@@ -1,11 +1,10 @@
 package handler
 
 import (
-	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
-	pkgErr "github.com/pkg/errors"
 	"net/http"
 
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	controller2 "dumpapp_server/pkg/controller"
 	impl3 "dumpapp_server/pkg/controller/impl"
@@ -17,6 +16,7 @@ import (
 	impl2 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	pkgErr "github.com/pkg/errors"
 )
 
 type SearchIpaHandler struct {
@@ -160,7 +160,6 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 		url, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
 		util.PanicIf(err)
-
 		data := []*render.Ipa{
 			{
 				ID:   ipa.ID,

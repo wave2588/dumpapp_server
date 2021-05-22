@@ -2,9 +2,10 @@ package impl
 
 import (
 	"context"
+	"fmt"
+
 	controller3 "dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
-	"fmt"
 )
 
 type EmailWebController struct {
