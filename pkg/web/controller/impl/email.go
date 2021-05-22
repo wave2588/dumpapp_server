@@ -2,10 +2,9 @@ package impl
 
 import (
 	"context"
-	"fmt"
-
 	controller3 "dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
+	"fmt"
 )
 
 type EmailWebController struct {
@@ -25,8 +24,8 @@ func NewEmailWebController() *EmailWebController {
 }
 
 /// 发给自己
-func (h *EmailWebController) SendEmailToMaster(ctx context.Context, appName, receiveEmail string) error {
+func (h *EmailWebController) SendEmailToMaster(ctx context.Context, appName, version, memberEmail string) error {
 	title := fmt.Sprintf("Hi~ 订单来了, 应用名称:「%s」", appName)
-	content := fmt.Sprintf("应用名称: %s <br>接收邮箱: %s", appName, receiveEmail)
+	content := fmt.Sprintf("应用名称: %s <br>应用版本: %s <br>用户邮箱: %s", appName, version, memberEmail)
 	return h.emailCtl.SendEmail(ctx, title, content, "", []string{})
 }

@@ -28,12 +28,12 @@ func OAuthRegister(next http.Handler) http.Handler {
 
 		registerTicket := util.GetCookie(r, "session")["ticket"]
 		if registerTicket == "" {
-			panic(errors.NotAuthorizedError("登陆才可以继续操作"))
+			panic(errors.ErrNotAuthorized)
 		}
 		ticket, err := util2.ParseTicket(registerTicket)
 		util.PanicIf(err)
 		if ticket.MemberID == 0 {
-			panic(errors.NotAuthorizedError("登陆才可以继续操作"))
+			panic(errors.ErrNotAuthorized)
 		}
 		ctx := context.WithValue(r.Context(), constant.MemberIDKey, ticket.MemberID)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -50,12 +50,12 @@ func OAuthGuest(next http.Handler) http.Handler {
 
 func GetMemberID(ctx context.Context) (int64, error) {
 	if ctx == nil {
-		return -1, errors.InvalidTicketError("无效的用户身份")
+		return -1, errors.ErrInvalidTicket
 	}
 	if MemberID, ok := ctx.Value(constant.MemberIDKey).(int64); ok {
 		return MemberID, nil
 	}
-	return -1, errors.InvalidTicketError("无效的用户身份")
+	return -1, errors.ErrInvalidTicket
 }
 
 func MustGetMemberID(ctx context.Context) int64 {
@@ -63,7 +63,7 @@ func MustGetMemberID(ctx context.Context) int64 {
 		panic(err)
 	} else {
 		if memberID <= 0 {
-			panic(errors.InvalidTicketError("无效的用户身份"))
+			panic(errors.ErrInvalidTicket)
 		}
 		return memberID
 	}
