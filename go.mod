@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/daixiang0/gci v0.2.8 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/friendsofgo/errors v0.9.2
@@ -26,4 +27,5 @@ require (
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	mvdan.cc/gofumpt v0.1.1 // indirect
 )
