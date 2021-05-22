@@ -34,7 +34,7 @@ func GetCookie(r *http.Request, name string) map[string]string {
 	value := make(map[string]string)
 	if cookie, err := r.Cookie(name); err == nil {
 		if err = s.Decode(name, cookie.Value, &value); err != nil {
-			panic(errors2.NotAuthorizedError(err.Error()))
+			panic(errors2.ErrNotAuthorized)
 		}
 	}
 	return value

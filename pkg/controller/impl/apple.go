@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/controller"
+	errors2 "dumpapp_server/pkg/errors"
 	"github.com/spf13/cast"
 )
 
