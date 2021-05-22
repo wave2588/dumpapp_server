@@ -82,6 +82,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		ipa := ipaMap[ipaArgs.AppID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
+				ID:   ipaArgs.AppID,
 				Name: appInfo.Name,
 			}))
 		}
