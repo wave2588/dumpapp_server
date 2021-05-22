@@ -58,7 +58,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(util.JSONArgs(r, args))
 
 	appIDs := make([]int64, 0)
-	appInfoMap := make([]*controller.AppInfo, 0)
+	appInfoMap := make(map[int64]*controller.AppInfo, 0)
 	for _, ipa := range args.Ipas {
 		appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, ipa.AppID)
 		util.PanicIf(err)

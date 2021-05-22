@@ -126,19 +126,18 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		panic(errors.ErrUpgradeVip)
 	}
 
-	appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
+	ipa, err := h.ipaDAO.Get(ctx, args.AppID)
 	util.PanicIf(err)
-	fmt.Println(appInfo.Name)
+	fmt.Println(ipa.Name)
 
 	/// 记录用户行为
 	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
 		MemberID: loginID,
-		Keyword:  appInfo.Name,
+		Keyword:  ipa.Name,
 	}))
 
-	ipa, err := h.ipaDAO.GetByName(ctx, appInfo.Name)
 	if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
 		util.RenderJSON(w, util.ListOutput{
 			Paging: nil,
 			Data:   []interface{}{},
@@ -150,7 +149,7 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	if args.Version != "" {
 		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipa.ID, args.Version)
 		if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
-			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
 			util.RenderJSON(w, util.ListOutput{
 				Paging: nil,
 				Data:   []interface{}{},
@@ -183,7 +182,7 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	data := render.NewIpaRender([]int64{ipa.ID}, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
 	if len(data) == 0 {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
 	}
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
