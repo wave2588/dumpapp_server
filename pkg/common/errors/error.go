@@ -46,3 +46,5 @@ var (
 	ErrUnprocessable   = NewError(422, "Unprocessable", "无法处理")
 	ErrTooManyRequests = NewError(509, "TooManyRequest", "操作太快，请稍后再试")
 )
+
+var ErrNotFoundApp = NewError(404, "NotFoundApp", "未找到 app")

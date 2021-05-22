@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
+	controller2 "dumpapp_server/pkg/controller"
+	impl3 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -21,6 +23,7 @@ type SearchIpaHandler struct {
 	searchRecordDAO dao.SearchRecordDAO
 
 	emailWebCtl controller.EmailWebController
+	appleCtl    controller2.AppleController
 }
 
 func NewSearchIpaHandler() *SearchIpaHandler {
@@ -30,11 +33,13 @@ func NewSearchIpaHandler() *SearchIpaHandler {
 		searchRecordDAO: impl.DefaultSearchRecordDAO,
 
 		emailWebCtl: impl2.DefaultEmailWebController,
+		appleCtl:    impl3.DefaultAppleController,
 	}
 }
 
 type searchIpaArgs struct {
-	Name string `form:"name" validate:"required"`
+	Name  string `form:"name"`
+	AppID int64  `form:"app_id"`
 }
 
 func (args *searchIpaArgs) Validate() error {
@@ -54,17 +59,8 @@ func (h *SearchIpaHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	loginID := mustGetLoginID(ctx)
 
-	if args.Name == "" {
-		panic(errors.UnproccessableError("请输入 ipa 名称"))
-	}
-
-	ipaID, err := h.ipaDAO.GetByLikeName(ctx, args.Name)
-	util.PanicIf(err)
-
-	data := render.NewIpaRender(ipaID, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
-
-	if len(data) == 0 {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, "dumpapp@126.com"))
+	if args.Name == "" && args.AppID == 0 {
+		panic(errors.UnproccessableError("请输入 app 名称或 app_id"))
 	}
 
 	/// 记录用户行为
@@ -73,6 +69,25 @@ func (h *SearchIpaHandler) Search(w http.ResponseWriter, r *http.Request) {
 		Keyword:  args.Name,
 	}))
 
+	ipaIDs := make([]int64, 0)
+	if args.Name != "" {
+		ids, err := h.ipaDAO.GetByLikeName(ctx, args.Name)
+		util.PanicIf(err)
+		ipaIDs = append(ipaIDs, ids...)
+	}
+
+	if args.AppID != 0 {
+		appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
+		util.PanicIf(err)
+		ids, err := h.ipaDAO.GetByLikeName(ctx, appInfo.Name)
+		util.PanicIf(err)
+		ipaIDs = append(ipaIDs, ids...)
+	}
+
+	data := render.NewIpaRender(ipaIDs, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
+	if len(data) == 0 {
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, "dumpapp@126.com"))
+	}
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
 		Data:   data,
