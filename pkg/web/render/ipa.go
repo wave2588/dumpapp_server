@@ -18,8 +18,9 @@ import (
 type Ipa struct {
 	meta *models.Ipa
 
-	ID   int64  `json:"id,string"`
-	Name string `json:"name"`
+	ID       int64  `json:"id,string"`
+	Name     string `json:"name"`
+	BundleID string `json:"bundle_id"`
 
 	Versions []*Version `json:"versions,omitempty" render:"method=RenderVersions"`
 }
@@ -115,9 +116,10 @@ func (f *IpaRender) fetch(ctx context.Context) {
 	res := make(map[int64]*Ipa)
 	for _, a := range aMap {
 		res[a.ID] = &Ipa{
-			meta: a,
-			ID:   a.ID,
-			Name: a.Name,
+			meta:     a,
+			ID:       a.ID,
+			Name:     a.Name,
+			BundleID: a.BundleID,
 		}
 	}
 	f.IpaMap = res

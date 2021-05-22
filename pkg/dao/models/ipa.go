@@ -25,6 +25,7 @@ import (
 type Ipa struct {
 	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	BundleID  string    `boil:"bundle_id" json:"bundle_id" toml:"bundle_id" yaml:"bundle_id"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -35,11 +36,13 @@ type Ipa struct {
 var IpaColumns = struct {
 	ID        string
 	Name      string
+	BundleID  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	Name:      "name",
+	BundleID:  "bundle_id",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -49,11 +52,13 @@ var IpaColumns = struct {
 var IpaWhere = struct {
 	ID        whereHelperint64
 	Name      whereHelperstring
+	BundleID  whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "`ipa`.`id`"},
 	Name:      whereHelperstring{field: "`ipa`.`name`"},
+	BundleID:  whereHelperstring{field: "`ipa`.`bundle_id`"},
 	CreatedAt: whereHelpertime_Time{field: "`ipa`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`ipa`.`updated_at`"},
 }
@@ -75,8 +80,8 @@ func (*ipaR) NewStruct() *ipaR {
 type ipaL struct{}
 
 var (
-	ipaAllColumns            = []string{"id", "name", "created_at", "updated_at"}
-	ipaColumnsWithoutDefault = []string{"name"}
+	ipaAllColumns            = []string{"id", "name", "bundle_id", "created_at", "updated_at"}
+	ipaColumnsWithoutDefault = []string{"name", "bundle_id"}
 	ipaColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	ipaPrimaryKeyColumns     = []string{"id"}
 )

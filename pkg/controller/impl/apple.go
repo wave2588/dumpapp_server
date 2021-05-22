@@ -34,6 +34,7 @@ type result struct {
 	TrackId        int64  `json:"trackId"`
 	TrackName      string `json:"trackName"`
 	FormattedPrice string `json:"formattedPrice"`
+	BundleID       string `json:"bundleId"`
 }
 
 func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*controller.AppInfo, error) {
@@ -60,8 +61,43 @@ func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*
 	r := app.Results[0]
 	price := strings.ReplaceAll(r.FormattedPrice, "¥", "")
 	return &controller.AppInfo{
-		AppID: r.TrackId,
-		Name:  r.TrackName,
-		Price: cast.ToFloat64(price),
+		AppID:    r.TrackId,
+		Name:     r.TrackName,
+		BundleID: r.BundleID,
+		Price:    cast.ToFloat64(price),
+	}, nil
+}
+
+func (c *AppleController) GetAppInfoByBundleID(ctx context.Context, bundleID string, isDomestic bool) (*controller.AppInfo, error) {
+	url := fmt.Sprintf("http://itunes.apple.com/lookup?bundleId=%s", bundleID)
+	if isDomestic {
+		url = fmt.Sprintf("http://itunes.apple.com/cn/lookup?bundleId=%s", bundleID)
+	}
+
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	app := &appResult{}
+	err = json.Unmarshal(body, app)
+	if err != nil {
+		return nil, err
+	}
+	if len(app.Results) == 0 {
+		return nil, errors2.ErrNotFoundApp
+	}
+
+	r := app.Results[0]
+	price := strings.ReplaceAll(r.FormattedPrice, "¥", "")
+	return &controller.AppInfo{
+		AppID:    r.TrackId,
+		Name:     r.TrackName,
+		BundleID: r.BundleID,
+		Price:    cast.ToFloat64(price),
 	}, nil
 }

@@ -38,9 +38,10 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	AppID   int64  `json:"app_id" validate:"required"`
-	Version string `json:"version" validate:"required"`
-	Token   string `json:"token" validate:"required"`
+	BundleID   string `json:"bundle_id" validate:"required"`
+	Version    string `json:"version" validate:"required"`
+	Token      string `json:"token" validate:"required"`
+	IsDomestic bool   `json:"is_domestic" validate:"required"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -58,12 +59,12 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(util.JSONArgs(r, args))
 
 	appIDs := make([]int64, 0)
-	appInfoMap := make(map[int64]*controller.AppInfo, 0)
-	for _, ipa := range args.Ipas {
-		appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, ipa.AppID)
+	appInfoMap := make(map[string]*controller.AppInfo, 0)
+	for _, ipaArgs := range args.Ipas {
+		appInfo, err := h.appleCtl.GetAppInfoByBundleID(ctx, ipaArgs.BundleID, ipaArgs.IsDomestic)
 		util.PanicIf(err)
-		appInfoMap[ipa.AppID] = appInfo
-		appIDs = append(appIDs, ipa.AppID)
+		appInfoMap[ipaArgs.BundleID] = appInfo
+		appIDs = append(appIDs, appInfo.AppID)
 	}
 
 	ipaMap, err := h.ipaDAO.BatchGet(ctx, appIDs)
@@ -75,20 +76,21 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
 	for _, ipaArgs := range args.Ipas {
-		appInfo := appInfoMap[ipaArgs.AppID]
+		appInfo := appInfoMap[ipaArgs.BundleID]
 		if appInfo == nil {
 			continue
 		}
-		ipa := ipaMap[ipaArgs.AppID]
+		ipa := ipaMap[appInfo.AppID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				ID:   ipaArgs.AppID,
-				Name: appInfo.Name,
+				ID:       appInfo.AppID,
+				Name:     appInfo.Name,
+				BundleID: appInfo.BundleID,
 			}))
 		}
 		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
 		util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-			IpaID:     ipaArgs.AppID,
+			IpaID:     appInfo.AppID,
 			Version:   ipaArgs.Version,
 			TokenPath: ipaArgs.Token,
 		}))
