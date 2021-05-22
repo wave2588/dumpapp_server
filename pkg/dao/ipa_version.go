@@ -25,5 +25,4 @@ type IpaVersionDAO interface {
 	// GetIpaVersionSliceByIpaID retrieves a slice of records by first field of uniq key [ipaID] with an executor.
 	GetIpaVersionSliceByIpaID(ctx context.Context, ipaID int64) ([]*models.IpaVersion, error)
 	BatchGetIpaVersions(ctx context.Context, ipaIDs []int64) (map[int64][]*models.IpaVersion, error)
-	BatchGetLatestVersion(ctx context.Context, ipaIDs []int64) (map[int64]*models.IpaVersion, error)
 }

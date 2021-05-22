@@ -2,6 +2,8 @@ package render
 
 import (
 	"context"
+	"sort"
+	"strings"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -10,6 +12,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"github.com/spf13/cast"
 )
 
 type Ipa struct {
@@ -124,35 +127,32 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 	totalVersionMap, err := f.ipaVersionDAO.BatchGetIpaVersions(ctx, f.ids)
 	util.PanicIf(err)
 
-	versionMap, err := f.ipaVersionDAO.BatchGetLatestVersion(ctx, f.ids)
-	util.PanicIf(err)
-
 	memberMap := NewMemberRender([]int64{f.loginID}, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
 	member := memberMap[f.loginID]
 
 	for _, ipa := range f.IpaMap {
+		vs := totalVersionMap[ipa.ID]
+		if vs == nil {
+			continue
+		}
+		sort.Slice(vs, func(i, j int) bool {
+			version1 := cast.ToInt64(strings.ReplaceAll(vs[i].Version, ".", ""))
+			version2 := cast.ToInt64(strings.ReplaceAll(vs[j].Version, ".", ""))
+			return version1 > version2
+		})
+
 		res := make([]*Version, 0)
-		/// 如果是 vip 返回所有 ipa
-		if member.Vip.IsVip {
-			if vs, ok := totalVersionMap[ipa.ID]; ok {
-				for _, v := range vs {
-					url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
-					util.PanicIf(err)
-					res = append(res, &Version{
-						Version: v.Version,
-						URL:     url,
-					})
-				}
+		for idx, v := range vs {
+			version := &Version{
+				Version: v.Version,
 			}
-		} else {
-			if v, ok := versionMap[ipa.ID]; ok {
+			/// 如果是 vip 返回所有 ipa url
+			if member.Vip.IsVip || idx != len(vs)-1 {
 				url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
 				util.PanicIf(err)
-				res = append(res, &Version{
-					Version: v.Version,
-					URL:     url,
-				})
+				version.URL = url
 			}
+			res = append(res, version)
 		}
 		ipa.Versions = res
 	}
