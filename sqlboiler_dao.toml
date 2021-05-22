@@ -1,0 +1,55 @@
+[[types]]
+    [types.match]
+        type = "uint64"
+
+    [types.replace]
+        type = "int64"
+
+[[types]]
+    [types.match]
+        type = "null.Uint64"
+        nullable = true
+
+    [types.replace]
+        type = "null.Int64"
+
+[[types]]
+    [types.match]
+        name = "id"
+        type = "uint"
+
+    [types.replace]
+        type = "int64"
+
+[[types]]
+    [types.match]
+        type = "uint8"
+
+    [types.replace]
+        type = "int"
+
+[[types]]
+    [types.match]
+        type = "int8"
+
+    [types.replace]
+        type = "int"
+
+
+[imports.all]
+standard = [
+    '"time"',
+    '"fmt"',
+    '"context"',
+    '"database/sql"'
+]
+third_party = [
+    'pkgErr "github.com/pkg/errors"',
+    'mysqlDriver "github.com/go-sql-driver/mysql"',
+    '"github.com/volatiletech/sqlboiler/v4/boil"',
+    '"github.com/volatiletech/sqlboiler/v4/queries/qm"',
+    '"github.com/volatiletech/sqlboiler/v4/queries"',
+    '"github.com/volatiletech/null/v8"',
+    '"dumpapp_server/pkg/common/clients"',
+    '"dumpapp_server/pkg/common/errors"',
+]

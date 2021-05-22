@@ -1,0 +1,34 @@
+[[types]]
+    [types.match]
+        type = "uint64"
+
+    [types.replace]
+        type = "int64"
+
+[[types]]
+    [types.match]
+        type = "null.Uint64"
+        nullable = true
+
+    [types.replace]
+        type = "null.Int64"
+
+[[types]]
+    [types.match]
+        type = "int8"
+
+    [types.replace]
+        type = "int"
+
+# member_vip_order table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_vip_order"]
+
+  [types.replace]
+    type = "enum.MemberVipOrderStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
