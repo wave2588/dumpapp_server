@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/controller"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -18,12 +20,16 @@ import (
 type AdminIpaHandler struct {
 	ipaDAO        dao.IpaDAO
 	ipaVersionDAO dao.IpaVersionDAO
+
+	appleCtl controller.AppleController
 }
 
 func NewAdminIpaHandler() *AdminIpaHandler {
 	return &AdminIpaHandler{
 		ipaDAO:        impl.DefaultIpaDAO,
 		ipaVersionDAO: impl.DefaultIpaVersionDAO,
+
+		appleCtl: impl2.DefaultAppleController,
 	}
 }
 
@@ -32,7 +38,7 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	Name    string `json:"name" validate:"required"`
+	AppID   int64  `json:"app_id" validate:"required"`
 	Version string `json:"version" validate:"required"`
 	Token   string `json:"token" validate:"required"`
 }
@@ -51,12 +57,16 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	names := make([]string, 0)
+	appIDs := make([]int64, 0)
+	appInfoMap := make([]*controller.AppInfo, 0)
 	for _, ipa := range args.Ipas {
-		names = append(names, ipa.Name)
+		appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, ipa.AppID)
+		util.PanicIf(err)
+		appInfoMap[ipa.AppID] = appInfo
+		appIDs = append(appIDs, ipa.AppID)
 	}
 
-	ipaMap, err := h.ipaDAO.BatchGetByName(ctx, names)
+	ipaMap, err := h.ipaDAO.BatchGet(ctx, appIDs)
 	util.PanicIf(err)
 
 	/// 事物
@@ -65,27 +75,22 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
 	for _, ipaArgs := range args.Ipas {
-		ipa := ipaMap[ipaArgs.Name]
-		var ipaID int64
-		if ipa == nil { /// 没找到说明不存在, 往库里写入
-			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				Name: ipaArgs.Name,
-			}))
-			/// 再获取一遍是为了得到 id
-			i, err := h.ipaDAO.GetByName(ctx, ipaArgs.Name)
-			util.PanicIf(err)
-			ipaID = i.ID
-		} else {
-			ipaID = ipa.ID
+		appInfo := appInfoMap[ipaArgs.AppID]
+		if appInfo == nil {
+			continue
 		}
-		/// fixme: 需要判断 版本 是否存在, 存在的话就不能再保存.
+		ipa := ipaMap[ipaArgs.AppID]
+		if ipa == nil {
+			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
+				Name: appInfo.Name,
+			}))
+		}
+		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
 		util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-			IpaID:     ipaID,
+			IpaID:     ipaArgs.AppID,
 			Version:   ipaArgs.Version,
 			TokenPath: ipaArgs.Token,
 		}))
-
-		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
 	}
 
 	clients.MustCommit(ctx, txn)

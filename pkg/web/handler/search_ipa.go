@@ -1,7 +1,9 @@
 package handler
 
 import (
+	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
+	pkgErr "github.com/pkg/errors"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -24,6 +26,7 @@ type SearchIpaHandler struct {
 
 	emailWebCtl controller.EmailWebController
 	appleCtl    controller2.AppleController
+	tencentCtl  controller2.TencentController
 }
 
 func NewSearchIpaHandler() *SearchIpaHandler {
@@ -34,6 +37,7 @@ func NewSearchIpaHandler() *SearchIpaHandler {
 
 		emailWebCtl: impl2.DefaultEmailWebController,
 		appleCtl:    impl3.DefaultAppleController,
+		tencentCtl:  impl3.DefaultTencentController,
 	}
 }
 
@@ -86,7 +90,100 @@ func (h *SearchIpaHandler) Search(w http.ResponseWriter, r *http.Request) {
 
 	data := render.NewIpaRender(ipaIDs, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
 	if len(data) == 0 {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, "dumpapp@126.com"))
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, "", ""))
+	}
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
+		Data:   data,
+	})
+}
+
+type postSearchArgs struct {
+	AppID   int64  `json:"app_id" validate:"required"`
+	Version string `json:"app_version"`
+}
+
+func (p *postSearchArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := mustGetLoginID(ctx)
+	_ = GetAccountByLoginID(ctx, loginID)
+	loginMember := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)[loginID]
+	if loginMember == nil {
+		panic(errors.ErrNotFoundMember)
+	}
+
+	args := &postSearchArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+	if args.Version != "" && !loginMember.Vip.IsVip {
+		panic(errors.ErrUpgradeVip)
+	}
+
+	appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
+	util.PanicIf(err)
+	fmt.Println(appInfo.Name)
+
+	/// 记录用户行为
+	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
+		MemberID: loginID,
+		Keyword:  appInfo.Name,
+	}))
+
+	ipa, err := h.ipaDAO.GetByName(ctx, appInfo.Name)
+	if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+		util.RenderJSON(w, util.ListOutput{
+			Paging: nil,
+			Data:   []interface{}{},
+		})
+		return
+	}
+	util.PanicIf(err)
+
+	if args.Version != "" {
+		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipa.ID, args.Version)
+		if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
+			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+			util.RenderJSON(w, util.ListOutput{
+				Paging: nil,
+				Data:   []interface{}{},
+			})
+			return
+		}
+		util.PanicIf(err)
+
+		url, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
+		util.PanicIf(err)
+
+		data := []*render.Ipa{
+			{
+				ID:   ipa.ID,
+				Name: ipa.Name,
+				Versions: []*render.Version{
+					{
+						Version: args.Version,
+						URL:     url,
+					},
+				},
+			},
+		}
+		util.RenderJSON(w, util.ListOutput{
+			Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
+			Data:   data,
+		})
+		return
+	}
+
+	data := render.NewIpaRender([]int64{ipa.ID}, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
+	if len(data) == 0 {
+		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
 	}
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
