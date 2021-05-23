@@ -128,7 +128,6 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	ipa, err := h.ipaDAO.Get(ctx, args.AppID)
 	util.PanicIf(err)
-	fmt.Println(ipa.Name)
 
 	/// 记录用户行为
 	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{

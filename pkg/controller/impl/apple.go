@@ -38,6 +38,33 @@ type result struct {
 	BundleID       string `json:"bundleId"`
 }
 
+func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []int64) (map[int64]*controller.AppInfo, error) {
+	res := make([]*controller.AppInfo, 0)
+	batch := util.NewBatch(ctx)
+	for _, appID := range appIDs {
+		batch.Append(func(appID int64) util.FutureFunc {
+			return func() error {
+				appInfo, err := c.GetAppInfoByAppID(ctx, appID)
+				if err != nil {
+					return err
+				}
+				res = append(res, appInfo)
+				return nil
+			}
+		}(appID))
+	}
+	rpcErrs := batch.Get()
+	result := make(map[int64]*controller.AppInfo)
+	for idx, appID := range appIDs {
+		if rpcErrs[idx] != nil {
+			err := rpcErrs[idx]
+			return nil, err
+		}
+		result[appID] = res[idx]
+	}
+	return result, nil
+}
+
 func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*controller.AppInfo, error) {
 	res, err := http.Get(fmt.Sprintf("http://itunes.apple.com/cn/lookup?id=%d", appID))
 	if err != nil {
