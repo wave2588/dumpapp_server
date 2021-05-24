@@ -97,28 +97,28 @@ func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*
 }
 
 func (c *AppleController) BatchGetAppInfoByBundleIDs(ctx context.Context, bundleInfos []*controller.BundleInfo) (map[string]*controller.AppInfo, error) {
-	res := make([]*controller.AppInfo, 0)
+	res := make(map[int]*controller.AppInfo)
 	batch := util.NewBatch(ctx)
-	for _, bundleInfo := range bundleInfos {
-		batch.Append(func(bundleInfo *controller.BundleInfo) util.FutureFunc {
+	for idx, bundleInfo := range bundleInfos {
+		batch.Append(func(idx int,bundleInfo *controller.BundleInfo) util.FutureFunc {
 			return func() error {
 				appInfo, err := c.GetAppInfoByBundleID(ctx, bundleInfo.BundleID, bundleInfo.IsDomestic)
 				if err != nil {
 					return err
 				}
-				res = append(res, appInfo)
+				res[idx] = appInfo
 				return nil
 			}
-		}(bundleInfo))
+		}(idx,bundleInfo))
 	}
 	rpcErrs := batch.Get()
 	result := make(map[string]*controller.AppInfo)
-	for idx, bundleInfo := range bundleInfos {
+	for idx := range bundleInfos {
 		if rpcErrs[idx] != nil {
 			err := rpcErrs[idx]
 			return nil, err
 		}
-		result[bundleInfo.BundleID] = res[idx]
+		result[res[idx].BundleID] = res[idx]
 	}
 	return result, nil
 }
