@@ -40,8 +40,12 @@ func NewRouter() chi.Router {
 
 	// search ipa
 	searchIpaHandler := handler.NewSearchIpaHandler()
-	r.With(middleware.OAuthRegister).Get("/ipa/search", searchIpaHandler.Search)
 	r.With(middleware.OAuthRegister).Post("/ipa/search", searchIpaHandler.Post)
+	// endregion
+
+	// email
+	emailHandler := handler.NewEmailHandler()
+	r.With(middleware.OAuthGuest).Post("/email", emailHandler.PostEmail)
 	// endregion
 
 	// region Cos
