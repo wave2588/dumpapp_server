@@ -10,6 +10,7 @@ import (
 
 	"dumpapp_server/pkg/controller"
 	errors2 "dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/util"
 	"github.com/spf13/cast"
 )
 
@@ -35,6 +36,33 @@ type result struct {
 	TrackName      string `json:"trackName"`
 	FormattedPrice string `json:"formattedPrice"`
 	BundleID       string `json:"bundleId"`
+}
+
+func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []int64) (map[int64]*controller.AppInfo, error) {
+	res := make([]*controller.AppInfo, 0)
+	batch := util.NewBatch(ctx)
+	for _, appID := range appIDs {
+		batch.Append(func(appID int64) util.FutureFunc {
+			return func() error {
+				appInfo, err := c.GetAppInfoByAppID(ctx, appID)
+				if err != nil {
+					return err
+				}
+				res = append(res, appInfo)
+				return nil
+			}
+		}(appID))
+	}
+	rpcErrs := batch.Get()
+	result := make(map[int64]*controller.AppInfo)
+	for idx, appID := range appIDs {
+		if rpcErrs[idx] != nil {
+			err := rpcErrs[idx]
+			return nil, err
+		}
+		result[appID] = res[idx]
+	}
+	return result, nil
 }
 
 func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*controller.AppInfo, error) {
@@ -66,6 +94,33 @@ func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (*
 		BundleID: r.BundleID,
 		Price:    cast.ToFloat64(price),
 	}, nil
+}
+
+func (c *AppleController) BatchGetAppInfoByBundleIDs(ctx context.Context, bundleInfos []*controller.BundleInfo) (map[string]*controller.AppInfo, error) {
+	res := make([]*controller.AppInfo, 0)
+	batch := util.NewBatch(ctx)
+	for _, bundleInfo := range bundleInfos {
+		batch.Append(func(bundleInfo *controller.BundleInfo) util.FutureFunc {
+			return func() error {
+				appInfo, err := c.GetAppInfoByBundleID(ctx, bundleInfo.BundleID, bundleInfo.IsDomestic)
+				if err != nil {
+					return err
+				}
+				res = append(res, appInfo)
+				return nil
+			}
+		}(bundleInfo))
+	}
+	rpcErrs := batch.Get()
+	result := make(map[string]*controller.AppInfo)
+	for idx, bundleInfo := range bundleInfos {
+		if rpcErrs[idx] != nil {
+			err := rpcErrs[idx]
+			return nil, err
+		}
+		result[bundleInfo.BundleID] = res[idx]
+	}
+	return result, nil
 }
 
 func (c *AppleController) GetAppInfoByBundleID(ctx context.Context, bundleID string, isDomestic bool) (*controller.AppInfo, error) {

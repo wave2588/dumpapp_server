@@ -58,12 +58,18 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	bundleInfos := make([]*controller.BundleInfo, 0)
+	for _, ipa := range args.Ipas {
+		bundleInfos = append(bundleInfos, &controller.BundleInfo{
+			BundleID:   ipa.BundleID,
+			IsDomestic: ipa.IsDomestic,
+		})
+	}
+	appInfoMap, err := h.appleCtl.BatchGetAppInfoByBundleIDs(ctx, bundleInfos)
+	util.PanicIf(err)
+
 	appIDs := make([]int64, 0)
-	appInfoMap := make(map[string]*controller.AppInfo, 0)
-	for _, ipaArgs := range args.Ipas {
-		appInfo, err := h.appleCtl.GetAppInfoByBundleID(ctx, ipaArgs.BundleID, ipaArgs.IsDomestic)
-		util.PanicIf(err)
-		appInfoMap[ipaArgs.BundleID] = appInfo
+	for _, appInfo := range appInfoMap {
 		appIDs = append(appIDs, appInfo.AppID)
 	}
 

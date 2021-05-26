@@ -17,6 +17,7 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorilla/securecookie v1.1.1
 	github.com/pkg/errors v0.9.1
+	github.com/roylee0704/gron v0.0.0-20160621042432-e78485adab46 // indirect
 	github.com/smartwalle/alipay/v3 v3.1.6
 	github.com/spf13/cast v1.3.1
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.10

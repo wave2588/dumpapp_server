@@ -41,63 +41,6 @@ func NewSearchIpaHandler() *SearchIpaHandler {
 	}
 }
 
-type searchIpaArgs struct {
-	Name  string `form:"name"`
-	AppID int64  `form:"app_id"`
-}
-
-func (args *searchIpaArgs) Validate() error {
-	err := validator.New().Struct(args)
-	if err != nil {
-		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
-	}
-	return nil
-}
-
-func (h *SearchIpaHandler) Search(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	args := searchIpaArgs{}
-	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
-	util.PanicIf(args.Validate())
-
-	loginID := mustGetLoginID(ctx)
-
-	if args.Name == "" && args.AppID == 0 {
-		panic(errors.UnproccessableError("请输入 app 名称或 app_id"))
-	}
-
-	/// 记录用户行为
-	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
-		MemberID: loginID,
-		Keyword:  args.Name,
-	}))
-
-	ipaIDs := make([]int64, 0)
-	if args.Name != "" {
-		ids, err := h.ipaDAO.GetByLikeName(ctx, args.Name)
-		util.PanicIf(err)
-		ipaIDs = append(ipaIDs, ids...)
-	}
-
-	if args.AppID != 0 {
-		appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
-		util.PanicIf(err)
-		ids, err := h.ipaDAO.GetByLikeName(ctx, appInfo.Name)
-		util.PanicIf(err)
-		ipaIDs = append(ipaIDs, ids...)
-	}
-
-	data := render.NewIpaRender(ipaIDs, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
-	if len(data) == 0 {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, "", ""))
-	}
-	util.RenderJSON(w, util.ListOutput{
-		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
-		Data:   data,
-	})
-}
-
 type postSearchArgs struct {
 	AppID   int64  `json:"app_id" validate:"required"`
 	Version string `json:"app_version"`
@@ -128,7 +71,6 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	ipa, err := h.ipaDAO.Get(ctx, args.AppID)
 	util.PanicIf(err)
-	fmt.Println(ipa.Name)
 
 	/// 记录用户行为
 	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
