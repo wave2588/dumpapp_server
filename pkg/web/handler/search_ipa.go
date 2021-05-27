@@ -70,7 +70,24 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ipa, err := h.ipaDAO.Get(ctx, args.AppID)
-	util.PanicIf(err)
+	if err != nil {
+		if pkgErr.Cause(err) == errors2.ErrNotFound {
+			appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
+			util.PanicIf(err)
+			/// 记录用户行为
+			util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
+				MemberID: loginID,
+				Keyword:  appInfo.Name,
+			}))
+			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
+			util.RenderJSON(w, util.ListOutput{
+				Paging: nil,
+				Data:   []interface{}{},
+			})
+			return
+		}
+		util.PanicIf(err)
+	}
 
 	/// 记录用户行为
 	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
