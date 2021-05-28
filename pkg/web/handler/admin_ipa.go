@@ -2,9 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
@@ -14,7 +11,9 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	"fmt"
 	"github.com/go-playground/validator/v10"
+	"net/http"
 )
 
 type AdminIpaHandler struct {
@@ -38,10 +37,11 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	BundleID   string `json:"bundle_id" validate:"required"`
-	Version    string `json:"version" validate:"required"`
-	Token      string `json:"token" validate:"required"`
-	IsDomestic bool   `json:"is_domestic" validate:"required"`
+	IpaID    int64  `json:"ipa_id" validate:"required"`
+	Name     string `json:"name" validate:"required"`
+	BundleID string `json:"bundle_id" validate:"required"`
+	Version  string `json:"version" validate:"required"`
+	Token    string `json:"token" validate:"required"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -58,45 +58,29 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	bundleInfos := make([]*controller.BundleInfo, 0)
-	for _, ipa := range args.Ipas {
-		bundleInfos = append(bundleInfos, &controller.BundleInfo{
-			BundleID:   ipa.BundleID,
-			IsDomestic: ipa.IsDomestic,
-		})
+	ipaIDs := make([]int64, 0)
+	for _, ipaArgs := range args.Ipas {
+		ipaIDs = append(ipaIDs, ipaArgs.IpaID)
 	}
-	appInfoMap, err := h.appleCtl.BatchGetAppInfoByBundleIDs(ctx, bundleInfos)
+	ipaMap, err := h.ipaDAO.BatchGet(ctx, ipaIDs)
 	util.PanicIf(err)
 
-	appIDs := make([]int64, 0)
-	for _, appInfo := range appInfoMap {
-		appIDs = append(appIDs, appInfo.AppID)
-	}
-
-	ipaMap, err := h.ipaDAO.BatchGet(ctx, appIDs)
-	util.PanicIf(err)
-
-	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
 	for _, ipaArgs := range args.Ipas {
-		appInfo := appInfoMap[ipaArgs.BundleID]
-		if appInfo == nil {
-			continue
-		}
-		ipa := ipaMap[appInfo.AppID]
+		ipa := ipaMap[ipaArgs.IpaID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				ID:       appInfo.AppID,
-				Name:     appInfo.Name,
-				BundleID: appInfo.BundleID,
+				ID:       ipaArgs.IpaID,
+				Name:     ipaArgs.Name,
+				BundleID: ipaArgs.BundleID,
 			}))
 		}
 		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
 		util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-			IpaID:     appInfo.AppID,
+			IpaID:     ipaArgs.IpaID,
 			Version:   ipaArgs.Version,
 			TokenPath: ipaArgs.Token,
 		}))
