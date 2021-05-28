@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,11 +24,12 @@ import (
 
 // SearchRecord is an object representing the database table.
 type SearchRecord struct {
-	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	MemberID  int64     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
-	Keyword   string    `boil:"keyword" json:"keyword" toml:"keyword" yaml:"keyword"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	MemberID  int64      `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
+	IpaID     null.Int64 `boil:"ipa_id" json:"ipa_id,omitempty" toml:"ipa_id" yaml:"ipa_id,omitempty"`
+	Keyword   string     `boil:"keyword" json:"keyword" toml:"keyword" yaml:"keyword"`
+	CreatedAt time.Time  `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time  `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *searchRecordR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L searchRecordL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -36,12 +38,14 @@ type SearchRecord struct {
 var SearchRecordColumns = struct {
 	ID        string
 	MemberID  string
+	IpaID     string
 	Keyword   string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	MemberID:  "member_id",
+	IpaID:     "ipa_id",
 	Keyword:   "keyword",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -49,15 +53,40 @@ var SearchRecordColumns = struct {
 
 // Generated where
 
+type whereHelpernull_Int64 struct{ field string }
+
+func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var SearchRecordWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
+	IpaID     whereHelpernull_Int64
 	Keyword   whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "`search_record`.`id`"},
 	MemberID:  whereHelperint64{field: "`search_record`.`member_id`"},
+	IpaID:     whereHelpernull_Int64{field: "`search_record`.`ipa_id`"},
 	Keyword:   whereHelperstring{field: "`search_record`.`keyword`"},
 	CreatedAt: whereHelpertime_Time{field: "`search_record`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`search_record`.`updated_at`"},
@@ -80,8 +109,8 @@ func (*searchRecordR) NewStruct() *searchRecordR {
 type searchRecordL struct{}
 
 var (
-	searchRecordAllColumns            = []string{"id", "member_id", "keyword", "created_at", "updated_at"}
-	searchRecordColumnsWithoutDefault = []string{"member_id", "keyword"}
+	searchRecordAllColumns            = []string{"id", "member_id", "ipa_id", "keyword", "created_at", "updated_at"}
+	searchRecordColumnsWithoutDefault = []string{"member_id", "ipa_id", "keyword"}
 	searchRecordColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	searchRecordPrimaryKeyColumns     = []string{"id"}
 )

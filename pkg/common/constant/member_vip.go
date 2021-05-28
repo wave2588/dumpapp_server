@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-const OneMonthPrice float64 = 0.6
+const OneMonthPrice float64 = 68
 
 var MemberVipDurationTypeToPrice = map[enum.MemberVipDurationType]int64{
 	enum.MemberVipDurationTypeOneMonth:   cast.ToInt64(OneMonthPrice),
