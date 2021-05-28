@@ -10,6 +10,7 @@ var TableNames = struct {
 	MemberVip      string
 	MemberVipOrder string
 	SearchRecord   string
+	SearchRecordV2 string
 }{
 	Account:        "account",
 	Ipa:            "ipa",
@@ -17,4 +18,5 @@ var TableNames = struct {
 	MemberVip:      "member_vip",
 	MemberVipOrder: "member_vip_order",
 	SearchRecord:   "search_record",
+	SearchRecordV2: "search_record_v2",
 }

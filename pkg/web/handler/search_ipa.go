@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/volatiletech/null/v8"
 	"net/http"
 
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -17,12 +18,13 @@ import (
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 type SearchIpaHandler struct {
-	ipaDAO          dao.IpaDAO
-	ipaVersionDAO   dao.IpaVersionDAO
-	searchRecordDAO dao.SearchRecordDAO
+	ipaDAO            dao.IpaDAO
+	ipaVersionDAO     dao.IpaVersionDAO
+	searchRecordV2DAO dao.SearchRecordV2DAO
 
 	emailWebCtl controller.EmailWebController
 	appleCtl    controller2.AppleController
@@ -31,9 +33,9 @@ type SearchIpaHandler struct {
 
 func NewSearchIpaHandler() *SearchIpaHandler {
 	return &SearchIpaHandler{
-		ipaDAO:          impl.DefaultIpaDAO,
-		ipaVersionDAO:   impl.DefaultIpaVersionDAO,
-		searchRecordDAO: impl.DefaultSearchRecordDAO,
+		ipaDAO:            impl.DefaultIpaDAO,
+		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
 
 		emailWebCtl: impl2.DefaultEmailWebController,
 		appleCtl:    impl3.DefaultAppleController,
@@ -42,7 +44,8 @@ func NewSearchIpaHandler() *SearchIpaHandler {
 }
 
 type postSearchArgs struct {
-	AppID   int64  `json:"app_id" validate:"required"`
+	IpaID   string `json:"ipa_id" validate:"required"`
+	Name    string `json:"name" validate:"required"`
 	Version string `json:"app_version"`
 }
 
@@ -69,79 +72,32 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		panic(errors.ErrUpgradeVip)
 	}
 
-	ipa, err := h.ipaDAO.Get(ctx, args.AppID)
-	if err != nil {
-		if pkgErr.Cause(err) == errors2.ErrNotFound {
-			appInfo, err := h.appleCtl.GetAppInfoByAppID(ctx, args.AppID)
-			util.PanicIf(err)
-			/// 记录用户行为
-			util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
-				MemberID: loginID,
-				Keyword:  appInfo.Name,
-			}))
-			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, appInfo.Name, args.Version, loginMember.Email))
-			util.RenderJSON(w, util.ListOutput{
-				Paging: nil,
-				Data:   []interface{}{},
-			})
-			return
-		}
+	ipaID := cast.ToInt64(args.IpaID)
+	if ipaID == 0 {
+		panic(errors.HttpBadRequestError)
+	}
+	ipa, err := h.ipaDAO.Get(ctx, ipaID)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
 
-	/// 记录用户行为
-	util.PanicIf(h.searchRecordDAO.Insert(ctx, &models.SearchRecord{
+	util.PanicIf(h.searchRecordV2DAO.Insert(ctx, &models.SearchRecordV2{
 		MemberID: loginID,
-		Keyword:  ipa.Name,
+		IpaID:    ipaID,
+		Name:     args.Name,
+		Version:  null.StringFrom(args.Version),
 	}))
 
-	if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
-		util.RenderJSON(w, util.ListOutput{
-			Paging: nil,
-			Data:   []interface{}{},
-		})
-		return
-	}
-	util.PanicIf(err)
-
-	if args.Version != "" {
-		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipa.ID, args.Version)
-		if err != nil && pkgErr.Cause(err) == errors2.ErrNotFound {
-			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
-			util.RenderJSON(w, util.ListOutput{
-				Paging: nil,
-				Data:   []interface{}{},
-			})
-			return
+	if ipa == nil {
+		message := "ipa 已被我们收录，更新后会通过邮件形式告知。"
+		if loginMember.Vip.IsVip {
+			message = "您提交的请求我们会尽快处理，预计两小时内处理完毕，请注意邮件查收。"
 		}
-		util.PanicIf(err)
-
-		url, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
-		util.PanicIf(err)
-		data := []*render.Ipa{
-			{
-				ID:   ipa.ID,
-				Name: ipa.Name,
-				Versions: []*render.Version{
-					{
-						Version: args.Version,
-						URL:     url,
-					},
-				},
-			},
-		}
-		util.RenderJSON(w, util.ListOutput{
-			Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
-			Data:   data,
-		})
+		util.RenderJSON(w, message)
 		return
 	}
 
 	data := render.NewIpaRender([]int64{ipa.ID}, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
-	if len(data) == 0 {
-		util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, ipa.Name, args.Version, loginMember.Email))
-	}
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, len(data), 0, len(data)),
 		Data:   data,

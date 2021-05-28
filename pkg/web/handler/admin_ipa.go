@@ -2,6 +2,10 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"time"
+
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
@@ -11,24 +15,33 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
-	"fmt"
+	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"github.com/go-playground/validator/v10"
-	"net/http"
+	"github.com/spf13/cast"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AdminIpaHandler struct {
-	ipaDAO        dao.IpaDAO
-	ipaVersionDAO dao.IpaVersionDAO
+	accountDAO        dao.AccountDAO
+	ipaDAO            dao.IpaDAO
+	ipaVersionDAO     dao.IpaVersionDAO
+	searchRecordV2DAO dao.SearchRecordV2DAO
 
-	appleCtl controller.AppleController
+	appleCtl    controller.AppleController
+	emailWebCtl controller2.EmailWebController
 }
 
 func NewAdminIpaHandler() *AdminIpaHandler {
 	return &AdminIpaHandler{
-		ipaDAO:        impl.DefaultIpaDAO,
-		ipaVersionDAO: impl.DefaultIpaVersionDAO,
+		accountDAO:        impl.DefaultAccountDAO,
+		ipaDAO:            impl.DefaultIpaDAO,
+		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
 
-		appleCtl: impl2.DefaultAppleController,
+		appleCtl:    impl2.DefaultAppleController,
+		emailWebCtl: impl3.DefaultEmailWebController,
 	}
 }
 
@@ -37,7 +50,7 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	IpaID    int64  `json:"ipa_id" validate:"required"`
+	IpaID    string `json:"ipa_id" validate:"required"`
 	Name     string `json:"name" validate:"required"`
 	BundleID string `json:"bundle_id" validate:"required"`
 	Version  string `json:"version" validate:"required"`
@@ -58,9 +71,12 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	ipaArgsMap := make(map[int64]*ipaArgs)
 	ipaIDs := make([]int64, 0)
 	for _, ipaArgs := range args.Ipas {
-		ipaIDs = append(ipaIDs, ipaArgs.IpaID)
+		ipaID := cast.ToInt64(ipaArgs.IpaID)
+		ipaIDs = append(ipaIDs, ipaID)
+		ipaArgsMap[ipaID] = ipaArgs
 	}
 	ipaMap, err := h.ipaDAO.BatchGet(ctx, ipaIDs)
 	util.PanicIf(err)
@@ -70,17 +86,18 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
 	for _, ipaArgs := range args.Ipas {
-		ipa := ipaMap[ipaArgs.IpaID]
+		ipaID := cast.ToInt64(ipaArgs.IpaID)
+		ipa := ipaMap[ipaID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				ID:       ipaArgs.IpaID,
+				ID:       ipaID,
 				Name:     ipaArgs.Name,
 				BundleID: ipaArgs.BundleID,
 			}))
 		}
 		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
 		util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-			IpaID:     ipaArgs.IpaID,
+			IpaID:     ipaID,
 			Version:   ipaArgs.Version,
 			TokenPath: ipaArgs.Token,
 		}))
@@ -89,5 +106,49 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
+	util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
+
 	util.RenderJSON(w, "保存成功")
+}
+
+func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*ipaArgs) error {
+	ipaIDs := make([]int64, 0)
+	for _, args := range ipaArgsMap {
+		ipaID := cast.ToInt64(args.IpaID)
+		ipaIDs = append(ipaIDs, ipaID)
+	}
+
+	filters := []qm.QueryMod{
+		models.SearchRecordV2Where.CreatedAt.GTE(time.Date(0, 0, -7, 0, 0, 0, 0, time.Now().Location())),
+	}
+	records, err := h.searchRecordV2DAO.BatchGetByIpaIDs(ctx, ipaIDs, filters)
+	if err != nil {
+		return err
+	}
+	memberIDs := make([]int64, 0)
+	for _, record := range records {
+		memberIDs = append(memberIDs, record.MemberID)
+	}
+	memberIDs = util2.RemoveDuplicates(memberIDs)
+	memberMap, err := h.accountDAO.BatchGet(ctx, memberIDs)
+	if err != nil {
+		return err
+	}
+
+	for _, record := range records {
+		member := memberMap[record.MemberID]
+		if member == nil {
+			continue
+		}
+		ipaArgs := ipaArgsMap[record.IpaID]
+		if ipaArgs == nil {
+			continue
+		}
+		err = h.emailWebCtl.SendUpdateIpaEmail(ctx, member.Email, ipaArgs.Name)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

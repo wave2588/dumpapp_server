@@ -1,13 +1,14 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/errors"
-	"fmt"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 )
 
 type EmailHandler struct {
