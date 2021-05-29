@@ -135,6 +135,9 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		return err
 	}
 
+	// 已发过滤
+	filterMap := make(map[string]struct{})
+
 	for _, record := range records {
 		member := memberMap[record.MemberID]
 		if member == nil {
@@ -144,6 +147,11 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		if ipaArgs == nil {
 			continue
 		}
+		key := fmt.Sprintf("%d-%s", member.ID, ipaArgs.IpaID)
+		if _, ok := filterMap[key]; ok {
+			continue
+		}
+		filterMap[key] = struct{}{}
 		err = h.emailWebCtl.SendUpdateIpaEmail(ctx, member.Email, ipaArgs.Name)
 		if err != nil {
 			return err
