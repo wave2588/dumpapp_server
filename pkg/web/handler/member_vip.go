@@ -66,19 +66,19 @@ func (h *MemberVipHandler) Get(w http.ResponseWriter, r *http.Request) {
 			"type":     enum.MemberVipDurationTypeOneMonth,
 			"title":    "月度会员",
 			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeOneMonth],
-			"describe": "这是一段描述",
+			"describe": fmt.Sprintf("月度会员每月 %d 元。", constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeOneMonth]),
 		},
 		{
 			"type":     enum.MemberVipDurationTypeThreeMonth,
 			"title":    "季度会员",
 			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeThreeMonth],
-			"describe": "这是一段描述",
+			"describe": fmt.Sprintf("季度会员享受 85 折优惠，每月仅需 57 元。"),
 		},
 		{
 			"type":     enum.MemberVipDurationTypeSixMonth,
-			"title":    "半年会员",
+			"title":    "年度会员",
 			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeSixMonth],
-			"describe": "这是一段描述",
+			"describe": fmt.Sprintf("年度会员享受 7 折优惠，每月仅需 47 元。"),
 		},
 	}
 	util.RenderJSON(w, res)
