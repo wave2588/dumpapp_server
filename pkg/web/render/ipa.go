@@ -2,6 +2,7 @@ package render
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 
@@ -132,6 +133,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 	memberMap := NewMemberRender([]int64{f.loginID}, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
 	member := memberMap[f.loginID]
 
+	fmt.Println(f.loginID)
 	for _, ipa := range f.IpaMap {
 		vs := totalVersionMap[ipa.ID]
 		if vs == nil {
@@ -140,7 +142,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		sort.Slice(vs, func(i, j int) bool {
 			version1 := cast.ToInt64(strings.ReplaceAll(vs[i].Version, ".", ""))
 			version2 := cast.ToInt64(strings.ReplaceAll(vs[j].Version, ".", ""))
-			return version1 > version2
+			return version1 < version2
 		})
 
 		res := make([]*Version, 0)
