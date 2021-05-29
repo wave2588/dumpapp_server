@@ -31,6 +31,12 @@ func (h *EmailWebController) SendEmailToMaster(ctx context.Context, appName, ver
 	return h.emailCtl.SendEmail(ctx, title, content, "", []string{})
 }
 
+func (h *EmailWebController) SendVipEmailToMaster(ctx context.Context, appName, version, memberEmail string) error {
+	title := fmt.Sprintf("Hi~ Vip 订单来了, 应用名称:「%s」", appName)
+	content := fmt.Sprintf("应用名称: %s <br>应用版本: %s <br>用户邮箱: %s", appName, version, memberEmail)
+	return h.emailCtl.SendEmail(ctx, title, content, "", []string{})
+}
+
 func (h *EmailWebController) SendUpdateIpaEmail(ctx context.Context, email, name string) error {
 	title := "ipa 已更新~"
 	content := fmt.Sprintf("您搜索的「%s」已更新，请访问 https://dumpapp.com 查看。", name)

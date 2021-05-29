@@ -60,7 +60,7 @@ func (p *postSearchArgs) Validate() error {
 func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := mustGetLoginID(ctx)
-	_ = GetAccountByLoginID(ctx, loginID)
+	account := GetAccountByLoginID(ctx, loginID)
 	loginMember := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)[loginID]
 	if loginMember == nil {
 		panic(errors.ErrNotFoundMember)
@@ -89,9 +89,13 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}))
 
 	if ipa == nil {
-		message := "ipa 已被我们收录，更新后会通过邮件形式告知。"
+		message := ""
 		if loginMember.Vip.IsVip {
 			message = "您提交的请求我们会尽快处理，预计两小时内处理完毕，请注意邮件查收。"
+			util.PanicIf(h.emailWebCtl.SendVipEmailToMaster(ctx, args.Name, args.Version, account.Email))
+		} else {
+			message = "ipa 已被我们收录，更新后会通过邮件形式告知。"
+			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, args.Version, account.Email))
 		}
 		util.RenderJSON(w, message)
 		return
