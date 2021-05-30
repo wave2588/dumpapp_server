@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	util2 "dumpapp_server/pkg/util"
 	"errors"
 	"fmt"
 	"net/http"
@@ -80,15 +81,16 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 
 	util.PanicIf(h.memberVipOrderDAO.Update(ctx, order))
 
-	days := constant.MemberVipDurationTypeToDays[duration]
+	endAt := constant.MemberVipDurationTypeToDays[duration]
 	if memberVip == nil {
 		util.PanicIf(h.memberVipDAO.Insert(ctx,
 			&models.MemberVip{
 				ID:      account.ID,
 				StartAt: time.Now(),
-				EndAt:   time.Now().AddDate(0, 0, days),
+				EndAt:   endAt,
 			}))
 	} else {
+		days := util2.GetDiffDays(endAt, memberVip.EndAt)
 		memberVip.EndAt = memberVip.EndAt.AddDate(0, 0, days)
 		util.PanicIf(h.memberVipDAO.Update(ctx, memberVip))
 	}
