@@ -91,7 +91,8 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		} else {
 			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, args.Version, account.Email))
 		}
-		panic(errors.ErrNotFoundIpa)
+		util.RenderJSON(w, "")
+		return
 	}
 
 	if args.Version != "" {
@@ -105,7 +106,8 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		}
 		if ipaVersion == nil {
 			util.PanicIf(h.emailWebCtl.SendVipEmailToMaster(ctx, args.Name, args.Version, account.Email))
-			panic(errors.ErrNotFoundIpaVersion)
+			util.RenderJSON(w, "")
+			return
 		}
 	}
 
