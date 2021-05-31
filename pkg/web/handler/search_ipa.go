@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/volatiletech/null/v8"
 	"net/http"
 
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -19,6 +18,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"github.com/volatiletech/null/v8"
 )
 
 type SearchIpaHandler struct {
@@ -68,9 +68,6 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	args := &postSearchArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
-	if args.Version != "" && !loginMember.Vip.IsVip {
-		panic(errors.ErrUpgradeVip)
-	}
 
 	ipaID := cast.ToInt64(args.IpaID)
 	if ipaID == 0 {
@@ -89,16 +86,27 @@ func (h *SearchIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}))
 
 	if ipa == nil {
-		message := ""
 		if loginMember.Vip.IsVip {
-			message = "您提交的请求我们会尽快处理，预计两小时内处理完毕，请注意邮件查收。"
 			util.PanicIf(h.emailWebCtl.SendVipEmailToMaster(ctx, args.Name, args.Version, account.Email))
 		} else {
-			message = "ipa 已被我们收录，更新后会通过邮件形式告知。"
 			util.PanicIf(h.emailWebCtl.SendEmailToMaster(ctx, args.Name, args.Version, account.Email))
 		}
-		util.RenderJSON(w, message)
-		return
+		panic(errors.ErrNotFoundIpa)
+	}
+
+	if args.Version != "" {
+		/// 不是 vip 不能用此功能
+		if !loginMember.Vip.IsVip {
+			panic(errors.ErrUpgradeVip)
+		}
+		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
+		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+			panic(err)
+		}
+		if ipaVersion == nil {
+			util.PanicIf(h.emailWebCtl.SendVipEmailToMaster(ctx, args.Name, args.Version, account.Email))
+			panic(errors.ErrNotFoundIpaVersion)
+		}
 	}
 
 	data := render.NewIpaRender([]int64{ipa.ID}, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)

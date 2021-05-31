@@ -1,9 +1,10 @@
 package constant
 
 import (
+	"time"
+
 	"dumpapp_server/pkg/common/enum"
 	"github.com/spf13/cast"
-	"time"
 )
 
 const OneMonthPrice float64 = 68
