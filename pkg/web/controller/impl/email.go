@@ -37,8 +37,8 @@ func (h *EmailWebController) SendVipEmailToMaster(ctx context.Context, appName, 
 	return h.emailCtl.SendEmail(ctx, title, content, "", []string{})
 }
 
-func (h *EmailWebController) SendUpdateIpaEmail(ctx context.Context, email, name string) error {
+func (h *EmailWebController) SendUpdateIpaEmail(ctx context.Context, ipaID int64, email, name string) error {
 	title := "ipa 已更新~"
-	content := fmt.Sprintf("DumpAPP - 您需要的「%s」IPA 已更新，请访问 https://dumpapp.com 重新输入 App Store 链接，获取 IPA。", name)
+	content := fmt.Sprintf("DumpAPP - 您需要的 [%s] IPA 已更新，请访问 https://dumpapp.com/download?appid=%d 查看。", name, ipaID)
 	return h.emailCtl.SendEmail(ctx, title, content, email, []string{})
 }
