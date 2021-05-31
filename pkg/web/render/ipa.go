@@ -142,7 +142,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		sort.Slice(vs, func(i, j int) bool {
 			version1 := cast.ToInt64(strings.ReplaceAll(vs[i].Version, ".", ""))
 			version2 := cast.ToInt64(strings.ReplaceAll(vs[j].Version, ".", ""))
-			return version1 < version2
+			return version1 > version2
 		})
 
 		res := make([]*Version, 0)
