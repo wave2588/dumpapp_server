@@ -154,7 +154,7 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		}
 		filterMap[key] = struct{}{}
 		batch.Append(func() error {
-			return h.emailWebCtl.SendUpdateIpaEmail(ctx, member.Email, ipaArgs.Name)
+			return h.emailWebCtl.SendUpdateIpaEmail(ctx, cast.ToInt64(ipaArgs.IpaID), member.Email, ipaArgs.Name)
 		})
 	}
 	batch.Wait()
