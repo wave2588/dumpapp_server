@@ -12,6 +12,7 @@ func NewRouter() chi.Router {
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
 	r.With(middleware.OAuthRegister).Post("/admin/ipa", adminIpaHandler.Post)
+	r.With(middleware.OAuthRegister).Delete("/admin/ipa", adminIpaHandler.DeleteIpa)
 	// endregion
 
 	/// admin_member_vip
