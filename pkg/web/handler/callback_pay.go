@@ -57,15 +57,16 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 	}
 
 	duration := enum.MemberVipDurationTypeOneMonth
-	durationStrings := r.PostForm["duration"]
-	if len(durationStrings) >= 1 {
-		duration = constant.DurationToMemberVipDurationType[durationStrings[0]]
+
+	order, err := h.memberVipOrderDAO.Get(ctx, orderID)
+	util.PanicIf(err)
+
+	if du, ok := constant.DurationToMemberVipDurationType[order.Duration.String]; ok {
+		duration = du
 	}
 
 	util.PanicIf(h.alipayCtl.CheckPayStatus(ctx, orderID))
 
-	order, err := h.memberVipOrderDAO.Get(ctx, orderID)
-	util.PanicIf(err)
 	order.Status = enum.MemberVipOrderStatusPaid
 
 	account := GetAccountByLoginID(ctx, order.MemberID)

@@ -15,6 +15,7 @@ import (
 
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -27,6 +28,7 @@ type MemberVipOrder struct {
 	ID        int64                     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	MemberID  int64                     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status    enum.MemberVipOrderStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Duration  null.String               `boil:"duration" json:"duration,omitempty" toml:"duration" yaml:"duration,omitempty"`
 	CreatedAt time.Time                 `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                 `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -38,12 +40,14 @@ var MemberVipOrderColumns = struct {
 	ID        string
 	MemberID  string
 	Status    string
+	Duration  string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	MemberID:  "member_id",
 	Status:    "status",
+	Duration:  "duration",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -71,16 +75,41 @@ func (w whereHelperenum_MemberVipOrderStatus) GTE(x enum.MemberVipOrderStatus) q
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MemberVipOrderWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberVipOrderStatus
+	Duration  whereHelpernull_String
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "`member_vip_order`.`id`"},
 	MemberID:  whereHelperint64{field: "`member_vip_order`.`member_id`"},
 	Status:    whereHelperenum_MemberVipOrderStatus{field: "`member_vip_order`.`status`"},
+	Duration:  whereHelpernull_String{field: "`member_vip_order`.`duration`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_vip_order`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_vip_order`.`updated_at`"},
 }
@@ -102,8 +131,8 @@ func (*memberVipOrderR) NewStruct() *memberVipOrderR {
 type memberVipOrderL struct{}
 
 var (
-	memberVipOrderAllColumns            = []string{"id", "member_id", "status", "created_at", "updated_at"}
-	memberVipOrderColumnsWithoutDefault = []string{"member_id", "status"}
+	memberVipOrderAllColumns            = []string{"id", "member_id", "status", "duration", "created_at", "updated_at"}
+	memberVipOrderColumnsWithoutDefault = []string{"member_id", "status", "duration"}
 	memberVipOrderColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberVipOrderPrimaryKeyColumns     = []string{"id"}
 )
