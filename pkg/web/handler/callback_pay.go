@@ -91,8 +91,13 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 				EndAt:   endAt,
 			}))
 	} else {
-		days := util2.GetDiffDays(endAt, memberVip.EndAt)
-		memberVip.EndAt = memberVip.EndAt.AddDate(0, 0, days)
+		/// 如果 vip 时间 < 现在的时间, 说明用户的 vip 权益要从当前时间开始计算
+		if memberVip.EndAt.Unix() < time.Now().Unix() {
+			memberVip.EndAt = endAt
+		} else {
+			days := util2.GetDiffDays(endAt, memberVip.EndAt)
+			memberVip.EndAt = memberVip.EndAt.AddDate(0, 0, days)
+		}
 		util.PanicIf(h.memberVipDAO.Update(ctx, memberVip))
 	}
 
