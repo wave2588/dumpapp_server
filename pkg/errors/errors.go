@@ -1,10 +1,11 @@
 package errors
 
 var (
-	ErrNotAuthorized  = NewDefaultAPIError(401, 10000, "NotAuthorized", "登陆才可以继续操作")
-	ErrInvalidTicket  = NewDefaultAPIError(401, 10001, "InvalidTicket", "无效的用户身份")
-	ErrNotFoundMember = NewDefaultAPIError(404, 10002, "NotFoundMember", "未找到用户")
-	ErrUpgradeVip     = NewDefaultAPIError(401, 10003, "UpgradeVip", "请升级 vip")
+	ErrNotAuthorized      = NewDefaultAPIError(401, 10000, "NotAuthorized", "登陆才可以继续操作")
+	ErrInvalidTicket      = NewDefaultAPIError(401, 10001, "InvalidTicket", "无效的用户身份")
+	ErrNotFoundMember     = NewDefaultAPIError(404, 10002, "NotFoundMember", "未找到用户")
+	ErrUpgradeVip         = NewDefaultAPIError(401, 10003, "UpgradeVip", "请升级 vip")
+	ErrMemberAccessDenied = NewDefaultAPIError(403, 10004, "MemberAccessDenied", "没有权限进行操作")
 
 	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 app")
 	ErrNotFoundIpa        = NewDefaultAPIError(404, 20002, "NotFoundIpa", "未找到 ipa")

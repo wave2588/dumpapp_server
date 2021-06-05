@@ -11,7 +11,13 @@ func NewRouter() chi.Router {
 
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
-	r.With(middleware.OAuthGuest).Post("/ipa", adminIpaHandler.Post)
+	r.With(middleware.OAuthRegister).Post("/admin/ipa", adminIpaHandler.Post)
+	// endregion
+
+	/// admin_member_vip
+	adminMemberVipHandler := handler.NewAdminMemberVipHandler()
+	r.With(middleware.OAuthRegister).Post("/admin/member/vip", adminMemberVipHandler.AddDuration)
+	// endregion
 
 	/// region account
 	accountHandler := handler.NewAccountHandler()

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/middleware"
 	"fmt"
 	"net/http"
 	"time"
@@ -67,6 +68,10 @@ func (p *createIpaArgs) Validate() error {
 
 func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		panic(errors.ErrMemberAccessDenied)
+	}
 
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
