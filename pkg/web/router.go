@@ -17,6 +17,7 @@ func NewRouter() chi.Router {
 	/// admin_member_vip
 	adminMemberVipHandler := handler.NewAdminMemberVipHandler()
 	r.With(middleware.OAuthRegister).Post("/admin/member/vip", adminMemberVipHandler.AddDuration)
+	r.With(middleware.OAuthRegister).Delete("/admin/member/vip", adminMemberVipHandler.DeleteMemberVip)
 	// endregion
 
 	/// region account

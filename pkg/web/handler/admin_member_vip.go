@@ -65,3 +65,36 @@ func (h *AdminMemberVipHandler) AddDuration(w http.ResponseWriter, r *http.Reque
 
 	util.RenderJSON(w, "ok")
 }
+
+type deleteMemberVipArgs struct {
+	Email string `json:"email" validate:"required"`
+}
+
+func (p *deleteMemberVipArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminMemberVipHandler) DeleteMemberVip(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		panic(errors.ErrMemberAccessDenied)
+	}
+
+	args := &deleteMemberVipArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
+	util.PanicIf(err)
+
+	memberVip, err := h.memberVipDAO.Get(ctx, account.ID)
+	util.PanicIf(err)
+
+	util.PanicIf(h.memberVipDAO.Delete(ctx, memberVip.ID))
+
+	util.RenderJSON(w, "ok")
+}
