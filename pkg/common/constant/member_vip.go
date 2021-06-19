@@ -4,31 +4,28 @@ import (
 	"time"
 
 	"dumpapp_server/pkg/common/enum"
-	"github.com/spf13/cast"
 )
 
-const OneMonthPrice float64 = 68
-
 var MemberVipDurationTypeToPrice = map[enum.MemberVipDurationType]int64{
-	enum.MemberVipDurationTypeOneMonth:   cast.ToInt64(OneMonthPrice),
-	enum.MemberVipDurationTypeThreeMonth: cast.ToInt64(OneMonthPrice * 3 * 0.85), /// 3 个月 85 折
-	enum.MemberVipDurationTypeSixMonth:   cast.ToInt64(OneMonthPrice * 12 * 0.7), /// 12 个月 7折
+	enum.MemberVipDurationTypeOne:   18,
+	enum.MemberVipDurationTypeTwo:   28,
+	enum.MemberVipDurationTypeThree: 38,
 }
 
 var MemberVipDurationTypeToDays = map[enum.MemberVipDurationType]time.Time{
-	enum.MemberVipDurationTypeOneMonth:   time.Now().AddDate(0, 1, 0),
-	enum.MemberVipDurationTypeThreeMonth: time.Now().AddDate(0, 3, 0),
-	enum.MemberVipDurationTypeSixMonth:   time.Now().AddDate(1, 0, 0),
+	enum.MemberVipDurationTypeOne:   time.Now().AddDate(0, 0, 10),
+	enum.MemberVipDurationTypeTwo:   time.Now().AddDate(0, 0, 20),
+	enum.MemberVipDurationTypeThree: time.Now().AddDate(0, 0, 30),
 }
 
 var DurationToMemberVipDurationType = map[string]enum.MemberVipDurationType{
-	enum.MemberVipDurationTypeOneMonth.String():   enum.MemberVipDurationTypeOneMonth,
-	enum.MemberVipDurationTypeThreeMonth.String(): enum.MemberVipDurationTypeThreeMonth,
-	enum.MemberVipDurationTypeSixMonth.String():   enum.MemberVipDurationTypeSixMonth,
+	enum.MemberVipDurationTypeOne.String():   enum.MemberVipDurationTypeOne,
+	enum.MemberVipDurationTypeTwo.String():   enum.MemberVipDurationTypeTwo,
+	enum.MemberVipDurationTypeThree.String(): enum.MemberVipDurationTypeThree,
 }
 
 var MemberVipDurationTypeToSubject = map[enum.MemberVipDurationType]string{
-	enum.MemberVipDurationTypeOneMonth:   "DumpApp",
-	enum.MemberVipDurationTypeThreeMonth: "DumpApp",
-	enum.MemberVipDurationTypeSixMonth:   "DumpApp",
+	enum.MemberVipDurationTypeOne:   "DumpApp",
+	enum.MemberVipDurationTypeTwo:   "DumpApp",
+	enum.MemberVipDurationTypeThree: "DumpApp",
 }

@@ -56,7 +56,7 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 		panic(errors.New(fmt.Sprintf("orderID 错啦 orderIDString: %s  orderID: %d  orderIDStrings: %v", orderIDString, orderID, orderIDStrings)))
 	}
 
-	duration := enum.MemberVipDurationTypeOneMonth
+	duration := enum.MemberVipDurationTypeOne
 
 	order, err := h.memberVipOrderDAO.Get(ctx, orderID)
 	util.PanicIf(err)

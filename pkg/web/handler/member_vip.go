@@ -63,22 +63,22 @@ func (h *MemberVipHandler) Post(w http.ResponseWriter, r *http.Request) {
 func (h *MemberVipHandler) Get(w http.ResponseWriter, r *http.Request) {
 	res := []map[string]interface{}{
 		{
-			"type":     enum.MemberVipDurationTypeOneMonth,
-			"title":    "月度会员",
-			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeOneMonth],
-			"describe": fmt.Sprintf("月度会员每月 %d 元。", constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeOneMonth]),
+			"type":     enum.MemberVipDurationTypeOne,
+			"title":    "10 天会员",
+			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeOne],
+			"describe": fmt.Sprintf("10 天会员, 平均每天 %.2f 元", 18/10.0),
 		},
 		{
-			"type":     enum.MemberVipDurationTypeThreeMonth,
-			"title":    "季度会员",
-			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeThreeMonth],
-			"describe": fmt.Sprintf("季度会员享受 85 折优惠，每月仅需 57 元。"),
+			"type":     enum.MemberVipDurationTypeTwo,
+			"title":    "20 天会员",
+			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeTwo],
+			"describe": fmt.Sprintf("20 天会员, 平均每天 %.2f 元", 28/20.0),
 		},
 		{
-			"type":     enum.MemberVipDurationTypeSixMonth,
-			"title":    "年度会员",
-			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeSixMonth],
-			"describe": fmt.Sprintf("年度会员享受 7 折优惠，每月仅需 47 元。"),
+			"type":     enum.MemberVipDurationTypeThree,
+			"title":    "30 天会员",
+			"price":    constant.MemberVipDurationTypeToPrice[enum.MemberVipDurationTypeThree],
+			"describe": fmt.Sprintf("30 天会员, 平均每天 %.2f 元", 38/30.0),
 		},
 	}
 	util.RenderJSON(w, res)
