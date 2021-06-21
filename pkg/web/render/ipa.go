@@ -150,11 +150,16 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 			version := &Version{
 				Version: v.Version,
 			}
-			/// 如果是 vip 返回所有 ipa url
-			if member.Vip.IsVip || idx != len(vs)-1 || len(vs) == 1 {
+			if member.Vip.IsVip {
 				url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
 				util.PanicIf(err)
 				version.URL = url
+			} else {
+				if idx == 0 {
+					url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
+					util.PanicIf(err)
+					version.URL = url
+				}
 			}
 			res = append(res, version)
 		}
