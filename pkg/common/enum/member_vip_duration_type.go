@@ -5,7 +5,7 @@ package enum
 type MemberVipDurationType int
 
 const (
-	MemberVipDurationTypeOneMonth MemberVipDurationType = iota + 1
-	MemberVipDurationTypeThreeMonth
-	MemberVipDurationTypeSixMonth
+	MemberVipDurationTypeOne MemberVipDurationType = iota + 1
+	MemberVipDurationTypeTwo
+	MemberVipDurationTypeThree
 )

@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _MemberVipDurationTypeName = "one_monththree_monthsix_month"
+const _MemberVipDurationTypeName = "onetwothree"
 
-var _MemberVipDurationTypeIndex = [...]uint8{0, 9, 20, 29}
+var _MemberVipDurationTypeIndex = [...]uint8{0, 3, 6, 11}
 
-const _MemberVipDurationTypeLowerName = "one_monththree_monthsix_month"
+const _MemberVipDurationTypeLowerName = "onetwothree"
 
 func (i MemberVipDurationType) String() string {
 	i -= 1
@@ -27,26 +27,26 @@ func (i MemberVipDurationType) String() string {
 // Re-run the stringer command to generate them again.
 func _MemberVipDurationTypeNoOp() {
 	var x [1]struct{}
-	_ = x[MemberVipDurationTypeOneMonth-(1)]
-	_ = x[MemberVipDurationTypeThreeMonth-(2)]
-	_ = x[MemberVipDurationTypeSixMonth-(3)]
+	_ = x[MemberVipDurationTypeOne-(1)]
+	_ = x[MemberVipDurationTypeTwo-(2)]
+	_ = x[MemberVipDurationTypeThree-(3)]
 }
 
-var _MemberVipDurationTypeValues = []MemberVipDurationType{MemberVipDurationTypeOneMonth, MemberVipDurationTypeThreeMonth, MemberVipDurationTypeSixMonth}
+var _MemberVipDurationTypeValues = []MemberVipDurationType{MemberVipDurationTypeOne, MemberVipDurationTypeTwo, MemberVipDurationTypeThree}
 
 var _MemberVipDurationTypeNameToValueMap = map[string]MemberVipDurationType{
-	_MemberVipDurationTypeName[0:9]:        MemberVipDurationTypeOneMonth,
-	_MemberVipDurationTypeLowerName[0:9]:   MemberVipDurationTypeOneMonth,
-	_MemberVipDurationTypeName[9:20]:       MemberVipDurationTypeThreeMonth,
-	_MemberVipDurationTypeLowerName[9:20]:  MemberVipDurationTypeThreeMonth,
-	_MemberVipDurationTypeName[20:29]:      MemberVipDurationTypeSixMonth,
-	_MemberVipDurationTypeLowerName[20:29]: MemberVipDurationTypeSixMonth,
+	_MemberVipDurationTypeName[0:3]:       MemberVipDurationTypeOne,
+	_MemberVipDurationTypeLowerName[0:3]:  MemberVipDurationTypeOne,
+	_MemberVipDurationTypeName[3:6]:       MemberVipDurationTypeTwo,
+	_MemberVipDurationTypeLowerName[3:6]:  MemberVipDurationTypeTwo,
+	_MemberVipDurationTypeName[6:11]:      MemberVipDurationTypeThree,
+	_MemberVipDurationTypeLowerName[6:11]: MemberVipDurationTypeThree,
 }
 
 var _MemberVipDurationTypeNames = []string{
-	_MemberVipDurationTypeName[0:9],
-	_MemberVipDurationTypeName[9:20],
-	_MemberVipDurationTypeName[20:29],
+	_MemberVipDurationTypeName[0:3],
+	_MemberVipDurationTypeName[3:6],
+	_MemberVipDurationTypeName[6:11],
 }
 
 // MemberVipDurationTypeString retrieves an enum value from the enum constants string name.

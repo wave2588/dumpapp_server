@@ -56,16 +56,17 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 		panic(errors.New(fmt.Sprintf("orderID 错啦 orderIDString: %s  orderID: %d  orderIDStrings: %v", orderIDString, orderID, orderIDStrings)))
 	}
 
-	duration := enum.MemberVipDurationTypeOneMonth
-	durationStrings := r.PostForm["duration"]
-	if len(durationStrings) >= 1 {
-		duration = constant.DurationToMemberVipDurationType[durationStrings[0]]
+	duration := enum.MemberVipDurationTypeOne
+
+	order, err := h.memberVipOrderDAO.Get(ctx, orderID)
+	util.PanicIf(err)
+
+	if du, ok := constant.DurationToMemberVipDurationType[order.Duration.String]; ok {
+		duration = du
 	}
 
 	util.PanicIf(h.alipayCtl.CheckPayStatus(ctx, orderID))
 
-	order, err := h.memberVipOrderDAO.Get(ctx, orderID)
-	util.PanicIf(err)
 	order.Status = enum.MemberVipOrderStatusPaid
 
 	account := GetAccountByLoginID(ctx, order.MemberID)
@@ -90,8 +91,13 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 				EndAt:   endAt,
 			}))
 	} else {
-		days := util2.GetDiffDays(endAt, memberVip.EndAt)
-		memberVip.EndAt = memberVip.EndAt.AddDate(0, 0, days)
+		/// 如果 vip 时间 < 现在的时间, 说明用户的 vip 权益要从当前时间开始计算
+		if memberVip.EndAt.Unix() < time.Now().Unix() {
+			memberVip.EndAt = endAt
+		} else {
+			days := util2.GetDiffDays(endAt, memberVip.EndAt)
+			memberVip.EndAt = memberVip.EndAt.AddDate(0, 0, days)
+		}
 		util.PanicIf(h.memberVipDAO.Update(ctx, memberVip))
 	}
 

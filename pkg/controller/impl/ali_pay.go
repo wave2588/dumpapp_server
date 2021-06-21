@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/volatiletech/null/v8"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -54,6 +55,7 @@ func (c *ALiPayController) GetPayURL(ctx context.Context, loginID int64, duratio
 		ID:       id,
 		MemberID: loginID,
 		Status:   enum.MemberVipOrderStatusPending,
+		Duration: null.StringFrom(duration.String()),
 	})
 	if err != nil {
 		return "", err
@@ -66,9 +68,9 @@ func (c *ALiPayController) GetPayURL(ctx context.Context, loginID int64, duratio
 	p.OutTradeNo = fmt.Sprintf("%d", id)
 	p.TotalAmount = fmt.Sprintf("%d", constant.MemberVipDurationTypeToPrice[duration])
 	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
-	p.ExtendParams = map[string]interface{}{
-		"duration": duration.String(),
-	}
+	//p.ExtendParams = map[string]interface{}{
+	//	"duration": duration.String(),
+	//}
 	p.TimeoutExpress = "15m"
 	url, err := c.client.TradePagePay(p)
 	if err != nil {

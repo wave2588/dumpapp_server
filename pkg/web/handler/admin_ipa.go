@@ -2,7 +2,10 @@ package handler
 
 import (
 	"context"
+	errors2 "dumpapp_server/pkg/common/errors"
+	"dumpapp_server/pkg/middleware"
 	"fmt"
+	pkgErr "github.com/pkg/errors"
 	"net/http"
 	"time"
 
@@ -31,6 +34,7 @@ type AdminIpaHandler struct {
 
 	appleCtl    controller.AppleController
 	emailWebCtl controller2.EmailWebController
+	tencentCtl  controller.TencentController
 }
 
 func NewAdminIpaHandler() *AdminIpaHandler {
@@ -42,6 +46,7 @@ func NewAdminIpaHandler() *AdminIpaHandler {
 
 		appleCtl:    impl2.DefaultAppleController,
 		emailWebCtl: impl3.DefaultEmailWebController,
+		tencentCtl:  impl2.DefaultTencentController,
 	}
 }
 
@@ -67,6 +72,10 @@ func (p *createIpaArgs) Validate() error {
 
 func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		panic(errors.ErrMemberAccessDenied)
+	}
 
 	args := &createIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -95,12 +104,20 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				BundleID: ipaArgs.BundleID,
 			}))
 		}
-		/// todo: 后期如果做 ipa 个数限制的话, 在这里做.
-		util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-			IpaID:     ipaID,
-			Version:   ipaArgs.Version,
-			TokenPath: ipaArgs.Token,
-		}))
+		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, ipaArgs.Version)
+		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+			panic(err)
+		}
+		if ipaVersion == nil {
+			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
+				IpaID:     ipaID,
+				Version:   ipaArgs.Version,
+				TokenPath: ipaArgs.Token,
+			}))
+			continue
+		}
+		ipaVersion.TokenPath = ipaArgs.Token
+		util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
 	}
 
 	clients.MustCommit(ctx, txn)
@@ -160,4 +177,85 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 	batch.Wait()
 
 	return nil
+}
+
+type deleteIpaArgs struct {
+	IpaID      string `json:"ipa_id" validate:"required"`
+	IpaVersion string `json:"ipa_version"`
+}
+
+func (p *deleteIpaArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminIpaHandler) DeleteIpa(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		panic(errors.ErrMemberAccessDenied)
+	}
+
+	args := &deleteIpaArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	ipaID := cast.ToInt64(args.IpaID)
+	if args.IpaVersion == "" {
+		util.PanicIf(h.deleteIpa(ctx, ipaID))
+	} else {
+		util.PanicIf(h.deleteIpaVersion(ctx, ipaID, args.IpaVersion))
+	}
+
+	util.RenderJSON(w, "ok")
+}
+
+func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64) error {
+	ipa, err := h.ipaDAO.Get(ctx, ipaID)
+	if err != nil {
+		return err
+	}
+	ivs, err := h.ipaVersionDAO.GetIpaVersionSliceByIpaID(ctx, ipaID)
+	if err != nil {
+		return err
+	}
+
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	err = h.ipaDAO.Delete(ctx, ipa.ID)
+	if err != nil {
+		return err
+	}
+
+	for _, iv := range ivs {
+		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
+		if err != nil {
+			return err
+		}
+		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	return nil
+}
+
+func (h *AdminIpaHandler) deleteIpaVersion(ctx context.Context, ipaID int64, ipaVersion string) error {
+	iv, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, ipaVersion)
+	if err != nil {
+		return err
+	}
+	err = h.ipaVersionDAO.Delete(ctx, iv.ID)
+	if err != nil {
+		return err
+	}
+	return h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 }
