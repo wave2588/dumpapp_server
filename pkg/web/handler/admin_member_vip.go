@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -8,9 +11,7 @@ import (
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web/render"
-	"fmt"
 	"github.com/go-playground/validator/v10"
-	"net/http"
 )
 
 type AdminMemberVipHandler struct {
