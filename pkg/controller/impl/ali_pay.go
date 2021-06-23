@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/volatiletech/null/v8"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -15,6 +14,7 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
 	"github.com/smartwalle/alipay/v3"
+	"github.com/volatiletech/null/v8"
 )
 
 type ALiPayController struct {

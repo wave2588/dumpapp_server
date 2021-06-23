@@ -2,15 +2,13 @@ package handler
 
 import (
 	"context"
-	errors2 "dumpapp_server/pkg/common/errors"
-	"dumpapp_server/pkg/middleware"
 	"fmt"
-	pkgErr "github.com/pkg/errors"
 	"net/http"
 	"time"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -18,10 +16,12 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"github.com/go-playground/validator/v10"
+	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -55,11 +55,16 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	IpaID    string `json:"ipa_id" validate:"required"`
-	Name     string `json:"name" validate:"required"`
-	BundleID string `json:"bundle_id" validate:"required"`
-	Version  string `json:"version" validate:"required"`
-	Token    string `json:"token" validate:"required"`
+	IpaID     string     `json:"ipa_id" validate:"required"`
+	Name      string     `json:"name" validate:"required"`
+	BundleID  string     `json:"bundle_id" validate:"required"`
+	IsInterim bool       `json:"is_interim"`
+	Versions  []*Version `json:"versions"`
+}
+
+type Version struct {
+	Version string `json:"version" validate:"required"`
+	Token   string `json:"token" validate:"required"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -99,25 +104,33 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		ipa := ipaMap[ipaID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				ID:       ipaID,
-				Name:     ipaArgs.Name,
-				BundleID: ipaArgs.BundleID,
+				ID:        ipaID,
+				Name:      ipaArgs.Name,
+				BundleID:  ipaArgs.BundleID,
+				IsInterim: cast.ToInt(ipaArgs.IsInterim),
 			}))
+		} else {
+			ipa.Name = ipaArgs.Name
+			ipa.BundleID = ipaArgs.BundleID
+			ipa.IsInterim = cast.ToInt(ipaArgs.IsInterim)
+			util.PanicIf(h.ipaDAO.Update(ctx, ipa))
 		}
-		ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, ipaArgs.Version)
-		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-			panic(err)
+		for _, version := range ipaArgs.Versions {
+			ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, version.Version)
+			if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+				panic(err)
+			}
+			if ipaVersion == nil {
+				util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
+					IpaID:     ipaID,
+					Version:   version.Version,
+					TokenPath: version.Token,
+				}))
+				continue
+			}
+			ipaVersion.TokenPath = version.Token
+			util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
 		}
-		if ipaVersion == nil {
-			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-				IpaID:     ipaID,
-				Version:   ipaArgs.Version,
-				TokenPath: ipaArgs.Token,
-			}))
-			continue
-		}
-		ipaVersion.TokenPath = ipaArgs.Token
-		util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
 	}
 
 	clients.MustCommit(ctx, txn)
