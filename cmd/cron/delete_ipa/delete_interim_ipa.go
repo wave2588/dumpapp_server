@@ -43,7 +43,6 @@ func run() {
 		for _, id := range ids {
 			util.PanicIf(impl.DefaultIpaDAO.Delete(ctx, id))
 		}
-
 		ipaVersions, err := impl.DefaultIpaVersionDAO.BatchGetIpaVersions(ctx, ids)
 		util.PanicIf(err)
 
