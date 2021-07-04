@@ -82,7 +82,7 @@ func (h *CallbackPayHandler) ALiPayCallback(w http.ResponseWriter, r *http.Reque
 
 	util.PanicIf(h.memberVipOrderDAO.Update(ctx, order))
 
-	endAt := constant.MemberVipDurationTypeToDays[duration]
+	endAt := constant.GetMemberVipDays(duration)
 	if memberVip == nil {
 		util.PanicIf(h.memberVipDAO.Insert(ctx,
 			&models.MemberVip{

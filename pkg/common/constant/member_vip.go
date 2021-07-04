@@ -12,12 +12,6 @@ var MemberVipDurationTypeToPrice = map[enum.MemberVipDurationType]int64{
 	enum.MemberVipDurationTypeThree: 38,
 }
 
-var MemberVipDurationTypeToDays = map[enum.MemberVipDurationType]time.Time{
-	enum.MemberVipDurationTypeOne:   time.Now().AddDate(0, 0, 10),
-	enum.MemberVipDurationTypeTwo:   time.Now().AddDate(0, 0, 20),
-	enum.MemberVipDurationTypeThree: time.Now().AddDate(0, 0, 30),
-}
-
 var DurationToMemberVipDurationType = map[string]enum.MemberVipDurationType{
 	enum.MemberVipDurationTypeOne.String():   enum.MemberVipDurationTypeOne,
 	enum.MemberVipDurationTypeTwo.String():   enum.MemberVipDurationTypeTwo,
@@ -28,4 +22,14 @@ var MemberVipDurationTypeToSubject = map[enum.MemberVipDurationType]string{
 	enum.MemberVipDurationTypeOne:   "DumpApp",
 	enum.MemberVipDurationTypeTwo:   "DumpApp",
 	enum.MemberVipDurationTypeThree: "DumpApp",
+}
+
+func GetMemberVipDays(durationType enum.MemberVipDurationType) time.Time {
+	now := time.Now()
+	var MemberVipDurationTypeToDays = map[enum.MemberVipDurationType]time.Time{
+		enum.MemberVipDurationTypeOne:   now.AddDate(0, 0, 10),
+		enum.MemberVipDurationTypeTwo:   now.AddDate(0, 0, 20),
+		enum.MemberVipDurationTypeThree: now.AddDate(0, 0, 30),
+	}
+	return MemberVipDurationTypeToDays[durationType]
 }
