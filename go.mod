@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
-	github.com/daixiang0/gci v0.2.8 // indirect
+	github.com/daixiang0/gci v0.2.9 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/friendsofgo/errors v0.9.2

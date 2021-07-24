@@ -32,3 +32,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_download_count table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_download_count"]
+
+  [types.replace]
+    type = "enum.MemberDownloadCountStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']

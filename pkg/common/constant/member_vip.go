@@ -26,7 +26,7 @@ var MemberVipDurationTypeToSubject = map[enum.MemberVipDurationType]string{
 
 func GetMemberVipDays(durationType enum.MemberVipDurationType) time.Time {
 	now := time.Now()
-	var MemberVipDurationTypeToDays = map[enum.MemberVipDurationType]time.Time{
+	MemberVipDurationTypeToDays := map[enum.MemberVipDurationType]time.Time{
 		enum.MemberVipDurationTypeOne:   now.AddDate(0, 0, 10),
 		enum.MemberVipDurationTypeTwo:   now.AddDate(0, 0, 20),
 		enum.MemberVipDurationTypeThree: now.AddDate(0, 0, 30),

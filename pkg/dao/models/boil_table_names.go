@@ -4,17 +4,19 @@
 package models
 
 var TableNames = struct {
-	Account        string
-	Ipa            string
-	IpaVersion     string
-	MemberVip      string
-	MemberVipOrder string
-	SearchRecordV2 string
+	Account             string
+	Ipa                 string
+	IpaVersion          string
+	MemberDownloadCount string
+	MemberVip           string
+	MemberVipOrder      string
+	SearchRecordV2      string
 }{
-	Account:        "account",
-	Ipa:            "ipa",
-	IpaVersion:     "ipa_version",
-	MemberVip:      "member_vip",
-	MemberVipOrder: "member_vip_order",
-	SearchRecordV2: "search_record_v2",
+	Account:             "account",
+	Ipa:                 "ipa",
+	IpaVersion:          "ipa_version",
+	MemberDownloadCount: "member_download_count",
+	MemberVip:           "member_vip",
+	MemberVipOrder:      "member_vip_order",
+	SearchRecordV2:      "search_record_v2",
 }
