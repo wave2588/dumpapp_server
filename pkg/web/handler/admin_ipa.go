@@ -99,6 +99,9 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
+	ipaVersionMap, err := h.ipaVersionDAO.BatchGetIpaVersions(ctx, ipaIDs)
+	util.PanicIf(err)
+
 	for _, ipaArgs := range args.Ipas {
 		ipaID := cast.ToInt64(ipaArgs.IpaID)
 		ipa := ipaMap[ipaID]
@@ -130,6 +133,13 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			}
 			ipaVersion.TokenPath = version.Token
 			util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
+		}
+		/// 删除最久的一个 ipa version, 保证库里永远只存入三个 ipa
+		versions := ipaVersionMap[ipaID]
+		if len(versions) > 3 {
+			version := versions[len(versions)-1]
+			util.PanicIf(h.ipaVersionDAO.Delete(ctx, version.ID))
+			util.PanicIf(h.tencentCtl.DeleteFile(ctx, version.TokenPath))
 		}
 	}
 
