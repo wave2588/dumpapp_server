@@ -2,18 +2,18 @@ package impl
 
 import (
 	"context"
+
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func (d *MemberDownloadCountDAO) BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error) {
-
+func (d *MemberDownloadNumberDAO) BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error) {
 	qs := []qm.QueryMod{
-		qm.Select(models.MemberDownloadCountColumns.MemberID, "count(*) as count"),
+		qm.Select(models.MemberDownloadNumberColumns.MemberID, "count(*) as count"),
 		qm.From("member_download_count"),
-		models.MemberDownloadCountWhere.MemberID.IN(memberIDs),
-		models.MemberDownloadCountWhere.Status.EQ(enum.MemberDownloadCountStatusNormal),
+		models.MemberDownloadNumberWhere.MemberID.IN(memberIDs),
+		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
 	}
 
 	var data []struct {

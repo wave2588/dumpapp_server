@@ -18,7 +18,9 @@ type Member struct {
 	Email  string `json:"email"`
 	Status string `json:"status"`
 
-	Vip *Vip `json:"vip,omitempty" render:"method=RenderMemberVip"`
+	/// 可下载次数
+	DownloadCount int64 `json:"download_count" render:"method=RenderDownloadCount"`
+	Vip           *Vip  `json:"vip,omitempty" render:"method=RenderMemberVip"`
 }
 
 type Vip struct {
@@ -34,8 +36,9 @@ type MemberRender struct {
 
 	memberMap map[int64]*Member
 
-	accountDAO   dao.AccountDAO
-	memberVipDAO dao.MemberVipDAO
+	accountDAO              dao.AccountDAO
+	memberVipDAO            dao.MemberVipDAO
+	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 }
 
 type MemberOption func(*MemberRender)
@@ -58,6 +61,7 @@ func MemberIncludes(fields []string) MemberOption {
 
 var MemberDefaultRenderFields = []MemberOption{
 	MemberIncludes([]string{
+		"DownloadCount",
 		"Vip",
 	}),
 }
@@ -67,8 +71,9 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		ids:     ids,
 		loginID: loginID,
 
-		accountDAO:   impl.DefaultAccountDAO,
-		memberVipDAO: impl.DefaultMemberVipDAO,
+		accountDAO:              impl.DefaultAccountDAO,
+		memberVipDAO:            impl.DefaultMemberVipDAO,
+		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -134,5 +139,13 @@ func (f *MemberRender) RenderMemberVip(ctx context.Context) {
 		member.Vip = &Vip{
 			IsVip: false,
 		}
+	}
+}
+
+func (f *MemberRender) RenderDownloadCount(ctx context.Context) {
+	countMap, err := f.memberDownloadNumberDAO.BatchGetMemberNormalCount(ctx, f.ids)
+	util.PanicIf(err)
+	for _, member := range f.memberMap {
+		member.DownloadCount = countMap[member.ID]
 	}
 }

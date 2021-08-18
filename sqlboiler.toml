@@ -38,10 +38,23 @@
   [types.match]
     name = "status"
     type = "string"
-    tables = ["member_download_count"]
+    tables = ["member_download_number"]
 
   [types.replace]
-    type = "enum.MemberDownloadCountStatus"
+    type = "enum.MemberDownloadNumberStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_download_order table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_download_order"]
+
+  [types.replace]
+    type = "enum.MemberDownloadOrderStatus"
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
