@@ -26,6 +26,8 @@ func main() {
 	r.Use(middleware2.CORS(origins()))
 
 	r.Mount("/api/", web.DefaultRouter)
+	r.Mount("/api/v2/", web.DefaultRouterV2)
+
 	http.ListenAndServe(":1995", r)
 }
 

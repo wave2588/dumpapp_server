@@ -2,9 +2,6 @@ package impl
 
 import (
 	"context"
-	"errors"
-	"fmt"
-
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -13,6 +10,8 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"errors"
+	"fmt"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/volatiletech/null/v8"
 )
@@ -24,7 +23,8 @@ type ALiPayController struct {
 	privateKey   string
 	aliPublicKey string
 
-	memberVipOrderDAO dao.MemberVipOrderDAO
+	memberVipOrderDAO      dao.MemberVipOrderDAO
+	memberDownloadOrderDAO dao.MemberDownloadOrderDAO
 }
 
 var DefaultALiPayController *ALiPayController
@@ -45,8 +45,39 @@ func NewALiPayController() *ALiPayController {
 	return &ALiPayController{
 		client: c,
 
-		memberVipOrderDAO: impl.DefaultMemberVipOrderDAO,
+		memberVipOrderDAO:      impl.DefaultMemberVipOrderDAO,
+		memberDownloadOrderDAO: impl.DefaultMemberDownloadOrderDAO,
 	}
+}
+
+func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, number int64) (string, error) {
+	id := util2.MustGenerateID(ctx)
+	err := c.memberDownloadOrderDAO.Insert(ctx, &models.MemberDownloadOrder{
+		ID:       id,
+		MemberID: loginID,
+		Status:   enum.MemberDownloadOrderStatusPending,
+		Number:   number,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	p := alipay.TradePagePay{}
+	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLV2
+	p.ReturnURL = "https://www.dumpapp.com"
+	p.Subject = "Dumpapp"
+	p.OutTradeNo = fmt.Sprintf("%d", id)
+	p.TotalAmount = fmt.Sprintf("%d", number*constant.DownloadIpaPrice)
+	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
+	//p.ExtendParams = map[string]interface{}{
+	//	"duration": duration.String(),
+	//}
+	p.TimeoutExpress = "15m"
+	url, err := c.client.TradePagePay(p)
+	if err != nil {
+		return "", err
+	}
+	return url.String(), nil
 }
 
 func (c *ALiPayController) GetPayURL(ctx context.Context, loginID int64, duration enum.MemberVipDurationType) (string, error) {

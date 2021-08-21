@@ -28,7 +28,7 @@ type Ipa struct {
 
 type Version struct {
 	Version string `json:"version"`
-	URL     string `json:"url"`
+	//URL     string `json:"url"`
 }
 
 type IpaRender struct {
@@ -130,8 +130,8 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 	totalVersionMap, err := f.ipaVersionDAO.BatchGetIpaVersions(ctx, f.ids)
 	util.PanicIf(err)
 
-	memberMap := NewMemberRender([]int64{f.loginID}, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
-	member := memberMap[f.loginID]
+	//memberMap := NewMemberRender([]int64{f.loginID}, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
+	//member := memberMap[f.loginID]
 
 	fmt.Println(f.loginID)
 	for _, ipa := range f.IpaMap {
@@ -146,21 +146,21 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		})
 
 		res := make([]*Version, 0)
-		for idx, v := range vs {
+		for _, v := range vs {
 			version := &Version{
 				Version: v.Version,
 			}
-			if member.Vip.IsVip {
-				url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
-				util.PanicIf(err)
-				version.URL = url
-			} else {
-				if idx == 0 {
-					url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
-					util.PanicIf(err)
-					version.URL = url
-				}
-			}
+			//if member.Vip.IsVip {
+			//url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
+			//util.PanicIf(err)
+			//version.URL = url
+			//} else {
+			//if idx == 0 {
+			//url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
+			//util.PanicIf(err)
+			//version.URL = url
+			//}
+			//}
 			res = append(res, version)
 		}
 		ipa.Versions = res

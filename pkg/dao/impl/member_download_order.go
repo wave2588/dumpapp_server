@@ -17,24 +17,24 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type MemberDownloadCountDAO struct {
+type MemberDownloadOrderDAO struct {
 	mysqlPool *sql.DB
 }
 
-var DefaultMemberDownloadCountDAO *MemberDownloadCountDAO
+var DefaultMemberDownloadOrderDAO *MemberDownloadOrderDAO
 
 func init() {
-	DefaultMemberDownloadCountDAO = NewMemberDownloadCountDAO()
+	DefaultMemberDownloadOrderDAO = NewMemberDownloadOrderDAO()
 }
 
-func NewMemberDownloadCountDAO() *MemberDownloadCountDAO {
-	d := &MemberDownloadCountDAO{
+func NewMemberDownloadOrderDAO() *MemberDownloadOrderDAO {
+	d := &MemberDownloadOrderDAO{
 		mysqlPool: clients.MySQLConnectionsPool,
 	}
 	return d
 }
 
-func (d *MemberDownloadCountDAO) Insert(ctx context.Context, data *models.MemberDownloadCount) error {
+func (d *MemberDownloadOrderDAO) Insert(ctx context.Context, data *models.MemberDownloadOrder) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -52,7 +52,7 @@ func (d *MemberDownloadCountDAO) Insert(ctx context.Context, data *models.Member
 	return nil
 }
 
-func (d *MemberDownloadCountDAO) Update(ctx context.Context, data *models.MemberDownloadCount) error {
+func (d *MemberDownloadOrderDAO) Update(ctx context.Context, data *models.MemberDownloadOrder) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -64,9 +64,9 @@ func (d *MemberDownloadCountDAO) Update(ctx context.Context, data *models.Member
 	return pkgErr.WithStack(err)
 }
 
-func (d *MemberDownloadCountDAO) Delete(ctx context.Context, id int64) error {
+func (d *MemberDownloadOrderDAO) Delete(ctx context.Context, id int64) error {
 	qs := []qm.QueryMod{
-		models.MemberDownloadCountWhere.ID.EQ(id),
+		models.MemberDownloadOrderWhere.ID.EQ(id),
 	}
 
 	var exec boil.ContextExecutor
@@ -76,27 +76,27 @@ func (d *MemberDownloadCountDAO) Delete(ctx context.Context, id int64) error {
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	_, err := models.MemberDownloadCounts(qs...).DeleteAll(ctx, exec)
+	_, err := models.MemberDownloadOrders(qs...).DeleteAll(ctx, exec)
 	if err != nil {
 		return pkgErr.WithStack(err)
 	}
 	return nil
 }
 
-func (d *MemberDownloadCountDAO) Get(ctx context.Context, id int64) (*models.MemberDownloadCount, error) {
+func (d *MemberDownloadOrderDAO) Get(ctx context.Context, id int64) (*models.MemberDownloadOrder, error) {
 	result, err := d.BatchGet(ctx, []int64{id})
 	if err != nil {
 		return nil, err
 	}
 	if v, ok := result[id]; !ok {
-		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_count, id=%d", id)
+		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_order, id=%d", id)
 	} else {
 		return v, nil
 	}
 }
 
 // BatchGet retrieves multiple records by primary key from db.
-func (d *MemberDownloadCountDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberDownloadCount, error) {
+func (d *MemberDownloadOrderDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberDownloadOrder, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -104,12 +104,12 @@ func (d *MemberDownloadCountDAO) BatchGet(ctx context.Context, ids []int64) (map
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	datas, err := models.MemberDownloadCounts(models.MemberDownloadCountWhere.ID.IN(ids)).All(ctx, exec)
+	datas, err := models.MemberDownloadOrders(models.MemberDownloadOrderWhere.ID.IN(ids)).All(ctx, exec)
 	if err != nil {
 		return nil, pkgErr.WithStack(err)
 	}
 
-	result := make(map[int64]*models.MemberDownloadCount)
+	result := make(map[int64]*models.MemberDownloadOrder)
 	for _, c := range datas {
 		result[c.ID] = c
 	}
@@ -118,11 +118,11 @@ func (d *MemberDownloadCountDAO) BatchGet(ctx context.Context, ids []int64) (map
 }
 
 // 后台和脚本使用：倒序列出所有
-func (d *MemberDownloadCountDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
+func (d *MemberDownloadOrderDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
 	if offset < 0 || limit <= 0 || limit > 10000 {
 		return nil, pkgErr.Errorf("invalid offset or limit")
 	}
-	qs := []qm.QueryMod{qm.Select(models.MemberDownloadCountColumns.ID)}
+	qs := []qm.QueryMod{qm.Select(models.MemberDownloadOrderColumns.ID)}
 	qs = append(qs, filters...)
 
 	if len(orderBys) > 0 {
@@ -146,9 +146,9 @@ func (d *MemberDownloadCountDAO) ListIDs(ctx context.Context, offset, limit int,
 		exec = txn.(*sql.Tx)
 	}
 
-	datas, err := models.MemberDownloadCounts(qs...).All(ctx, exec)
+	datas, err := models.MemberDownloadOrders(qs...).All(ctx, exec)
 	if err != nil {
-		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_download_count offset=%d limit=%d filters=%v", offset, limit, filters))
+		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_download_order offset=%d limit=%d filters=%v", offset, limit, filters))
 	}
 
 	result := make([]int64, 0)
@@ -158,8 +158,8 @@ func (d *MemberDownloadCountDAO) ListIDs(ctx context.Context, offset, limit int,
 	return result, nil
 }
 
-func (d *MemberDownloadCountDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
-	qs := []qm.QueryMod{qm.Select(models.MemberDownloadCountColumns.ID)}
+func (d *MemberDownloadOrderDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
+	qs := []qm.QueryMod{qm.Select(models.MemberDownloadOrderColumns.ID)}
 	qs = append(qs, filters...)
 
 	var exec boil.ContextExecutor
@@ -170,5 +170,5 @@ func (d *MemberDownloadCountDAO) Count(ctx context.Context, filters []qm.QueryMo
 		exec = txn.(*sql.Tx)
 	}
 
-	return models.MemberDownloadCounts(qs...).Count(ctx, exec)
+	return models.MemberDownloadOrders(qs...).Count(ctx, exec)
 }

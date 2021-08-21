@@ -33,3 +33,5 @@ func GetMemberVipDays(durationType enum.MemberVipDurationType) time.Time {
 	}
 	return MemberVipDurationTypeToDays[durationType]
 }
+
+const DownloadIpaPrice int64 = 1
