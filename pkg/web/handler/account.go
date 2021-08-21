@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/enum"
 	"fmt"
 	"net/http"
 
@@ -25,8 +26,9 @@ import (
 type AccountHandler struct {
 	iceRPC rpc.IceRPC
 
-	accountDAO dao2.AccountDAO
-	captchaDAO dao2.CaptchaDAO
+	accountDAO              dao2.AccountDAO
+	captchaDAO              dao2.CaptchaDAO
+	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
 
 	emailCtl controller2.EmailController
 }
@@ -35,8 +37,9 @@ func NewAccountHandler() *AccountHandler {
 	return &AccountHandler{
 		iceRPC: impl.DefaultIceRPC,
 
-		accountDAO: impl4.DefaultAccountDAO,
-		captchaDAO: impl4.DefaultCaptchaDAO,
+		accountDAO:              impl4.DefaultAccountDAO,
+		captchaDAO:              impl4.DefaultCaptchaDAO,
+		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
 
 		emailCtl: impl2.DefaultEmailController,
 	}
@@ -127,6 +130,12 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}))
 
 	util.PanicIf(h.captchaDAO.RemoveCaptcha(ctx, args.Email))
+
+	/// 新用户送一次下载次数
+	util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
+		MemberID: accountID,
+		Status:   enum.MemberDownloadNumberStatusNormal,
+	}))
 
 	members := render.NewMemberRender([]int64{accountID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
