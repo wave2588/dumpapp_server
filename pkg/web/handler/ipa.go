@@ -1,7 +1,9 @@
 package handler
 
 import (
+	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
+	pkgErr "github.com/pkg/errors"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -18,18 +20,20 @@ import (
 )
 
 type IpaHandler struct {
-	ipaDAO            dao.IpaDAO
-	ipaVersionDAO     dao.IpaVersionDAO
-	searchRecordV2DAO dao.SearchRecordV2DAO
+	ipaDAO                  dao.IpaDAO
+	ipaVersionDAO           dao.IpaVersionDAO
+	searchRecordV2DAO       dao.SearchRecordV2DAO
+	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 
 	memberDownloadCtl controller.MemberDownloadController
 }
 
 func NewIpaHandler() *IpaHandler {
 	return &IpaHandler{
-		ipaDAO:            impl.DefaultIpaDAO,
-		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
-		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
+		ipaDAO:                  impl.DefaultIpaDAO,
+		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO:       impl.DefaultSearchRecordV2DAO,
+		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 	}
@@ -84,9 +88,23 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 		Name:     args.Name,
 	}))
 
-	_, err := h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
+	ipa, err := h.ipaDAO.Get(ctx, ipaID)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+	/// 如果找到了, 正常返回结构即可, 子页面会判断是否有下载次数
+	if ipa != nil {
+		data := render.NewIpaRender([]int64{ipaID}, loginID, render.IpaDefaultRenderFields...).RenderMap(ctx)
+		util.RenderJSON(w, data[ipaID])
+		return
+	}
+
+	/// 判断是否有下载次数
+	_, err = h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
 	util.PanicIf(err)
 
-	data := render.NewIpaRender([]int64{ipaID}, loginID, render.IpaDefaultRenderFields...).RenderMap(ctx)
-	util.RenderJSON(w, data[ipaID])
+	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
+	util.RenderJSON(w, map[string]bool{
+		"send_email": true,
+	})
 }

@@ -13,7 +13,9 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	pkgErr "github.com/pkg/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -171,4 +173,60 @@ func (d *MemberDownloadNumberDAO) Count(ctx context.Context, filters []qm.QueryM
 	}
 
 	return models.MemberDownloadNumbers(qs...).Count(ctx, exec)
+}
+
+// GetByMemberIDIpaIDVersion retrieves a single record by uniq key memberID, ipaID, version from db.
+func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDVersion(ctx context.Context, memberID int64, ipaID null.Int64, version null.String) (*models.MemberDownloadNumber, error) {
+	memberDownloadNumberObj := &models.MemberDownloadNumber{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `member_download_number` where `member_id`=? AND `ipa_id`=? AND `version`=?", sel,
+	)
+
+	q := queries.Raw(query, memberID, ipaID, version)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, memberDownloadNumberObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID:%v ipaID:%v version :%v", query, memberID, ipaID, version)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_number")
+	}
+
+	return memberDownloadNumberObj, nil
+}
+
+// GetMemberDownloadNumberSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
+func (d *MemberDownloadNumberDAO) GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error) {
+	var o []*models.MemberDownloadNumber
+
+	query := "select `member_download_number`.* from `member_download_number` where `member_id`=?"
+
+	q := queries.Raw(query, memberID)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, &o)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID :%v", query, memberID)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_number")
+	}
+	return o, nil
 }

@@ -7,7 +7,7 @@ var (
 	ErrUpgradeVip         = NewDefaultAPIError(401, 10003, "UpgradeVip", "请升级 vip")
 	ErrMemberAccessDenied = NewDefaultAPIError(403, 10004, "MemberAccessDenied", "没有权限进行操作")
 
-	ErrNotDownloadNumber = NewDefaultAPIError(401, 10004, "NotDownloadNumber", "没有下载次数")
+	ErrNotDownloadNumber = NewDefaultAPIError(403, 10004, "NotDownloadNumber", "没有下载次数")
 
 	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 app")
 	ErrNotFoundIpa        = NewDefaultAPIError(404, 20002, "NotFoundIpa", "未找到 ipa")

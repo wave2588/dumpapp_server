@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"dumpapp_server/pkg/common/enum"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
-	"github.com/volatiletech/null/v8"
+	pkgErr "github.com/pkg/errors"
 	"net/http"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -15,6 +16,7 @@ import (
 	"dumpapp_server/pkg/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
+	"github.com/volatiletech/null/v8"
 )
 
 type DownloadHandler struct {
@@ -60,14 +62,18 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 
 	loginID := middleware.MustGetMemberID(ctx)
 
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+
 	/// 如果之前没有下载过, 则需要扣除一次下载次数
-	dns, err := h.memberDownloadNumberDAO.GetByMemberIDAndIpaID(ctx, loginID, ipaID)
-	util.PanicIf(err)
-	if len(dns) == 0 {
+	if dn == nil {
 		dn, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
 		util.PanicIf(err)
 		dn.Status = enum.MemberDownloadNumberStatusUsed
 		dn.IpaID = null.Int64From(ipaID)
+		dn.Version = null.StringFrom(args.Version)
 		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 	}
 

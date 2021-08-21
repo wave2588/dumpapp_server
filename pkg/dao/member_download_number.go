@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"dumpapp_server/pkg/dao/models"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -20,6 +21,9 @@ type MemberDownloadNumberDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
+	// GetByMemberIDIpaIDVersion retrieves a single record by uniq key memberID, ipaID, version from db.
+	GetByMemberIDIpaIDVersion(ctx context.Context, memberID int64, ipaID null.Int64, version null.String) (*models.MemberDownloadNumber, error)
+	// GetMemberDownloadNumberSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
+	GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error)
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)
-	GetByMemberIDAndIpaID(ctx context.Context, memberID, ipaID int64) ([]*models.MemberDownloadNumber, error)
 }

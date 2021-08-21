@@ -29,7 +29,7 @@ number: 1
 #### 获取单个 ipa, 如果没有下载次数会抛错
 GET /ipa/{ipa_id}  
 参数:  
-name: "ipa_name"
+name: "ipa_name"  
 ```json
 {
   "id": "1111",
