@@ -21,4 +21,5 @@ type MemberDownloadNumberDAO interface {
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)
+	GetByMemberIDAndIpaID(ctx context.Context, memberID, ipaID int64) ([]*models.MemberDownloadNumber, error)
 }

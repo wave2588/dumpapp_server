@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/volatiletech/null/v8"
 	"net/http"
 
 	"dumpapp_server/pkg/common/enum"
@@ -63,6 +64,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	util.PanicIf(err)
 
 	dn.Status = enum.MemberDownloadNumberStatusUsed
+	dn.IpaID = null.Int64From(ipaID)
 	util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 
 	ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
