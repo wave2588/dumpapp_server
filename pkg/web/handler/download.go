@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"dumpapp_server/pkg/common/enum"
 	"fmt"
 	"github.com/volatiletech/null/v8"
 	"net/http"
 
-	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -60,20 +60,25 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 
 	loginID := middleware.MustGetMemberID(ctx)
 
-	dn, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
+	/// 如果之前没有下载过, 则需要扣除一次下载次数
+	dns, err := h.memberDownloadNumberDAO.GetByMemberIDAndIpaID(ctx, loginID, ipaID)
 	util.PanicIf(err)
-
-	dn.Status = enum.MemberDownloadNumberStatusUsed
-	dn.IpaID = null.Int64From(ipaID)
-	util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+	if len(dns) == 0 {
+		dn, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
+		util.PanicIf(err)
+		dn.Status = enum.MemberDownloadNumberStatusUsed
+		dn.IpaID = null.Int64From(ipaID)
+		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+	}
 
 	ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
 	util.PanicIf(err)
 
 	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
 	util.PanicIf(err)
-	res := map[string]interface{}{
+	resJSON := map[string]interface{}{
 		"open_url": openURL,
 	}
-	util.RenderJSON(w, res)
+
+	util.RenderJSON(w, resJSON)
 }
