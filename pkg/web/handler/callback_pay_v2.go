@@ -53,6 +53,11 @@ func (h *CallbackPayV2Handler) ALiPayCallback(w http.ResponseWriter, r *http.Req
 	order, err := h.memberDownloadOrderDAO.Get(ctx, orderID)
 	util.PanicIf(err)
 
+	/// 支付成功的订单即可忽略
+	if order.Status == enum.MemberDownloadOrderStatusPaid {
+		return
+	}
+
 	order.Status = enum.MemberDownloadOrderStatusPaid
 
 	/// 事物
