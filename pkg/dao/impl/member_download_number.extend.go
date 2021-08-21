@@ -14,6 +14,7 @@ func (d *MemberDownloadNumberDAO) BatchGetMemberNormalCount(ctx context.Context,
 		qm.From("member_download_number"),
 		models.MemberDownloadNumberWhere.MemberID.IN(memberIDs),
 		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
+		qm.GroupBy(models.MemberDownloadNumberColumns.MemberID),
 	}
 
 	var data []struct {
@@ -24,6 +25,7 @@ func (d *MemberDownloadNumberDAO) BatchGetMemberNormalCount(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+
 	result := make(map[int64]int64)
 	for _, datum := range data {
 		result[datum.MemberID] = datum.Count
