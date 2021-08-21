@@ -11,7 +11,7 @@ import (
 func (d *MemberDownloadNumberDAO) BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error) {
 	qs := []qm.QueryMod{
 		qm.Select(models.MemberDownloadNumberColumns.MemberID, "count(*) as count"),
-		qm.From("member_download_count"),
+		qm.From("member_download_number"),
 		models.MemberDownloadNumberWhere.MemberID.IN(memberIDs),
 		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
 	}
