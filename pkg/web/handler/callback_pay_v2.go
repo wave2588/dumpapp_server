@@ -2,6 +2,10 @@ package handler
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -11,10 +15,7 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
-	"errors"
-	"fmt"
 	"github.com/spf13/cast"
-	"net/http"
 )
 
 type CallbackPayV2Handler struct {

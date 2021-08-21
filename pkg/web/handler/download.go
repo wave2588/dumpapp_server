@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -9,10 +12,8 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
-	"net/http"
 )
 
 type DownloadHandler struct {

@@ -1,9 +1,7 @@
 package handler
 
 import (
-	"dumpapp_server/pkg/errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
@@ -12,6 +10,8 @@ import (
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/errors"
+	"github.com/go-playground/validator/v10"
 )
 
 type MemberVipV2Handler struct {
