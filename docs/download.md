@@ -17,7 +17,9 @@ GET /v2/member/vip
 ```
 
 #### 获取支付链接:
-POST /v2/member/vip?number=1
+POST /v2/member/vip
+参数:  
+number: 1
 ```json
 {
   "open_url": "xxxxx" 
