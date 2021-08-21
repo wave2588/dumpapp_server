@@ -29,6 +29,7 @@ type MemberDownloadNumber struct {
 	MemberID  int64                           `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status    enum.MemberDownloadNumberStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	IpaID     null.Int64                      `boil:"ipa_id" json:"ipa_id,omitempty" toml:"ipa_id" yaml:"ipa_id,omitempty"`
+	Version   null.String                     `boil:"version" json:"version,omitempty" toml:"version" yaml:"version,omitempty"`
 	CreatedAt time.Time                       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -41,6 +42,7 @@ var MemberDownloadNumberColumns = struct {
 	MemberID  string
 	Status    string
 	IpaID     string
+	Version   string
 	CreatedAt string
 	UpdatedAt string
 }{
@@ -48,6 +50,7 @@ var MemberDownloadNumberColumns = struct {
 	MemberID:  "member_id",
 	Status:    "status",
 	IpaID:     "ipa_id",
+	Version:   "version",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -98,11 +101,35 @@ func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MemberDownloadNumberWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberDownloadNumberStatus
 	IpaID     whereHelpernull_Int64
+	Version   whereHelpernull_String
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -110,6 +137,7 @@ var MemberDownloadNumberWhere = struct {
 	MemberID:  whereHelperint64{field: "`member_download_number`.`member_id`"},
 	Status:    whereHelperenum_MemberDownloadNumberStatus{field: "`member_download_number`.`status`"},
 	IpaID:     whereHelpernull_Int64{field: "`member_download_number`.`ipa_id`"},
+	Version:   whereHelpernull_String{field: "`member_download_number`.`version`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_download_number`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_download_number`.`updated_at`"},
 }
@@ -131,8 +159,8 @@ func (*memberDownloadNumberR) NewStruct() *memberDownloadNumberR {
 type memberDownloadNumberL struct{}
 
 var (
-	memberDownloadNumberAllColumns            = []string{"id", "member_id", "status", "ipa_id", "created_at", "updated_at"}
-	memberDownloadNumberColumnsWithoutDefault = []string{"member_id", "status", "ipa_id"}
+	memberDownloadNumberAllColumns            = []string{"id", "member_id", "status", "ipa_id", "version", "created_at", "updated_at"}
+	memberDownloadNumberColumnsWithoutDefault = []string{"member_id", "status", "ipa_id", "version"}
 	memberDownloadNumberColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberDownloadNumberPrimaryKeyColumns     = []string{"id"}
 )
