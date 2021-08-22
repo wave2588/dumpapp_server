@@ -39,7 +39,7 @@ func (c *EmailController) SendEmail(ctx context.Context, title, content, receive
 	}
 	m.SetBody("text/html", content) // 邮件内容
 
-	d := gomail.NewDialer("smtp.qq.com", 465, fromEmail, fromEmailPassword)
+	d := gomail.NewDialer("smtp.exmail.qq.com", 465, fromEmail, fromEmailPassword)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	/// 邮件发送服务器信息,使用授权码而非密码
