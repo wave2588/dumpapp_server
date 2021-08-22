@@ -1,5 +1,27 @@
 ## 按次下载 ipa 文档
 
+- ### Admin 相关
+####增加次数
+POST /admin/member/download_number  
+参数:  
+email: "xxx@163.com"  
+number: 10
+```json
+{
+}
+```
+
+####删除次数
+DELETE /admin/member/download_number 
+参数:  
+email: "xxx@163.com"  
+number: 10
+```json
+{
+}
+```
+
+- ### 用户相关
 #### 用户信息结构里新加了 download_number 字段
 ```json
 {
@@ -38,6 +60,16 @@ name: "ipa_name"
       "version": "1.1.1"
     }
   ]
+}
+```
+
+#### 查看是否可以下载  
+GET  /v2/ipa/{ipa_id}/check_can_download  
+参数:   
+version: "1.1.1"    
+```json
+{
+  "can_download": true
 }
 ```
 
