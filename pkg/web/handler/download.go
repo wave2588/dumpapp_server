@@ -66,29 +66,9 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
-	/// 说明下载过, 返回 true
-	if dn != nil {
-		resJSON := map[string]interface{}{
-			"can_download": true,
-		}
-		util.RenderJSON(w, resJSON)
-		return
-	}
 
-	don, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
-	util.PanicIf(err)
-	/// 说明还有下载次数, 可下载
-	if don != nil {
-		resJSON := map[string]interface{}{
-			"can_download": true,
-		}
-		util.RenderJSON(w, resJSON)
-		return
-	}
-
-	/// 否则就是不可下载
 	resJSON := map[string]interface{}{
-		"can_download": false,
+		"can_download": dn == nil,
 	}
 	util.RenderJSON(w, resJSON)
 }
