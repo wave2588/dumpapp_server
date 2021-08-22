@@ -68,7 +68,7 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	}
 
 	resJSON := map[string]interface{}{
-		"can_download": dn == nil,
+		"can_download": dn != nil,
 	}
 	util.RenderJSON(w, resJSON)
 }
