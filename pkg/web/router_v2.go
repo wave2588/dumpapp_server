@@ -17,6 +17,7 @@ func NewRouterV2() chi.Router {
 	// ipa
 	downloadHandler := handler.NewDownloadHandler()
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}/download_url", downloadHandler.GetDownloadURL)
+	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}/check_can_download", downloadHandler.CheckCanDownload)
 
 	/// callback_pay
 	callbackPayV2Handler := handler.NewCallbackPayV2Handler()

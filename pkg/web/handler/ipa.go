@@ -1,11 +1,10 @@
 package handler
 
 import (
-	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
-	pkgErr "github.com/pkg/errors"
 	"net/http"
 
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -16,6 +15,7 @@ import (
 	"dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 )
 

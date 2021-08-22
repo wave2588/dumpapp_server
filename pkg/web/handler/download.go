@@ -1,12 +1,11 @@
 package handler
 
 import (
-	errors2 "dumpapp_server/pkg/common/errors"
 	"fmt"
-	pkgErr "github.com/pkg/errors"
 	"net/http"
 
 	"dumpapp_server/pkg/common/enum"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -15,6 +14,7 @@ import (
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
 	"github.com/go-playground/validator/v10"
+	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/null/v8"
 )
@@ -37,6 +37,60 @@ func NewDownloadHandler() *DownloadHandler {
 		memberDownloadNumberCtl: impl2.DefaultMemberDownloadController,
 		tencentCtl:              impl2.DefaultTencentController,
 	}
+}
+
+type checkCanDownloadArgs struct {
+	Version string `form:"version" validate:"required"`
+}
+
+func (args *checkCanDownloadArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
+
+	args := checkCanDownloadArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	loginID := middleware.MustGetMemberID(ctx)
+
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+	/// 说明下载过, 返回 true
+	if dn != nil {
+		resJSON := map[string]interface{}{
+			"can_download": true,
+		}
+		util.RenderJSON(w, resJSON)
+		return
+	}
+
+	don, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
+	util.PanicIf(err)
+	/// 说明还有下载次数, 可下载
+	if don != nil {
+		resJSON := map[string]interface{}{
+			"can_download": true,
+		}
+		util.RenderJSON(w, resJSON)
+		return
+	}
+
+	/// 否则就是不可下载
+	resJSON := map[string]interface{}{
+		"can_download": false,
+	}
+	util.RenderJSON(w, resJSON)
 }
 
 type getDownloadURLArgs struct {

@@ -21,6 +21,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Delete("/admin/member/vip", adminMemberVipHandler.DeleteMemberVip)
 	// endregion
 
+	/// admin download number
+	adminDownloadNumberHandler := handler.NewAdminDownloadNumberHandler()
+	r.With(middleware.OAuthRegister).Post("/admin/member/download_number", adminDownloadNumberHandler.AddNumber)
+	r.With(middleware.OAuthRegister).Delete("/admin/member/download_number", adminDownloadNumberHandler.DeleteNumber)
+
 	/// region account
 	accountHandler := handler.NewAccountHandler()
 	r.With(middleware.OAuthGuest).Post("/captcha", accountHandler.SendCaptcha)
