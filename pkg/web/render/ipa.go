@@ -2,10 +2,6 @@ package render
 
 import (
 	"context"
-	"fmt"
-	"sort"
-	"strings"
-
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -13,7 +9,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
-	"github.com/spf13/cast"
+	"sort"
 )
 
 type Ipa struct {
@@ -139,19 +135,15 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 	totalVersionMap, err := f.ipaVersionDAO.BatchGetIpaVersions(ctx, f.ids)
 	util.PanicIf(err)
 
-	// memberMap := NewMemberRender([]int64{f.loginID}, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
-	// member := memberMap[f.loginID]
-
-	fmt.Println(f.loginID)
 	for _, ipa := range f.IpaMap {
 		vs := totalVersionMap[ipa.ID]
 		if vs == nil {
 			continue
 		}
 		sort.Slice(vs, func(i, j int) bool {
-			version1 := cast.ToInt64(strings.ReplaceAll(strings.ReplaceAll(vs[i].Version, ".", ""), "0", ""))
-			version2 := cast.ToInt64(strings.ReplaceAll(strings.ReplaceAll(vs[j].Version, ".", ""), "0", ""))
-			return version1 > version2
+			re1 := vs[i].Version
+			re2 := vs[j].Version
+			return util2.CompareLittleVer(re1, re2) == util2.VersionCompareResBig
 		})
 
 		res := make([]*Version, 0)
@@ -162,17 +154,6 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
 			}
-			//if member.Vip.IsVip {
-			//url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
-			//util.PanicIf(err)
-			//version.URL = url
-			//} else {
-			//if idx == 0 {
-			//url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
-			//util.PanicIf(err)
-			//version.URL = url
-			//}
-			//}
 			res = append(res, version)
 		}
 		ipa.Versions = res
