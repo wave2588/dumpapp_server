@@ -27,6 +27,7 @@ type Ipa struct {
 }
 
 type Version struct {
+	ID      int64  `json:"id,string"`
 	Version string `json:"version"`
 	// URL     string `json:"url"`
 }
@@ -148,6 +149,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		res := make([]*Version, 0)
 		for _, v := range vs {
 			version := &Version{
+				ID:      v.ID,
 				Version: v.Version,
 			}
 			//if member.Vip.IsVip {

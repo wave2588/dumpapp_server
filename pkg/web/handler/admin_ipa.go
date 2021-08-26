@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/web/render"
 	"fmt"
 	"net/http"
 	"time"
@@ -204,8 +205,9 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 }
 
 type deleteIpaArgs struct {
-	IpaID      string `json:"ipa_id" validate:"required"`
-	IpaVersion string `json:"ipa_version"`
+	IpaID                 string `json:"ipa_id" validate:"required"`
+	IpaVersion            string `json:"ipa_version"`              /// 指定删除某个版本
+	IsRetainLatestVersion bool   `json:"is_retain_latest_version"` /// 是否保留最新版本
 }
 
 func (p *deleteIpaArgs) Validate() error {
@@ -228,12 +230,40 @@ func (h *AdminIpaHandler) DeleteIpa(w http.ResponseWriter, r *http.Request) {
 
 	ipaID := cast.ToInt64(args.IpaID)
 	if args.IpaVersion == "" {
-		util.PanicIf(h.deleteIpa(ctx, ipaID))
+		/// 保留最新版本, 删除其他的
+		if args.IsRetainLatestVersion {
+			util.PanicIf(h.deleteIpaRetainLatestVersion(ctx, ipaID))
+		} else {
+			/// 删除操作
+			util.PanicIf(h.deleteIpa(ctx, ipaID))
+		}
 	} else {
 		util.PanicIf(h.deleteIpaVersion(ctx, ipaID, args.IpaVersion))
 	}
 
 	util.RenderJSON(w, "ok")
+}
+
+func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaID int64) error {
+	ipaMap := render.NewIpaRender([]int64{ipaID}, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
+
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	for _, ipa := range ipaMap {
+		for idx, version := range ipa.Versions {
+			if idx != 0 {
+				err := h.ipaVersionDAO.Delete(ctx, version.ID)
+				return err
+			}
+		}
+	}
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	return nil
 }
 
 func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64) error {
