@@ -19,16 +19,21 @@ import (
 type Ipa struct {
 	meta *models.Ipa
 
-	ID       int64  `json:"id,string"`
-	Name     string `json:"name"`
-	BundleID string `json:"bundle_id"`
+	ID        int64  `json:"id,string"`
+	Name      string `json:"name"`
+	BundleID  string `json:"bundle_id"`
+	IsInterim bool   `json:"is_interim"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
 
 	Versions []*Version `json:"versions,omitempty" render:"method=RenderVersions"`
 }
 
 type Version struct {
-	ID      int64  `json:"id,string"`
-	Version string `json:"version"`
+	ID        int64  `json:"id,string"`
+	Version   string `json:"version"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
 	// URL     string `json:"url"`
 }
 
@@ -118,10 +123,13 @@ func (f *IpaRender) fetch(ctx context.Context) {
 	res := make(map[int64]*Ipa)
 	for _, a := range aMap {
 		res[a.ID] = &Ipa{
-			meta:     a,
-			ID:       a.ID,
-			Name:     a.Name,
-			BundleID: a.BundleID,
+			meta:      a,
+			ID:        a.ID,
+			Name:      a.Name,
+			BundleID:  a.BundleID,
+			IsInterim: a.IsInterim == 1,
+			CreatedAt: a.CreatedAt.Unix(),
+			UpdatedAt: a.UpdatedAt.Unix(),
 		}
 	}
 	f.IpaMap = res
@@ -149,8 +157,10 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		res := make([]*Version, 0)
 		for _, v := range vs {
 			version := &Version{
-				ID:      v.ID,
-				Version: v.Version,
+				ID:        v.ID,
+				Version:   v.Version,
+				CreatedAt: v.CreatedAt.Unix(),
+				UpdatedAt: v.UpdatedAt.Unix(),
 			}
 			//if member.Vip.IsVip {
 			//url, err := f.tencentCtl.GetSignatureURL(ctx, v.TokenPath)
