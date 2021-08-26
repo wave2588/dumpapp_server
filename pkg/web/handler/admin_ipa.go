@@ -204,6 +204,93 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 	return nil
 }
 
+type batchDeleteIpaArgs struct {
+	IpaIDs                []string `json:"ipa_ids" validate:"required"`
+	IsRetainLatestVersion bool     `json:"is_retain_latest_version"` /// 是否保留最新版本
+}
+
+func (p *batchDeleteIpaArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminIpaHandler) BatchDeleteIpa(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		panic(errors.ErrMemberAccessDenied)
+	}
+
+	args := &batchDeleteIpaArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	ipaIDs := make([]int64, 0)
+	for _, id := range args.IpaIDs {
+		ipaIDs = append(ipaIDs, cast.ToInt64(id))
+	}
+
+	if args.IsRetainLatestVersion {
+		util.PanicIf(h.batchDeleteByRetainLatestVersion(ctx, ipaIDs))
+	} else {
+		util.PanicIf(h.batchDeleteAll(ctx, ipaIDs))
+	}
+}
+
+func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, ipaIDs []int64) error {
+	ipaMap := render.NewIpaRender(ipaIDs, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
+
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	for _, ipa := range ipaMap {
+		for idx, version := range ipa.Versions {
+			if idx == 0 {
+				continue
+			}
+			err := h.ipaVersionDAO.Delete(ctx, version.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	return nil
+}
+
+func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64) error {
+
+	ipaMap := render.NewIpaRender(ipaIDs, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
+
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	for _, ipa := range ipaMap {
+		err := h.ipaDAO.Delete(ctx, ipa.ID)
+		if err != nil {
+			return err
+		}
+		for _, version := range ipa.Versions {
+			err = h.ipaVersionDAO.Delete(ctx, version.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	return nil
+}
+
 type deleteIpaArgs struct {
 	IpaID                 string `json:"ipa_id" validate:"required"`
 	IpaVersion            string `json:"ipa_version"`              /// 指定删除某个版本
@@ -253,10 +340,11 @@ func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaI
 
 	for _, ipa := range ipaMap {
 		for idx, version := range ipa.Versions {
-			if idx != 0 {
-				err := h.ipaVersionDAO.Delete(ctx, version.ID)
-				return err
+			if idx == 0 {
+				continue
 			}
+			err := h.ipaVersionDAO.Delete(ctx, version.ID)
+			return err
 		}
 	}
 
