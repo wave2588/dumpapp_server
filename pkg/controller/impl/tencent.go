@@ -44,11 +44,27 @@ func (c *TencentController) DeleteFile(ctx context.Context, TokenPath string) er
 	if err != nil {
 		return err
 	}
-
 	if response.StatusCode >= 300 {
 		return errors.UnproccessableError(fmt.Sprintf("服务器删除文件错误. 错误码: %s", response.Status))
 	}
 	return nil
+}
+
+func (c *TencentController) ListFile(ctx context.Context, marker *string, limit int) (*cos.BucketGetResult, error) {
+	options := &cos.BucketGetOptions{
+		MaxKeys: limit,
+	}
+	if marker != nil {
+		options.Marker = *marker
+	}
+	result, response, err := c.client.Bucket.Get(ctx, options)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode != 200 {
+		return nil, errors.UnproccessableError(fmt.Sprintf("服务器删除文件错误. 错误码: %s", response.Status))
+	}
+	return result, nil
 }
 
 func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {

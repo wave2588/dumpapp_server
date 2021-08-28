@@ -22,3 +22,18 @@ func (d *IpaVersionDAO) BatchGetIpaVersions(ctx context.Context, ipaIDs []int64)
 	}
 	return res, nil
 }
+
+func (d *IpaVersionDAO) BatchGetByTokens(ctx context.Context, tokens []string) (map[string]*models.IpaVersion, error) {
+	qs := []qm.QueryMod{
+		models.IpaVersionWhere.TokenPath.IN(tokens),
+	}
+	data, err := models.IpaVersions(qs...).All(ctx, d.mysqlPool)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]*models.IpaVersion)
+	for _, datum := range data {
+		res[datum.TokenPath] = datum
+	}
+	return res, nil
+}
