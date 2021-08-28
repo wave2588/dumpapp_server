@@ -29,5 +29,4 @@ type IpaVersionDAO interface {
 	// BatchGetByTokenPath retrieves multiple records by uniq key tokenPath from db.
 	BatchGetByTokenPath(ctx context.Context, tokenPaths []string) (map[string]*models.IpaVersion, error)
 	BatchGetIpaVersions(ctx context.Context, ipaIDs []int64) (map[int64][]*models.IpaVersion, error)
-	BatchGetByTokens(ctx context.Context, tokens []string) (map[string]*models.IpaVersion, error)
 }

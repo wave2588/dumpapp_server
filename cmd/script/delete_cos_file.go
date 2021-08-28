@@ -27,7 +27,7 @@ func main() {
 			tokens = append(tokens, content.Key)
 		}
 
-		ipaVersionMap, err := impl2.DefaultIpaVersionDAO.BatchGetByTokens(ctx, tokens)
+		ipaVersionMap, err := impl2.DefaultIpaVersionDAO.BatchGetByTokenPath(ctx, tokens)
 		util.PanicIf(err)
 
 		for _, content := range res.Contents {

@@ -91,7 +91,17 @@ func GetAccountByEmail(ctx context.Context, email string) *models.Account {
 		}
 	}
 	if account == nil {
-		panic(errors.UnproccessableError("该邮箱未注册"))
+		panic(errors.ErrNotFoundMember)
+	}
+	return account
+}
+
+func GetAccountByPhone(ctx context.Context, phone string) *models.Account {
+	accountMap, err := impl.DefaultAccountDAO.BatchGetByPhones(ctx, []string{phone})
+	util.PanicIf(err)
+	account := accountMap[phone]
+	if account == nil {
+		panic(errors.ErrNotFoundMember)
 	}
 	return account
 }

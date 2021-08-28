@@ -3,7 +3,13 @@ package dao
 import "context"
 
 type CaptchaDAO interface {
-	SetCaptcha(ctx context.Context, email, captcha string) error
-	GetCaptcha(ctx context.Context, email string) (string, error)
-	RemoveCaptcha(ctx context.Context, email string) error
+	/// 邮箱相关
+	SetEmailCaptcha(ctx context.Context, email, captcha string) error
+	GetEmailCaptcha(ctx context.Context, email string) (string, error)
+	RemoveEmailCaptcha(ctx context.Context, email string) error
+
+	/// 手机相关
+	SetPhoneCaptcha(ctx context.Context, phone, captcha string) error
+	GetPhoneCaptcha(ctx context.Context, phone string) (string, error)
+	RemovePhoneCaptcha(ctx context.Context, phone string) error
 }

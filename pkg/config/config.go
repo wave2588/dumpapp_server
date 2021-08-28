@@ -47,6 +47,10 @@ var config = appConfig{
 	TencentCosSecretKey:    os.Getenv("TENCENT_COS_SECRET_KEY"),
 	TencentCosIpaHost:      os.Getenv("TENCENT_COS_IPA_HOST"),
 
+	TencentSMSAppSDKID:   os.Getenv("TENCENT_SMS_APP_SKD_ID"),
+	TencentSMSTemplateID: os.Getenv("TENCENT_SMS_TEMPLATE_ID"),
+	TencentSMSSignName:   os.Getenv("TENCENT_SMS_SIGN_NAME"),
+
 	ALiPayDumpAppID:      os.Getenv("ALIPAY_DUMP_APP_ID"),
 	ALiPayDumpPublicKey:  os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
 	ALiPayDumpPrivateKey: os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
@@ -72,6 +76,10 @@ type appConfig struct {
 	TencentCosSecretID     string
 	TencentCosSecretKey    string
 	TencentCosIpaHost      string
+
+	TencentSMSAppSDKID   string
+	TencentSMSTemplateID string
+	TencentSMSSignName   string
 
 	ALiPayDumpAppID      string
 	ALiPayDumpPublicKey  string
