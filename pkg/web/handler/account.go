@@ -127,6 +127,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		ID:       accountID,
 		Email:    args.Email,
 		Password: args.Password,
+		Phone:    "",
 	}))
 
 	util.PanicIf(h.captchaDAO.RemoveCaptcha(ctx, args.Email))

@@ -654,6 +654,7 @@ func (o IpaVersionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 var mySQLIpaVersionUniqueColumns = []string{
 	"id",
+	"token_path",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

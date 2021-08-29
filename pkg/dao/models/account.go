@@ -25,6 +25,7 @@ import (
 type Account struct {
 	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Email     string    `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Phone     string    `boil:"phone" json:"phone" toml:"phone" yaml:"phone"`
 	Password  string    `boil:"password" json:"password" toml:"password" yaml:"password"`
 	Status    uint8     `boil:"status" json:"status" toml:"status" yaml:"status"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
@@ -37,6 +38,7 @@ type Account struct {
 var AccountColumns = struct {
 	ID        string
 	Email     string
+	Phone     string
 	Password  string
 	Status    string
 	CreatedAt string
@@ -44,6 +46,7 @@ var AccountColumns = struct {
 }{
 	ID:        "id",
 	Email:     "email",
+	Phone:     "phone",
 	Password:  "password",
 	Status:    "status",
 	CreatedAt: "created_at",
@@ -145,6 +148,7 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var AccountWhere = struct {
 	ID        whereHelperint64
 	Email     whereHelperstring
+	Phone     whereHelperstring
 	Password  whereHelperstring
 	Status    whereHelperuint8
 	CreatedAt whereHelpertime_Time
@@ -152,6 +156,7 @@ var AccountWhere = struct {
 }{
 	ID:        whereHelperint64{field: "`account`.`id`"},
 	Email:     whereHelperstring{field: "`account`.`email`"},
+	Phone:     whereHelperstring{field: "`account`.`phone`"},
 	Password:  whereHelperstring{field: "`account`.`password`"},
 	Status:    whereHelperuint8{field: "`account`.`status`"},
 	CreatedAt: whereHelpertime_Time{field: "`account`.`created_at`"},
@@ -175,8 +180,8 @@ func (*accountR) NewStruct() *accountR {
 type accountL struct{}
 
 var (
-	accountAllColumns            = []string{"id", "email", "password", "status", "created_at", "updated_at"}
-	accountColumnsWithoutDefault = []string{"id", "email", "password"}
+	accountAllColumns            = []string{"id", "email", "phone", "password", "status", "created_at", "updated_at"}
+	accountColumnsWithoutDefault = []string{"id", "email", "phone", "password"}
 	accountColumnsWithDefault    = []string{"status", "created_at", "updated_at"}
 	accountPrimaryKeyColumns     = []string{"id"}
 )

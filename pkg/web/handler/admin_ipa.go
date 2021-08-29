@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/web/render"
 	"fmt"
 	"net/http"
 	"time"
@@ -21,6 +20,7 @@ import (
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -265,7 +265,6 @@ func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, 
 }
 
 func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64) error {
-
 	ipaMap := render.NewIpaRender(ipaIDs, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
 
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)

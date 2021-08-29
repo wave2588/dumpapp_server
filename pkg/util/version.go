@@ -9,7 +9,6 @@ const (
 )
 
 func CompareLittleVer(verA, verB string) VersionCompareRes {
-
 	bytesA := []byte(verA)
 	bytesB := []byte(verB)
 
@@ -23,14 +22,14 @@ func CompareLittleVer(verA, verB string) VersionCompareRes {
 		return VersionCompareResSmall
 	}
 
-	//如果长度相等则按byte位进行比较
+	// 如果长度相等则按byte位进行比较
 
 	return compareByBytes(bytesA, bytesB)
 }
 
 // 按byte位进行比较小版本号
 func compareByBytes(verA, verB []byte) VersionCompareRes {
-	for index, _ := range verA {
+	for index := range verA {
 		if verA[index] > verB[index] {
 			return VersionCompareResBig
 		}
