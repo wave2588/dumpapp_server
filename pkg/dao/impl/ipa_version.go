@@ -229,3 +229,55 @@ func (d *IpaVersionDAO) GetIpaVersionSliceByIpaID(ctx context.Context, ipaID int
 	}
 	return o, nil
 }
+
+// GetByTokenPath retrieves a single record by uniq key tokenPath from db.
+func (d *IpaVersionDAO) GetByTokenPath(ctx context.Context, tokenPath string) (*models.IpaVersion, error) {
+	ipaVersionObj := &models.IpaVersion{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `ipa_version` where `token_path`=?", sel,
+	)
+
+	q := queries.Raw(query, tokenPath)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, ipaVersionObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=ipa_version, query=%s, args=tokenPath :%v", query, tokenPath)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from ipa_version")
+	}
+
+	return ipaVersionObj, nil
+}
+
+// BatchGetByTokenPath retrieves multiple records by uniq key tokenPath from db.
+func (d *IpaVersionDAO) BatchGetByTokenPath(ctx context.Context, tokenPaths []string) (map[string]*models.IpaVersion, error) {
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+	datas, err := models.IpaVersions(models.IpaVersionWhere.TokenPath.IN(tokenPaths)).All(ctx, exec)
+	if err != nil {
+		return nil, pkgErr.WithStack(err)
+	}
+
+	result := make(map[string]*models.IpaVersion)
+	for _, c := range datas {
+		result[c.TokenPath] = c
+	}
+
+	return result, nil
+}
