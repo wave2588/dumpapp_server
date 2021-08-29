@@ -26,18 +26,18 @@ func NewCaptchaDAO() *CaptchaDAO {
 	return d
 }
 
-func (d *CaptchaDAO) generateCaptchaKey(email string) string {
+func (d *CaptchaDAO) generateEmailCaptchaKey(email string) string {
 	return fmt.Sprintf("dump:register:captcha:%s", email)
 }
 
 /// 5 分钟有效期
-func (d *CaptchaDAO) SetCaptcha(ctx context.Context, email, captcha string) error {
-	key := d.generateCaptchaKey(email)
-	return d.redis.Set(ctx, key, captcha, 300000*time.Millisecond).Err()
+func (d *CaptchaDAO) SetEmailCaptcha(ctx context.Context, email, captcha string) error {
+	key := d.generateEmailCaptchaKey(email)
+	return d.redis.Set(ctx, key, captcha, 5*time.Minute).Err()
 }
 
-func (d *CaptchaDAO) GetCaptcha(ctx context.Context, email string) (string, error) {
-	key := d.generateCaptchaKey(email)
+func (d *CaptchaDAO) GetEmailCaptcha(ctx context.Context, email string) (string, error) {
+	key := d.generateEmailCaptchaKey(email)
 	res, err := d.redis.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return "", nil
@@ -47,8 +47,35 @@ func (d *CaptchaDAO) GetCaptcha(ctx context.Context, email string) (string, erro
 	return res, nil
 }
 
-func (d *CaptchaDAO) RemoveCaptcha(ctx context.Context, email string) error {
-	key := d.generateCaptchaKey(email)
+func (d *CaptchaDAO) RemoveEmailCaptcha(ctx context.Context, email string) error {
+	key := d.generateEmailCaptchaKey(email)
+	_, err := d.redis.Del(ctx, key).Result()
+	return err
+}
+
+func (d *CaptchaDAO) generatePhoneCaptchaKey(phone string) string {
+	return fmt.Sprintf("dump:register:phone:captcha:%s", phone)
+}
+
+/// 15 分钟有效期
+func (d *CaptchaDAO) SetPhoneCaptcha(ctx context.Context, phone, captcha string) error {
+	key := d.generatePhoneCaptchaKey(phone)
+	return d.redis.Set(ctx, key, captcha, 15*time.Minute).Err()
+}
+
+func (d *CaptchaDAO) GetPhoneCaptcha(ctx context.Context, phone string) (string, error) {
+	key := d.generatePhoneCaptchaKey(phone)
+	res, err := d.redis.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", nil
+	} else if err != nil {
+		return "", err
+	}
+	return res, nil
+}
+
+func (d *CaptchaDAO) RemovePhoneCaptcha(ctx context.Context, phone string) error {
+	key := d.generatePhoneCaptchaKey(phone)
 	_, err := d.redis.Del(ctx, key).Result()
 	return err
 }

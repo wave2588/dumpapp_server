@@ -14,13 +14,17 @@ import (
 type Member struct {
 	meta *models.Account
 
-	ID     int64  `json:"id,string"`
-	Email  string `json:"email"`
-	Status string `json:"status"`
+	ID     int64   `json:"id,string"`
+	Email  string  `json:"email"`
+	Status string  `json:"status"`
+	Phone  *string `json:"phone,omitempty"`
 
 	/// 可下载次数
 	DownloadCount int64 `json:"download_count" render:"method=RenderDownloadCount"`
 	Vip           *Vip  `json:"vip,omitempty" render:"method=RenderMemberVip"`
+
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
 }
 
 type Vip struct {
@@ -112,10 +116,13 @@ func (f *MemberRender) fetch(ctx context.Context) {
 	res := make(map[int64]*Member)
 	for _, account := range accountMap {
 		res[account.ID] = &Member{
-			meta:   account,
-			ID:     account.ID,
-			Email:  account.Email,
-			Status: "normal",
+			meta:      account,
+			ID:        account.ID,
+			Email:     account.Email,
+			Status:    "normal",
+			Phone:     util.StringPtr(account.Phone),
+			CreatedAt: account.CreatedAt.Unix(),
+			UpdatedAt: account.UpdatedAt.Unix(),
 		}
 	}
 	f.memberMap = res

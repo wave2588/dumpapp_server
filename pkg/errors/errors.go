@@ -1,11 +1,16 @@
 package errors
 
 var (
-	ErrNotAuthorized      = NewDefaultAPIError(401, 10000, "NotAuthorized", "登陆才可以继续操作")
-	ErrInvalidTicket      = NewDefaultAPIError(401, 10001, "InvalidTicket", "无效的用户身份")
-	ErrNotFoundMember     = NewDefaultAPIError(404, 10002, "NotFoundMember", "未找到用户")
-	ErrUpgradeVip         = NewDefaultAPIError(401, 10003, "UpgradeVip", "请升级 vip")
-	ErrMemberAccessDenied = NewDefaultAPIError(403, 10004, "MemberAccessDenied", "没有权限进行操作")
+	ErrNotAuthorized            = NewDefaultAPIError(401, 10000, "NotAuthorized", "登陆才可以继续操作")
+	ErrInvalidTicket            = NewDefaultAPIError(401, 10001, "InvalidTicket", "无效的用户身份")
+	ErrNotFoundMember           = NewDefaultAPIError(404, 10002, "NotFoundMember", "未找到用户")
+	ErrUpgradeVip               = NewDefaultAPIError(401, 10003, "UpgradeVip", "请升级 vip")
+	ErrMemberAccessDenied       = NewDefaultAPIError(403, 10004, "MemberAccessDenied", "没有权限进行操作")
+	ErrAccountRegisteredByEmail = NewDefaultAPIError(403, 10005, "AccountRegisteredByEmail", "该邮箱已被注册")
+	ErrAccountRegisteredByPhone = NewDefaultAPIError(403, 10006, "AccountRegisteredByPhone", "该手机号已被注册")
+	ErrCaptchaIncorrectByEmail  = NewDefaultAPIError(403, 10007, "CaptchaIncorrectByEmail", "邮箱验证码错误")
+	ErrCaptchaIncorrectByPhone  = NewDefaultAPIError(403, 10008, "CaptchaIncorrectByPhone", "手机验证码错误")
+	ErrCaptchaRepeated          = NewDefaultAPIError(403, 10009, "CaptchaRepeated", "验证码重复发送")
 
 	ErrNotDownloadNumber = NewDefaultAPIError(403, 10004, "NotDownloadNumber", "没有下载次数")
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dumpapp_server/pkg/common/util"
 	middleware2 "dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web"
 
@@ -28,7 +29,7 @@ func main() {
 	r.Mount("/api/", web.DefaultRouter)
 	r.Mount("/api/v2/", web.DefaultRouterV2)
 
-	http.ListenAndServe(":1995", r)
+	util.PanicIf(http.ListenAndServe(":1995", r))
 }
 
 func origins() []string {

@@ -30,7 +30,8 @@ type AccountHandler struct {
 	captchaDAO              dao2.CaptchaDAO
 	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
 
-	emailCtl controller2.EmailController
+	emailCtl   controller2.EmailController
+	tencentCtl controller2.TencentController
 }
 
 func NewAccountHandler() *AccountHandler {
@@ -41,15 +42,16 @@ func NewAccountHandler() *AccountHandler {
 		captchaDAO:              impl4.DefaultCaptchaDAO,
 		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
 
-		emailCtl: impl2.DefaultEmailController,
+		emailCtl:   impl2.DefaultEmailController,
+		tencentCtl: impl2.DefaultTencentController,
 	}
 }
 
-type sendCaptchaQueryArgs struct {
-	Email string `json:"email"`
+type sendEmailCaptchaQueryArgs struct {
+	Email string `json:"email" validate:"required"`
 }
 
-func (p *sendCaptchaQueryArgs) Validate() error {
+func (p *sendEmailCaptchaQueryArgs) Validate() error {
 	err := validator.New().Struct(p)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
@@ -57,13 +59,21 @@ func (p *sendCaptchaQueryArgs) Validate() error {
 	return nil
 }
 
-func (h *AccountHandler) SendCaptcha(w http.ResponseWriter, r *http.Request) {
+func (h *AccountHandler) SendEmailCaptcha(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := &sendCaptchaQueryArgs{}
+	args := &sendEmailCaptchaQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	captcha, err := h.captchaDAO.GetCaptcha(ctx, args.Email)
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
+	util.PanicIf(err)
+	account := accountMap[args.Email]
+	if account != nil {
+		panic(errors.ErrAccountRegisteredByEmail)
+		return
+	}
+
+	captcha, err := h.captchaDAO.GetEmailCaptcha(ctx, args.Email)
 	util.PanicIf(err)
 
 	if captcha != "" {
@@ -81,13 +91,56 @@ func (h *AccountHandler) sendCaptcha(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	return h.captchaDAO.SetCaptcha(ctx, email, captcha)
+	return h.captchaDAO.SetEmailCaptcha(ctx, email, captcha)
+}
+
+type sendPhoneCaptchaQueryArgs struct {
+	Phone string `json:"phone" validate:"required"`
+}
+
+func (p *sendPhoneCaptchaQueryArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := &sendPhoneCaptchaQueryArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	util.PanicIf(err)
+	account := accountMap[args.Phone]
+	if account != nil {
+		panic(errors.ErrAccountRegisteredByPhone)
+		return
+	}
+
+	captcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, args.Phone)
+	util.PanicIf(err)
+
+	if captcha != "" {
+		panic(errors.ErrCaptchaRepeated)
+	}
+
+	/// 发送验证码
+	newCaptcha := h.iceRPC.MustGenerateCaptcha(ctx)
+	h.captchaDAO.SetPhoneCaptcha(ctx, args.Phone, newCaptcha)
+	util.PanicIf(h.tencentCtl.SendPhoneRegisterCaptcha(ctx, newCaptcha, args.Phone))
+
+	util.RenderJSON(w, "ok")
 }
 
 type registerQueryArgs struct {
-	Email    string `json:"email"`
-	Captcha  string `json:"captcha"`
-	Password string `json:"password"`
+	Email        string `json:"email" validate:"required"`
+	EmailCaptcha string `json:"email_captcha" validate:"required"`
+	Phone        string `json:"phone"`
+	PhoneCaptcha string `json:"phone_captcha"`
+	Password     string `json:"password" validate:"required"`
 }
 
 func (p *registerQueryArgs) Validate() error {
@@ -107,11 +160,11 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	args := &registerQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	captcha, err := h.captchaDAO.GetCaptcha(ctx, args.Email)
+	captcha, err := h.captchaDAO.GetEmailCaptcha(ctx, args.Email)
 	util.PanicIf(err)
 
-	if args.Captcha != captcha {
-		panic(errors.UnproccessableError("验证码错误"))
+	if args.EmailCaptcha != captcha {
+		panic(errors.ErrCaptchaIncorrectByEmail)
 	}
 
 	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
@@ -119,7 +172,22 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(err)
 	}
 	if account != nil {
-		panic(errors.UnproccessableError("该邮箱已注册"))
+		panic(errors.ErrAccountRegisteredByEmail)
+	}
+
+	/// 验证手机号是否可用
+	if args.Phone != "" {
+		phoneCaptcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, args.Phone)
+		util.PanicIf(err)
+		if args.PhoneCaptcha != phoneCaptcha {
+			panic(errors.ErrCaptchaIncorrectByPhone)
+		}
+		accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+		util.PanicIf(err)
+		account := accountMap[args.Phone]
+		if account != nil {
+			panic(errors.ErrAccountRegisteredByPhone)
+		}
 	}
 
 	accountID := h.iceRPC.MustGenerateID(ctx)
@@ -127,16 +195,19 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		ID:       accountID,
 		Email:    args.Email,
 		Password: args.Password,
-		Phone:    "",
+		Phone:    args.Phone,
 	}))
 
-	util.PanicIf(h.captchaDAO.RemoveCaptcha(ctx, args.Email))
+	util.PanicIf(h.captchaDAO.RemoveEmailCaptcha(ctx, args.Email))
+	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
 
-	/// 新用户送一次下载次数
-	util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
-		MemberID: accountID,
-		Status:   enum.MemberDownloadNumberStatusNormal,
-	}))
+	/// 必须使用手机号注册, 才能送一次下载次数
+	if args.Phone != "" {
+		util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
+			MemberID: accountID,
+			Status:   enum.MemberDownloadNumberStatusNormal,
+		}))
+	}
 
 	members := render.NewMemberRender([]int64{accountID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
@@ -150,6 +221,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 type loginQueryArgs struct {
 	Email    string `json:"email"`
+	Phone    string `json:"phone"`
 	Password string `json:"password"`
 }
 
@@ -170,7 +242,16 @@ func (h *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	args := &loginQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	account := GetAccountByEmail(ctx, args.Email)
+	var account *models.Account
+	if args.Email != "" {
+		account = GetAccountByEmail(ctx, args.Email)
+	}
+	if args.Phone != "" {
+		account = GetAccountByPhone(ctx, args.Phone)
+	}
+	if account == nil {
+		panic(errors.ErrNotFoundMember)
+	}
 
 	if account.Password != args.Password {
 		panic(errors.UnproccessableError("密码错误"))
