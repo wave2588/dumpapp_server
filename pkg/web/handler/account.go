@@ -202,12 +202,12 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
 
 	/// 必须使用手机号注册, 才能送一次下载次数
-	if args.Phone != "" {
-		util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
-			MemberID: accountID,
-			Status:   enum.MemberDownloadNumberStatusNormal,
-		}))
-	}
+	//if args.Phone != "" {
+	//	util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
+	//		MemberID: accountID,
+	//		Status:   enum.MemberDownloadNumberStatusNormal,
+	//	}))
+	//}
 
 	members := render.NewMemberRender([]int64{accountID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
