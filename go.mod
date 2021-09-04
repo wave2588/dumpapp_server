@@ -16,6 +16,7 @@ require (
 	github.com/go-redis/redis/v8 v8.8.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gorilla/securecookie v1.1.1
+	github.com/mozillazg/go-cos v0.13.0
 	github.com/pkg/errors v0.9.1
 	github.com/roylee0704/gron v0.0.0-20160621042432-e78485adab46 // indirect
 	github.com/smartwalle/alipay/v3 v3.1.6

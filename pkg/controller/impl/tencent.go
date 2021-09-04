@@ -2,19 +2,21 @@ package impl
 
 import (
 	"context"
-	"fmt"
-	"net/http"
-	"net/url"
-
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/errors"
+	"fmt"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	errors2 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/regions"
+	"net/http"
+	"net/url"
+	"time"
 
 	// 引入sms
+	cos2 "github.com/mozillazg/go-cos"
+	"github.com/mozillazg/go-cos/debug"
 	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
@@ -78,47 +80,37 @@ func (c *TencentController) ListFile(ctx context.Context, marker *string, limit 
 }
 
 func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {
-	return util.GetImageUrl(name), nil
+	auth := cos2.Auth{
+		SecretID:  config.DumpConfig.AppConfig.TencentCosSecretID,
+		SecretKey: config.DumpConfig.AppConfig.TencentCosSecretKey,
+		Expire:    time.Minute,
+	}
 
-	//url, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, time.Hour*24, nil)
-	//if err != nil {
-	//	return "", err
-	//}
-	//
-	//s := fmt.Sprintf("%09v", rand.New(rand.NewSource(time.Now().UnixNano())).Int63n(10000000))
-	//i, err := strconv.ParseInt(s, 10, 64)
-	//util.PanicIf(err)
-	//
-	//appID := config.DumpConfig.AppConfig.TencentCOSAppID
-	//bucket := config.DumpConfig.AppConfig.TencentCosBucketName
-	//secretID := config.DumpConfig.AppConfig.TencentCosSecretID
-	//secretKey := config.DumpConfig.AppConfig.TencentCosSecretKey
-	////expired := time.Now().Add(60).Unix()
-	//current := time.Now().Unix()
-	//onceExpired := 0
-	//rdm := i
-	////fileid := "/200001/newbucket/tencent_test.jpg"
-	//fileid := fmt.Sprintf("%s/%s/%s", appID, bucket, name)
-	//
-	////$once_signature=
-	////'a='.$appid.'&b='.$bucket.'&k='.$secret_id.'&e='.$onceExpired.'&t='.$current.'&r='.$rdm.'&f='.$fileid;
-	//
-	//onceSignature := fmt.Sprintf("a=%s&./src/nocodeb=%s&k=%s&e=%d&t=%d&r=%d&f=%s", appID, bucket, secretID, onceExpired, current, rdm, fileid)
-	//
-	////$once_signature = base64_encode(hash_hmac('SHA1',$once_signature,$secret_key, true).$once_signature);
-	//
-	////$once_signature = base64_encode(hash_hmac('SHA1',$once_signature,$secret_key, true).$once_signature);
-	//
-	//h := hmac.New(sha1.New, []byte(secretKey))
-	//h.Write([]byte(onceSignature))
-	//// Get result and encode as hexadecimal string
-	//sha := hex.EncodeToString(h.Sum(nil))
-	//
-	//fmt.Println("sha--->: ", sha)
-	////expectedMAC := hmac.
-	////return hmac.Equal(messageMAC, expectedMAC)
-	//
-	//return url.String(), nil
+	b, err := cos2.NewBaseURL(config.DumpConfig.AppConfig.TencentCosIpaHost)
+	if err != nil {
+		return "", err
+	}
+	s := cos2.NewClient(b, &http.Client{
+		Transport: &cos.AuthorizationTransport{
+			SecretID:  auth.SecretID,
+			SecretKey: auth.SecretKey,
+			Expire:    auth.Expire,
+			Transport: &debug.DebugRequestTransport{
+				RequestHeader:  true,
+				RequestBody:    true,
+				ResponseHeader: true,
+				ResponseBody:   true,
+			},
+		},
+	})
+
+	// 获取预签名授权 URL
+	presignedURL, err := s.Object.PresignedURL(ctx, http.MethodGet, name, auth, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return presignedURL.String(), nil
 }
 
 func (c *TencentController) SendPhoneRegisterCaptcha(ctx context.Context, captcha, phone string) error {
