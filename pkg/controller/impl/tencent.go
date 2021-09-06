@@ -14,9 +14,6 @@ import (
 	"net/url"
 	"time"
 
-	// 引入sms
-	cos2 "github.com/mozillazg/go-cos"
-	"github.com/mozillazg/go-cos/debug"
 	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
@@ -79,38 +76,18 @@ func (c *TencentController) ListFile(ctx context.Context, marker *string, limit 
 	return result, nil
 }
 
+// 通过tag的方式，用户可以将请求参数或者请求头部放进签名中。
+type URLToken struct {
+	SessionToken string `url:"x-cos-security-token,omitempty" header:"-"`
+}
+
 func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {
-	auth := cos2.Auth{
-		SecretID:  config.DumpConfig.AppConfig.TencentCosSecretID,
-		SecretKey: config.DumpConfig.AppConfig.TencentCosSecretKey,
-		Expire:    time.Minute,
-	}
 
-	b, err := cos2.NewBaseURL(config.DumpConfig.AppConfig.TencentCosIpaHost)
-	if err != nil {
-		return "", err
-	}
-	s := cos2.NewClient(b, &http.Client{
-		Transport: &cos.AuthorizationTransport{
-			SecretID:  auth.SecretID,
-			SecretKey: auth.SecretKey,
-			Expire:    auth.Expire,
-			Transport: &debug.DebugRequestTransport{
-				RequestHeader:  true,
-				RequestBody:    true,
-				ResponseHeader: true,
-				ResponseBody:   true,
-			},
-		},
-	})
+	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, 5*time.Minute, nil)
+	util.PanicIf(err)
+	fmt.Println(res)
 
-	// 获取预签名授权 URL
-	presignedURL, err := s.Object.PresignedURL(ctx, http.MethodGet, name, auth, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return presignedURL.String(), nil
+	return res.String(), nil
 }
 
 func (c *TencentController) SendPhoneRegisterCaptcha(ctx context.Context, captcha, phone string) error {
