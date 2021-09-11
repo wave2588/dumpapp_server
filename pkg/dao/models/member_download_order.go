@@ -15,6 +15,7 @@ import (
 
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -28,6 +29,7 @@ type MemberDownloadOrder struct {
 	MemberID  int64                          `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status    enum.MemberDownloadOrderStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Number    int64                          `boil:"number" json:"number" toml:"number" yaml:"number"`
+	Amount    null.Float64                   `boil:"amount" json:"amount,omitempty" toml:"amount" yaml:"amount,omitempty"`
 	CreatedAt time.Time                      `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                      `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -40,6 +42,7 @@ var MemberDownloadOrderColumns = struct {
 	MemberID  string
 	Status    string
 	Number    string
+	Amount    string
 	CreatedAt string
 	UpdatedAt string
 }{
@@ -47,6 +50,7 @@ var MemberDownloadOrderColumns = struct {
 	MemberID:  "member_id",
 	Status:    "status",
 	Number:    "number",
+	Amount:    "amount",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -74,11 +78,35 @@ func (w whereHelperenum_MemberDownloadOrderStatus) GTE(x enum.MemberDownloadOrde
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_Float64 struct{ field string }
+
+func (w whereHelpernull_Float64) EQ(x null.Float64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Float64) NEQ(x null.Float64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Float64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Float64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Float64) LT(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Float64) LTE(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Float64) GT(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Float64) GTE(x null.Float64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MemberDownloadOrderWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberDownloadOrderStatus
 	Number    whereHelperint64
+	Amount    whereHelpernull_Float64
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -86,6 +114,7 @@ var MemberDownloadOrderWhere = struct {
 	MemberID:  whereHelperint64{field: "`member_download_order`.`member_id`"},
 	Status:    whereHelperenum_MemberDownloadOrderStatus{field: "`member_download_order`.`status`"},
 	Number:    whereHelperint64{field: "`member_download_order`.`number`"},
+	Amount:    whereHelpernull_Float64{field: "`member_download_order`.`amount`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_download_order`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_download_order`.`updated_at`"},
 }
@@ -107,8 +136,8 @@ func (*memberDownloadOrderR) NewStruct() *memberDownloadOrderR {
 type memberDownloadOrderL struct{}
 
 var (
-	memberDownloadOrderAllColumns            = []string{"id", "member_id", "status", "number", "created_at", "updated_at"}
-	memberDownloadOrderColumnsWithoutDefault = []string{"member_id", "status", "number"}
+	memberDownloadOrderAllColumns            = []string{"id", "member_id", "status", "number", "amount", "created_at", "updated_at"}
+	memberDownloadOrderColumnsWithoutDefault = []string{"member_id", "status", "number", "amount"}
 	memberDownloadOrderColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberDownloadOrderPrimaryKeyColumns     = []string{"id"}
 )
