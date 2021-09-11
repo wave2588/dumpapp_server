@@ -11,6 +11,8 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -18,7 +20,8 @@ type MemberVipV2Handler struct {
 	ipaDAO        dao.IpaDAO
 	ipaVersionDAO dao.IpaVersionDAO
 
-	alipayCtl controller.ALiPayController
+	alipayCtl   controller.ALiPayController
+	alertWebCtl controller2.AlterWebController
 }
 
 func NewMemberVipV2Handler() *MemberVipV2Handler {
@@ -26,7 +29,8 @@ func NewMemberVipV2Handler() *MemberVipV2Handler {
 		ipaDAO:        impl.DefaultIpaDAO,
 		ipaVersionDAO: impl.DefaultIpaVersionDAO,
 
-		alipayCtl: impl2.DefaultALiPayController,
+		alipayCtl:   impl2.DefaultALiPayController,
+		alertWebCtl: impl3.DefaultAlterWebController,
 	}
 }
 
@@ -57,8 +61,10 @@ func (h *MemberVipV2Handler) GetPayURL(w http.ResponseWriter, r *http.Request) {
 
 	loginID := mustGetLoginID(ctx)
 
-	payURL, err := h.alipayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
+	orderID, payURL, err := h.alipayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
 	util.PanicIf(err)
+
+	h.alertWebCtl.SendPendingOrderMsg(ctx, orderID)
 
 	res := map[string]interface{}{
 		"open_url": payURL,
