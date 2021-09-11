@@ -24,6 +24,5 @@ type AccountDAO interface {
 	GetByEmail(ctx context.Context, email string) (*models.Account, error)
 	// BatchGetByEmail retrieves multiple records by uniq key email from db.
 	BatchGetByEmail(ctx context.Context, emails []string) (map[string]*models.Account, error)
-
 	BatchGetByPhones(ctx context.Context, phones []string) (map[string]*models.Account, error)
 }

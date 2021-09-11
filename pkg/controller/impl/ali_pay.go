@@ -14,6 +14,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
 	"github.com/smartwalle/alipay/v3"
+	"github.com/spf13/cast"
+	"github.com/volatiletech/null/v8"
 )
 
 type ALiPayController struct {
@@ -52,11 +54,13 @@ func NewALiPayController() *ALiPayController {
 
 func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, number int64) (string, error) {
 	id := util2.MustGenerateID(ctx)
+	totalAmount := number * constant.DownloadIpaPrice
 	err := c.memberDownloadOrderDAO.Insert(ctx, &models.MemberDownloadOrder{
 		ID:       id,
 		MemberID: loginID,
 		Status:   enum.MemberDownloadOrderStatusPending,
 		Number:   number,
+		Amount:   null.Float64From(cast.ToFloat64(totalAmount)),
 	})
 	if err != nil {
 		return "", err
@@ -67,7 +71,7 @@ func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, numbe
 	p.ReturnURL = "https://www.dumpapp.com"
 	p.Subject = "Dumpapp"
 	p.OutTradeNo = fmt.Sprintf("%d", id)
-	p.TotalAmount = fmt.Sprintf("%d", number*constant.DownloadIpaPrice)
+	p.TotalAmount = fmt.Sprintf("%d", totalAmount)
 	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
 	//p.ExtendParams = map[string]interface{}{
 	//	"duration": duration.String(),

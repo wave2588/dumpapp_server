@@ -58,15 +58,18 @@ func (h *AdminOrderHandler) GetOrderCount(w http.ResponseWriter, r *http.Request
 
 	paidCount := 0
 	downloadCount := 0
+	var amount float64
 	for _, re := range res {
 		if re.Status == enum.MemberDownloadOrderStatusPaid {
 			paidCount++
 			downloadCount += cast.ToInt(re.Number)
+			amount += re.Amount.Float64
 		}
 	}
-	util.RenderJSON(w, map[string]int{
+	util.RenderJSON(w, map[string]interface{}{
 		"order_count":    len(res),
 		"paid_count":     paidCount,
 		"download_count": downloadCount,
+		"amount":         amount,
 	})
 }
