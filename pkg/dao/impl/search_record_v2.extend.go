@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/models"
 	"github.com/spf13/cast"
@@ -26,13 +27,15 @@ func (d *SearchRecordV2DAO) BatchGetByIpaIDs(ctx context.Context, ipaIDs []int64
 }
 
 func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*dao.SearchCount, error) {
-	query := models.SearchRecordV2S(
+	qm := []qm.QueryMod{
 		qm.Select("ipa_id, name, count(id) as count"),
 		qm.GroupBy("ipa_id"),
 		qm.OrderBy("count desc"),
 		qm.Offset(offset),
 		qm.Limit(limit),
-	)
+	}
+	qm = append(qm, filter...)
+	query := models.SearchRecordV2S(qm...)
 	res, err := query.QueryContext(ctx, d.mysqlPool)
 	if err != nil {
 		return nil, err
@@ -47,7 +50,6 @@ func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, l
 		}
 		result = append(result, r)
 	}
-
 	return result, nil
 }
 

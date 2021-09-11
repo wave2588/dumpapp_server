@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"sort"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -17,18 +17,21 @@ import (
 )
 
 type AdminMemberHandler struct {
-	accountDAO dao.AccountDAO
+	accountDAO     dao.AccountDAO
+	memberOrderDAO dao.MemberDownloadOrderDAO
 }
 
 func NewAdminMemberHandler() *AdminMemberHandler {
 	return &AdminMemberHandler{
-		accountDAO: impl.DefaultAccountDAO,
+		accountDAO:     impl.DefaultAccountDAO,
+		memberOrderDAO: impl.DefaultMemberDownloadOrderDAO,
 	}
 }
 
 type ListMemberArgs struct {
-	StartAt int64 `form:"start_at"`
-	EndAt   int64 `form:"end_at"`
+	IsOrderCountSort bool  `form:"is_order_count_sort"`
+	StartAt          int64 `form:"start_at"`
+	EndAt            int64 `form:"end_at"`
 }
 
 func (args *ListMemberArgs) Validate() error {
@@ -46,6 +49,9 @@ func (h *AdminMemberHandler) ListMember(w http.ResponseWriter, r *http.Request) 
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
+	offset := GetIntArgument(r, "offset", 0)
+	limit := GetIntArgument(r, "limit", 10)
+
 	loginID := mustGetLoginID(ctx)
 
 	filter := make([]qm.QueryMod, 0)
@@ -55,16 +61,36 @@ func (h *AdminMemberHandler) ListMember(w http.ResponseWriter, r *http.Request) 
 	if args.EndAt != 0 {
 		filter = append(filter, models.AccountWhere.CreatedAt.LT(cast.ToTime(args.EndAt)))
 	}
-	ids, err := h.accountDAO.ListIDs(ctx, 0, 10000, filter, nil)
+
+	if args.IsOrderCountSort {
+		h.getMemberByOrderCountDesc(ctx, w, r, loginID, offset, limit, filter)
+		return
+	}
+
+	h.getMembers(ctx, w, r, loginID, offset, limit, filter)
+}
+
+func (h *AdminMemberHandler) getMembers(ctx context.Context, w http.ResponseWriter, r *http.Request, loginID int64, offset, limit int, filter []qm.QueryMod) {
+	ids, err := h.accountDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
-
+	totalCount, err := h.accountDAO.Count(ctx, filter)
+	util.PanicIf(err)
 	members := render.NewMemberRender(ids, loginID, render.MemberAdminRenderFields...).RenderSlice(ctx)
-	sort.Slice(members, func(i, j int) bool {
-		return members[i].Admin.PaidCount > members[j].Admin.PaidCount
-	})
-
 	util.RenderJSON(w, util.ListOutput{
-		Paging: nil,
+		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
+		Data:   members,
+	})
+}
+
+func (h *AdminMemberHandler) getMemberByOrderCountDesc(ctx context.Context, w http.ResponseWriter, r *http.Request, loginID int64, offset, limit int, filter []qm.QueryMod) {
+	memberIDs, err := h.memberOrderDAO.GetMemberIDsOrderByPaidCount(ctx, offset, limit, filter)
+	util.PanicIf(err)
+	fmt.Println(memberIDs)
+	totalCount, err := h.memberOrderDAO.CountMemberIDsOrderByPaidCount(ctx, filter)
+	util.PanicIf(err)
+	members := render.NewMemberRender(memberIDs, loginID, render.MemberAdminRenderFields...).RenderSlice(ctx)
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
 		Data:   members,
 	})
 }
