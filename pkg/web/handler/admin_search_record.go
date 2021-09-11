@@ -37,10 +37,9 @@ func (args *GetMemberSearchRecordArgs) Validate() error {
 }
 
 type record struct {
-	IpaID    int64  `json:"ipa_id,string"`
-	Name     string `json:"name"`
-	Count    int64  `json:"count"`
-	LatestAt int64  `json:"latest_at"`
+	IpaID int64  `json:"ipa_id,string"`
+	Name  string `json:"name"`
+	Count int64  `json:"count"`
 }
 
 func (h *AdminSearchRecordHandler) GetMemberSearchRecord(w http.ResponseWriter, r *http.Request) {
