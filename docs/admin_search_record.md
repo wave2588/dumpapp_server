@@ -2,11 +2,15 @@
 
 ### 某个时间范围内用户获取 ipa 的排名情况
 GET /admin/search/record  
-参数:  
-offset: 0  
-limit: 10  
-start_at: 1630425600        /// 可不传  
-end_at: 1631343007          /// 可不传
+```json
+{
+  "offset": 0,
+  "limit": 10,
+  "start_at": 1630425600, /// 可不传
+  "end_at": 1631343007  /// 可不传
+}
+```  
+Response:
 ```json
 {
     "paging": null,
