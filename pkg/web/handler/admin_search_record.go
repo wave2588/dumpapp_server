@@ -1,18 +1,16 @@
 package handler
 
 import (
-	"fmt"
-	"net/http"
-	"sort"
-
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"net/http"
 )
 
 type AdminSearchRecordHandler struct {
@@ -26,8 +24,8 @@ func NewAdminSearchRecordHandler() *AdminSearchRecordHandler {
 }
 
 type GetMemberSearchRecordArgs struct {
-	StartAt int64 `form:"start_at" validate:"required"`
-	EndAt   int64 `form:"end_at" validate:"required"`
+	StartAt int64 `form:"start_at"`
+	EndAt   int64 `form:"end_at"`
 }
 
 func (args *GetMemberSearchRecordArgs) Validate() error {
@@ -52,40 +50,34 @@ func (h *AdminSearchRecordHandler) GetMemberSearchRecord(w http.ResponseWriter, 
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	filter := []qm.QueryMod{
-		models.SearchRecordV2Where.CreatedAt.GT(cast.ToTime(args.StartAt)),
-		models.SearchRecordV2Where.CreatedAt.LT(cast.ToTime(args.EndAt)),
+	offset := GetIntArgument(r, "offset", 0)
+	limit := GetIntArgument(r, "limit", 10)
+
+	filter := make([]qm.QueryMod, 0)
+	if args.StartAt != 0 {
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.GT(cast.ToTime(args.StartAt)))
 	}
-	ids, err := h.searchRecordV2DAO.ListIDs(ctx, 0, 10000, filter, nil)
+	if args.EndAt != 0 {
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LT(cast.ToTime(args.EndAt)))
+	}
+
+	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, offset, limit, filter)
 	util.PanicIf(err)
 
-	recordMap, err := h.searchRecordV2DAO.BatchGet(ctx, ids)
+	totalCount, err := h.searchRecordV2DAO.CountOrderBySearchCount(ctx, filter)
 	util.PanicIf(err)
-
-	recordIpaMap := make(map[int64][]*models.SearchRecordV2, 0)
-	for _, record := range recordMap {
-		recordIpaMap[record.IpaID] = append(recordIpaMap[record.IpaID], record)
-	}
 
 	result := make([]*record, 0)
-	for ipaID, records := range recordIpaMap {
-		if len(records) < 1 {
-			continue
-		}
+	for _, datum := range data {
 		result = append(result, &record{
-			IpaID:    ipaID,
-			Name:     records[0].Name,
-			Count:    cast.ToInt64(len(records)),
-			LatestAt: records[len(records)-1].CreatedAt.Unix(),
+			IpaID: datum.IpaID,
+			Name:  datum.Name,
+			Count: datum.Count,
 		})
 	}
 
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].Count > result[j].Count
-	})
-
 	util.RenderJSON(w, util.ListOutput{
-		Paging: nil,
+		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
 		Data:   result,
 	})
 }
