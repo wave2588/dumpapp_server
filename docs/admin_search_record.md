@@ -4,7 +4,7 @@
 GET /admin/search/record  
 参数:  
 offset: 0  
-limit: 10
+limit: 10  
 start_at: 1630425600        /// 可不传  
 end_at: 1631343007          /// 可不传
 ```json
