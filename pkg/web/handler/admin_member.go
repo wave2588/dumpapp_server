@@ -56,10 +56,10 @@ func (h *AdminMemberHandler) ListMember(w http.ResponseWriter, r *http.Request) 
 
 	filter := make([]qm.QueryMod, 0)
 	if args.StartAt != 0 {
-		filter = append(filter, models.AccountWhere.CreatedAt.GT(cast.ToTime(args.StartAt)))
+		filter = append(filter, models.AccountWhere.CreatedAt.GTE(cast.ToTime(args.StartAt)))
 	}
 	if args.EndAt != 0 {
-		filter = append(filter, models.AccountWhere.CreatedAt.LT(cast.ToTime(args.EndAt)))
+		filter = append(filter, models.AccountWhere.CreatedAt.LTE(cast.ToTime(args.EndAt)))
 	}
 
 	if args.IsOrderCountSort {

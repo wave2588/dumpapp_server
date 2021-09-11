@@ -26,6 +26,11 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdmin).Get("/search/record", adminSearchRecordHandler.GetMemberSearchRecord)
 	// endregion
 
+	/// admin download order
+	adminOrderHandler := handler.NewAdminOrderHandler()
+	r.With(middleware.OAuthAdmin).Get("/order", adminOrderHandler.GetOrderCount)
+	// endregion
+
 	/// admin download number
 	adminDownloadNumberHandler := handler.NewAdminDownloadNumberHandler()
 	r.With(middleware.OAuthRegister).Post("/member/download_number", adminDownloadNumberHandler.AddNumber)

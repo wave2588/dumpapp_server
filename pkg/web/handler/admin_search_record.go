@@ -55,10 +55,10 @@ func (h *AdminSearchRecordHandler) GetMemberSearchRecord(w http.ResponseWriter, 
 
 	filter := make([]qm.QueryMod, 0)
 	if args.StartAt != 0 {
-		filter = append(filter, models.SearchRecordV2Where.CreatedAt.GT(cast.ToTime(args.StartAt)))
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(args.StartAt)))
 	}
 	if args.EndAt != 0 {
-		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LT(cast.ToTime(args.EndAt)))
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
 	}
 
 	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, offset, limit, filter)

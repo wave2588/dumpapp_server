@@ -24,15 +24,15 @@ func (d *MemberDownloadOrderDAO) BatchGetByMemberIDs(ctx context.Context, member
 }
 
 func (d *MemberDownloadOrderDAO) GetMemberIDsOrderByPaidCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]int64, error) {
-	qm := []qm.QueryMod{
+	qs := []qm.QueryMod{
 		qm.Select("member_id, count(id) as count"),
 		qm.GroupBy("member_id"),
 		qm.OrderBy("count desc"),
 		qm.Offset(offset),
 		qm.Limit(limit),
 	}
-	qm = append(qm, filter...)
-	query := models.MemberDownloadOrders(qm...)
+	qs = append(qs, filter...)
+	query := models.MemberDownloadOrders(qs...)
 	rows, err := query.QueryContext(ctx, d.mysqlPool)
 	if err != nil {
 		return nil, err
@@ -47,16 +47,30 @@ func (d *MemberDownloadOrderDAO) GetMemberIDsOrderByPaidCount(ctx context.Contex
 }
 
 func (d *MemberDownloadOrderDAO) CountMemberIDsOrderByPaidCount(ctx context.Context, filter []qm.QueryMod) (int64, error) {
-	qm := []qm.QueryMod{
+	qs := []qm.QueryMod{
 		qm.Select("member_id, count(id) as count"),
 		qm.GroupBy("member_id"),
 		qm.OrderBy("count desc"),
 	}
-	qm = append(qm, filter...)
-	query := models.MemberDownloadOrders(qm...)
+	qs = append(qs, filter...)
+	query := models.MemberDownloadOrders(qs...)
 	data, err := query.All(ctx, d.mysqlPool)
 	if err != nil {
 		return 0, err
 	}
 	return cast.ToInt64(len(data)), nil
+}
+
+func (d *MemberDownloadOrderDAO) GetByFilters(ctx context.Context, filters []qm.QueryMod, orderBys []string) ([]*models.MemberDownloadOrder, error) {
+	qs := make([]qm.QueryMod, 0)
+	qs = append(qs, filters...)
+	if len(orderBys) > 0 {
+		orderBys = append(orderBys, "id desc")
+		for _, orderBy := range orderBys {
+			qs = append(qs, qm.OrderBy(orderBy))
+		}
+	} else {
+		qs = append(qs, qm.OrderBy("created_at DESC, id DESC"))
+	}
+	return models.MemberDownloadOrders(qs...).All(ctx, d.mysqlPool)
 }
