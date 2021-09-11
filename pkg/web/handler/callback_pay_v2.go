@@ -15,6 +15,8 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"github.com/spf13/cast"
 )
 
@@ -22,7 +24,8 @@ type CallbackPayV2Handler struct {
 	memberDownloadOrderDAO  dao.MemberDownloadOrderDAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 
-	alipayCtl controller.ALiPayController
+	alipayCtl   controller.ALiPayController
+	alterWebCtl controller2.AlterWebController
 }
 
 func NewCallbackPayV2Handler() *CallbackPayV2Handler {
@@ -30,7 +33,8 @@ func NewCallbackPayV2Handler() *CallbackPayV2Handler {
 		memberDownloadOrderDAO:  impl.DefaultMemberDownloadOrderDAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 
-		alipayCtl: impl2.DefaultALiPayController,
+		alipayCtl:   impl2.DefaultALiPayController,
+		alterWebCtl: impl3.DefaultAlterWebController,
 	}
 }
 
@@ -76,4 +80,6 @@ func (h *CallbackPayV2Handler) ALiPayCallback(w http.ResponseWriter, r *http.Req
 
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	h.alterWebCtl.SendPaidOrderMsg(ctx, orderID)
 }

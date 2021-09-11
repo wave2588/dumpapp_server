@@ -52,7 +52,7 @@ func NewALiPayController() *ALiPayController {
 	}
 }
 
-func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, number int64) (string, error) {
+func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
 	totalAmount := number * constant.DownloadIpaPrice
 	err := c.memberDownloadOrderDAO.Insert(ctx, &models.MemberDownloadOrder{
@@ -63,7 +63,7 @@ func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, numbe
 		Amount:   null.Float64From(cast.ToFloat64(totalAmount)),
 	})
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
 	p := alipay.TradePagePay{}
@@ -79,9 +79,9 @@ func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, numbe
 	p.TimeoutExpress = "15m"
 	url, err := c.client.TradePagePay(p)
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
-	return url.String(), nil
+	return id, url.String(), nil
 }
 
 func (c *ALiPayController) CheckPayStatus(ctx context.Context, orderID int64) error {
