@@ -25,6 +25,9 @@ type Member struct {
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
+
+	/// Admin 相关
+	Admin *Admin `json:"admin,omitempty" render:"method=RenderAdmin"`
 }
 
 type Vip struct {
@@ -61,6 +64,14 @@ func MemberIncludes(fields []string) MemberOption {
 		}
 		render.includeFields = uniqFields
 	}
+}
+
+var MemberAdminRenderFields = []MemberOption{
+	MemberIncludes([]string{
+		"DownloadCount",
+		"Vip",
+		"Admin",
+	}),
 }
 
 var MemberDefaultRenderFields = []MemberOption{
@@ -154,5 +165,12 @@ func (f *MemberRender) RenderDownloadCount(ctx context.Context) {
 	util.PanicIf(err)
 	for _, member := range f.memberMap {
 		member.DownloadCount = countMap[member.ID]
+	}
+}
+
+func (f *MemberRender) RenderAdmin(ctx context.Context) {
+	adminMap := NewAdminRender(f.ids, f.loginID).RenderMap(ctx)
+	for _, member := range f.memberMap {
+		member.Admin = adminMap[member.ID]
 	}
 }

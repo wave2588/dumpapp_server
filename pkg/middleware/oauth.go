@@ -16,6 +16,26 @@ func SetTicketCookie(w http.ResponseWriter, r *http.Request, ticket string) {
 	})
 }
 
+func OAuthAdmin(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		registerTicket := util.GetCookie(r, "session")["ticket"]
+		if registerTicket == "" {
+			panic(errors.ErrNotAuthorized)
+		}
+		ticket, err := util2.ParseTicket(registerTicket)
+		util.PanicIf(err)
+		if ticket.MemberID == 0 {
+			panic(errors.ErrNotAuthorized)
+		}
+		if _, ok := constant.OpsAuthMemberIDMap[ticket.MemberID]; !ok {
+			panic(errors.ErrMemberAccessDenied)
+		}
+		ctx := context.WithValue(r.Context(), constant.MemberIDKey, ticket.MemberID)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+	return http.HandlerFunc(fn)
+}
+
 func OAuthRegister(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		/// 判断是否是调试

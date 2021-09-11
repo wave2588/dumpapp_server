@@ -39,26 +39,6 @@ func NewIpaHandler() *IpaHandler {
 	}
 }
 
-func (h *IpaHandler) List(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
-
-	offset := GetIntArgument(r, "offset", 0)
-	limit := GetIntArgument(r, "limit", 10)
-
-	count, err := h.ipaDAO.Count(ctx, nil)
-	util.PanicIf(err)
-
-	ids, err := h.ipaDAO.ListIDs(ctx, offset, limit, nil, nil)
-	util.PanicIf(err)
-
-	data := render.NewIpaRender(ids, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
-	util.RenderJSON(w, util.ListOutput{
-		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
-		Data:   data,
-	})
-}
-
 type getIpaArgs struct {
 	Name string `form:"name" validate:"required"`
 }
