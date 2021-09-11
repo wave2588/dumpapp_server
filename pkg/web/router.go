@@ -16,6 +16,10 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Delete("/admin/batch_ipa", adminIpaHandler.BatchDeleteIpa)
 	// endregion
 
+	/// admin_record
+	adminSearchRecordHandler := handler.NewAdminSearchRecordHandler()
+	r.With(middleware.OAuthAdmin).Get("/admin/search/record", adminSearchRecordHandler.GetMemberSearchRecord)
+
 	/// admin_member_vip
 	adminMemberVipHandler := handler.NewAdminMemberVipHandler()
 	r.With(middleware.OAuthRegister).Post("/admin/member/vip", adminMemberVipHandler.AddDuration)

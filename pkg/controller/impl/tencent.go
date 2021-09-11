@@ -2,18 +2,18 @@ package impl
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/config"
-	"dumpapp_server/pkg/errors"
 	"fmt"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
-	errors2 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
-	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/regions"
 	"net/http"
 	"net/url"
 	"time"
 
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
+	"dumpapp_server/pkg/errors"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	errors2 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/regions"
 	sms "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms/v20210111"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
@@ -76,17 +76,9 @@ func (c *TencentController) ListFile(ctx context.Context, marker *string, limit 
 	return result, nil
 }
 
-// 通过tag的方式，用户可以将请求参数或者请求头部放进签名中。
-type URLToken struct {
-	SessionToken string `url:"x-cos-security-token,omitempty" header:"-"`
-}
-
 func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {
-
 	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, 5*time.Minute, nil)
 	util.PanicIf(err)
-	fmt.Println(res)
-
 	return res.String(), nil
 }
 
