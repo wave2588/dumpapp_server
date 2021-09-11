@@ -14,4 +14,5 @@ Response:
   "order_count": 1111,  /// 生成订单总数
   "paid_count": 11, /// 支付成功总数
   "download_count": 15 /// 生成的次数
+  "amount": 18, /// 总收入
 }
