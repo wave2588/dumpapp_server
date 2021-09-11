@@ -26,6 +26,7 @@ func main() {
 	//r.Use(middleware2.Cors)
 	r.Use(middleware2.CORS(origins()))
 
+	r.Mount("/api/admin/", web.DefaultRouterAdmin)
 	r.Mount("/api/", web.DefaultRouter)
 	r.Mount("/api/v2/", web.DefaultRouterV2)
 

@@ -9,22 +9,6 @@ import (
 func NewRouter() chi.Router {
 	r := chi.NewRouter()
 
-	/// admin_v2
-	adminIpaHandler := handler.NewAdminIpaHandler()
-	r.With(middleware.OAuthRegister).Post("/admin/ipa", adminIpaHandler.Post)
-	r.With(middleware.OAuthRegister).Delete("/admin/ipa", adminIpaHandler.DeleteIpa)
-	r.With(middleware.OAuthRegister).Delete("/admin/batch_ipa", adminIpaHandler.BatchDeleteIpa)
-	// endregion
-
-	/// admin_record
-	adminSearchRecordHandler := handler.NewAdminSearchRecordHandler()
-	r.With(middleware.OAuthAdmin).Get("/admin/search/record", adminSearchRecordHandler.GetMemberSearchRecord)
-
-	/// admin download number
-	adminDownloadNumberHandler := handler.NewAdminDownloadNumberHandler()
-	r.With(middleware.OAuthRegister).Post("/admin/member/download_number", adminDownloadNumberHandler.AddNumber)
-	r.With(middleware.OAuthRegister).Delete("/admin/member/download_number", adminDownloadNumberHandler.DeleteNumber)
-
 	/// region account
 	accountHandler := handler.NewAccountHandler()
 	r.With(middleware.OAuthGuest).Post("/email/captcha", accountHandler.SendEmailCaptcha)

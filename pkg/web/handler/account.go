@@ -137,8 +137,8 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 type registerQueryArgs struct {
 	Email        string `json:"email" validate:"required"`
 	EmailCaptcha string `json:"email_captcha" validate:"required"`
-	Phone        string `json:"phone"`
-	PhoneCaptcha string `json:"phone_captcha"`
+	Phone        string `json:"phone" validate:"required"`
+	PhoneCaptcha string `json:"phone_captcha" validate:"required"`
 	Password     string `json:"password" validate:"required"`
 }
 
@@ -175,18 +175,16 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/// 验证手机号是否可用
-	if args.Phone != "" {
-		phoneCaptcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, args.Phone)
-		util.PanicIf(err)
-		if args.PhoneCaptcha != phoneCaptcha {
-			panic(errors.ErrCaptchaIncorrectByPhone)
-		}
-		accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
-		util.PanicIf(err)
-		account := accountMap[args.Phone]
-		if account != nil {
-			panic(errors.ErrAccountRegisteredByPhone)
-		}
+	phoneCaptcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, args.Phone)
+	util.PanicIf(err)
+	if args.PhoneCaptcha != phoneCaptcha {
+		panic(errors.ErrCaptchaIncorrectByPhone)
+	}
+	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	util.PanicIf(err)
+	account = accountMap[args.Phone]
+	if account != nil {
+		panic(errors.ErrAccountRegisteredByPhone)
 	}
 
 	accountID := h.iceRPC.MustGenerateID(ctx)
