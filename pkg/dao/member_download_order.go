@@ -22,6 +22,8 @@ type MemberDownloadOrderDAO interface {
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDownloadOrder, error)
 
+	GetByFilters(ctx context.Context, filters []qm.QueryMod, orderBys []string) ([]*models.MemberDownloadOrder, error)
+
 	GetMemberIDsOrderByPaidCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]int64, error)
 	CountMemberIDsOrderByPaidCount(ctx context.Context, filter []qm.QueryMod) (int64, error)
 }
