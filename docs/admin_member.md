@@ -2,9 +2,12 @@
 
 ### 某个时间范围内用户充值列表 (注册时间)
 GET /admin/member
-参数:  
-start_at: 1630425600  
-end_at: 1631343007  
+参数:    
+offset: 0  
+limit: 10  
+is_order_count_sort: true /// 是否按照订单数排序, 不传或 false 就按照注册时间返回 
+start_at: 1630425600   // 可不传
+end_at: 1631343007     // 可不传
 ```json
 {
     "paging": null,

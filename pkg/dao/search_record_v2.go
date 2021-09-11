@@ -21,4 +21,13 @@ type SearchRecordV2DAO interface {
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	BatchGetByIpaIDs(ctx context.Context, ipaIDs []int64, filters []qm.QueryMod) ([]*models.SearchRecordV2, error)
+
+	GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*SearchCount, error)
+	CountOrderBySearchCount(ctx context.Context, filter []qm.QueryMod) (int64, error)
+}
+
+type SearchCount struct {
+	IpaID int64
+	Name  string
+	Count int64
 }
