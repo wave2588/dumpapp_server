@@ -2,6 +2,7 @@
 // go get github.com/dmarkham/enumer
 package enum
 
+/// 已经没有再用了, 为了保证 DAO 层不报错才留着
 type MemberVipOrderStatus int
 
 const (

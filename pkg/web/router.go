@@ -20,12 +20,6 @@ func NewRouter() chi.Router {
 	adminSearchRecordHandler := handler.NewAdminSearchRecordHandler()
 	r.With(middleware.OAuthAdmin).Get("/admin/search/record", adminSearchRecordHandler.GetMemberSearchRecord)
 
-	/// admin_member_vip
-	adminMemberVipHandler := handler.NewAdminMemberVipHandler()
-	r.With(middleware.OAuthRegister).Post("/admin/member/vip", adminMemberVipHandler.AddDuration)
-	r.With(middleware.OAuthRegister).Delete("/admin/member/vip", adminMemberVipHandler.DeleteMemberVip)
-	// endregion
-
 	/// admin download number
 	adminDownloadNumberHandler := handler.NewAdminDownloadNumberHandler()
 	r.With(middleware.OAuthRegister).Post("/admin/member/download_number", adminDownloadNumberHandler.AddNumber)
@@ -45,21 +39,9 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/self", memberHandler.GetSelf)
 	// endregion
 
-	// member_vip
-	memberVipHandler := handler.NewMemberVipHandler()
-	r.With(middleware.OAuthRegister).Post("/member/vip", memberVipHandler.Post)
-	r.With(middleware.OAuthGuest).Get("/member/vip", memberVipHandler.Get)
-	// endregion
-
 	// ipa
 	ipaHandler := handler.NewIpaHandler()
-	r.With(middleware.OAuthRegister).Get("/ipa", ipaHandler.List)
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}", ipaHandler.Get)
-	// endregion
-
-	// search ipa
-	searchIpaHandler := handler.NewSearchIpaHandler()
-	r.With(middleware.OAuthRegister).Post("/ipa/search", searchIpaHandler.Post)
 	// endregion
 
 	// email
@@ -70,11 +52,6 @@ func NewRouter() chi.Router {
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
 	r.With().Get("/cos", tencentCosHandler.Get)
-	// endregion
-
-	// region alipay callback
-	callbackPayHandler := handler.NewCallbackPayHandler()
-	r.With().Post("/callback_alipay", callbackPayHandler.ALiPayCallback)
 	// endregion
 
 	return r

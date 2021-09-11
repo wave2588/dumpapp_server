@@ -14,7 +14,6 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
 	"github.com/smartwalle/alipay/v3"
-	"github.com/volatiletech/null/v8"
 )
 
 type ALiPayController struct {
@@ -78,37 +77,6 @@ func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, numbe
 	if err != nil {
 		return "", err
 	}
-	return url.String(), nil
-}
-
-func (c *ALiPayController) GetPayURL(ctx context.Context, loginID int64, duration enum.MemberVipDurationType) (string, error) {
-	id := util2.MustGenerateID(ctx)
-	err := c.memberVipOrderDAO.Insert(ctx, &models.MemberVipOrder{
-		ID:       id,
-		MemberID: loginID,
-		Status:   enum.MemberVipOrderStatusPending,
-		Duration: null.StringFrom(duration.String()),
-	})
-	if err != nil {
-		return "", err
-	}
-
-	p := alipay.TradePagePay{}
-	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURL
-	p.ReturnURL = "https://www.dumpapp.com"
-	p.Subject = constant.MemberVipDurationTypeToSubject[duration]
-	p.OutTradeNo = fmt.Sprintf("%d", id)
-	p.TotalAmount = fmt.Sprintf("%d", constant.MemberVipDurationTypeToPrice[duration])
-	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
-	//p.ExtendParams = map[string]interface{}{
-	//	"duration": duration.String(),
-	//}
-	p.TimeoutExpress = "15m"
-	url, err := c.client.TradePagePay(p)
-	if err != nil {
-		return "", err
-	}
-
 	return url.String(), nil
 }
 
