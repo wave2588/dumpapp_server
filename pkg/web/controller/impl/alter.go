@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"dumpapp_server/pkg/config"
 	controller3 "dumpapp_server/pkg/controller"
@@ -62,11 +63,12 @@ func (c *AlterWebController) SendPendingOrderMsg(ctx context.Context, orderID in
 	email := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	number := fmt.Sprintf("充值次数：：<font color=\"comment\">%d</font>\n", order.Number)
 	amount := fmt.Sprintf("充值金额：<font color=\"comment\">%v</font>\n", order.Amount.Float64)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "生成订单了，暂未支付。\n>" +
-				email + number + amount,
+				email + number + amount + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
@@ -89,11 +91,12 @@ func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64
 	number := fmt.Sprintf("充值次数：<font color=\"comment\">%d</font>\n", order.Number)
 	number2 := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
 	amount := fmt.Sprintf("充值金额：<font color=\"comment\">%v</font>\n", order.Amount.Float64)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"warning\">支付成功</font>\n>" +
-				email + number + amount + number2,
+				email + number + amount + number2 + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
