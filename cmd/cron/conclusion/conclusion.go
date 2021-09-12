@@ -42,18 +42,30 @@ func run() {
 		memberIDs = append(memberIDs, ids...)
 	}
 
+	/// 计算支付过的新用户
 	memberOrderMap, err := impl.DefaultMemberDownloadOrderDAO.BatchGetByMemberIDs(ctx, memberIDs)
 	util.PanicIf(err)
 	paidMemberIDs := make([]int64, 0)
-	amount := 0.0
-	orderCount := 0
 	for memberID, orders := range memberOrderMap {
 		for _, order := range orders {
 			if order.Status == enum.MemberDownloadOrderStatusPaid {
 				paidMemberIDs = append(paidMemberIDs, memberID)
-				amount += order.Amount.Float64
-				orderCount += 1
 			}
+		}
+	}
+
+	/// 计算总费用
+	filters := []qm.QueryMod{
+		models.MemberDownloadOrderWhere.CreatedAt.GT(startAt),
+	}
+	totalMemberOrders, err := impl.DefaultMemberDownloadOrderDAO.GetByFilters(ctx, filters, nil)
+	util.PanicIf(err)
+	amount := 0.0
+	orderCount := 0
+	for _, order := range totalMemberOrders {
+		if order.Status == enum.MemberDownloadOrderStatusPaid {
+			amount += order.Amount.Float64
+			orderCount += 1
 		}
 	}
 
