@@ -1,24 +1,20 @@
 package main
 
 import (
-	"dumpapp_server/cmd/cron/delete_ipa"
-	"github.com/roylee0704/gron"
+	"dumpapp_server/cmd/cron/conclusion"
+	"github.com/robfig/cron/v3"
 )
-
-var c = gron.New()
 
 func main() {
 
-	//var (
-	//	daily = gron.Every(1 * xtime.Day)
-	//)
+	c := cron.New(cron.WithSeconds())
 
-	///// 定时更新 ipa
-	//r := &update_ipa.UpdateIpa{}
-	//c.Add(daily.At("00:00"), r)
-	//
-	//c.Start()
-	//
+	spec := "00 00 20 * * ?" /// 每秒一次
+	c.AddFunc(spec, func() {
+		conclusion.Run()
+	})
 
-	delete_ipa.Run()
+	//delete_ipa.Run()
+	c.Start()
+	select {}
 }
