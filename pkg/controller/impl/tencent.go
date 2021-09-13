@@ -77,7 +77,7 @@ func (c *TencentController) ListFile(ctx context.Context, marker *string, limit 
 }
 
 func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {
-	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, 5*time.Minute, nil)
+	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, 1*time.Minute, nil)
 	util.PanicIf(err)
 	return res.String(), nil
 }
