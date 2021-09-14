@@ -7,4 +7,7 @@ var (
 	AppOpsAuthNameHeaderKey = "Ops-Auth-Name"
 )
 
-var MemberIDKey = "member_id"
+var (
+	MemberIDKey = "member_id"
+	RemoteIP    = "remote_ip"
+)

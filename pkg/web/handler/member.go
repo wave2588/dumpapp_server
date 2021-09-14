@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+	"net"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -21,7 +23,34 @@ func NewMemberHandler() *MemberHandler {
 	}
 }
 
+const (
+	XForwardedFor = "X-Forwarded-For"
+	XRealIP       = "X-Real-IP"
+)
+
+func RemoteIp(req *http.Request) string {
+	remoteAddr := req.RemoteAddr
+	if ip := req.Header.Get(XRealIP); ip != "" {
+		remoteAddr = ip
+	} else if ip = req.Header.Get(XForwardedFor); ip != "" {
+		remoteAddr = ip
+	} else {
+		remoteAddr, _, _ = net.SplitHostPort(remoteAddr)
+	}
+
+	if remoteAddr == "::1" {
+		remoteAddr = "127.0.0.1"
+	}
+
+	return remoteAddr
+}
+
 func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(111, r.Header)
+	fmt.Println(111, r.Header.Get("X-FORWARDED-FOR"))
+
+	fmt.Println(RemoteIp(r))
+
 	ctx := r.Context()
 
 	loginID := mustGetLoginID(ctx)

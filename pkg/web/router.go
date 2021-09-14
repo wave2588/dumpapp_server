@@ -35,7 +35,7 @@ func NewRouter() chi.Router {
 
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
-	r.With().Get("/cos", tencentCosHandler.Get)
+	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get)
 	// endregion
 
 	return r
