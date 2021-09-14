@@ -110,6 +110,8 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	incrCount, err := h.cribberDAO.GetMemberIPIncrCount(ctx, loginID, remoteIP)
 	util.PanicIf(err)
 	if incrCount > 10 {
+		/// 加入黑名单
+		util.PanicIf(h.cribberDAO.SetMemberIDToBlacklist(ctx, loginID))
 		panic(errors.ErrMemberBlacklist)
 	}
 
