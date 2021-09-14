@@ -51,6 +51,26 @@ func NewAdminIpaHandler() *AdminIpaHandler {
 	}
 }
 
+func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+
+	offset := GetIntArgument(r, "offset", 0)
+	limit := GetIntArgument(r, "offset", 10)
+
+	ids, err := h.ipaDAO.ListIDs(ctx, offset, limit, nil, nil)
+	util.PanicIf(err)
+
+	totalCount, err := h.ipaDAO.Count(ctx, nil)
+	util.PanicIf(err)
+
+	ipa := render.NewIpaRender(ids, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
+		Data:   ipa,
+	})
+}
+
 type createIpaArgs struct {
 	Ipas []*ipaArgs `json:"ipas" validate:"required"`
 }
