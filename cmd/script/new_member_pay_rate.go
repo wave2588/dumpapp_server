@@ -16,7 +16,7 @@ func main() {
 
 	ctx := context.Background()
 
-	for i := 1; i <= 30; i++ {
+	for i := 0; i <= 100; i++ {
 		offset := 0
 		bulkSize := 100
 		hasNext := true

@@ -56,7 +56,7 @@ func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
 	loginID := middleware.MustGetMemberID(ctx)
 
 	offset := GetIntArgument(r, "offset", 0)
-	limit := GetIntArgument(r, "offset", 10)
+	limit := GetIntArgument(r, "limit", 10)
 
 	ids, err := h.ipaDAO.ListIDs(ctx, offset, limit, nil, nil)
 	util.PanicIf(err)
