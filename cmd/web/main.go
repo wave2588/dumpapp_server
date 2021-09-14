@@ -25,6 +25,7 @@ func main() {
 	r.Use(middleware2.PanicAsError)
 	//r.Use(middleware2.Cors)
 	r.Use(middleware2.CORS(origins()))
+	r.Use(middleware2.RemoteIP)
 
 	r.Mount("/api/admin/", web.DefaultRouterAdmin)
 	r.Mount("/api/", web.DefaultRouter)

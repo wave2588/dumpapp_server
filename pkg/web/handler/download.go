@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -23,6 +24,7 @@ type DownloadHandler struct {
 	ipaDAO                  dao.IpaDAO
 	ipaVersionDAO           dao.IpaVersionDAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	cribberDAO              dao.CribberDAO
 
 	memberDownloadNumberCtl controller.MemberDownloadController
 	tencentCtl              controller.TencentController
@@ -33,6 +35,7 @@ func NewDownloadHandler() *DownloadHandler {
 		ipaDAO:                  impl.DefaultIpaDAO,
 		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		cribberDAO:              impl.DefaultCribberDAO,
 
 		memberDownloadNumberCtl: impl2.DefaultMemberDownloadController,
 		tencentCtl:              impl2.DefaultTencentController,
@@ -95,6 +98,23 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	util.PanicIf(args.Validate())
 
 	loginID := middleware.MustGetMemberID(ctx)
+
+	/// 以下是一套反作弊的机制
+	isBlackList, err := h.cribberDAO.GetBlacklistByMemberID(ctx, loginID)
+	util.PanicIf(err)
+	if isBlackList {
+		panic(errors.ErrMemberBlacklist)
+	}
+
+	remoteIP := cast.ToString(ctx.Value(constant.RemoteIP))
+	incrCount, err := h.cribberDAO.GetMemberIPIncrCount(ctx, loginID, remoteIP)
+	util.PanicIf(err)
+	if incrCount > 10 {
+		panic(errors.ErrMemberBlacklist)
+	}
+
+	/// 操作数 +1
+	util.PanicIf(h.cribberDAO.IncrMemberIP(ctx, loginID, remoteIP))
 
 	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
