@@ -16,6 +16,7 @@ func NewRouterAdmin() chi.Router {
 
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
+	r.With(middleware.OAuthAdmin).Get("/ipa", adminIpaHandler.List)
 	r.With(middleware.OAuthRegister).Post("/ipa", adminIpaHandler.Post)
 	r.With(middleware.OAuthRegister).Delete("/ipa", adminIpaHandler.DeleteIpa)
 	r.With(middleware.OAuthRegister).Delete("/batch_ipa", adminIpaHandler.BatchDeleteIpa)
