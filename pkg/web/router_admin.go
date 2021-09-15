@@ -9,6 +9,12 @@ import (
 func NewRouterAdmin() chi.Router {
 	r := chi.NewRouter()
 
+	/// config
+	adminConfigHandler := handler.NewAdminConfigHandler()
+	r.With(middleware.OAuthAdmin).Post("/config", adminConfigHandler.Post)
+	r.With(middleware.OAuthAdmin).Get("/config", adminConfigHandler.Get)
+	// endregion
+
 	/// admin_member
 	adminMemberHandler := handler.NewAdminMemberHandler()
 	r.With(middleware.OAuthAdmin).Get("/member", adminMemberHandler.ListMember)
