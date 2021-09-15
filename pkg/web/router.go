@@ -9,6 +9,11 @@ import (
 func NewRouter() chi.Router {
 	r := chi.NewRouter()
 
+	/// region config
+	configHandler := handler.NewConfigHandler()
+	r.With(middleware.OAuthGuest).Get("/config", configHandler.Get)
+	// endregion
+
 	/// region account
 	accountHandler := handler.NewAccountHandler()
 	r.With(middleware.OAuthGuest).Post("/email/captcha", accountHandler.SendEmailCaptcha)
@@ -26,6 +31,7 @@ func NewRouter() chi.Router {
 	// ipa
 	ipaHandler := handler.NewIpaHandler()
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}", ipaHandler.Get)
+	r.With(middleware.OAuthGuest).Get("/ipa/ranking", ipaHandler.GetRanking)
 	// endregion
 
 	// email
