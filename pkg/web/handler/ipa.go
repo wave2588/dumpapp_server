@@ -17,6 +17,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type IpaHandler struct {
@@ -86,5 +87,55 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{
 		"send_email": true,
+	})
+}
+
+type getRankingArgs struct {
+	StartAt int64 `form:"start_at"`
+	EndAt   int64 `form:"end_at"`
+}
+
+func (args *getRankingArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+type searchRanking struct {
+	IpaID int64  `json:"ipa_id,string"`
+	Name  string `json:"name"`
+}
+
+func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := getRankingArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	filter := make([]qm.QueryMod, 0)
+	if args.StartAt != 0 {
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(args.StartAt)))
+	}
+	if args.EndAt != 0 {
+		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
+	}
+
+	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 10, filter)
+	util.PanicIf(err)
+
+	result := make([]*searchRanking, 0)
+	for _, datum := range data {
+		result = append(result, &searchRanking{
+			IpaID: datum.IpaID,
+			Name:  datum.Name,
+		})
+	}
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: nil,
+		Data:   result,
 	})
 }
