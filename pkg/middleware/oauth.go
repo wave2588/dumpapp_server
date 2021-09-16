@@ -18,6 +18,13 @@ func SetTicketCookie(w http.ResponseWriter, r *http.Request, ticket string) {
 
 func OAuthAdmin(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		/// 判断是否是调试
+		name := r.Header.Get(constant.AppOpsAuthNameHeaderKey)
+		if memberID, ok := constant.OpsAuthNameMap[name]; ok {
+			ctx := context.WithValue(r.Context(), constant.MemberIDKey, memberID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
 		registerTicket := util.GetCookie(r, "session")["ticket"]
 		if registerTicket == "" {
 			panic(errors.ErrNotAuthorized)
