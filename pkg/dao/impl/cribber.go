@@ -28,12 +28,12 @@ func NewCribberDAO() *CribberDAO {
 	return d
 }
 
-func (d *CribberDAO) generateIncrRemoteIP(ip string) string {
+func (d *CribberDAO) generateIncrRemoteIP(memberID int64, ip string) string {
 	return fmt.Sprintf("dump:incr:remote_ip:%s", ip)
 }
 
-func (d *CribberDAO) IncrRemoteIP(ctx context.Context, ip string) error {
-	key := d.generateIncrRemoteIP(ip)
+func (d *CribberDAO) IncrMemberRemoteIP(ctx context.Context, memberID int64, ip string) error {
+	key := d.generateIncrRemoteIP(memberID, ip)
 	incrCmd := d.redis.Incr(ctx, key)
 	_, err := incrCmd.Result()
 	if err != nil {
@@ -50,8 +50,8 @@ func (d *CribberDAO) IncrRemoteIP(ctx context.Context, ip string) error {
 	return nil
 }
 
-func (d *CribberDAO) GetRemoteIPIncrCount(ctx context.Context, ip string) (int, error) {
-	key := d.generateIncrRemoteIP(ip)
+func (d *CribberDAO) GetRemoteIPIncrCount(ctx context.Context, memberID int64, ip string) (int, error) {
+	key := d.generateIncrRemoteIP(memberID, ip)
 	cmd := d.redis.Get(ctx, key)
 	res, err := cmd.Result()
 	if err != nil && err != redis.Nil {

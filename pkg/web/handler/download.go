@@ -113,7 +113,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	remoteIP := cast.ToString(ctx.Value(constant.RemoteIP))
-	incrCount, err := h.cribberDAO.GetRemoteIPIncrCount(ctx, remoteIP)
+	incrCount, err := h.cribberDAO.GetRemoteIPIncrCount(ctx, loginID, remoteIP)
 	util.PanicIf(err)
 	if incrCount > 10 {
 		/// 加入黑名单
@@ -123,7 +123,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	/// 操作数 +1
-	util.PanicIf(h.cribberDAO.IncrRemoteIP(ctx, remoteIP))
+	util.PanicIf(h.cribberDAO.IncrMemberRemoteIP(ctx, loginID, remoteIP))
 
 	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
