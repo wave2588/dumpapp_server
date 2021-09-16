@@ -61,10 +61,8 @@ func (h *MemberVipV2Handler) GetPayURL(w http.ResponseWriter, r *http.Request) {
 
 	loginID := mustGetLoginID(ctx)
 
-	orderID, payURL, err := h.alipayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
+	_, payURL, err := h.alipayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
 	util.PanicIf(err)
-
-	h.alertWebCtl.SendPendingOrderMsg(ctx, orderID)
 
 	res := map[string]interface{}{
 		"open_url": payURL,

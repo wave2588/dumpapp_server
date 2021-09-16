@@ -3,8 +3,8 @@ package dao
 import "context"
 
 type CribberDAO interface {
-	IncrMemberIP(ctx context.Context, memberID int64, ip string) error
-	GetMemberIPIncrCount(ctx context.Context, memberID int64, ip string) (int, error)
+	IncrRemoteIP(ctx context.Context, ip string) error
+	GetRemoteIPIncrCount(ctx context.Context, ip string) (int, error)
 
 	/// 黑名单
 	SetMemberIDToBlacklist(ctx context.Context, memberID int64) error

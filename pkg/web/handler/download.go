@@ -1,19 +1,23 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
+	util2 "dumpapp_server/pkg/util"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -21,6 +25,7 @@ import (
 )
 
 type DownloadHandler struct {
+	accountDAO              dao.AccountDAO
 	ipaDAO                  dao.IpaDAO
 	ipaVersionDAO           dao.IpaVersionDAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
@@ -32,6 +37,7 @@ type DownloadHandler struct {
 
 func NewDownloadHandler() *DownloadHandler {
 	return &DownloadHandler{
+		accountDAO:              impl.DefaultAccountDAO,
 		ipaDAO:                  impl.DefaultIpaDAO,
 		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
@@ -107,16 +113,17 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	remoteIP := cast.ToString(ctx.Value(constant.RemoteIP))
-	incrCount, err := h.cribberDAO.GetMemberIPIncrCount(ctx, loginID, remoteIP)
+	incrCount, err := h.cribberDAO.GetRemoteIPIncrCount(ctx, remoteIP)
 	util.PanicIf(err)
 	if incrCount > 10 {
 		/// 加入黑名单
 		util.PanicIf(h.cribberDAO.SetMemberIDToBlacklist(ctx, loginID))
+		h.sendBlacklistWeiXinBot(ctx, loginID, ipaID, remoteIP)
 		panic(errors.ErrMemberBlacklist)
 	}
 
 	/// 操作数 +1
-	util.PanicIf(h.cribberDAO.IncrMemberIP(ctx, loginID, remoteIP))
+	util.PanicIf(h.cribberDAO.IncrRemoteIP(ctx, remoteIP))
 
 	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
@@ -143,4 +150,29 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	util.RenderJSON(w, resJSON)
+}
+
+func (h *DownloadHandler) sendBlacklistWeiXinBot(ctx context.Context, loginID, ipaID int64, ip string) {
+	account, err := h.accountDAO.Get(ctx, loginID)
+	util.PanicIf(err)
+
+	ipa, err := h.ipaDAO.Get(ctx, ipaID)
+	util.PanicIf(err)
+
+	ipStr := fmt.Sprintf("ip 地址：<font color=\"comment\">%s</font>\n", ip)
+	idStr := fmt.Sprintf("ID：<font color=\"comment\">%d</font>\n", account.ID)
+	email := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	number := fmt.Sprintf("手机号：：<font color=\"comment\">%s</font>\n", account.Phone)
+	createdAtStr := fmt.Sprintf("注册时间：<font color=\"comment\">%s</font>\n", account.CreatedAt.Format("2006-01-02 15:04:05"))
+	ipaIDStr := fmt.Sprintf("Ipa ID：<font color=\"comment\">%d</font>\n", ipa.ID)
+	ipaName := fmt.Sprintf("Ipa 名称：<font color=\"comment\">%s</font>\n", ipa.Name)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"warning\">危险: 发现恶意刷流量用户</font>\n>" +
+				ipStr + idStr + email + number + createdAtStr + ipaIDStr + ipaName + timeStr,
+		},
+	}
+	util2.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{"@all"})
 }
