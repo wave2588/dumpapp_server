@@ -59,6 +59,10 @@ func (h *MemberVipV2Handler) GetPayURL(w http.ResponseWriter, r *http.Request) {
 	args := &getNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	if args.Number > 7 {
+		util.PanicIf(errors.UnproccessableError("超过最大订单数限制。"))
+	}
+
 	loginID := mustGetLoginID(ctx)
 
 	_, payURL, err := h.alipayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
