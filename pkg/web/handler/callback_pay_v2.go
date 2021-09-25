@@ -72,14 +72,12 @@ func (h *CallbackPayV2Handler) ALiPayCallback(w http.ResponseWriter, r *http.Req
 	util.PanicIf(h.memberDownloadOrderDAO.Update(ctx, order))
 
 	number := cast.ToInt(order.Number)
-	if order.MemberID == 1390315185599680512 {
-		if number >= 3 && number < 5 { /// 买三送一
-			number += 1
-		} else if number >= 5 && number < 7 { /// 买五送二
-			number += 2
-		} else if number >= 7 { /// 买七送三
-			number += 3
-		}
+	if number >= 3 && number < 5 { /// 买三送一
+		number += 1
+	} else if number >= 5 && number < 7 { /// 买五送二
+		number += 2
+	} else if number >= 7 { /// 买七送三
+		number += 3
 	}
 
 	for i := 0; i < number; i++ {
