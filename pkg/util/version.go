@@ -1,5 +1,11 @@
 package util
 
+import (
+	"fmt"
+	"github.com/spf13/cast"
+	"strings"
+)
+
 type VersionCompareRes int
 
 const (
@@ -14,6 +20,8 @@ func CompareLittleVer(verA, verB string) VersionCompareRes {
 
 	lenA := len(bytesA)
 	lenB := len(bytesB)
+	fmt.Println(lenA, lenB)
+
 	if lenA > lenB {
 		return VersionCompareResBig
 	}
@@ -34,6 +42,25 @@ func compareByBytes(verA, verB []byte) VersionCompareRes {
 			return VersionCompareResBig
 		}
 		if verA[index] < verB[index] {
+			return VersionCompareResSmall
+		}
+	}
+	return VersionCompareResEqual
+}
+
+func Compare(verA, verB string) VersionCompareRes {
+	a := strings.Split(verA, ".")
+	b := strings.Split(verB, ".")
+	for idx, ver := range a {
+		av := cast.ToInt(ver)
+		bv := 0
+		if len(b) >= idx {
+			bv = cast.ToInt(b[idx])
+		}
+		if av > bv {
+			return VersionCompareResBig
+		}
+		if av < bv {
 			return VersionCompareResSmall
 		}
 	}
