@@ -21,6 +21,7 @@ func SendWeiXinBotV2(ctx context.Context, keyID string, message string, receiver
 				"bundleID:<font color=\"comment\">11111</font>\n" +
 				"邮箱:<font color=\"comment\">zhanghaibo</font>\n" +
 				"手机号:<font color=\"comment\">15711367321</font>",
+			"mentioned_list": receivers,
 		},
 	}
 	SendWeiXinBot(ctx, keyID, data, receivers)

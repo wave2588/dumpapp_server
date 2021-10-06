@@ -50,30 +50,6 @@ func (c *AlterWebController) SendMsg(ctx context.Context, memberID int64, name, 
 	//SendWeiXinBot(ctx, keyID, data, receivers)
 }
 
-func (c *AlterWebController) SendPendingOrderMsg(ctx context.Context, orderID int64) {
-	order, err := c.orderDAO.Get(ctx, orderID)
-	if err != nil {
-		return
-	}
-	account, err := c.accountDAO.Get(ctx, order.MemberID)
-	if err != nil {
-		return
-	}
-
-	email := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n", account.Email)
-	number := fmt.Sprintf("充值次数：：<font color=\"comment\">%d</font>\n", order.Number)
-	amount := fmt.Sprintf("充值金额：<font color=\"comment\">%v</font>\n", order.Amount.Float64)
-	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
-	data := map[string]interface{}{
-		"msgtype": "markdown",
-		"markdown": map[string]interface{}{
-			"content": "生成订单了，暂未支付。\n>" +
-				email + number + amount + timeStr,
-		},
-	}
-	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
-}
-
 func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64) {
 	order, err := c.orderDAO.Get(ctx, orderID)
 	if err != nil {
@@ -97,6 +73,22 @@ func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"warning\">支付成功</font>\n>" +
 				email + number + amount + number2 + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+}
+
+func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, ipaName string) {
+	account, err := c.accountDAO.Get(ctx, loginID)
+	if err != nil {
+		return
+	}
+	content := fmt.Sprintf("- 需求来了~\n- email:%s\n- ipaID: %d\n- ipaName: %s\n- 发送时间: %s", account.Email, ipaID, ipaName, time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "text",
+		"text": map[string]interface{}{
+			"content":        content,
+			"mentioned_list": []string{"@all"},
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
