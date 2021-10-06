@@ -1,6 +1,8 @@
 package handler
 
 import (
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -27,6 +29,7 @@ type IpaHandler struct {
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 
 	memberDownloadCtl controller.MemberDownloadController
+	alterWebCtl       controller2.AlterWebController
 }
 
 func NewIpaHandler() *IpaHandler {
@@ -37,6 +40,7 @@ func NewIpaHandler() *IpaHandler {
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
+		alterWebCtl:       impl3.DefaultAlterWebController,
 	}
 }
 
@@ -83,6 +87,9 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	/// 判断是否有下载次数
 	_, err = h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
 	util.PanicIf(err)
+
+	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
+	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.Name)
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{

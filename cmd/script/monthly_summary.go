@@ -19,8 +19,9 @@ func main() {
 	hasNext := true
 
 	var amount int64 = 0
+	month := time.Month(10)
 
-	startAt := time.Date(time.Now().Year(), 9, 1, 0, 0, 0, 0, time.Local)
+	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
 	for hasNext {
 
 		filter := []qm.QueryMod{
@@ -55,6 +56,6 @@ func main() {
 		memberIDs = append(memberIDs, ids...)
 	}
 
-	fmt.Println("9 月新注册用户数-->: ", len(memberIDs))
-	fmt.Println("9 月总收入-->: ", amount)
+	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
+	fmt.Println(fmt.Sprintf("%d 总收入-->: %d", month, amount))
 }

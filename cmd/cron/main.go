@@ -15,10 +15,7 @@ func main() {
 		delete_ipa.Run()
 	})
 
-	/// 每晚 8 点和 0 点推送总结
-	c.AddFunc("00 00 20 * * ?", func() {
-		conclusion.Run()
-	})
+	/// 每晚 0 点推送总结
 	c.AddFunc("00 00 00 * * ?", func() {
 		conclusion.Run()
 	})
