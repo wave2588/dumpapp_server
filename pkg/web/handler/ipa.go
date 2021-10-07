@@ -99,6 +99,38 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+type getLatestVersionArgs struct {
+	Name     string `form:"name" validate:"required"`
+	BundleID string `form:"bundle_id"`
+	Version  string `form:"version"`
+}
+
+func (p *getLatestVersionArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := middleware.MustGetMemberID(ctx)
+
+	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
+
+	args := getLatestVersionArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	/// 判断是否有下载次数
+	_, err := h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
+	util.PanicIf(err)
+
+	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
+	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
+}
+
 type getRankingArgs struct {
 	StartAt int64 `form:"start_at"`
 	EndAt   int64 `form:"end_at"`

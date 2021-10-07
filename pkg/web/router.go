@@ -31,6 +31,7 @@ func NewRouter() chi.Router {
 	// ipa
 	ipaHandler := handler.NewIpaHandler()
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}", ipaHandler.Get)
+	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}/latest", ipaHandler.GetLatestVersion)
 	r.With(middleware.OAuthGuest).Get("/ipa/ranking", ipaHandler.GetRanking)
 	// endregion
 
