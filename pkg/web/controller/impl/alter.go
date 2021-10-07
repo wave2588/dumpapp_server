@@ -78,16 +78,36 @@ func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
 
-func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, ipaName string) {
+func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, bundleID, ipaName, version string) {
 	account, err := c.accountDAO.Get(ctx, loginID)
 	if err != nil {
 		return
 	}
-	content := fmt.Sprintf("- 需求来了~\n- email:%s\n- ipaID: %d\n- ipaName: %s\n- 发送时间: %s", account.Email, ipaID, ipaName, time.Now().Format("2006-01-02 15:04:05"))
+	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	if err != nil {
+		return
+	}
+
+	ipaIDStr := fmt.Sprintf("应用 ID：<font color=\"comment\">%d</font>\n", ipaID)
+	ipaNameStr := fmt.Sprintf("应用名称：<font color=\"comment\">%s</font>\n", ipaName)
+	versionStr := fmt.Sprintf("应用版本：<font color=\"comment\">%s</font>\n", version)
+	bundleIDStr := fmt.Sprintf("BundleID：<font color=\"comment\">%s</font>\n", bundleID)
+	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"warning\">需求来了</font>\n>" +
+				ipaIDStr + ipaNameStr + versionStr + bundleIDStr + numberStr + emailStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	data = map[string]interface{}{
 		"msgtype": "text",
 		"text": map[string]interface{}{
-			"content":        content,
+			"content":        "",
 			"mentioned_list": []string{"@all"},
 		},
 	}

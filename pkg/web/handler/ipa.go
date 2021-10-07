@@ -45,7 +45,9 @@ func NewIpaHandler() *IpaHandler {
 }
 
 type getIpaArgs struct {
-	Name string `form:"name" validate:"required"`
+	Name     string `form:"name" validate:"required"`
+	BundleID string `form:"bundle_id"`
+	Version  string `form:"version"`
 }
 
 func (p *getIpaArgs) Validate() error {
@@ -89,7 +91,7 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(err)
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
-	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.Name)
+	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{

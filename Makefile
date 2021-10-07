@@ -27,5 +27,5 @@ ps_go:
 	ps aux | grep go
 
 run:
-	bash env_pro.sh
 	nohup go run cmd/web/main.go &
+	nohup go run cmd/cron/main.go &
