@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 
@@ -46,18 +45,13 @@ func RemoteIp(req *http.Request) string {
 }
 
 func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(111, r.Header)
-	fmt.Println(111, r.Header.Get("X-FORWARDED-FOR"))
-
-	fmt.Println(RemoteIp(r))
-
 	ctx := r.Context()
 
 	loginID := mustGetLoginID(ctx)
 
 	account := GetAccountByLoginID(ctx, loginID)
 
-	members := render.NewMemberRender([]int64{account.ID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	members := render.NewMemberRender([]int64{account.ID}, loginID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
 	ticket, err := util2.GenerateRegisterTicket(account.ID)
 	util.PanicIf(err)

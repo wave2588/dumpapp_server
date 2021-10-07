@@ -245,7 +245,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	//	}))
 	//}
 
-	members := render.NewMemberRender([]int64{accountID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	members := render.NewMemberRender([]int64{accountID}, accountID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
 	/// 获取 ticket
 	ticket, err := util2.GenerateRegisterTicket(accountID)
@@ -292,7 +292,7 @@ func (h *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if account.Password != args.Password {
 		panic(errors.UnproccessableError("密码错误"))
 	}
-	members := render.NewMemberRender([]int64{account.ID}, 0, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	members := render.NewMemberRender([]int64{account.ID}, account.ID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 
 	/// 获取 ticket
 	ticket, err := util2.GenerateRegisterTicket(account.ID)

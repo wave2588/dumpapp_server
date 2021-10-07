@@ -2,13 +2,16 @@ package render
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	pkgErr "github.com/pkg/errors"
 )
 
 type Member struct {
@@ -21,7 +24,11 @@ type Member struct {
 
 	/// 可下载次数
 	DownloadCount int64 `json:"download_count" render:"method=RenderDownloadCount"`
-	Vip           *Vip  `json:"vip,omitempty" render:"method=RenderMemberVip"`
+	/// todo: 已经没有这个东西了
+	Vip *Vip `json:"vip,omitempty" render:"method=RenderMemberVip"`
+
+	/// 邀请链接
+	InviteURL *string `json:"invite_url" render:"method=RenderInviteURL"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
@@ -46,6 +53,7 @@ type MemberRender struct {
 	accountDAO              dao.AccountDAO
 	memberVipDAO            dao.MemberVipDAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	memberInviteCodeDAO     dao.MemberInviteCodeDAO
 }
 
 type MemberOption func(*MemberRender)
@@ -78,6 +86,7 @@ var MemberDefaultRenderFields = []MemberOption{
 	MemberIncludes([]string{
 		"DownloadCount",
 		"Vip",
+		"InviteURL",
 	}),
 }
 
@@ -89,6 +98,7 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		accountDAO:              impl.DefaultAccountDAO,
 		memberVipDAO:            impl.DefaultMemberVipDAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		memberInviteCodeDAO:     impl.DefaultMemberInviteCodeDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -165,6 +175,35 @@ func (f *MemberRender) RenderDownloadCount(ctx context.Context) {
 	util.PanicIf(err)
 	for _, member := range f.memberMap {
 		member.DownloadCount = countMap[member.ID]
+	}
+}
+
+func (f *MemberRender) RenderInviteURL(ctx context.Context) {
+	inviteCode, err := f.memberInviteCodeDAO.GetByMemberID(ctx, f.loginID)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+
+	inviteCodeString := ""
+
+	/// 如果邀请码已经存在, 则直接取出即可
+	if inviteCode != nil {
+		inviteCodeString = inviteCode.Code
+	}
+
+	/// 如果没有邀请码则生成邀请码
+	if inviteCode == nil {
+		inviteCodeString = util2.MustGenerateInviteCode(ctx, 6)
+		util.PanicIf(f.memberInviteCodeDAO.Insert(ctx, &models.MemberInviteCode{
+			MemberID: f.loginID,
+			Code:     inviteCodeString,
+		}))
+	}
+
+	for _, member := range f.memberMap {
+		if member.ID == f.loginID {
+			member.InviteURL = util.StringPtr(fmt.Sprintf("https://www.dumpapp.com/register?invite_code=%s", inviteCodeString))
+		}
 	}
 }
 
