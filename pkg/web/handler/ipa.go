@@ -130,7 +130,7 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
 	}
 
-	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 10, filter)
+	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 20, filter)
 	util.PanicIf(err)
 
 	result := make([]*searchRanking, 0)
