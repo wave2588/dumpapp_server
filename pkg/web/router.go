@@ -39,6 +39,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/email", emailHandler.PostEmail)
 	// endregion
 
+	// invite
+	memberInviteHandler := handler.NewMemberInviteHandler()
+	r.With(middleware.OAuthRegister).Post("/member/invite_url", memberInviteHandler.PostInviteURL)
+	// endregion
+
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
 	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get)

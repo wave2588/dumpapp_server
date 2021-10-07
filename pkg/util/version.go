@@ -2,8 +2,9 @@ package util
 
 import (
 	"fmt"
-	"github.com/spf13/cast"
 	"strings"
+
+	"github.com/spf13/cast"
 )
 
 type VersionCompareRes int

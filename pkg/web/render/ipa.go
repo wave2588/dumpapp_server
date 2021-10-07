@@ -144,7 +144,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 		sort.Slice(vs, func(i, j int) bool {
 			re1 := vs[i].Version
 			re2 := vs[j].Version
-			//return util2.CompareLittleVer(re1, re2) == util2.VersionCompareResBig
+			// return util2.CompareLittleVer(re1, re2) == util2.VersionCompareResBig
 			return util2.Compare(re1, re2) == util2.VersionCompareResBig
 		})
 

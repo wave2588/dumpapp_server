@@ -1,8 +1,6 @@
 package handler
 
 import (
-	controller2 "dumpapp_server/pkg/web/controller"
-	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -15,6 +13,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"

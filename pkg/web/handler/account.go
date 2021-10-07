@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/clients"
+	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	controller2 "dumpapp_server/pkg/controller"
@@ -28,6 +31,8 @@ type AccountHandler struct {
 	accountDAO              dao2.AccountDAO
 	captchaDAO              dao2.CaptchaDAO
 	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
+	memberInviteCodeDAO     dao2.MemberInviteCodeDAO
+	memberInviteDAO         dao2.MemberInviteDAO
 
 	emailCtl   controller2.EmailController
 	tencentCtl controller2.TencentController
@@ -40,6 +45,8 @@ func NewAccountHandler() *AccountHandler {
 		accountDAO:              impl4.DefaultAccountDAO,
 		captchaDAO:              impl4.DefaultCaptchaDAO,
 		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
+		memberInviteCodeDAO:     impl4.DefaultMemberInviteCodeDAO,
+		memberInviteDAO:         impl4.DefaultMemberInviteDAO,
 
 		emailCtl:   impl2.DefaultEmailController,
 		tencentCtl: impl2.DefaultTencentController,
@@ -140,6 +147,7 @@ type registerQueryArgs struct {
 	Phone        string `json:"phone" validate:"required"`
 	PhoneCaptcha string `json:"phone_captcha" validate:"required"`
 	Password     string `json:"password" validate:"required"`
+	InviteCode   string `json:"invite_code"`
 }
 
 func (p *registerQueryArgs) Validate() error {
@@ -188,6 +196,34 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accountID := h.iceRPC.MustGenerateID(ctx)
+
+	/// 事物
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	/// start 判断是否有邀请码
+	if args.InviteCode != "" {
+		inviteCode, err := h.memberInviteCodeDAO.GetByCode(ctx, args.InviteCode)
+		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+			util.PanicIf(err)
+		}
+		if inviteCode == nil {
+			panic(errors.ErrMemberInviteCodeInvalid)
+		}
+		/// 记录邀请关系
+		util.PanicIf(h.memberInviteDAO.Insert(ctx, &models.MemberInvite{
+			InviterID: inviteCode.MemberID,
+			InviteeID: accountID,
+		}))
+		/// 送给邀请人下载 1 次数
+		util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
+			MemberID: inviteCode.MemberID,
+			Status:   enum.MemberDownloadNumberStatusNormal,
+		}))
+	}
+	/// end
+
 	util.PanicIf(h.accountDAO.Insert(ctx, &models.Account{
 		ID:       accountID,
 		Email:    args.Email,
@@ -197,6 +233,9 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	util.PanicIf(h.captchaDAO.RemoveEmailCaptcha(ctx, args.Email))
 	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	/// 必须使用手机号注册, 才能送一次下载次数
 	//if args.Phone != "" {
