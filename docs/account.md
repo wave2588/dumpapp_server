@@ -21,9 +21,10 @@ POST /register
 参数:  
 email: "11@1.com"               必填  
 email_captcha: "888888"         必填  
-phone: "157"                    非必填    
-phone_captcha: "666666"         非必填   
+phone: "157"                    必填    
+phone_captcha: "666666"         必填   
 password: "xxxx"                必填
+invite_code: ""                 非必填
 ```
 
 #### 登录

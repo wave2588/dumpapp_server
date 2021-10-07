@@ -29,7 +29,6 @@ func NewCribberDAO() *CribberDAO {
 }
 
 func (d *CribberDAO) generateIncrRemoteIP(memberID int64, ip string) string {
-
 	return fmt.Sprintf("dump:incr:member_id:%d:remote_ip:%s", memberID, ip)
 }
 

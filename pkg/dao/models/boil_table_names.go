@@ -9,6 +9,8 @@ var TableNames = struct {
 	IpaVersion           string
 	MemberDownloadNumber string
 	MemberDownloadOrder  string
+	MemberInvite         string
+	MemberInviteCode     string
 	MemberVip            string
 	MemberVipOrder       string
 	SearchRecordV2       string
@@ -18,6 +20,8 @@ var TableNames = struct {
 	IpaVersion:           "ipa_version",
 	MemberDownloadNumber: "member_download_number",
 	MemberDownloadOrder:  "member_download_order",
+	MemberInvite:         "member_invite",
+	MemberInviteCode:     "member_invite_code",
 	MemberVip:            "member_vip",
 	MemberVipOrder:       "member_vip_order",
 	SearchRecordV2:       "search_record_v2",
