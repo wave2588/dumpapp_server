@@ -1,4 +1,4 @@
-## ipa 相关文档
+```## ipa 相关文档
 
 ### 某个时间范围内 ipa 的排名情况
 GET /ipa/ranking  
@@ -18,4 +18,34 @@ Response:
             "name": "xxx",
         }
     ]
+}  
+```
+
+
+### 获取单个 ipa 信息
+GET /ipa/{ipa_id}  
+```json
+{
+  "name": "xxx",
+  "bundle_id": "xxx.com",  
+  "version": "1.1.1"
 }
+```  
+Response:
+```json
+{}
+```
+
+### 发送获取最新 ipa 信息给管理员
+GET /ipa/{ipa_id}/latest
+```json
+{
+  "name": "xxx",
+  "bundle_id": "xxx.com",  
+  "version": "1.1.1"
+}
+```  
+Response:
+```json
+{}
+```
