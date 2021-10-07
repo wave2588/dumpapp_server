@@ -1,4 +1,4 @@
-```## ipa 相关文档
+## ipa 相关文档
 
 ### 某个时间范围内 ipa 的排名情况
 GET /ipa/ranking  
