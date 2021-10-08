@@ -71,7 +71,7 @@ func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
-			"content": "<font color=\"warning\">支付成功</font>\n>" +
+			"content": "<font color=\"info\">支付成功</font>\n>" +
 				email + number + amount + number2 + timeStr,
 		},
 	}

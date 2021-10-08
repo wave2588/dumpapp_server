@@ -72,7 +72,8 @@ func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 type createIpaArgs struct {
-	Ipas []*ipaArgs `json:"ipas" validate:"required"`
+	Ipas        []*ipaArgs `json:"ipas" validate:"required"`
+	IsSendEmail bool       `json:"is_send_email"`
 }
 
 type ipaArgs struct {
@@ -167,7 +168,9 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
-	util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
+	if args.IsSendEmail {
+		util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
+	}
 
 	util.RenderJSON(w, "保存成功")
 }
