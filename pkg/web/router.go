@@ -40,6 +40,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/email", emailHandler.PostEmail)
 	// endregion
 
+	// region feedback
+	feedbackHandler := handler.NewFeedbackHandler()
+	r.With(middleware.OAuthRegister).Post("/feedback", feedbackHandler.Post)
+	// endregion
+
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
 	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get)
