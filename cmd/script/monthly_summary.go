@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -22,13 +23,19 @@ func main() {
 	month := time.Month(10)
 
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
-	for hasNext {
+	endAt := time.Date(time.Now().Year(), month, 30, 23, 59, 59, 0, time.Local)
 
+	resIDs := make([]int64, 0)
+	for hasNext {
 		filter := []qm.QueryMod{
 			models.MemberDownloadOrderWhere.CreatedAt.GTE(startAt),
+			models.MemberDownloadOrderWhere.CreatedAt.LTE(endAt),
+			models.MemberDownloadOrderWhere.Status.EQ(enum.MemberDownloadOrderStatusPaid),
 		}
 		ids, err := impl.DefaultMemberDownloadOrderDAO.ListIDs(ctx, offset, bulkSize, filter, nil)
 		util.PanicIf(err)
+
+		resIDs = append(resIDs, ids...)
 
 		hasNext = len(ids) >= bulkSize
 		offset += len(ids)
@@ -57,5 +64,6 @@ func main() {
 	}
 
 	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
+	fmt.Println(fmt.Sprintf("%d 支付成功的订单-->: %d", month, len(resIDs)))
 	fmt.Println(fmt.Sprintf("%d 总收入-->: %d", month, amount))
 }
