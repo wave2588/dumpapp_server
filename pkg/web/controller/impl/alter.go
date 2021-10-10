@@ -113,3 +113,31 @@ func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaI
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
+
+func (c *AlterWebController) SendFeedbackMsg(ctx context.Context, loginID int64, content string) {
+	account, err := c.accountDAO.Get(ctx, loginID)
+	if err != nil {
+		return
+	}
+
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	contentStr := fmt.Sprintf("反馈：<font color=\"comment\">%s</font>\n", content)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"comment\">反馈来了</font>\n>" +
+				emailStr + contentStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	data = map[string]interface{}{
+		"msgtype": "text",
+		"text": map[string]interface{}{
+			"content":        "",
+			"mentioned_list": []string{"@all"},
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+}
