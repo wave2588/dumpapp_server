@@ -35,6 +35,16 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/ipa/ranking", ipaHandler.GetRanking)
 	// endregion
 
+	// device
+	deviceHandler := handler.NewDeviceHandler()
+	/// 获取"获取"描述文件接口
+	r.With(middleware.OAuthRegister).Get("/device/config/qr_code", deviceHandler.GetMobileConfigQRCode)
+	/// 获取描述文件
+	r.With(middleware.OAuthGuest).Get("/device/config/file", deviceHandler.GetMobileConfigFile)
+	/// 绑定设备
+	r.With(middleware.OAuthGuest).Post("/device/bind/{code}", deviceHandler.Bind)
+	// endregion
+
 	// email
 	emailHandler := handler.NewEmailHandler()
 	r.With(middleware.OAuthGuest).Post("/email", emailHandler.PostEmail)

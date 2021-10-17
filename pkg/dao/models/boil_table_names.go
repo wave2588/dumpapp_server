@@ -8,8 +8,10 @@ var TableNames = struct {
 	Feedback             string
 	Ipa                  string
 	IpaVersion           string
+	MemberDevice         string
 	MemberDownloadNumber string
 	MemberDownloadOrder  string
+	MemberIDEncryption   string
 	MemberInvite         string
 	MemberInviteCode     string
 	MemberVip            string
@@ -20,8 +22,10 @@ var TableNames = struct {
 	Feedback:             "feedback",
 	Ipa:                  "ipa",
 	IpaVersion:           "ipa_version",
+	MemberDevice:         "member_device",
 	MemberDownloadNumber: "member_download_number",
 	MemberDownloadOrder:  "member_download_order",
+	MemberIDEncryption:   "member_id_encryption",
 	MemberInvite:         "member_invite",
 	MemberInviteCode:     "member_invite_code",
 	MemberVip:            "member_vip",
