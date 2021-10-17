@@ -23,7 +23,7 @@ func MustGenerateCaptcha(ctx context.Context) string {
 	return fmt.Sprintf("%06v", rnd.Int31n(1000000))
 }
 
-func MustGenerateInviteCode(ctx context.Context, l int) string {
+func MustGenerateCode(ctx context.Context, l int) string {
 	str := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 	bytes := []byte(str)
 	result := []byte{}

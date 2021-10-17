@@ -20,6 +20,7 @@ import (
 	"dumpapp_server/pkg/ice/impl"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/middleware/util"
+	util3 "dumpapp_server/pkg/util"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
@@ -33,6 +34,7 @@ type AccountHandler struct {
 	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
 	memberInviteCodeDAO     dao2.MemberInviteCodeDAO
 	memberInviteDAO         dao2.MemberInviteDAO
+	memberIDEncryptionDAO   dao2.MemberIDEncryptionDAO
 
 	emailCtl   controller2.EmailController
 	tencentCtl controller2.TencentController
@@ -47,6 +49,7 @@ func NewAccountHandler() *AccountHandler {
 		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
 		memberInviteCodeDAO:     impl4.DefaultMemberInviteCodeDAO,
 		memberInviteDAO:         impl4.DefaultMemberInviteDAO,
+		memberIDEncryptionDAO:   impl4.DefaultMemberIDEncryptionDAO,
 
 		emailCtl:   impl2.DefaultEmailController,
 		tencentCtl: impl2.DefaultTencentController,
@@ -229,6 +232,11 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Email:    args.Email,
 		Password: args.Password,
 		Phone:    args.Phone,
+	}))
+
+	util.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
+		MemberID: accountID,
+		Code:     util3.MustGenerateCode(ctx, 10),
 	}))
 
 	util.PanicIf(h.captchaDAO.RemoveEmailCaptcha(ctx, args.Email))
