@@ -117,7 +117,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type downloadP12FileArgs struct {
-	DeviceID string `form:"cer_id" validate:"required"`
+	DeviceID string `form:"device_id" validate:"required"`
 	CerID    string `form:"cer_id" validate:"required"`
 }
 
@@ -151,7 +151,7 @@ func (h *CertificateHandler) DownloadP12File(w http.ResponseWriter, r *http.Requ
 }
 
 type downloadMobileprovisionFileArgs struct {
-	DeviceID string `form:"cer_id" validate:"required"`
+	DeviceID string `form:"device_id" validate:"required"`
 	CerID    string `form:"cer_id" validate:"required"`
 }
 
@@ -166,7 +166,7 @@ func (args *downloadMobileprovisionFileArgs) Validate() error {
 func (h *CertificateHandler) DownloadMobileprovisionFile(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := downloadP12FileArgs{}
+	args := downloadMobileprovisionFileArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 	cerID := cast.ToInt64(args.CerID)
