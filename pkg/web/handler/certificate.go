@@ -180,6 +180,6 @@ func (h *CertificateHandler) DownloadMobileprovisionFile(w http.ResponseWriter, 
 	}
 	uDec, err := base64.StdEncoding.DecodeString(cer.MobileProvisionFileData)
 	util.PanicIf(err)
-	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment;filename="%d.p12"`, cer.ID))
+	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment;filename="%d.mobileprovision"`, cer.ID))
 	w.Write(uDec)
 }
