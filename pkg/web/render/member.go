@@ -40,6 +40,7 @@ type Member struct {
 }
 
 type Device struct {
+	ID      int64    `json:"id,string"`
 	UDID    string   `json:"udid"`
 	Product string   `json:"product"`
 	CerIDs  []string `json:"cer_ids"` /// 证书 ids
@@ -254,6 +255,7 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 			cerIDs = append(cerIDs, cast.ToString(cd.CertificateID))
 		}
 		result = append(result, &Device{
+			ID:      device.ID,
 			UDID:    device.Udid,
 			Product: device.Product,
 			CerIDs:  cerIDs,
