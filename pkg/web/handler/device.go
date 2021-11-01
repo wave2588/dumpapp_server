@@ -92,7 +92,7 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	fileData, err := ioutil.ReadAll(file)
 	util.PanicIf(err)
 
-	configURL := fmt.Sprintf(string(fileData), url)
+	configURL := strings.ReplaceAll(string(fileData), "%s", url)
 	content, err := ioutil.ReadAll(strings.NewReader(configURL))
 	util.PanicIf(err)
 
