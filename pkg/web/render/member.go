@@ -26,15 +26,20 @@ type Member struct {
 	DownloadCount int64 `json:"download_count" render:"method=RenderDownloadCount"`
 	/// todo: 已经没有这个东西了
 	Vip *Vip `json:"vip,omitempty" render:"method=RenderMemberVip"`
-
 	/// 邀请链接
 	InviteURL *string `json:"invite_url" render:"method=RenderInviteURL"`
+	/// 用户绑定的设备信息
+	Devices []*Device `json:"devices" render:"method=RenderDevices"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
 
 	/// Admin 相关
 	Admin *Admin `json:"admin,omitempty" render:"method=RenderAdmin"`
+}
+
+type Device struct {
+	UDID string `json:"udid"`
 }
 
 type Vip struct {
@@ -54,6 +59,7 @@ type MemberRender struct {
 	memberVipDAO            dao.MemberVipDAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 	memberInviteCodeDAO     dao.MemberInviteCodeDAO
+	memberDeviceDAO         dao.MemberDeviceDAO
 }
 
 type MemberOption func(*MemberRender)
@@ -87,6 +93,7 @@ var MemberDefaultRenderFields = []MemberOption{
 		"DownloadCount",
 		"Vip",
 		"InviteURL",
+		"Devices",
 	}),
 }
 
@@ -99,6 +106,7 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		memberVipDAO:            impl.DefaultMemberVipDAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 		memberInviteCodeDAO:     impl.DefaultMemberInviteCodeDAO,
+		memberDeviceDAO:         impl.DefaultMemberDeviceDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -205,6 +213,26 @@ func (f *MemberRender) RenderInviteURL(ctx context.Context) {
 			member.InviteURL = util.StringPtr(fmt.Sprintf("https://www.dumpapp.com/register?invite_code=%s", inviteCodeString))
 		}
 	}
+}
+
+func (f *MemberRender) RenderDevices(ctx context.Context) {
+	_, ok := f.memberMap[f.loginID]
+	if !ok {
+		return
+	}
+
+	memberDeviceMap, err := f.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{f.loginID})
+	util.PanicIf(err)
+
+	devices, ok := memberDeviceMap[f.loginID]
+	if !ok {
+		return
+	}
+	result := make([]*Device, 0)
+	for _, device := range devices {
+		result = append(result, &Device{UDID: device.Udid})
+	}
+	f.memberMap[f.loginID].Devices = result
 }
 
 func (f *MemberRender) RenderAdmin(ctx context.Context) {

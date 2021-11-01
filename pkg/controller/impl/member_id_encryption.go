@@ -2,11 +2,11 @@ package impl
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/errors"
-	pkgErr "github.com/pkg/errors"
 
+	"dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	pkgErr "github.com/pkg/errors"
 )
 
 type MemberIDEncryptionController struct {

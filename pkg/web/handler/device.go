@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 
+	"dumpapp_server/pkg/common/constant"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -17,24 +18,25 @@ import (
 	"dumpapp_server/pkg/errors"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
+	pkgErr "github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
 )
 
 type DeviceHandler struct {
 	accountDAO            dao.AccountDAO
-	memebrDeivceDAO       dao.MemberDeviceDAO
+	memberDeivceDAO       dao.MemberDeviceDAO
 	memberIDEncryptionCtl controller.MemberIDEncryptionController
 }
 
 func NewDeviceHandler() *DeviceHandler {
 	return &DeviceHandler{
 		accountDAO:            impl.DefaultAccountDAO,
-		memebrDeivceDAO:       impl.DefaultMemberDeviceDAO,
+		memberDeivceDAO:       impl.DefaultMemberDeviceDAO,
 		memberIDEncryptionCtl: impl2.DefaultMemberIDEncryptionController,
 	}
 }
 
-//var host = "http://10.14.9.188:1995"
+// var host = "http://10.14.9.188:1995"
 
 var host = "https://dumpapp.com/api"
 
@@ -83,22 +85,22 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	_, err := h.memberIDEncryptionCtl.GetMemberIDByCode(ctx, args.Code)
 	util.PanicIf(err)
 
-	//url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
+	url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
 
-	path, _ := os.Getwd()
-	file, err := os.Open(fmt.Sprintf("%s/templates/device.mobileconfig", path))
-	util.PanicIf(err)
-	defer file.Close()
-	fileData, err := ioutil.ReadAll(file)
-	util.PanicIf(err)
+	// path, _ := os.Getwd()
+	// file, err := os.Open(fmt.Sprintf("%s/templates/device.mobileconfig", path))
+	// util.PanicIf(err)
+	// defer file.Close()
+	// fileData, err := ioutil.ReadAll(file)
+	// util.PanicIf(err)
 
-	//configURL := strings.ReplaceAll(string(fileData), "%s", url)
-	//content, err := ioutil.ReadAll(strings.NewReader(configURL))
-	//util.PanicIf(err)
+	configURL := strings.ReplaceAll(constant.DeviceMobileConfig, "%s", url)
+	content, err := ioutil.ReadAll(strings.NewReader(configURL))
+	util.PanicIf(err)
 
 	w.Header().Add("Content-Type", "application/x-apple-aspen-config; chatset=utf-8")
 	w.Header().Add("Content-Disposition", "attachment;filename=\"1.mobileconfig\"")
-	w.Write(fileData)
+	w.Write(content)
 }
 
 type device struct {
@@ -164,7 +166,14 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 			panic(errors.UnproccessableError(fmt.Sprintf("发现未识别的 key。 key = %s", key)))
 		}
 	}
-	util.PanicIf(h.memebrDeivceDAO.Insert(ctx, memberDevice))
+
+	md, err := h.memberDeivceDAO.GetByUdid(ctx, memberDevice.Udid)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+	if md == nil {
+		util.PanicIf(h.memberDeivceDAO.Insert(ctx, memberDevice))
+	}
 
 	util.RenderJSON(w, "")
 }
