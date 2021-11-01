@@ -41,3 +41,30 @@ func (c *MemberDownloadController) GetDownloadNumber(ctx context.Context, loginI
 	}
 	return c.memberDownloadNumberDAO.Get(ctx, ids[0])
 }
+
+/// 获取一个整数消费 5 个下载次数
+func (c *MemberDownloadController) GetCertificateDownloadNumbers(ctx context.Context, loginID int64) ([]*models.MemberDownloadNumber, error) {
+	filter := []qm.QueryMod{
+		models.MemberDownloadNumberWhere.MemberID.EQ(loginID),
+		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
+	}
+	ids, err := c.memberDownloadNumberDAO.ListIDs(ctx, 0, 5, filter, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ids) < 5 {
+		return nil, errors2.ErrDownloadNumberLessThanFive
+	}
+
+	ids = ids[0:5]
+	data, err := c.memberDownloadNumberDAO.BatchGet(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*models.MemberDownloadNumber, 0)
+	for _, number := range data {
+		result = append(result, number)
+	}
+	return result, nil
+}

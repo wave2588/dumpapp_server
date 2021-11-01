@@ -12,6 +12,7 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
 	pkgErr "github.com/pkg/errors"
+	"github.com/spf13/cast"
 )
 
 type Member struct {
@@ -39,7 +40,9 @@ type Member struct {
 }
 
 type Device struct {
-	UDID string `json:"udid"`
+	UDID    string   `json:"udid"`
+	Product string   `json:"product"`
+	CerIDs  []string `json:"cer_ids"` /// 证书 ids
 }
 
 type Vip struct {
@@ -60,6 +63,7 @@ type MemberRender struct {
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 	memberInviteCodeDAO     dao.MemberInviteCodeDAO
 	memberDeviceDAO         dao.MemberDeviceDAO
+	certificateDeviceDAO    dao.CertificateDeviceDAO
 }
 
 type MemberOption func(*MemberRender)
@@ -107,6 +111,7 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 		memberInviteCodeDAO:     impl.DefaultMemberInviteCodeDAO,
 		memberDeviceDAO:         impl.DefaultMemberDeviceDAO,
+		certificateDeviceDAO:    impl.DefaultCertificateDeviceDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -221,6 +226,7 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 		return
 	}
 
+	/// 获取用户所有设备
 	memberDeviceMap, err := f.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{f.loginID})
 	util.PanicIf(err)
 
@@ -228,9 +234,30 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 	if !ok {
 		return
 	}
+
+	/// 获取所有设备 id
+	deviceIDs := make([]int64, 0)
+	for _, device := range devices {
+		deviceIDs = append(deviceIDs, device.ID)
+	}
+
+	/// 获取设备和证书绑定关系
+	cdsm, err := f.certificateDeviceDAO.BatchGetByDeviceIDs(ctx, deviceIDs)
+	util.PanicIf(err)
+
 	result := make([]*Device, 0)
 	for _, device := range devices {
-		result = append(result, &Device{UDID: device.Udid})
+		/// 根据设备 id 获取所有证书 id
+		cds := cdsm[device.ID]
+		cerIDs := make([]string, 0)
+		for _, cd := range cds {
+			cerIDs = append(cerIDs, cast.ToString(cd.CertificateID))
+		}
+		result = append(result, &Device{
+			UDID:    device.Udid,
+			Product: device.Product,
+			CerIDs:  cerIDs,
+		})
 	}
 	f.memberMap[f.loginID].Devices = result
 }

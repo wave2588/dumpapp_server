@@ -45,6 +45,13 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/device/bind/{code}", deviceHandler.Bind)
 	// endregion
 
+	// certificate
+	certificateHandler := handler.NewCertificateHandler()
+	r.With(middleware.OAuthRegister).Post("/certificate", certificateHandler.Post) /// 生成证书
+	r.With(middleware.OAuthRegister).Get("/certificate/p12", certificateHandler.DownloadP12File)
+	r.With(middleware.OAuthRegister).Get("/certificate/mobileprovision", certificateHandler.DownloadMobileprovisionFile)
+	// endregion
+
 	// email
 	emailHandler := handler.NewEmailHandler()
 	r.With(middleware.OAuthGuest).Post("/email", emailHandler.PostEmail)

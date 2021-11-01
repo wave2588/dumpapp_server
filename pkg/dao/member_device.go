@@ -24,6 +24,5 @@ type MemberDeviceDAO interface {
 	GetByUdid(ctx context.Context, udid string) (*models.MemberDevice, error)
 	// BatchGetByUdid retrieves multiple records by uniq key udid from db.
 	BatchGetByUdid(ctx context.Context, udids []string) (map[string]*models.MemberDevice, error)
-
 	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDevice, error)
 }

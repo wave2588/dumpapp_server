@@ -8,4 +8,5 @@ import (
 
 type MemberDownloadController interface {
 	GetDownloadNumber(ctx context.Context, loginID int64) (*models.MemberDownloadNumber, error)
+	GetCertificateDownloadNumbers(ctx context.Context, loginID int64) ([]*models.MemberDownloadNumber, error)
 }

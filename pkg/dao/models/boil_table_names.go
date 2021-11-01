@@ -5,6 +5,8 @@ package models
 
 var TableNames = struct {
 	Account              string
+	Certificate          string
+	CertificateDevice    string
 	Feedback             string
 	Ipa                  string
 	IpaVersion           string
@@ -19,6 +21,8 @@ var TableNames = struct {
 	SearchRecordV2       string
 }{
 	Account:              "account",
+	Certificate:          "certificate",
+	CertificateDevice:    "certificate_device",
 	Feedback:             "feedback",
 	Ipa:                  "ipa",
 	IpaVersion:           "ipa_version",

@@ -24,9 +24,3 @@ type SearchRecordV2DAO interface {
 	GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*SearchCount, error)
 	CountOrderBySearchCount(ctx context.Context, filter []qm.QueryMod) (int64, error)
 }
-
-type SearchCount struct {
-	IpaID int64
-	Name  string
-	Count int64
-}

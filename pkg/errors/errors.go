@@ -13,15 +13,21 @@ var (
 	ErrCaptchaRepeated          = NewDefaultAPIError(403, 10009, "CaptchaRepeated", "验证码重复发送")
 	ErrMemberInviteCodeInvalid  = NewDefaultAPIError(403, 10010, "ErrMemberInviteCodeInvalid", "邀请码无效")
 
-	ErrNotDownloadNumber = NewDefaultAPIError(403, 10004, "NotDownloadNumber", "没有下载次数")
-
 	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 app")
 	ErrNotFoundIpa        = NewDefaultAPIError(404, 20002, "NotFoundIpa", "未找到 ipa")
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
+	/// 支付相关的错误
+	ErrNotDownloadNumber          = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "没有下载次数")
+	ErrDownloadNumberLessThanFive = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 5 次")
+
 	/// 业务 dao 层错误
 	ErrRedisFail       = NewDefaultAPIError(500, 50000, "RedisFail", "redis 发生错误")
 	ErrMemberBlacklist = NewDefaultAPIError(403, 50001, "MemberBlacklist", "该账户已被拉黑, 请稍后重试。")
+
+	///
+	ErrHttpFail = NewDefaultAPIError(403, 403, "HttpFail", "http 请求失败")
+	ErrNotFound = NewDefaultAPIError(404, 404, "NotFound", "记录未找到")
 )
 
 func UnproccessableError(msg string) *APIError {
