@@ -83,7 +83,7 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	_, err := h.memberIDEncryptionCtl.GetMemberIDByCode(ctx, args.Code)
 	util.PanicIf(err)
 
-	url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
+	//url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
 
 	path, _ := os.Getwd()
 	file, err := os.Open(fmt.Sprintf("%s/templates/device.mobileconfig", path))
@@ -92,13 +92,13 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	fileData, err := ioutil.ReadAll(file)
 	util.PanicIf(err)
 
-	configURL := strings.ReplaceAll(string(fileData), "%s", url)
-	content, err := ioutil.ReadAll(strings.NewReader(configURL))
-	util.PanicIf(err)
+	//configURL := strings.ReplaceAll(string(fileData), "%s", url)
+	//content, err := ioutil.ReadAll(strings.NewReader(configURL))
+	//util.PanicIf(err)
 
 	w.Header().Add("Content-Type", "application/x-apple-aspen-config; chatset=utf-8")
 	w.Header().Add("Content-Disposition", "attachment;filename=\"1.mobileconfig\"")
-	w.Write(content)
+	w.Write(fileData)
 }
 
 type device struct {
