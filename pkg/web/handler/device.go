@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -34,8 +34,9 @@ func NewDeviceHandler() *DeviceHandler {
 	}
 }
 
-// var host = "http://192.168.50.252:1995"
-var host = "https://dumpapp.com/api"
+var host = "http://10.14.9.188:1995"
+
+//var host = "https://dumpapp.com/api"
 
 /// 获取下载描述文件二维码
 func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +84,15 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	util.PanicIf(err)
 
 	url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
-	configURL := fmt.Sprintf(constant.DeviceMobileConfig, url)
+
+	path, _ := os.Getwd()
+	file, err := os.Open(fmt.Sprintf("%s/templates/device.mobileconfig", path))
+	util.PanicIf(err)
+	defer file.Close()
+	fileData, err := ioutil.ReadAll(file)
+	util.PanicIf(err)
+
+	configURL := fmt.Sprintf(string(fileData), url)
 	content, err := ioutil.ReadAll(strings.NewReader(configURL))
 	util.PanicIf(err)
 
