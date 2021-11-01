@@ -34,9 +34,9 @@ func NewDeviceHandler() *DeviceHandler {
 	}
 }
 
-var host = "http://10.14.9.188:1995"
+//var host = "http://10.14.9.188:1995"
 
-//var host = "https://dumpapp.com/api"
+var host = "https://dumpapp.com/api"
 
 /// 获取下载描述文件二维码
 func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Request) {
