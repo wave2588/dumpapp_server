@@ -2,6 +2,8 @@ package impl
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/errors"
+	pkgErr "github.com/pkg/errors"
 
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -35,8 +37,11 @@ func (c *MemberIDEncryptionController) GetCodeByMemberID(ctx context.Context, me
 
 func (c *MemberIDEncryptionController) GetMemberIDByCode(ctx context.Context, code string) (int64, error) {
 	e, err := c.memberIDEncryptionDAO.GetByCode(ctx, code)
-	if err != nil {
+	if err != nil && pkgErr.Cause(err) != errors.ErrNotFound {
 		return 0, err
+	}
+	if e == nil {
+		return 0, errors.ErrNotFound
 	}
 	_, err = c.accountDAO.Get(ctx, e.MemberID)
 	if err != nil {
