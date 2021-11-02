@@ -7,13 +7,13 @@ type CertificateServer interface {
 }
 
 type CreateCerResponse struct {
-	IsSuccess    bool        `json:"IsSuccess"`
-	Data         *Data       `json:"data"`
-	ErrorCode    int         `json:"ErrorCode"`
-	ErrorMessage interface{} `json:"ErrorMessage"`
+	IsSuccess    bool                   `json:"IsSuccess"`
+	Data         *CreateCerResponseData `json:"data"`
+	ErrorCode    int                    `json:"ErrorCode"`
+	ErrorMessage interface{}            `json:"ErrorMessage"`
 }
 
-type Data struct {
+type CreateCerResponseData struct {
 	P12FileDate             string `json:"p12_file_date"`
 	MobileProvisionFileData string `json:"mobile_provision_file_data"`
 	UdidBatchNo             string `json:"udid_batch_no"`
