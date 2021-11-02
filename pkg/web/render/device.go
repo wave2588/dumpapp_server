@@ -13,7 +13,7 @@ type Device struct {
 	ID           int64          `json:"id,string"`
 	UDID         string         `json:"udid"`
 	Product      string         `json:"product"`
-	Certificates []*Certificate `json:"certificates" render:"method=RenderCertificates"` /// 证书列表
+	Certificates []*Certificate `json:"certificates,omitempty" render:"method=RenderCertificates"` /// 证书列表
 }
 
 type DeviceRender struct {

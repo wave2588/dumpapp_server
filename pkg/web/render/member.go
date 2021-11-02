@@ -31,7 +31,7 @@ type Member struct {
 	/// 邀请链接
 	InviteURL *string `json:"invite_url" render:"method=RenderInviteURL"`
 	/// 用户绑定的设备信息
-	Devices []*Device `json:"devices" render:"method=RenderDevices"`
+	Devices []*Device `json:"devices,omitempty" render:"method=RenderDevices"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
