@@ -55,3 +55,32 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.C
 	}
 	return &result, nil
 }
+
+func (h *CertificateServer) CheckCer(ctx context.Context, p12FileData, p12Password string) (*http.CheckCerResponse, error) {
+	endpoint := "https://www.neicexia.com/public_service/check_p12_file_validate"
+	data := url.Values{}
+	data.Set("p12_file_data", p12FileData)
+	data.Set("p12_password", p12Password)
+	client := &http2.Client{}
+	r, err := http2.NewRequest("POST", endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
+	if err != nil {
+		return nil, err
+	}
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+	res, err := client.Do(r)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	var result http.CheckCerResponse
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
