@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	util2 "dumpapp_server/pkg/util"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -71,11 +72,11 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	md, err := h.memberDeviceDAO.GetByUdid(ctx, args.UDID)
+	memberDevice, err := h.memberDeviceDAO.GetByUdid(ctx, args.UDID)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
-	if md == nil {
+	if memberDevice == nil {
 		panic(errors.ErrNotFound)
 	}
 
@@ -87,29 +88,58 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	cerData := result.Data
 
+	/// 查看证书是否已经存在
+	p12FileMd5 := util2.StringMd5(cerData.P12FileDate)
+	mpFileMd5 := util2.StringMd5(cerData.MobileProvisionFileData)
+	cer, err := h.certificateDAO.GetByP12FileDateMD5MobileProvisionFileDataMD5(ctx, p12FileMd5, mpFileMd5)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		panic(err)
+	}
+
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
-	/// 创建证书
-	cerID := h.iceRPC.MustGenerateID(ctx)
-	util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
-		ID:                      cerID,
-		P12FileDate:             cerData.P12FileDate,
-		MobileProvisionFileData: cerData.MobileProvisionFileData,
-		UdidBatchNo:             cerData.UdidBatchNo,
-		CerAppleid:              cerData.CerAppleid,
-	}))
-	/// 绑定证书和设备关系
-	util.PanicIf(h.certificateDeviceDAO.Insert(ctx, &models.CertificateDevice{
-		DeviceID:      md.ID,
-		CertificateID: cerID,
-	}))
-	/// 消费 5 次
-	for _, dn := range dns {
-		dn.Status = enum.MemberDownloadNumberStatusUsed
-		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+	if cer == nil {
+		/// 创建证书
+		cerID := h.iceRPC.MustGenerateID(ctx)
+		util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
+			ID:                         cerID,
+			P12FileDate:                cerData.P12FileDate,
+			P12FileDateMD5:             p12FileMd5,
+			MobileProvisionFileData:    cerData.MobileProvisionFileData,
+			MobileProvisionFileDataMD5: mpFileMd5,
+			UdidBatchNo:                cerData.UdidBatchNo,
+			CerAppleid:                 cerData.CerAppleid,
+		}))
+		/// 绑定证书和设备关系
+		util.PanicIf(h.certificateDeviceDAO.Insert(ctx, &models.CertificateDevice{
+			DeviceID:      memberDevice.ID,
+			CertificateID: cerID,
+		}))
+		/// 消费 5 次, 这是因为完全新创建, 所以进行消费
+		for _, dn := range dns {
+			dn.Status = enum.MemberDownloadNumberStatusUsed
+			util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+		}
+	} else {
+		/// 发现设备和此证书没绑定过, 则进行绑定
+		mc, err := h.certificateDeviceDAO.GetByDeviceIDCertificateID(ctx, memberDevice.ID, cer.ID)
+		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+			util.PanicIf(err)
+		}
+		if mc == nil {
+			util.PanicIf(h.certificateDeviceDAO.Insert(ctx, &models.CertificateDevice{
+				DeviceID:      memberDevice.ID,
+				CertificateID: cer.ID,
+			}))
+			/// 消费 5 次, 这是因为有证书了, 但是没绑定, 所以进行消费
+			for _, dn := range dns {
+				dn.Status = enum.MemberDownloadNumberStatusUsed
+				util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+			}
+		}
 	}
 
 	clients.MustCommit(ctx, txn)

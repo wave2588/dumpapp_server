@@ -14,6 +14,7 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	pkgErr "github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -171,4 +172,60 @@ func (d *CertificateDAO) Count(ctx context.Context, filters []qm.QueryMod) (int6
 	}
 
 	return models.Certificates(qs...).Count(ctx, exec)
+}
+
+// GetByP12FileDateMD5MobileProvisionFileDataMD5 retrieves a single record by uniq key p12FileDateMD5, mobileProvisionFileDataMD5 from db.
+func (d *CertificateDAO) GetByP12FileDateMD5MobileProvisionFileDataMD5(ctx context.Context, p12FileDateMD5 string, mobileProvisionFileDataMD5 string) (*models.Certificate, error) {
+	certificateObj := &models.Certificate{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `certificate` where `p12_file_date_md5`=? AND `mobile_provision_file_data_md5`=?", sel,
+	)
+
+	q := queries.Raw(query, p12FileDateMD5, mobileProvisionFileDataMD5)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, certificateObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=certificate, query=%s, args=p12FileDateMD5:%v mobileProvisionFileDataMD5 :%v", query, p12FileDateMD5, mobileProvisionFileDataMD5)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from certificate")
+	}
+
+	return certificateObj, nil
+}
+
+// GetCertificateSliceByP12FileDateMD5 retrieves a slice of records by first field of uniq key [p12FileDateMD5] with an executor.
+func (d *CertificateDAO) GetCertificateSliceByP12FileDateMD5(ctx context.Context, p12FileDateMD5 string) ([]*models.Certificate, error) {
+	var o []*models.Certificate
+
+	query := "select `certificate`.* from `certificate` where `p12_file_date_md5`=?"
+
+	q := queries.Raw(query, p12FileDateMD5)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, &o)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=certificate, query=%s, args=p12FileDateMD5 :%v", query, p12FileDateMD5)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from certificate")
+	}
+	return o, nil
 }

@@ -23,54 +23,64 @@ import (
 
 // Certificate is an object representing the database table.
 type Certificate struct {
-	ID                      int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	P12FileDate             string    `boil:"p12_file_date" json:"p12_file_date" toml:"p12_file_date" yaml:"p12_file_date"`
-	MobileProvisionFileData string    `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
-	UdidBatchNo             string    `boil:"udid_batch_no" json:"udid_batch_no" toml:"udid_batch_no" yaml:"udid_batch_no"`
-	CerAppleid              string    `boil:"cer_appleid" json:"cer_appleid" toml:"cer_appleid" yaml:"cer_appleid"`
-	CreatedAt               time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt               time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID                         int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	P12FileDate                string    `boil:"p12_file_date" json:"p12_file_date" toml:"p12_file_date" yaml:"p12_file_date"`
+	P12FileDateMD5             string    `boil:"p12_file_date_md5" json:"p12_file_date_md5" toml:"p12_file_date_md5" yaml:"p12_file_date_md5"`
+	MobileProvisionFileData    string    `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
+	MobileProvisionFileDataMD5 string    `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
+	UdidBatchNo                string    `boil:"udid_batch_no" json:"udid_batch_no" toml:"udid_batch_no" yaml:"udid_batch_no"`
+	CerAppleid                 string    `boil:"cer_appleid" json:"cer_appleid" toml:"cer_appleid" yaml:"cer_appleid"`
+	CreatedAt                  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt                  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *certificateR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L certificateL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CertificateColumns = struct {
-	ID                      string
-	P12FileDate             string
-	MobileProvisionFileData string
-	UdidBatchNo             string
-	CerAppleid              string
-	CreatedAt               string
-	UpdatedAt               string
+	ID                         string
+	P12FileDate                string
+	P12FileDateMD5             string
+	MobileProvisionFileData    string
+	MobileProvisionFileDataMD5 string
+	UdidBatchNo                string
+	CerAppleid                 string
+	CreatedAt                  string
+	UpdatedAt                  string
 }{
-	ID:                      "id",
-	P12FileDate:             "p12_file_date",
-	MobileProvisionFileData: "mobile_provision_file_data",
-	UdidBatchNo:             "udid_batch_no",
-	CerAppleid:              "cer_appleid",
-	CreatedAt:               "created_at",
-	UpdatedAt:               "updated_at",
+	ID:                         "id",
+	P12FileDate:                "p12_file_date",
+	P12FileDateMD5:             "p12_file_date_md5",
+	MobileProvisionFileData:    "mobile_provision_file_data",
+	MobileProvisionFileDataMD5: "mobile_provision_file_data_md5",
+	UdidBatchNo:                "udid_batch_no",
+	CerAppleid:                 "cer_appleid",
+	CreatedAt:                  "created_at",
+	UpdatedAt:                  "updated_at",
 }
 
 // Generated where
 
 var CertificateWhere = struct {
-	ID                      whereHelperint64
-	P12FileDate             whereHelperstring
-	MobileProvisionFileData whereHelperstring
-	UdidBatchNo             whereHelperstring
-	CerAppleid              whereHelperstring
-	CreatedAt               whereHelpertime_Time
-	UpdatedAt               whereHelpertime_Time
+	ID                         whereHelperint64
+	P12FileDate                whereHelperstring
+	P12FileDateMD5             whereHelperstring
+	MobileProvisionFileData    whereHelperstring
+	MobileProvisionFileDataMD5 whereHelperstring
+	UdidBatchNo                whereHelperstring
+	CerAppleid                 whereHelperstring
+	CreatedAt                  whereHelpertime_Time
+	UpdatedAt                  whereHelpertime_Time
 }{
-	ID:                      whereHelperint64{field: "`certificate`.`id`"},
-	P12FileDate:             whereHelperstring{field: "`certificate`.`p12_file_date`"},
-	MobileProvisionFileData: whereHelperstring{field: "`certificate`.`mobile_provision_file_data`"},
-	UdidBatchNo:             whereHelperstring{field: "`certificate`.`udid_batch_no`"},
-	CerAppleid:              whereHelperstring{field: "`certificate`.`cer_appleid`"},
-	CreatedAt:               whereHelpertime_Time{field: "`certificate`.`created_at`"},
-	UpdatedAt:               whereHelpertime_Time{field: "`certificate`.`updated_at`"},
+	ID:                         whereHelperint64{field: "`certificate`.`id`"},
+	P12FileDate:                whereHelperstring{field: "`certificate`.`p12_file_date`"},
+	P12FileDateMD5:             whereHelperstring{field: "`certificate`.`p12_file_date_md5`"},
+	MobileProvisionFileData:    whereHelperstring{field: "`certificate`.`mobile_provision_file_data`"},
+	MobileProvisionFileDataMD5: whereHelperstring{field: "`certificate`.`mobile_provision_file_data_md5`"},
+	UdidBatchNo:                whereHelperstring{field: "`certificate`.`udid_batch_no`"},
+	CerAppleid:                 whereHelperstring{field: "`certificate`.`cer_appleid`"},
+	CreatedAt:                  whereHelpertime_Time{field: "`certificate`.`created_at`"},
+	UpdatedAt:                  whereHelpertime_Time{field: "`certificate`.`updated_at`"},
 }
 
 // CertificateRels is where relationship names are stored.
@@ -90,8 +100,8 @@ func (*certificateR) NewStruct() *certificateR {
 type certificateL struct{}
 
 var (
-	certificateAllColumns            = []string{"id", "p12_file_date", "mobile_provision_file_data", "udid_batch_no", "cer_appleid", "created_at", "updated_at"}
-	certificateColumnsWithoutDefault = []string{"p12_file_date", "mobile_provision_file_data", "udid_batch_no", "cer_appleid"}
+	certificateAllColumns            = []string{"id", "p12_file_date", "p12_file_date_md5", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "created_at", "updated_at"}
+	certificateColumnsWithoutDefault = []string{"p12_file_date", "p12_file_date_md5", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid"}
 	certificateColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	certificatePrimaryKeyColumns     = []string{"id"}
 )
