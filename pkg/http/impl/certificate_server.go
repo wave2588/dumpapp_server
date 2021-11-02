@@ -57,7 +57,7 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.C
 }
 
 func (h *CertificateServer) CheckCer(ctx context.Context, p12FileData, p12Password string) (*http.CheckCerResponse, error) {
-	endpoint := "https://www.neicexia.com/public_service/check_p12_file_validate"
+	endpoint := config.DumpConfig.AppConfig.CerCheckP12URL
 	data := url.Values{}
 	data.Set("p12_file_data", p12FileData)
 	data.Set("p12_password", p12Password)
