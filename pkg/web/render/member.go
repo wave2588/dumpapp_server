@@ -10,9 +10,10 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/http"
+	impl2 "dumpapp_server/pkg/http/impl"
 	util2 "dumpapp_server/pkg/util"
 	pkgErr "github.com/pkg/errors"
-	"github.com/spf13/cast"
 )
 
 type Member struct {
@@ -39,13 +40,6 @@ type Member struct {
 	Admin *Admin `json:"admin,omitempty" render:"method=RenderAdmin"`
 }
 
-type Device struct {
-	ID      int64    `json:"id,string"`
-	UDID    string   `json:"udid"`
-	Product string   `json:"product"`
-	CerIDs  []string `json:"cer_ids"` /// 证书 ids
-}
-
 type Vip struct {
 	IsVip   bool   `json:"is_vip"`
 	StartAt *int64 `json:"start_at,omitempty"`
@@ -65,6 +59,7 @@ type MemberRender struct {
 	memberInviteCodeDAO     dao.MemberInviteCodeDAO
 	memberDeviceDAO         dao.MemberDeviceDAO
 	certificateDeviceDAO    dao.CertificateDeviceDAO
+	certificateService      http.CertificateServer
 }
 
 type MemberOption func(*MemberRender)
@@ -113,6 +108,7 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		memberInviteCodeDAO:     impl.DefaultMemberInviteCodeDAO,
 		memberDeviceDAO:         impl.DefaultMemberDeviceDAO,
 		certificateDeviceDAO:    impl.DefaultCertificateDeviceDAO,
+		certificateService:      impl2.DefaultCertificateServer,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -222,6 +218,7 @@ func (f *MemberRender) RenderInviteURL(ctx context.Context) {
 }
 
 func (f *MemberRender) RenderDevices(ctx context.Context) {
+	/// 非主用户不加载
 	_, ok := f.memberMap[f.loginID]
 	if !ok {
 		return
@@ -242,26 +239,16 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 		deviceIDs = append(deviceIDs, device.ID)
 	}
 
-	/// 获取设备和证书绑定关系
-	cdsm, err := f.certificateDeviceDAO.BatchGetByDeviceIDs(ctx, deviceIDs)
-	util.PanicIf(err)
-
-	result := make([]*Device, 0)
-	for _, device := range devices {
-		/// 根据设备 id 获取所有证书 id
-		cds := cdsm[device.ID]
-		cerIDs := make([]string, 0)
-		for _, cd := range cds {
-			cerIDs = append(cerIDs, cast.ToString(cd.CertificateID))
+	deviceMap := NewDeviceRender(deviceIDs, f.loginID, DeviceDefaultRenderFields...).RenderMap(ctx)
+	deviceResult := make([]*Device, 0)
+	for _, deviceID := range deviceIDs {
+		device, ok := deviceMap[deviceID]
+		if !ok {
+			continue
 		}
-		result = append(result, &Device{
-			ID:      device.ID,
-			UDID:    device.Udid,
-			Product: device.Product,
-			CerIDs:  cerIDs,
-		})
+		deviceResult = append(deviceResult, device)
 	}
-	f.memberMap[f.loginID].Devices = result
+	f.memberMap[f.loginID].Devices = deviceResult
 }
 
 func (f *MemberRender) RenderAdmin(ctx context.Context) {
