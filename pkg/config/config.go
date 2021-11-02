@@ -66,6 +66,7 @@ var config = appConfig{
 
 	/// cer server
 	CerCreateURL:   os.Getenv("CER_CREATE_URL"),
+	CerCheckP12URL: os.Getenv("CER_CHECK_P12_URL"),
 	CerServerToken: os.Getenv("CER_SERVER_TOKEN"),
 }
 
@@ -101,6 +102,7 @@ type appConfig struct {
 	DumpAppFromEmailPassword string
 
 	CerCreateURL   string
+	CerCheckP12URL string
 	CerServerToken string
 }
 

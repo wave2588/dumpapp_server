@@ -2,15 +2,10 @@ package impl
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
-	http2 "net/http"
-	"net/url"
-	"strconv"
-	"strings"
-
 	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/http"
+	"dumpapp_server/pkg/util"
+	"encoding/json"
 )
 
 type CertificateServer struct{}
@@ -27,24 +22,13 @@ func NewCertificateServer() *CertificateServer {
 
 func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.CreateCerResponse, error) {
 	endpoint := config.DumpConfig.AppConfig.CerCreateURL
-	data := url.Values{}
-	data.Set("token", config.DumpConfig.AppConfig.CerServerToken)
-	data.Set("udid", udid)
-	data.Set("udid_region_pool", "public")
-	client := &http2.Client{}
-	r, err := http2.NewRequest("POST", endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
-	if err != nil {
-		return nil, err
-	}
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-
-	res, err := client.Do(r)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := util.HttpRequest("POST", endpoint, map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}, map[string]string{
+		"token":            config.DumpConfig.AppConfig.CerServerToken,
+		"udid":             udid,
+		"udid_region_pool": "public",
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -57,23 +41,13 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.C
 }
 
 func (h *CertificateServer) CheckCer(ctx context.Context, p12FileData, p12Password string) (*http.CheckCerResponse, error) {
-	endpoint := "https://www.neicexia.com/public_service/check_p12_file_validate"
-	data := url.Values{}
-	data.Set("p12_file_data", p12FileData)
-	data.Set("p12_password", p12Password)
-	client := &http2.Client{}
-	r, err := http2.NewRequest("POST", endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
-	if err != nil {
-		return nil, err
-	}
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	res, err := client.Do(r)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	endpoint := config.DumpConfig.AppConfig.CerCheckP12URL
+	body, err := util.HttpRequest("POST", endpoint, map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}, map[string]string{
+		"p12_file_data": p12FileData,
+		"p12_password":  p12Password,
+	})
 	if err != nil {
 		return nil, err
 	}
