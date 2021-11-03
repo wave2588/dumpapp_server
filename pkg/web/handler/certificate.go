@@ -2,9 +2,7 @@ package handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -25,12 +23,16 @@ import (
 	impl4 "dumpapp_server/pkg/ice/impl"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl5 "dumpapp_server/pkg/web/controller/impl"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 )
 
 type CertificateHandler struct {
+	alterWebCtl             controller2.AlterWebController
 	memberDownloadNumberCtl controller.MemberDownloadController
 	certificateServer       http2.CertificateServer
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
@@ -42,6 +44,7 @@ type CertificateHandler struct {
 
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
+		alterWebCtl:             impl5.DefaultAlterWebController,
 		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
 		certificateServer:       impl3.DefaultCertificateServer,
 		memberDownloadNumberDAO: impl2.DefaultMemberDownloadNumberDAO,
@@ -86,9 +89,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
 
-	rs, _ := json.Marshal(result)
-	fmt.Println(string(rs))
-	if result.Data == nil {
+	if result.Data == nil || result.IsSuccess == false {
+		/// 创建失败推送
+		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, result.ErrorMessage)
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
 	cerData := result.Data
