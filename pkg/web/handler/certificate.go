@@ -4,6 +4,7 @@ import (
 	"context"
 	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -84,6 +85,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 请求整数接口
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
+
+	rs, _ := json.Marshal(result)
+	fmt.Println(string(rs))
 	if result.Data == nil {
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}

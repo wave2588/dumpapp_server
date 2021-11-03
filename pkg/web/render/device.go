@@ -10,9 +10,12 @@ import (
 )
 
 type Device struct {
-	ID           int64          `json:"id,string"`
-	UDID         string         `json:"udid"`
-	Product      string         `json:"product"`
+	ID        int64  `json:"id,string"`
+	UDID      string `json:"udid"`
+	Product   string `json:"product"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
+
 	Certificates []*Certificate `json:"certificates,omitempty" render:"method=RenderCertificates"` /// 证书列表
 }
 
@@ -100,9 +103,11 @@ func (f *DeviceRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[device.ID] = &Device{
-			ID:      device.ID,
-			UDID:    device.Udid,
-			Product: device.Product,
+			ID:        device.ID,
+			UDID:      device.Udid,
+			Product:   device.Product,
+			CreatedAt: device.CreatedAt.Unix(),
+			UpdatedAt: device.UpdatedAt.Unix(),
 		}
 	}
 	f.DeviceMap = result

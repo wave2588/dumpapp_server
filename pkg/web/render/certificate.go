@@ -2,7 +2,6 @@ package render
 
 import (
 	"context"
-
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -15,8 +14,11 @@ import (
 type Certificate struct {
 	meta *models.Certificate
 
-	ID          int64 `json:"id,string"`
-	P12IsActive bool  `json:"p12_is_active" render:"method=RenderP12IsActive"`
+	ID        int64 `json:"id,string"`
+	CreatedAt int64 `json:"created_at"`
+	UpdatedAt int64 `json:"updated_at"`
+
+	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
 }
 
 type CertificateRender struct {
@@ -103,8 +105,10 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[meta.ID] = &Certificate{
-			meta: meta,
-			ID:   meta.ID,
+			meta:      meta,
+			ID:        meta.ID,
+			CreatedAt: meta.CreatedAt.Unix(),
+			UpdatedAt: meta.UpdatedAt.Unix(),
 		}
 	}
 	f.CertificateMap = result
@@ -112,6 +116,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 
 func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 	batch := util2.NewBatch(ctx)
+	isActiveMap := make(map[int64]bool)
 	for _, certificate := range f.CertificateMap {
 		batch.Append(func(cerID int64) util2.FutureFunc {
 			return func() error {
@@ -119,10 +124,14 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 				if err != nil {
 					return err
 				}
-				certificate.P12IsActive = response.Data
+				isActiveMap[cerID] = response.Data
 				return nil
 			}
 		}(certificate.ID))
 	}
 	batch.Wait()
+
+	for _, certificate := range f.CertificateMap {
+		certificate.P12IsActive = isActiveMap[certificate.ID]
+	}
 }
