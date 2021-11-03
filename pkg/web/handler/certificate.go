@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -144,6 +145,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	util.RenderJSON(w, memberMap[loginID])
 }
 
 type downloadP12FileArgs struct {
