@@ -16,8 +16,6 @@ import (
 	impl4 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
-	rpc "dumpapp_server/pkg/ice"
-	"dumpapp_server/pkg/ice/impl"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/middleware/util"
 	util3 "dumpapp_server/pkg/util"
@@ -27,8 +25,6 @@ import (
 )
 
 type AccountHandler struct {
-	iceRPC rpc.IceRPC
-
 	accountDAO              dao2.AccountDAO
 	captchaDAO              dao2.CaptchaDAO
 	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
@@ -42,8 +38,6 @@ type AccountHandler struct {
 
 func NewAccountHandler() *AccountHandler {
 	return &AccountHandler{
-		iceRPC: impl.DefaultIceRPC,
-
 		accountDAO:              impl4.DefaultAccountDAO,
 		captchaDAO:              impl4.DefaultCaptchaDAO,
 		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
@@ -95,7 +89,7 @@ func (h *AccountHandler) SendEmailCaptcha(w http.ResponseWriter, r *http.Request
 }
 
 func (h *AccountHandler) sendCaptcha(ctx context.Context, email string) error {
-	captcha := h.iceRPC.MustGenerateCaptcha(ctx)
+	captcha := util3.MustGenerateCaptcha(ctx)
 	err := h.emailCtl.SendEmail(ctx, "验证码来了~", fmt.Sprintf("欢迎注册 iOS 脱壳平台, 此次注册验证码为: %s, 有效期为 5 分钟.", captcha), email, []string{})
 	if err != nil {
 		return err
@@ -137,8 +131,8 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 	}
 
 	/// 发送验证码
-	newCaptcha := h.iceRPC.MustGenerateCaptcha(ctx)
-	h.captchaDAO.SetPhoneCaptcha(ctx, args.Phone, newCaptcha)
+	newCaptcha := util3.MustGenerateCaptcha(ctx)
+	util.PanicIf(h.captchaDAO.SetPhoneCaptcha(ctx, args.Phone, newCaptcha))
 	util.PanicIf(h.tencentCtl.SendPhoneRegisterCaptcha(ctx, newCaptcha, args.Phone))
 
 	util.RenderJSON(w, "ok")
@@ -198,7 +192,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		panic(errors.ErrAccountRegisteredByPhone)
 	}
 
-	accountID := h.iceRPC.MustGenerateID(ctx)
+	accountID := util3.MustGenerateID(ctx)
 
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)

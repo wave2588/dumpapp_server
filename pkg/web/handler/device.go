@@ -1,8 +1,6 @@
 package handler
 
 import (
-	rpc "dumpapp_server/pkg/ice"
-	impl4 "dumpapp_server/pkg/ice/impl"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -19,6 +17,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	util2 "dumpapp_server/pkg/util"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
@@ -29,7 +28,6 @@ type DeviceHandler struct {
 	accountDAO            dao.AccountDAO
 	memberDeivceDAO       dao.MemberDeviceDAO
 	memberIDEncryptionCtl controller.MemberIDEncryptionController
-	iceRPC                rpc.IceRPC
 }
 
 func NewDeviceHandler() *DeviceHandler {
@@ -37,7 +35,6 @@ func NewDeviceHandler() *DeviceHandler {
 		accountDAO:            impl.DefaultAccountDAO,
 		memberDeivceDAO:       impl.DefaultMemberDeviceDAO,
 		memberIDEncryptionCtl: impl2.DefaultMemberIDEncryptionController,
-		iceRPC:                impl4.DefaultIceRPC,
 	}
 }
 
@@ -153,7 +150,7 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		panic(errors.UnproccessableError("device key value 不一致"))
 	}
 
-	id := h.iceRPC.MustGenerateID(ctx)
+	id := util2.MustGenerateID(ctx)
 	memberDevice := &models.MemberDevice{
 		ID:       id,
 		MemberID: memberID,

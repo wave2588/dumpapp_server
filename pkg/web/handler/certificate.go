@@ -19,8 +19,6 @@ import (
 	"dumpapp_server/pkg/errors"
 	http2 "dumpapp_server/pkg/http"
 	impl3 "dumpapp_server/pkg/http/impl"
-	rpc "dumpapp_server/pkg/ice"
-	impl4 "dumpapp_server/pkg/ice/impl"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
@@ -39,7 +37,6 @@ type CertificateHandler struct {
 	memberDeviceDAO         dao.MemberDeviceDAO
 	certificateDAO          dao.CertificateDAO
 	certificateDeviceDAO    dao.CertificateDeviceDAO
-	iceRPC                  rpc.IceRPC
 }
 
 func NewCertificateHandler() *CertificateHandler {
@@ -51,7 +48,6 @@ func NewCertificateHandler() *CertificateHandler {
 		memberDeviceDAO:         impl2.DefaultMemberDeviceDAO,
 		certificateDAO:          impl2.DefaultCertificateDAO,
 		certificateDeviceDAO:    impl2.DefaultCertificateDeviceDAO,
-		iceRPC:                  impl4.DefaultIceRPC,
 	}
 }
 
@@ -111,7 +107,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	if cer == nil {
 		/// 创建证书
-		cerID := h.iceRPC.MustGenerateID(ctx)
+		cerID := util2.MustGenerateID(ctx)
 		util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
 			ID:                         cerID,
 			P12FileDate:                cerData.P12FileDate,
