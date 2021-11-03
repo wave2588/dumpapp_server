@@ -2,9 +2,7 @@ package handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -21,34 +19,35 @@ import (
 	"dumpapp_server/pkg/errors"
 	http2 "dumpapp_server/pkg/http"
 	impl3 "dumpapp_server/pkg/http/impl"
-	rpc "dumpapp_server/pkg/ice"
-	impl4 "dumpapp_server/pkg/ice/impl"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl5 "dumpapp_server/pkg/web/controller/impl"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 )
 
 type CertificateHandler struct {
+	alterWebCtl             controller2.AlterWebController
 	memberDownloadNumberCtl controller.MemberDownloadController
 	certificateServer       http2.CertificateServer
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 	memberDeviceDAO         dao.MemberDeviceDAO
 	certificateDAO          dao.CertificateDAO
 	certificateDeviceDAO    dao.CertificateDeviceDAO
-	iceRPC                  rpc.IceRPC
 }
 
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
+		alterWebCtl:             impl5.DefaultAlterWebController,
 		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
 		certificateServer:       impl3.DefaultCertificateServer,
 		memberDownloadNumberDAO: impl2.DefaultMemberDownloadNumberDAO,
 		memberDeviceDAO:         impl2.DefaultMemberDeviceDAO,
 		certificateDAO:          impl2.DefaultCertificateDAO,
 		certificateDeviceDAO:    impl2.DefaultCertificateDeviceDAO,
-		iceRPC:                  impl4.DefaultIceRPC,
 	}
 }
 
@@ -86,9 +85,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
 
-	rs, _ := json.Marshal(result)
-	fmt.Println(string(rs))
-	if result.Data == nil {
+	if result.Data == nil || result.IsSuccess == false {
+		/// 创建失败推送
+		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, result.ErrorMessage)
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
 	cerData := result.Data
@@ -108,7 +107,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	if cer == nil {
 		/// 创建证书
-		cerID := h.iceRPC.MustGenerateID(ctx)
+		cerID := util2.MustGenerateID(ctx)
 		util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
 			ID:                         cerID,
 			P12FileDate:                cerData.P12FileDate,

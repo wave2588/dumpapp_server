@@ -6,15 +6,15 @@ import (
 	"math/rand"
 	"time"
 
+	"dumpapp_server/pkg/common/util"
 	"github.com/bwmarrin/snowflake"
 	"github.com/spf13/cast"
 )
 
+var node, nodeErr = snowflake.NewNode(1)
+
 func MustGenerateID(ctx context.Context) int64 {
-	node, err := snowflake.NewNode(1)
-	if err != nil {
-		panic(err)
-	}
+	util.PanicIf(nodeErr)
 	return node.Generate().Int64()
 }
 

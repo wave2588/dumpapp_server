@@ -17,6 +17,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	util2 "dumpapp_server/pkg/util"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
@@ -149,7 +150,9 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		panic(errors.UnproccessableError("device key value 不一致"))
 	}
 
+	id := util2.MustGenerateID(ctx)
 	memberDevice := &models.MemberDevice{
+		ID:       id,
 		MemberID: memberID,
 	}
 	for idx, key := range args.Device.Keys {

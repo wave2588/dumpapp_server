@@ -141,3 +141,37 @@ func (c *AlterWebController) SendFeedbackMsg(ctx context.Context, loginID int64,
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
+
+func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, loginID, deviceID int64, errorMessage string) {
+	account, err := c.accountDAO.Get(ctx, loginID)
+	if err != nil {
+		return
+	}
+	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	if err != nil {
+		return
+	}
+
+	errorStr := fmt.Sprintf("错误信息：<font color=\"comment\">%s</font>\n", errorMessage)
+	deviceStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", deviceID)
+	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"warning\">内侧侠报错了!</font>\n>" +
+				errorStr + deviceStr + numberStr + emailStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	data = map[string]interface{}{
+		"msgtype": "text",
+		"text": map[string]interface{}{
+			"content":        "",
+			"mentioned_list": []string{"@all"},
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+}

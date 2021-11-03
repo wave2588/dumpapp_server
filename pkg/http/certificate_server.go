@@ -13,7 +13,7 @@ type CreateCerResponse struct {
 	IsSuccess    bool                   `json:"IsSuccess"`
 	Data         *CreateCerResponseData `json:"Data"`
 	ErrorCode    int                    `json:"ErrorCode"`
-	ErrorMessage interface{}            `json:"ErrorMessage"`
+	ErrorMessage string                 `json:"ErrorMessage"`
 }
 
 type CreateCerResponseData struct {
@@ -24,8 +24,8 @@ type CreateCerResponseData struct {
 }
 
 type CheckCerResponse struct {
-	IsSuccess    bool        `json:"IsSuccess"`
-	Data         bool        `json:"Data"`
-	ErrorCode    int         `json:"ErrorCode"`
-	ErrorMessage interface{} `json:"ErrorMessage"`
+	IsSuccess    bool   `json:"IsSuccess"`
+	Data         bool   `json:"Data"`
+	ErrorCode    int    `json:"ErrorCode"`
+	ErrorMessage string `json:"ErrorMessage"`
 }
