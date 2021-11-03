@@ -22,7 +22,8 @@ func main() {
 	util.PanicIf(err)
 
 	/// 证书文件
-	pemPath := fmt.Sprintf("%s/templates/pem/sign.pem", path)
+	pemPath1 := fmt.Sprintf("%s/templates/pem/Intermediate.crt.pem", path)
+	pemPath2 := fmt.Sprintf("%s/templates/pem/root.crt.pem", path)
 
 	configURL := strings.ReplaceAll(constant.DeviceMobileConfig, "%s", "https://xxxxx")
 	/// 签名前的 mobileconfig
@@ -32,7 +33,12 @@ func main() {
 	/// 签名后的 mobileconfig
 	mobileconfigOutPath := fmt.Sprintf("%s/templates/mobileconfig/sign_out.mobileconfig", path)
 
-	cmdString := fmt.Sprintf("openssl smime -sign -in %s -out %s -signer %s -certfile %s -outform der -nodetach", mobileconfigInPath, mobileconfigOutPath, pemPath, pemPath)
+	//openssl smime -sign -in Example.mobileconfig -out SignedVerifyExample.mobileconfig -signer InnovCertificates.pem -certfile root.crt.pem -outform der -nodetach
+
+	//openssl x509 -inform DER -outform PEM -in AppleIncRootCertificate.cer -out root.crt.pem
+	//openssl x509 -inform DER -outform PEM -in AppleAAICA.cer -out Intermediate.crt.pem
+
+	cmdString := fmt.Sprintf("openssl smime -sign -in %s -out %s -signer %s -certfile %s -outform der -nodetach", mobileconfigInPath, mobileconfigOutPath, pemPath1, pemPath2)
 	fmt.Println(cmdString)
 	util.PanicIf(cmd(cmdString))
 
