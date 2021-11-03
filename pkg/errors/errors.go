@@ -20,6 +20,7 @@ var (
 	/// 支付相关的错误
 	ErrNotDownloadNumber          = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "没有下载次数")
 	ErrDownloadNumberLessThanFive = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 5 次")
+	ErrCreateCertificateFail      = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
 	/// 业务 dao 层错误
 	ErrRedisFail       = NewDefaultAPIError(500, 50000, "RedisFail", "redis 发生错误")

@@ -85,7 +85,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
 	if result.Data == nil {
-		util.PanicIf(errors.ErrHttpFail)
+		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
 	cerData := result.Data
 
