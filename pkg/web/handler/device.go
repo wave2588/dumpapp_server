@@ -169,5 +169,6 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(h.memberDeivceDAO.Insert(ctx, memberDevice))
 	}
 
-	util.RenderJSON(w, "")
+	w.Header().Set("Location", "https://www.dumpapp.com/cerBuy")
+	w.WriteHeader(301)
 }
