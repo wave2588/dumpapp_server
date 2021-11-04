@@ -16,34 +16,24 @@ import (
 func main() {
 	//ctx := context.Background()
 
-	//openssl smime -sign -in Example.mobileconfig -out SignedVerifyExample.mobileconfig -signer InnovCertificates.pem -certfile root.crt.pem -outform der -nodetach
-
 	path, err := os.Getwd()
 	util.PanicIf(err)
 
 	/// 证书文件
-	pemPath1 := fmt.Sprintf("%s/templates/pem/Intermediate.crt.pem", path)
-	pemPath2 := fmt.Sprintf("%s/templates/pem/root.crt.pem", path)
+	serverCrt := fmt.Sprintf("%s/templates/sign/server.crt", path)
+	serverKey := fmt.Sprintf("%s/templates/sign/server.key", path)
+	caCrt := fmt.Sprintf("%s/templates/sign/ca.crt", path)
 
 	configURL := strings.ReplaceAll(constant.DeviceMobileConfig, "%s", "https://xxxxx")
 	/// 签名前的 mobileconfig
-	mobileconfigInPath := fmt.Sprintf("%s/templates/mobileconfig/sign_in.mobileconfig", path)
+	mobileconfigInPath := fmt.Sprintf("%s/templates/mobileconfig/unsign.mobileconfig", path)
 	util.PanicIf(ioutil.WriteFile(mobileconfigInPath, []byte(configURL), 0644))
 
 	/// 签名后的 mobileconfig
-	mobileconfigOutPath := fmt.Sprintf("%s/templates/mobileconfig/sign_out.mobileconfig", path)
+	mobileconfigOutPath := fmt.Sprintf("%s/templates/mobileconfig/signed.mobileconfig", path)
 
-	//openssl smime -sign -in Example.mobileconfig -out SignedVerifyExample.mobileconfig -signer InnovCertificates.pem -certfile root.crt.pem -outform der -nodetach
-
-	//openssl x509 -inform DER -outform PEM -in AppleIncRootCertificate.cer -out root.crt.pem
-	//openssl x509 -inform DER -outform PEM -in AppleAAICA.cer -out Intermediate.crt.pem
-
-	cmdString := fmt.Sprintf("openssl smime -sign -in %s -out %s -signer %s -certfile %s -outform der -nodetach", mobileconfigInPath, mobileconfigOutPath, pemPath1, pemPath2)
-	fmt.Println(cmdString)
+	cmdString := fmt.Sprintf("openssl smime -sign -in %s -out %s -signer %s -inkey %s  -certfile %s -outform der -nodetach", mobileconfigInPath, mobileconfigOutPath, serverCrt, serverKey, caCrt)
 	util.PanicIf(cmd(cmdString))
-
-	//openssl smime -sign -in unsigned.mobileconfig -out signed.mobileconfig -signer mbaike.crt -inkey mbaikenopass.key -certfile ca-bundle.pem -outform der -nodetach
-
 }
 
 func cmd(input string) error {

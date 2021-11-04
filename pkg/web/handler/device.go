@@ -18,6 +18,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
@@ -28,6 +30,7 @@ type DeviceHandler struct {
 	accountDAO            dao.AccountDAO
 	memberDeivceDAO       dao.MemberDeviceDAO
 	memberIDEncryptionCtl controller.MemberIDEncryptionController
+	signWebCtl            controller2.SignMobileconfigWebController
 }
 
 func NewDeviceHandler() *DeviceHandler {
@@ -35,12 +38,9 @@ func NewDeviceHandler() *DeviceHandler {
 		accountDAO:            impl.DefaultAccountDAO,
 		memberDeivceDAO:       impl.DefaultMemberDeviceDAO,
 		memberIDEncryptionCtl: impl2.DefaultMemberIDEncryptionController,
+		signWebCtl:            impl3.DefaultSignMobileconfigWebController,
 	}
 }
-
-// var host = "http://10.14.9.188:1995"
-
-var host = "https://dumpapp.com/api"
 
 /// 获取下载描述文件二维码
 func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +50,7 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 	code, err := h.memberIDEncryptionCtl.GetCodeByMemberID(ctx, loginID)
 	util.PanicIf(err)
 
-	url := fmt.Sprintf("%s/device/config/file?code=%s", host, code)
+	url := fmt.Sprintf("%s/device/config/file?code=%s", constant.HOST, code)
 	q, err := qrcode.New(url, qrcode.Medium)
 	if err != nil {
 		return
@@ -84,20 +84,7 @@ func (h *DeviceHandler) GetMobileConfigFile(w http.ResponseWriter, r *http.Reque
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	_, err := h.memberIDEncryptionCtl.GetMemberIDByCode(ctx, args.Code)
-	util.PanicIf(err)
-
-	url := fmt.Sprintf("%s/device/bind/%s", host, args.Code)
-
-	// path, _ := os.Getwd()
-	// file, err := os.Open(fmt.Sprintf("%s/templates/device.mobileconfig", path))
-	// util.PanicIf(err)
-	// defer file.Close()
-	// fileData, err := ioutil.ReadAll(file)
-	// util.PanicIf(err)
-
-	configURL := strings.ReplaceAll(constant.DeviceMobileConfig, "%s", url)
-	content, err := ioutil.ReadAll(strings.NewReader(configURL))
+	content, err := h.signWebCtl.Sign(ctx, args.Code)
 	util.PanicIf(err)
 
 	w.Header().Add("Content-Type", "application/x-apple-aspen-config; chatset=utf-8")
