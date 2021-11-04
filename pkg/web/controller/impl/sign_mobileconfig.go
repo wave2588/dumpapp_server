@@ -72,8 +72,8 @@ func (c *SignMobileconfigWebController) Sign(ctx context.Context, memberCode str
 		return nil, err
 	}
 
-	os.Remove(signedFilePath)
-	os.Remove(unSignFilePath)
+	util.PanicIf(os.Remove(signedFilePath))
+	util.PanicIf(os.Remove(unSignFilePath))
 	return data, nil
 }
 
@@ -82,7 +82,7 @@ func (c *SignMobileconfigWebController) mobileconfigPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/templates/mobileconfig/", path), nil
+	return fmt.Sprintf("%s/templates/mobileconfig", path), nil
 }
 
 func (c *SignMobileconfigWebController) signPath() (string, error) {
@@ -90,7 +90,7 @@ func (c *SignMobileconfigWebController) signPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/templates/sign/", path), nil
+	return fmt.Sprintf("%s/templates/sign", path), nil
 }
 
 func (c *SignMobileconfigWebController) saveUnSignFile(ctx context.Context, mcPath, memberCode string) (string, string, error) {

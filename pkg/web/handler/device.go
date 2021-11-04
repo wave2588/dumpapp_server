@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -59,9 +58,12 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		return
 	}
-	util.RenderJSON(w, map[string]interface{}{
-		"image_base64": base64.StdEncoding.EncodeToString(png),
-	})
+	//util.RenderJSON(w, map[string]interface{}{
+	//	"image_base64": base64.StdEncoding.EncodeToString(png),
+	//})
+	w.Header().Set("Content-Type", "image/png")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(png)))
+	w.Write(png)
 }
 
 type getMobileConfigFileArgs struct {
