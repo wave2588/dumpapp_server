@@ -6,6 +6,7 @@ import (
 
 func PanicIf(err error) {
 	if err != nil {
-		panic(errors.WithStack(err))
+		e := errors.WithStack(err)
+		panic(e)
 	}
 }
