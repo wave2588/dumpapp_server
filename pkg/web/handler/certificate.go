@@ -150,7 +150,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
-	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, memberMap[loginID])
 }
 
