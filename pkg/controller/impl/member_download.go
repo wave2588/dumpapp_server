@@ -48,16 +48,16 @@ func (c *MemberDownloadController) GetCertificateDownloadNumbers(ctx context.Con
 		models.MemberDownloadNumberWhere.MemberID.EQ(loginID),
 		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
 	}
-	ids, err := c.memberDownloadNumberDAO.ListIDs(ctx, 0, 5, filter, nil)
+	ids, err := c.memberDownloadNumberDAO.ListIDs(ctx, 0, 6, filter, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(ids) < 5 {
-		return nil, errors2.ErrDownloadNumberLessThanFive
+	if len(ids) < 6 {
+		return nil, errors2.ErrDownloadNumberLessThanSix
 	}
 
-	ids = ids[0:5]
+	ids = ids[0:6]
 	data, err := c.memberDownloadNumberDAO.BatchGet(ctx, ids)
 	if err != nil {
 		return nil, err

@@ -2,29 +2,33 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/clients"
+	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	"dumpapp_server/pkg/controller/impl"
+	"dumpapp_server/pkg/dao"
+	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/middleware"
+	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"dumpapp_server/pkg/common/clients"
-	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
-	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/controller"
-	"dumpapp_server/pkg/controller/impl"
-	"dumpapp_server/pkg/dao"
+
 	impl2 "dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/dao/models"
-	"dumpapp_server/pkg/errors"
+
 	http2 "dumpapp_server/pkg/http"
 	impl3 "dumpapp_server/pkg/http/impl"
-	"dumpapp_server/pkg/middleware"
+
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl5 "dumpapp_server/pkg/web/controller/impl"
-	"dumpapp_server/pkg/web/render"
+
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -123,7 +127,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 			DeviceID:      memberDevice.ID,
 			CertificateID: cerID,
 		}))
-		/// 消费 5 次, 这是因为完全新创建, 所以进行消费
+		/// 消费 6 次, 这是因为完全新创建, 所以进行消费
 		for _, dn := range dns {
 			dn.Status = enum.MemberDownloadNumberStatusUsed
 			util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
@@ -139,7 +143,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 				DeviceID:      memberDevice.ID,
 				CertificateID: cer.ID,
 			}))
-			/// 消费 5 次, 这是因为有证书了, 但是没绑定, 所以进行消费
+			/// 消费 6 次, 这是因为有证书了, 但是没绑定, 所以进行消费
 			for _, dn := range dns {
 				dn.Status = enum.MemberDownloadNumberStatusUsed
 				util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))

@@ -63,9 +63,9 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 		"image_base64": base64.StdEncoding.EncodeToString(png),
 		"url":          url,
 	})
-	//w.Header().Set("Content-Type", "image/png")
-	//w.Header().Set("Content-Length", fmt.Sprintf("%d", len(png)))
-	//w.Write(png)
+	// w.Header().Set("Content-Type", "image/png")
+	// w.Header().Set("Content-Length", fmt.Sprintf("%d", len(png)))
+	// w.Write(png)
 }
 
 type getMobileConfigFileArgs struct {

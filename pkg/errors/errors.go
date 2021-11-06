@@ -18,9 +18,9 @@ var (
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
 	/// 支付相关的错误
-	ErrNotDownloadNumber          = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "没有下载次数")
-	ErrDownloadNumberLessThanFive = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 5 次")
-	ErrCreateCertificateFail      = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
+	ErrNotDownloadNumber         = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "没有下载次数")
+	ErrDownloadNumberLessThanSix = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 6 次")
+	ErrCreateCertificateFail     = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
 	/// 业务 dao 层错误
 	ErrRedisFail       = NewDefaultAPIError(500, 50000, "RedisFail", "redis 发生错误")

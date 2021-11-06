@@ -2,8 +2,7 @@ package handler
 
 import "net/http"
 
-type CheckHealthHandler struct {
-}
+type CheckHealthHandler struct{}
 
 func NewCheckHealthHandler() *CheckHealthHandler {
 	return &CheckHealthHandler{}
