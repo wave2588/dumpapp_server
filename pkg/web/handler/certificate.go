@@ -188,7 +188,7 @@ func (h *CertificateHandler) DownloadP12File(w http.ResponseWriter, r *http.Requ
 	}
 	uDec, err := base64.StdEncoding.DecodeString(cer.P12FileDate)
 	util.PanicIf(err)
-	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment;filename="%d.p12"`, cer.ID))
+	w.Header().Add("Content-Disposition", `attachment;filename="developer.p12`)
 	w.Header().Add("Access-Control-Expose-Headers", "Content-Disposition")
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(uDec)), 10))
@@ -225,7 +225,7 @@ func (h *CertificateHandler) DownloadMobileprovisionFile(w http.ResponseWriter, 
 	}
 	uDec, err := base64.StdEncoding.DecodeString(cer.MobileProvisionFileData)
 	util.PanicIf(err)
-	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment;filename="%d.mobileprovision"`, cer.ID))
+	w.Header().Add("Content-Disposition", `attachment;filename="developer.mobileprovision"`)
 	w.Header().Add("Access-Control-Expose-Headers", "Content-Disposition")
 	w.Header().Set("Content-Type", "application/octet-stream")
 	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(uDec)), 10))
