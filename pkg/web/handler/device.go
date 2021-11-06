@@ -170,6 +170,6 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(h.memberDeivceDAO.Insert(ctx, memberDevice))
 	}
 
-	w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s", memberDevice.Udid))
+	w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version))
 	w.WriteHeader(301)
 }
