@@ -132,6 +132,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 			dn.Status = enum.MemberDownloadNumberStatusUsed
 			util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 		}
+		h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
 	} else {
 		/// 发现设备和此证书没绑定过, 则进行绑定
 		mc, err := h.certificateDeviceDAO.GetByDeviceIDCertificateID(ctx, memberDevice.ID, cer.ID)
@@ -148,6 +149,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 				dn.Status = enum.MemberDownloadNumberStatusUsed
 				util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 			}
+			h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cer.ID)
 		}
 	}
 
