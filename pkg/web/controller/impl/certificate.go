@@ -23,7 +23,7 @@ func NewCertificateWebController() *CertificateWebController {
 	return &CertificateWebController{}
 }
 
-func (c *CertificateWebController) ModifyCertificateContent(ctx context.Context, p12Data string) (string, error) {
+func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Context, p12Data string) (string, error) {
 	path, err := c.mobileconfigPath()
 	if err != nil {
 		return "", err

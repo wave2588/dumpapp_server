@@ -26,6 +26,7 @@ type Certificate struct {
 	ID                         int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	P12FileDate                string    `boil:"p12_file_date" json:"p12_file_date" toml:"p12_file_date" yaml:"p12_file_date"`
 	P12FileDateMD5             string    `boil:"p12_file_date_md5" json:"p12_file_date_md5" toml:"p12_file_date_md5" yaml:"p12_file_date_md5"`
+	ModifiedP12FileDate        string    `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
 	MobileProvisionFileData    string    `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
 	MobileProvisionFileDataMD5 string    `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
 	UdidBatchNo                string    `boil:"udid_batch_no" json:"udid_batch_no" toml:"udid_batch_no" yaml:"udid_batch_no"`
@@ -41,6 +42,7 @@ var CertificateColumns = struct {
 	ID                         string
 	P12FileDate                string
 	P12FileDateMD5             string
+	ModifiedP12FileDate        string
 	MobileProvisionFileData    string
 	MobileProvisionFileDataMD5 string
 	UdidBatchNo                string
@@ -51,6 +53,7 @@ var CertificateColumns = struct {
 	ID:                         "id",
 	P12FileDate:                "p12_file_date",
 	P12FileDateMD5:             "p12_file_date_md5",
+	ModifiedP12FileDate:        "modified_p12_file_date",
 	MobileProvisionFileData:    "mobile_provision_file_data",
 	MobileProvisionFileDataMD5: "mobile_provision_file_data_md5",
 	UdidBatchNo:                "udid_batch_no",
@@ -65,6 +68,7 @@ var CertificateWhere = struct {
 	ID                         whereHelperint64
 	P12FileDate                whereHelperstring
 	P12FileDateMD5             whereHelperstring
+	ModifiedP12FileDate        whereHelperstring
 	MobileProvisionFileData    whereHelperstring
 	MobileProvisionFileDataMD5 whereHelperstring
 	UdidBatchNo                whereHelperstring
@@ -75,6 +79,7 @@ var CertificateWhere = struct {
 	ID:                         whereHelperint64{field: "`certificate`.`id`"},
 	P12FileDate:                whereHelperstring{field: "`certificate`.`p12_file_date`"},
 	P12FileDateMD5:             whereHelperstring{field: "`certificate`.`p12_file_date_md5`"},
+	ModifiedP12FileDate:        whereHelperstring{field: "`certificate`.`modified_p12_file_date`"},
 	MobileProvisionFileData:    whereHelperstring{field: "`certificate`.`mobile_provision_file_data`"},
 	MobileProvisionFileDataMD5: whereHelperstring{field: "`certificate`.`mobile_provision_file_data_md5`"},
 	UdidBatchNo:                whereHelperstring{field: "`certificate`.`udid_batch_no`"},
@@ -100,8 +105,8 @@ func (*certificateR) NewStruct() *certificateR {
 type certificateL struct{}
 
 var (
-	certificateAllColumns            = []string{"id", "p12_file_date", "p12_file_date_md5", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "created_at", "updated_at"}
-	certificateColumnsWithoutDefault = []string{"p12_file_date", "p12_file_date_md5", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid"}
+	certificateAllColumns            = []string{"id", "p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "created_at", "updated_at"}
+	certificateColumnsWithoutDefault = []string{"p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid"}
 	certificateColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	certificatePrimaryKeyColumns     = []string{"id"}
 )

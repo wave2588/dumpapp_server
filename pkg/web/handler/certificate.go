@@ -95,13 +95,14 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	cerData := result.Data
 
-	/// p12 文件修改内容
-	p12FileData, err := h.certificateWebCtl.ModifyCertificateContent(ctx, cerData.P12FileDate)
-	util.PanicIf(err)
+	p12FileData := cerData.P12FileDate
 	mpFileData := cerData.MobileProvisionFileData
+	/// p12 文件修改内容
+	modifiedP12FileData, err := h.certificateWebCtl.GetModifiedCertificateData(ctx, cerData.P12FileDate)
+	util.PanicIf(err)
 
 	/// 查看证书是否已经存在, p12 文件还是按照元数据计算
-	p12FileMd5 := util2.StringMd5(cerData.P12FileDate)
+	p12FileMd5 := util2.StringMd5(p12FileData)
 	mpFileMd5 := util2.StringMd5(mpFileData)
 	cer, err := h.certificateDAO.GetByP12FileDateMD5MobileProvisionFileDataMD5(ctx, p12FileMd5, mpFileMd5)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
@@ -120,6 +121,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 			ID:                         cerID,
 			P12FileDate:                p12FileData,
 			P12FileDateMD5:             p12FileMd5,
+			ModifiedP12FileDate:        modifiedP12FileData,
 			MobileProvisionFileData:    mpFileData,
 			MobileProvisionFileDataMD5: mpFileMd5,
 			UdidBatchNo:                cerData.UdidBatchNo,
@@ -191,7 +193,7 @@ func (h *CertificateHandler) DownloadP12File(w http.ResponseWriter, r *http.Requ
 	if cer == nil {
 		panic(errors.ErrNotFound)
 	}
-	uDec, err := base64.StdEncoding.DecodeString(cer.P12FileDate)
+	uDec, err := base64.StdEncoding.DecodeString(cer.ModifiedP12FileDate)
 	util.PanicIf(err)
 	w.Header().Add("Content-Disposition", `attachment;filename="developer.p12`)
 	w.Header().Add("Access-Control-Expose-Headers", "Content-Disposition")
