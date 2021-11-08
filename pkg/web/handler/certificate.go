@@ -2,33 +2,29 @@ package handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/clients"
-	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/enum"
-	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/controller"
-	"dumpapp_server/pkg/controller/impl"
-	"dumpapp_server/pkg/dao"
-	"dumpapp_server/pkg/dao/models"
-	"dumpapp_server/pkg/errors"
-	"dumpapp_server/pkg/middleware"
-	"dumpapp_server/pkg/web/render"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"dumpapp_server/pkg/common/clients"
+	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
-
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	"dumpapp_server/pkg/controller/impl"
+	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
-
+	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/errors"
 	http2 "dumpapp_server/pkg/http"
 	impl3 "dumpapp_server/pkg/http/impl"
-
+	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl5 "dumpapp_server/pkg/web/controller/impl"
-
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -36,6 +32,7 @@ import (
 
 type CertificateHandler struct {
 	alterWebCtl             controller2.AlterWebController
+	certificateWebCtl       controller2.CertificateWebController
 	memberDownloadNumberCtl controller.MemberDownloadController
 	certificateServer       http2.CertificateServer
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
@@ -47,6 +44,7 @@ type CertificateHandler struct {
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
 		alterWebCtl:             impl5.DefaultAlterWebController,
+		certificateWebCtl:       impl5.DefaultCertificateWebController,
 		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
 		certificateServer:       impl3.DefaultCertificateServer,
 		memberDownloadNumberDAO: impl2.DefaultMemberDownloadNumberDAO,
@@ -97,9 +95,14 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	cerData := result.Data
 
-	/// 查看证书是否已经存在
+	/// p12 文件修改内容
+	p12FileData, err := h.certificateWebCtl.ModifyCertificateContent(ctx, cerData.P12FileDate)
+	util.PanicIf(err)
+	mpFileData := cerData.MobileProvisionFileData
+
+	/// 查看证书是否已经存在, p12 文件还是按照元数据计算
 	p12FileMd5 := util2.StringMd5(cerData.P12FileDate)
-	mpFileMd5 := util2.StringMd5(cerData.MobileProvisionFileData)
+	mpFileMd5 := util2.StringMd5(mpFileData)
 	cer, err := h.certificateDAO.GetByP12FileDateMD5MobileProvisionFileDataMD5(ctx, p12FileMd5, mpFileMd5)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		panic(err)
@@ -115,9 +118,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		cerID := util2.MustGenerateID(ctx)
 		util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
 			ID:                         cerID,
-			P12FileDate:                cerData.P12FileDate,
+			P12FileDate:                p12FileData,
 			P12FileDateMD5:             p12FileMd5,
-			MobileProvisionFileData:    cerData.MobileProvisionFileData,
+			MobileProvisionFileData:    mpFileData,
 			MobileProvisionFileDataMD5: mpFileMd5,
 			UdidBatchNo:                cerData.UdidBatchNo,
 			CerAppleid:                 cerData.CerAppleid,
