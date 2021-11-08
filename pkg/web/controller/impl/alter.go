@@ -198,27 +198,18 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 		return
 	}
 
-	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	cerIDStr := fmt.Sprintf("证书 ID：<font color=\"comment\">%d</font>\n", cer.ID)
 	cerBatchNoStr := fmt.Sprintf("证书批次：<font color=\"comment\">%s</font>\n", cer.UdidBatchNo)
 	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
 	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"info\">证书购买成功</font>\n>" +
-				emailStr + cerIDStr + cerBatchNoStr + deviceIDStr + udidStr + numberStr + timeStr,
-		},
-	}
-	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
-
-	data = map[string]interface{}{
-		"msgtype": "text",
-		"text": map[string]interface{}{
-			"content":        "",
-			"mentioned_list": []string{"@all"},
+				cerIDStr + cerBatchNoStr + deviceIDStr + udidStr + emailStr + numberStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
