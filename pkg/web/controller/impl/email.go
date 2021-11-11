@@ -26,6 +26,6 @@ func NewEmailWebController() *EmailWebController {
 
 func (h *EmailWebController) SendUpdateIpaEmail(ctx context.Context, ipaID int64, email, name string) error {
 	title := "ipa 已更新~"
-	content := fmt.Sprintf("DumpAPP - 您需要的 [%s] IPA 已更新，请访问 https://www.dumpapp.com/download?appid=%d 查看。", name, ipaID)
+	content := fmt.Sprintf("感谢您使用 DumpAPP <br><br>您需要的 [%s] IPA 已更新，请访问 https://www.dumpapp.com/download?appid=%d 查看。 <br><br>有任何问题可打开官网，扫码联系微信 - https://www.dumpapp.com", name, ipaID)
 	return h.emailCtl.SendEmail(ctx, title, content, email, []string{})
 }
