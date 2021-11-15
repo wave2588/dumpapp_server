@@ -64,6 +64,9 @@ var config = appConfig{
 	DumpAppFromEmail:         os.Getenv("DUMP_APP_FROM_EMAIL"),
 	DumpAppFromEmailPassword: os.Getenv("DUMP_APP_FROM_EMAIL_PASSWORD"),
 
+	DumpAppRegisterFromEmail:         os.Getenv("DUMP_APP_REGISTER_FROM_EMAIL"),
+	DumpAppRegisterFromEmailPassword: os.Getenv("DUMP_APP_REGISTER_FROM_EMAIL_PASSWORD"),
+
 	/// cer server
 	CerCreateURL:   os.Getenv("CER_CREATE_URL"),
 	CerCheckP12URL: os.Getenv("CER_CHECK_P12_URL"),
@@ -100,6 +103,10 @@ type appConfig struct {
 	DumpAppEmail             string
 	DumpAppFromEmail         string
 	DumpAppFromEmailPassword string
+
+	/// 注册专有邮箱
+	DumpAppRegisterFromEmail         string
+	DumpAppRegisterFromEmailPassword string
 
 	CerCreateURL   string
 	CerCheckP12URL string
