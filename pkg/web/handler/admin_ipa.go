@@ -28,10 +28,11 @@ import (
 )
 
 type AdminIpaHandler struct {
-	accountDAO        dao.AccountDAO
-	ipaDAO            dao.IpaDAO
-	ipaVersionDAO     dao.IpaVersionDAO
-	searchRecordV2DAO dao.SearchRecordV2DAO
+	accountDAO          dao.AccountDAO
+	ipaDAO              dao.IpaDAO
+	ipaVersionDAO       dao.IpaVersionDAO
+	searchRecordV2DAO   dao.SearchRecordV2DAO
+	adminNeedDumpIpaDAO dao.AdminNeedDumpIpaDAO
 
 	appleCtl    controller.AppleController
 	emailWebCtl controller2.EmailWebController
@@ -40,10 +41,11 @@ type AdminIpaHandler struct {
 
 func NewAdminIpaHandler() *AdminIpaHandler {
 	return &AdminIpaHandler{
-		accountDAO:        impl.DefaultAccountDAO,
-		ipaDAO:            impl.DefaultIpaDAO,
-		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
-		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
+		accountDAO:          impl.DefaultAccountDAO,
+		ipaDAO:              impl.DefaultIpaDAO,
+		ipaVersionDAO:       impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO:   impl.DefaultSearchRecordV2DAO,
+		adminNeedDumpIpaDAO: impl.DefaultAdminNeedDumpIpaDAO,
 
 		appleCtl:    impl2.DefaultAppleController,
 		emailWebCtl: impl3.DefaultEmailWebController,
@@ -145,6 +147,9 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 				panic(err)
 			}
+			/// 删除用户记录
+			util.PanicIf(h.deleteNeedDumpIpa(ctx, ipaID, version.Version))
+
 			if ipaVersion == nil {
 				util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
 					IpaID:     ipaID,
@@ -173,6 +178,20 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.RenderJSON(w, "保存成功")
+}
+
+func (h *AdminIpaHandler) deleteNeedDumpIpa(ctx context.Context, ipaID int64, version string) error {
+	data, err := h.adminNeedDumpIpaDAO.GetByIpaIDAndIpaVersion(ctx, ipaID, version)
+	if err != nil {
+		return err
+	}
+	for _, datum := range data {
+		err = h.adminNeedDumpIpaDAO.Delete(ctx, datum.ID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*ipaArgs) error {

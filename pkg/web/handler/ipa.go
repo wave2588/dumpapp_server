@@ -27,6 +27,7 @@ type IpaHandler struct {
 	ipaVersionDAO           dao.IpaVersionDAO
 	searchRecordV2DAO       dao.SearchRecordV2DAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	adminNeedDumpIpaDAO     dao.AdminNeedDumpIpaDAO
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
@@ -38,6 +39,7 @@ func NewIpaHandler() *IpaHandler {
 		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
 		searchRecordV2DAO:       impl.DefaultSearchRecordV2DAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		adminNeedDumpIpaDAO:     impl.DefaultAdminNeedDumpIpaDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
@@ -92,6 +94,14 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
+
+	/// 写入记录库里
+	_ = h.adminNeedDumpIpaDAO.Insert(ctx, &models.AdminNeedDumpIpa{
+		MemberID:   loginID,
+		IpaID:      ipaID,
+		IpaVersion: args.Version,
+		IpaName:    args.Name,
+	})
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{

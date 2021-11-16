@@ -36,3 +36,20 @@ ipa_ids: ["1", "2"]
 is_retain_latest_version: true  选填  是否保留最新版本
 
 
+#### 查看未砸壳列表
+POST /admin/ipa/need_dump_list  
+参数:  
+offset: 0  
+limit: 10
+```json
+{
+  "data": [{
+    "member": {
+      "name": "xxxx"
+    },
+    "ipa_id": 111,
+    "ipa_name": "xxx",
+    "ipa_version": "1.1.1" 
+  }],
+  "paging": {}
+}
