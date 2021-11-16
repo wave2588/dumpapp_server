@@ -65,7 +65,8 @@ func OAuthRegister(next http.Handler) http.Handler {
 		}
 		account, err := impl.DefaultAccountDAO.Get(r.Context(), ticket.MemberID)
 		util.PanicIf(err)
-		if account.Status == 1 {
+		/// 账户异常
+		if account.Status == 2 {
 			panic(errors.ErrAccountUnusual)
 		}
 		ctx := context.WithValue(r.Context(), constant.MemberIDKey, ticket.MemberID)
