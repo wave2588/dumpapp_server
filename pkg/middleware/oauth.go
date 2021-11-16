@@ -6,6 +6,7 @@ import (
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/middleware/util"
 )
@@ -61,6 +62,11 @@ func OAuthRegister(next http.Handler) http.Handler {
 		util.PanicIf(err)
 		if ticket.MemberID == 0 {
 			panic(errors.ErrNotAuthorized)
+		}
+		account, err := impl.DefaultAccountDAO.Get(r.Context(), ticket.MemberID)
+		util.PanicIf(err)
+		if account.Status == 1 {
+			panic(errors.ErrAccountUnusual)
 		}
 		ctx := context.WithValue(r.Context(), constant.MemberIDKey, ticket.MemberID)
 		next.ServeHTTP(w, r.WithContext(ctx))

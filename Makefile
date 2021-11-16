@@ -7,7 +7,7 @@ web:
 
 fmt-fetch:
 	go get github.com/daixiang0/gci
-	go get mvdan.cc/gofumpt
+	go get mvdan.cc/gofumpt@v0.1.0
 
 fmt: fmt-fetch
 	go fmt ./pkg/...
