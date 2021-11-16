@@ -37,7 +37,7 @@ is_retain_latest_version: true  选填  是否保留最新版本
 
 
 #### 查看未砸壳列表
-POST /admin/ipa/need_dump_list  
+GET /admin/ipa/need_dump_list  
 参数:  
 offset: 0  
 limit: 10
