@@ -90,7 +90,7 @@ func (h *AccountHandler) SendEmailCaptcha(w http.ResponseWriter, r *http.Request
 
 func (h *AccountHandler) sendCaptcha(ctx context.Context, email string) error {
 	captcha := util3.MustGenerateCaptcha(ctx)
-	err := h.emailCtl.SendEmail(ctx, "验证码来了~", fmt.Sprintf("欢迎注册 iOS 脱壳平台, 此次注册验证码为: %s, 有效期为 5 分钟.", captcha), email, []string{})
+	err := h.emailCtl.SendRegisterEmail(ctx, "验证码来了~", fmt.Sprintf("欢迎注册 iOS 脱壳平台, 此次注册验证码为: %s, 有效期为 5 分钟.", captcha), email)
 	if err != nil {
 		return err
 	}
