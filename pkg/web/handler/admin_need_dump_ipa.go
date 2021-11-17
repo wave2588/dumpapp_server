@@ -45,8 +45,8 @@ func (h *AdminNeedDumpIpaHandler) GetNeedDumpList(w http.ResponseWriter, r *http
 		result = append(result, &NeedDumpResult{
 			Member:     memberMap[ndi.MemberID],
 			IpaID:      ndi.IpaID,
-			IpaVersion: ndi.IpaName,
-			IpaName:    ndi.IpaVersion,
+			IpaVersion: ndi.IpaVersion,
+			IpaName:    ndi.IpaName,
 			CreatedAt:  ndi.CreatedAt.Unix(),
 			UpdatedAt:  ndi.UpdatedAt.Unix(),
 		})

@@ -14,13 +14,14 @@ func main() {
 
 	email := ""
 	password := ""
+	phone := ""
 
 	id := util.MustGenerateID(ctx)
 	fmt.Println(id)
 	util2.PanicIf(impl.DefaultAccountDAO.Insert(ctx, &models.Account{
 		ID:       id,
 		Email:    email,
-		Phone:    "",
+		Phone:    phone,
 		Password: password,
 		Status:   0,
 	}))
