@@ -2,13 +2,13 @@ package impl
 
 import (
 	"context"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"encoding/json"
 
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
-	"dumpapp_server/pkg/errors"
 	pkgErr "github.com/pkg/errors"
 )
 
@@ -31,7 +31,7 @@ func NewAdminDumpOrderController() *AdminDumpOrderController {
 /// demanderID 需求者 id
 func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID int64, ipaName, ipaVersion, ipaBundleID, ipaAppStoreLink string) error {
 	order, err := c.adminDumpOrderDAO.GetByIpaIDIpaVersion(ctx, ipaID, ipaVersion)
-	if err != nil && pkgErr.Cause(err) != errors.ErrNotFound {
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		return err
 	}
 
@@ -65,7 +65,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 
 func (c *AdminDumpOrderController) Progressed(ctx context.Context, operatorID, ipaID int64, ipaVersion string) error {
 	data, err := c.adminDumpOrderDAO.GetByIpaIDIpaVersion(ctx, ipaID, ipaVersion)
-	if err != nil && pkgErr.Cause(err) != errors.ErrNotFound {
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		return err
 	}
 	/// 如果没有此条记录, 则过滤不做处理.
@@ -79,7 +79,7 @@ func (c *AdminDumpOrderController) Progressed(ctx context.Context, operatorID, i
 
 func (c *AdminDumpOrderController) Delete(ctx context.Context, operatorID, ipaID int64, ipaVersion string) error {
 	data, err := c.adminDumpOrderDAO.GetByIpaIDIpaVersion(ctx, ipaID, ipaVersion)
-	if err != nil && pkgErr.Cause(err) != errors.ErrNotFound {
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		return err
 	}
 	/// 如果没有此条记录, 则过滤不做处理.
