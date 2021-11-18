@@ -27,7 +27,6 @@ type IpaHandler struct {
 	ipaVersionDAO           dao.IpaVersionDAO
 	searchRecordV2DAO       dao.SearchRecordV2DAO
 	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
-	adminNeedDumpIpaDAO     dao.AdminNeedDumpIpaDAO
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
@@ -41,7 +40,6 @@ func NewIpaHandler() *IpaHandler {
 		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
 		searchRecordV2DAO:       impl.DefaultSearchRecordV2DAO,
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
-		adminNeedDumpIpaDAO:     impl.DefaultAdminNeedDumpIpaDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
