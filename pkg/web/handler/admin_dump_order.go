@@ -1,6 +1,7 @@
 package handler
 
 import (
+	util2 "dumpapp_server/pkg/util"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -58,7 +59,8 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 		}
 		memberIDs = append(memberIDs, bizExt.DemanderIDs...)
 	}
-	memberMap := render.NewMemberRender(memberIDs, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)
+	memberIDs = util2.RemoveDuplicates(memberIDs)
+	memberMap := render.NewMemberRender(memberIDs, loginID, render.MemberAdminRenderFields...).RenderMap(ctx)
 
 	result := make([]*DumpOrderResult, 0)
 	for _, do := range dumpOrders {
