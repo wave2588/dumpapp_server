@@ -94,7 +94,7 @@ type DumpOrderResult struct {
 	DemanderMember      *render.Member   `json:"demander_member"`
 	OtherDemanderMember []*render.Member `json:"other_demander_member"`
 	OperatorMember      *render.Member   `json:"operator_member"`
-	IpaID               int64            `json:"ipa_id"`
+	IpaID               int64            `json:"ipa_id,string"`
 	IpaVersion          string           `json:"ipa_version"`
 	IpaName             string           `json:"ipa_name"`
 	IpaBundleID         string           `json:"ipa_bundle_id"`
