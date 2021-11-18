@@ -31,6 +31,8 @@ type IpaHandler struct {
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
+
+	adminDumpOrderCtl controller.AdminDumpOrderController
 }
 
 func NewIpaHandler() *IpaHandler {
@@ -43,13 +45,16 @@ func NewIpaHandler() *IpaHandler {
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
+
+		adminDumpOrderCtl: impl2.DefaultAdminDumpOrderController,
 	}
 }
 
 type getIpaArgs struct {
-	Name     string `form:"name" validate:"required"`
-	BundleID string `form:"bundle_id"`
-	Version  string `form:"version"`
+	Name         string `form:"name" validate:"required"`
+	BundleID     string `form:"bundle_id"`
+	Version      string `form:"version"`
+	AppStoreLink string `from:"appstorelink"`
 }
 
 func (p *getIpaArgs) Validate() error {
@@ -96,12 +101,7 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
 
 	/// 写入记录库里
-	_ = h.adminNeedDumpIpaDAO.Insert(ctx, &models.AdminNeedDumpIpa{
-		MemberID:   loginID,
-		IpaID:      ipaID,
-		IpaVersion: args.Version,
-		IpaName:    args.Name,
-	})
+	_ = h.adminDumpOrderCtl.Upsert(ctx, loginID, ipaID, args.Name, args.Version, args.BundleID, args.AppStoreLink)
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{

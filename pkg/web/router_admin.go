@@ -29,8 +29,9 @@ func NewRouterAdmin() chi.Router {
 	// endregion
 
 	/// admin 查看未砸壳列表
-	adminNeedDumpIpaHandler := handler.NewAdminNeedDumpIpaHandler()
-	r.With(middleware.OAuthAdmin).Get("/ipa/need_dump_list", adminNeedDumpIpaHandler.GetNeedDumpList)
+	adminDumpOrderHandler := handler.NewAdminDumpOrderHandler()
+	r.With(middleware.OAuthAdmin).Get("/ipa/dump_order", adminDumpOrderHandler.GetDumpOrderList)
+	r.With(middleware.OAuthAdmin).Delete("/ipa/dump_order", adminDumpOrderHandler.DeleteDumpOrder)
 	// endregion
 
 	/// admin_record
