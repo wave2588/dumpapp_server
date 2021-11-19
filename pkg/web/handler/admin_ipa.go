@@ -177,7 +177,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	if args.IsSendEmail {
-		//util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
+		util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
 	}
 
 	util.RenderJSON(w, "保存成功")
