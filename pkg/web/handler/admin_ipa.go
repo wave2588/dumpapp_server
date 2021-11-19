@@ -148,10 +148,10 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 
-			/// 删除 dump order 记录
-			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, ipaVersion.Version))
-
 			if ipaVersion == nil {
+				/// 删除 dump order 记录
+				util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, ""))
+
 				util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
 					IpaID:     ipaID,
 					Version:   version.Version,
@@ -159,6 +159,9 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				}))
 				continue
 			}
+			/// 删除 dump order 记录
+			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, ipaVersion.Version))
+
 			ipaVersion.TokenPath = version.Token
 			util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
 		}
@@ -175,7 +178,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	if args.IsSendEmail {
-		util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
+		//util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
 	}
 
 	util.RenderJSON(w, "保存成功")
