@@ -148,9 +148,10 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				panic(err)
 			}
 
+			/// 删除 dump order 记录
+			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, version.Version))
+
 			if ipaVersion == nil {
-				/// 删除 dump order 记录
-				util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, ""))
 
 				util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
 					IpaID:     ipaID,
@@ -159,8 +160,6 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				}))
 				continue
 			}
-			/// 删除 dump order 记录
-			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, ipaVersion.Version))
 
 			ipaVersion.TokenPath = version.Token
 			util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
