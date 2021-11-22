@@ -46,11 +46,11 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 	util.PanicIf(err)
 	totalCount, err := h.adminDumpOrderDAO.Count(ctx, nil)
 	util.PanicIf(err)
-	dumpOrders, err := h.adminDumpOrderDAO.BatchGet(ctx, ids)
+	dumpOrderMap, err := h.adminDumpOrderDAO.BatchGet(ctx, ids)
 	util.PanicIf(err)
 
 	memberIDs := make([]int64, 0)
-	for _, do := range dumpOrders {
+	for _, do := range dumpOrderMap {
 		var bizExt dao.AdminDumpOrderBizExt
 		util.PanicIf(json.Unmarshal([]byte(do.IpaBizExt), &bizExt))
 		memberIDs = append(memberIDs, do.DemanderID)
@@ -63,7 +63,11 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 	memberMap := render.NewMemberRender(memberIDs, loginID, render.MemberAdminRenderFields...).RenderMap(ctx)
 
 	result := make([]*DumpOrderResult, 0)
-	for _, do := range dumpOrders {
+	for _, orderID := range ids {
+		do, ok := dumpOrderMap[orderID]
+		if !ok {
+			continue
+		}
 		var bizExt dao.AdminDumpOrderBizExt
 		util.PanicIf(json.Unmarshal([]byte(do.IpaBizExt), &bizExt))
 		otherDemanderMembers := make([]*render.Member, 0)
