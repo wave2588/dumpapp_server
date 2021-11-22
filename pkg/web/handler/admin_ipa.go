@@ -66,7 +66,7 @@ func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
 	totalCount, err := h.ipaDAO.Count(ctx, nil)
 	util.PanicIf(err)
 
-	ipa := render.NewIpaRender(ids, loginID, render.IpaDefaultRenderFields...).RenderSlice(ctx)
+	ipa := render.NewIpaRender(ids, loginID, render.IpaAdminRenderFields...).RenderSlice(ctx)
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
 		Data:   ipa,

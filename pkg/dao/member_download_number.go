@@ -26,4 +26,5 @@ type MemberDownloadNumberDAO interface {
 	// GetMemberDownloadNumberSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
 	GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error)
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)
+	GetIpaDownloadCount(ctx context.Context, ipaID int64) (int64, int64, error)
 }

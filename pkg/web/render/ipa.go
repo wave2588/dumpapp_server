@@ -23,6 +23,8 @@ type Ipa struct {
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 
+	Counter *Counter `json:"counter" render:"method=RenderCounter"`
+
 	Versions []*Version `json:"versions,omitempty" render:"method=RenderVersions"`
 }
 
@@ -34,6 +36,11 @@ type Version struct {
 	// URL     string `json:"url"`
 }
 
+type Counter struct {
+	DownloadCount    int64 `json:"download_count"`
+	LastDownloadTime int64 `json:"last_download_time"`
+}
+
 type IpaRender struct {
 	ids           []int64
 	loginID       int64
@@ -41,8 +48,9 @@ type IpaRender struct {
 
 	IpaMap map[int64]*Ipa
 
-	ipaDAO        dao.IpaDAO
-	ipaVersionDAO dao.IpaVersionDAO
+	ipaDAO                  dao.IpaDAO
+	ipaVersionDAO           dao.IpaVersionDAO
+	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 
 	tencentCtl controller.TencentController
 }
@@ -67,6 +75,13 @@ func IpaIncludes(fields []string) IpaOption {
 	}
 }
 
+var IpaAdminRenderFields = []IpaOption{
+	IpaIncludes([]string{
+		"Versions",
+		"Counter",
+	}),
+}
+
 var IpaDefaultRenderFields = []IpaOption{
 	IpaIncludes([]string{
 		"Versions",
@@ -78,8 +93,9 @@ func NewIpaRender(ids []int64, loginID int64, opts ...IpaOption) *IpaRender {
 		ids:     ids,
 		loginID: loginID,
 
-		ipaDAO:        impl.DefaultIpaDAO,
-		ipaVersionDAO: impl.DefaultIpaVersionDAO,
+		ipaDAO:                  impl.DefaultIpaDAO,
+		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
+		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 
 		tencentCtl: impl2.DefaultTencentController,
 	}
@@ -159,5 +175,18 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 			res = append(res, version)
 		}
 		ipa.Versions = res
+	}
+}
+
+func (f *IpaRender) RenderCounter(ctx context.Context) {
+	for _, ipa := range f.IpaMap {
+		count, updatedAt, err := f.memberDownloadNumberDAO.GetIpaDownloadCount(ctx, ipa.ID)
+		util.PanicIf(err)
+		if count != 0 {
+			ipa.Counter = &Counter{
+				DownloadCount:    count,
+				LastDownloadTime: updatedAt,
+			}
+		}
 	}
 }
