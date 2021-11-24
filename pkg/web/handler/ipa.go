@@ -95,12 +95,6 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	_, err = h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
 	util.PanicIf(err)
 
-	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
-	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
-
-	/// 写入记录库里
-	_ = h.adminDumpOrderCtl.Upsert(ctx, loginID, ipaID, args.Name, args.Version, args.BundleID, args.AppStoreLink)
-
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{
 		"send_email": true,

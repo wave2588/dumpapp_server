@@ -43,6 +43,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/ipa/ranking", ipaHandler.GetRanking)
 	// endregion
 
+	// dump order
+	dumpOrderHandler := handler.NewDumpOrderHandler()
+	r.With(middleware.OAuthRegister).Get("/ipa/dump_order", dumpOrderHandler.Post)
+	// endregion
+
 	// device
 	deviceHandler := handler.NewDeviceHandler()
 	/// 获取"获取"描述文件接口
