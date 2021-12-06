@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
+	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
@@ -131,6 +133,17 @@ func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
+}
+
+func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
+	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
+	country := cast.ToString(util.URLParam(r, "country"))
+	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{})
+	util.PanicIf(err)
+	var result interface{}
+	util.PanicIf(json.Unmarshal(body, &result))
+	util.RenderJSON(w, result)
 }
 
 type getRankingArgs struct {
