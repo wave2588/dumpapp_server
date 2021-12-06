@@ -5,8 +5,10 @@ import "context"
 type CertificateServer interface {
 	/// 创建证书
 	CreateCer(ctx context.Context, udid string) (*CreateCerResponse, error)
+	/// 检测p12证书是否有效
+	CheckP12File(ctx context.Context, p12FileData, p12Password string) (*CheckCerResponse, error)
 	/// 检测证书是否有效
-	CheckCer(ctx context.Context, p12FileData, p12Password string) (*CheckCerResponse, error)
+	CheckCerByUDIDBatchNo(ctx context.Context, udidBatchNo string) (*CheckCerResponse, error)
 }
 
 type CreateCerResponse struct {

@@ -20,6 +20,7 @@ type Certificate struct {
 	UpdatedAt int64 `json:"updated_at"`
 
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
+	IsValidate  bool `json:"is_validate" render:"method=RenderIsValidate"`
 }
 
 type CertificateRender struct {
@@ -54,6 +55,7 @@ func CertificateIncludes(fields []string) CertificateOption {
 var CertificateDefaultRenderFields = []CertificateOption{
 	CertificateIncludes([]string{
 		"P12IsActive",
+		"IsValidate",
 	}),
 }
 
@@ -119,20 +121,45 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 	batch := util2.NewBatch(ctx)
 	isActiveMap := make(map[int64]bool)
 	for _, certificate := range f.CertificateMap {
-		batch.Append(func(cerID int64) util2.FutureFunc {
+		batch.Append(func(cer *Certificate) util2.FutureFunc {
 			return func() error {
-				response, err := f.certificateServe.CheckCer(ctx, certificate.meta.P12FileDate, "1")
+				response, err := f.certificateServe.CheckP12File(ctx, cer.meta.P12FileDate, "1")
 				if err != nil {
 					return err
 				}
-				isActiveMap[cerID] = response.Data
+				isActiveMap[cer.ID] = response.Data
 				return nil
 			}
-		}(certificate.ID))
+		}(certificate))
 	}
 	batch.Wait()
 
 	for _, certificate := range f.CertificateMap {
 		certificate.P12IsActive = isActiveMap[certificate.ID]
+	}
+}
+
+func (f *CertificateRender) RenderIsValidate(ctx context.Context) {
+	batch := util2.NewBatch(ctx)
+	isValidateMap := make(map[int64]bool)
+	for _, certificate := range f.CertificateMap {
+		batch.Append(func(cer *Certificate) util2.FutureFunc {
+			return func() error {
+				if cer.meta.UdidBatchNo == "" {
+					return nil
+				}
+				response, err := f.certificateServe.CheckCerByUDIDBatchNo(ctx, cer.meta.UdidBatchNo)
+				if err != nil {
+					return err
+				}
+				isValidateMap[cer.ID] = response.Data
+				return nil
+			}
+		}(certificate))
+	}
+	batch.Wait()
+
+	for _, certificate := range f.CertificateMap {
+		certificate.IsValidate = isValidateMap[certificate.ID]
 	}
 }

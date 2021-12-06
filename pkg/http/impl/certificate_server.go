@@ -41,13 +41,32 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.C
 	return &result, nil
 }
 
-func (h *CertificateServer) CheckCer(ctx context.Context, p12FileData, p12Password string) (*http.CheckCerResponse, error) {
+func (h *CertificateServer) CheckP12File(ctx context.Context, p12FileData, p12Password string) (*http.CheckCerResponse, error) {
 	endpoint := config.DumpConfig.AppConfig.CerCheckP12URL
 	body, err := util.HttpRequest("POST", endpoint, map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 	}, map[string]string{
 		"p12_file_data": p12FileData,
 		"p12_password":  p12Password,
+	})
+	if err != nil {
+		return nil, err
+	}
+	var result http.CheckCerResponse
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+func (h *CertificateServer) CheckCerByUDIDBatchNo(ctx context.Context, udidBatchNo string) (*http.CheckCerResponse, error) {
+	endpoint := config.DumpConfig.AppConfig.CerCheckValidateURL
+	body, err := util.HttpRequest("POST", endpoint, map[string]string{
+		"Content-Type": "application/x-www-form-urlencoded",
+	}, map[string]string{
+		"token":      config.DumpConfig.AppConfig.CerServerToken,
+		"udid_batch": udidBatchNo,
 	})
 	if err != nil {
 		return nil, err
