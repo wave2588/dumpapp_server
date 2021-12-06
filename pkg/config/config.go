@@ -68,9 +68,10 @@ var config = appConfig{
 	DumpAppRegisterFromEmailPassword: os.Getenv("DUMP_APP_REGISTER_FROM_EMAIL_PASSWORD"),
 
 	/// cer server
-	CerCreateURL:   os.Getenv("CER_CREATE_URL"),
-	CerCheckP12URL: os.Getenv("CER_CHECK_P12_URL"),
-	CerServerToken: os.Getenv("CER_SERVER_TOKEN"),
+	CerCreateURL:        os.Getenv("CER_CREATE_URL"),
+	CerCheckP12URL:      os.Getenv("CER_CHECK_P12_URL"),
+	CerCheckValidateURL: os.Getenv("CER_CHECK_VALIDATE"),
+	CerServerToken:      os.Getenv("CER_SERVER_TOKEN"),
 }
 
 type appConfig struct {
@@ -108,9 +109,10 @@ type appConfig struct {
 	DumpAppRegisterFromEmail         string
 	DumpAppRegisterFromEmailPassword string
 
-	CerCreateURL   string
-	CerCheckP12URL string
-	CerServerToken string
+	CerCreateURL        string
+	CerCheckP12URL      string
+	CerCheckValidateURL string
+	CerServerToken      string
 }
 
 type MySQL struct {
