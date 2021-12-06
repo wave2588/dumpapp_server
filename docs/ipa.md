@@ -49,3 +49,13 @@ Response:
 ```json
 {}
 ```
+
+
+### 获取 ipa 所有版本
+GET /ipa/{country}/{ipa_id}  
+例如: /ipa/cn/1111
+```
+{
+    "data": 
+}
+```
