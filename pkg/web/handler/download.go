@@ -141,7 +141,12 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
-	util.PanicIf(err)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+	if ipaVersion == nil {
+		panic(errors.ErrNotFoundIpaVersion)
+	}
 
 	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
 	util.PanicIf(err)
