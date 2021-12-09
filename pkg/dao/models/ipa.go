@@ -28,7 +28,6 @@ type Ipa struct {
 	Name      string       `boil:"name" json:"name" toml:"name" yaml:"name"`
 	BundleID  string       `boil:"bundle_id" json:"bundle_id" toml:"bundle_id" yaml:"bundle_id"`
 	Type      enum.IpaType `boil:"type" json:"type" toml:"type" yaml:"type"`
-	IsInterim int          `boil:"is_interim" json:"is_interim" toml:"is_interim" yaml:"is_interim"`
 	CreatedAt time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -41,7 +40,6 @@ var IpaColumns = struct {
 	Name      string
 	BundleID  string
 	Type      string
-	IsInterim string
 	CreatedAt string
 	UpdatedAt string
 }{
@@ -49,7 +47,6 @@ var IpaColumns = struct {
 	Name:      "name",
 	BundleID:  "bundle_id",
 	Type:      "type",
-	IsInterim: "is_interim",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -77,35 +74,11 @@ func (w whereHelperenum_IpaType) GTE(x enum.IpaType) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelperint struct{ field string }
-
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint) IN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperint) NIN(slice []int) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
 var IpaWhere = struct {
 	ID        whereHelperint64
 	Name      whereHelperstring
 	BundleID  whereHelperstring
 	Type      whereHelperenum_IpaType
-	IsInterim whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -113,7 +86,6 @@ var IpaWhere = struct {
 	Name:      whereHelperstring{field: "`ipa`.`name`"},
 	BundleID:  whereHelperstring{field: "`ipa`.`bundle_id`"},
 	Type:      whereHelperenum_IpaType{field: "`ipa`.`type`"},
-	IsInterim: whereHelperint{field: "`ipa`.`is_interim`"},
 	CreatedAt: whereHelpertime_Time{field: "`ipa`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`ipa`.`updated_at`"},
 }
@@ -135,9 +107,9 @@ func (*ipaR) NewStruct() *ipaR {
 type ipaL struct{}
 
 var (
-	ipaAllColumns            = []string{"id", "name", "bundle_id", "type", "is_interim", "created_at", "updated_at"}
+	ipaAllColumns            = []string{"id", "name", "bundle_id", "type", "created_at", "updated_at"}
 	ipaColumnsWithoutDefault = []string{"name", "bundle_id", "type"}
-	ipaColumnsWithDefault    = []string{"id", "is_interim", "created_at", "updated_at"}
+	ipaColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	ipaPrimaryKeyColumns     = []string{"id"}
 )
 
