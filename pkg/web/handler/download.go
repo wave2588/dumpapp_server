@@ -145,7 +145,10 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		util.PanicIf(err)
 	}
 	if ipaVersion == nil {
-		panic(errors.ErrNotFoundIpaVersion)
+		util.RenderJSON(w, map[string]interface{}{
+			"can_download": false,
+		})
+		return
 	}
 
 	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
