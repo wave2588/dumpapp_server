@@ -4,6 +4,7 @@ import (
 	"context"
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -45,7 +46,7 @@ func run() {
 		fmt.Println(fmt.Sprintf("offset: %d...", offset))
 
 		filters := []qm.QueryMod{
-			models.IpaWhere.IsInterim.EQ(1), /// 被标记为临时ipa
+			models.IpaWhere.Type.EQ(enum.IpaTypeTemporary), /// 被标记为临时ipa
 			models.IpaWhere.UpdatedAt.LT(tm),
 		}
 		ids, err := impl.DefaultIpaDAO.ListIDs(ctx, offset, bulkSize, filters, nil)

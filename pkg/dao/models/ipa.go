@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,12 +24,13 @@ import (
 
 // Ipa is an object representing the database table.
 type Ipa struct {
-	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	BundleID  string    `boil:"bundle_id" json:"bundle_id" toml:"bundle_id" yaml:"bundle_id"`
-	IsInterim int       `boil:"is_interim" json:"is_interim" toml:"is_interim" yaml:"is_interim"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Name      string       `boil:"name" json:"name" toml:"name" yaml:"name"`
+	BundleID  string       `boil:"bundle_id" json:"bundle_id" toml:"bundle_id" yaml:"bundle_id"`
+	Type      enum.IpaType `boil:"type" json:"type" toml:"type" yaml:"type"`
+	IsInterim int          `boil:"is_interim" json:"is_interim" toml:"is_interim" yaml:"is_interim"`
+	CreatedAt time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *ipaR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L ipaL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -38,6 +40,7 @@ var IpaColumns = struct {
 	ID        string
 	Name      string
 	BundleID  string
+	Type      string
 	IsInterim string
 	CreatedAt string
 	UpdatedAt string
@@ -45,12 +48,34 @@ var IpaColumns = struct {
 	ID:        "id",
 	Name:      "name",
 	BundleID:  "bundle_id",
+	Type:      "type",
 	IsInterim: "is_interim",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
 
 // Generated where
+
+type whereHelperenum_IpaType struct{ field string }
+
+func (w whereHelperenum_IpaType) EQ(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_IpaType) NEQ(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_IpaType) LT(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_IpaType) LTE(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_IpaType) GT(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_IpaType) GTE(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 type whereHelperint struct{ field string }
 
@@ -79,6 +104,7 @@ var IpaWhere = struct {
 	ID        whereHelperint64
 	Name      whereHelperstring
 	BundleID  whereHelperstring
+	Type      whereHelperenum_IpaType
 	IsInterim whereHelperint
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
@@ -86,6 +112,7 @@ var IpaWhere = struct {
 	ID:        whereHelperint64{field: "`ipa`.`id`"},
 	Name:      whereHelperstring{field: "`ipa`.`name`"},
 	BundleID:  whereHelperstring{field: "`ipa`.`bundle_id`"},
+	Type:      whereHelperenum_IpaType{field: "`ipa`.`type`"},
 	IsInterim: whereHelperint{field: "`ipa`.`is_interim`"},
 	CreatedAt: whereHelpertime_Time{field: "`ipa`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`ipa`.`updated_at`"},
@@ -108,8 +135,8 @@ func (*ipaR) NewStruct() *ipaR {
 type ipaL struct{}
 
 var (
-	ipaAllColumns            = []string{"id", "name", "bundle_id", "is_interim", "created_at", "updated_at"}
-	ipaColumnsWithoutDefault = []string{"name", "bundle_id"}
+	ipaAllColumns            = []string{"id", "name", "bundle_id", "type", "is_interim", "created_at", "updated_at"}
+	ipaColumnsWithoutDefault = []string{"name", "bundle_id", "type"}
 	ipaColumnsWithDefault    = []string{"id", "is_interim", "created_at", "updated_at"}
 	ipaPrimaryKeyColumns     = []string{"id"}
 )

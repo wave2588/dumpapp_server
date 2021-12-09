@@ -19,7 +19,7 @@ type Ipa struct {
 	ID        int64  `json:"id,string"`
 	Name      string `json:"name"`
 	BundleID  string `json:"bundle_id"`
-	IsInterim bool   `json:"is_interim"`
+	Type      string `json:"type"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 
@@ -140,7 +140,7 @@ func (f *IpaRender) fetch(ctx context.Context) {
 			ID:        a.ID,
 			Name:      a.Name,
 			BundleID:  a.BundleID,
-			IsInterim: a.IsInterim == 1,
+			Type:      a.Type.String(),
 			CreatedAt: a.CreatedAt.Unix(),
 			UpdatedAt: a.UpdatedAt.Unix(),
 		}

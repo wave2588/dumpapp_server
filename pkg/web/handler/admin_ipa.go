@@ -8,6 +8,7 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -79,11 +80,11 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	IpaID     string     `json:"ipa_id" validate:"required"`
-	Name      string     `json:"name" validate:"required"`
-	BundleID  string     `json:"bundle_id" validate:"required"`
-	IsInterim bool       `json:"is_interim"`
-	Versions  []*Version `json:"versions"`
+	IpaID    string       `json:"ipa_id" validate:"required"`
+	Name     string       `json:"name" validate:"required"`
+	BundleID string       `json:"bundle_id" validate:"required"`
+	Type     enum.IpaType `json:"type" validate:"required"`
+	Versions []*Version   `json:"versions"`
 }
 
 type Version struct {
@@ -131,15 +132,15 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		ipa := ipaMap[ipaID]
 		if ipa == nil {
 			util.PanicIf(h.ipaDAO.Insert(ctx, &models.Ipa{
-				ID:        ipaID,
-				Name:      ipaArgs.Name,
-				BundleID:  ipaArgs.BundleID,
-				IsInterim: cast.ToInt(ipaArgs.IsInterim),
+				ID:       ipaID,
+				Name:     ipaArgs.Name,
+				BundleID: ipaArgs.BundleID,
+				Type:     ipaArgs.Type,
 			}))
 		} else {
 			ipa.Name = ipaArgs.Name
 			ipa.BundleID = ipaArgs.BundleID
-			ipa.IsInterim = cast.ToInt(ipaArgs.IsInterim)
+			ipa.Type = ipaArgs.Type
 			util.PanicIf(h.ipaDAO.Update(ctx, ipa))
 		}
 		for _, version := range ipaArgs.Versions {

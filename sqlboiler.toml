@@ -20,6 +20,19 @@
     [types.replace]
         type = "int"
 
+# ipa table
+[[types]]
+  [types.match]
+    name = "type"
+    type = "string"
+    tables = ["ipa"]
+
+  [types.replace]
+    type = "enum.IpaType"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
 # member_vip_order table
 [[types]]
   [types.match]
