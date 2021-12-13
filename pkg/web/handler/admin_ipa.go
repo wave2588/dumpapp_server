@@ -133,12 +133,10 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				ID:       ipaID,
 				Name:     ipaArgs.Name,
 				BundleID: ipaArgs.BundleID,
-				Type:     enum.IpaTypeNormal, /// todo: 要删掉
 			}))
 		} else {
 			ipa.Name = ipaArgs.Name
 			ipa.BundleID = ipaArgs.BundleID
-			ipa.Type = enum.IpaTypeNormal /// todo: 要删掉
 			util.PanicIf(h.ipaDAO.Update(ctx, ipa))
 		}
 		for _, version := range ipaArgs.Versions {

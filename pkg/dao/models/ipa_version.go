@@ -62,6 +62,27 @@ var IpaVersionColumns = struct {
 
 // Generated where
 
+type whereHelperenum_IpaType struct{ field string }
+
+func (w whereHelperenum_IpaType) EQ(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_IpaType) NEQ(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_IpaType) LT(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_IpaType) LTE(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_IpaType) GT(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_IpaType) GTE(x enum.IpaType) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var IpaVersionWhere = struct {
 	ID          whereHelperint64
 	IpaID       whereHelperint64
