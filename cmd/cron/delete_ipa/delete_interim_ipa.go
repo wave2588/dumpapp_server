@@ -4,7 +4,6 @@ import (
 	"context"
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -46,38 +45,31 @@ func run() {
 		fmt.Println(fmt.Sprintf("offset: %d...", offset))
 
 		filters := []qm.QueryMod{
-			models.IpaWhere.Type.EQ(enum.IpaTypeTemporary), /// 被标记为临时ipa
+			models.IpaVersionWhere.IsTemporary.EQ(1), /// 被标记为临时ipa
 			models.IpaWhere.UpdatedAt.LT(tm),
 		}
-		ids, err := impl.DefaultIpaDAO.ListIDs(ctx, offset, bulkSize, filters, nil)
+
+		ids, err := impl.DefaultIpaVersionDAO.ListIDs(ctx, offset, bulkSize, filters, nil)
 		util.PanicIf(err)
 
-		ipaMap, err := impl.DefaultIpaDAO.BatchGet(ctx, ids)
+		ipaVersionMap, err := impl.DefaultIpaVersionDAO.BatchGet(ctx, ids)
 		util.PanicIf(err)
 
 		hasNext = len(ids) >= bulkSize
 		offset += len(ids)
 
-		for _, ipa := range ipaMap {
-			util.PanicIf(impl.DefaultIpaDAO.Delete(ctx, ipa.ID))
-		}
-		ipaVersions, err := impl.DefaultIpaVersionDAO.BatchGetIpaVersions(ctx, ids)
-		util.PanicIf(err)
+		for _, ipaVersion := range ipaVersionMap {
+			util.PanicIf(impl.DefaultIpaVersionDAO.Delete(ctx, ipaVersion.ID))
+			util.PanicIf(impl2.DefaultTencentController.DeleteFile(ctx, ipaVersion.TokenPath))
 
-		for ipaID, versions := range ipaVersions {
-			ipa, ok := ipaMap[ipaID]
-			if !ok {
-				continue
-			}
-			for _, version := range versions {
-				util.PanicIf(impl.DefaultIpaVersionDAO.Delete(ctx, version.ID))
-				util.PanicIf(impl2.DefaultTencentController.DeleteFile(ctx, version.TokenPath))
-				deleteIpaMap[ipaID] = append(deleteIpaMap[ipaID], &deleteIpa{
-					ID:      ipaID,
-					Name:    ipa.Name,
-					Version: version.Version,
-				})
-			}
+			ipa, err := impl.DefaultIpaDAO.Get(ctx, ipaVersion.IpaID)
+			util.PanicIf(err)
+
+			deleteIpaMap[ipa.ID] = append(deleteIpaMap[ipa.ID], &deleteIpa{
+				ID:      ipa.ID,
+				Name:    ipa.Name,
+				Version: ipaVersion.Version,
+			})
 		}
 	}
 

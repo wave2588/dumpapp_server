@@ -15,7 +15,6 @@ import (
 
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -31,7 +30,7 @@ type IpaVersion struct {
 	IpaType     enum.IpaType `boil:"ipa_type" json:"ipa_type" toml:"ipa_type" yaml:"ipa_type"`
 	TokenPath   string       `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
 	BizExt      string       `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
-	IsTemporary null.Int64   `boil:"is_temporary" json:"is_temporary,omitempty" toml:"is_temporary" yaml:"is_temporary,omitempty"`
+	IsTemporary int64        `boil:"is_temporary" json:"is_temporary" toml:"is_temporary" yaml:"is_temporary"`
 	CreatedAt   time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -63,29 +62,6 @@ var IpaVersionColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int64 struct{ field string }
-
-func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var IpaVersionWhere = struct {
 	ID          whereHelperint64
 	IpaID       whereHelperint64
@@ -93,7 +69,7 @@ var IpaVersionWhere = struct {
 	IpaType     whereHelperenum_IpaType
 	TokenPath   whereHelperstring
 	BizExt      whereHelperstring
-	IsTemporary whereHelpernull_Int64
+	IsTemporary whereHelperint64
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
 }{
@@ -103,7 +79,7 @@ var IpaVersionWhere = struct {
 	IpaType:     whereHelperenum_IpaType{field: "`ipa_version`.`ipa_type`"},
 	TokenPath:   whereHelperstring{field: "`ipa_version`.`token_path`"},
 	BizExt:      whereHelperstring{field: "`ipa_version`.`biz_ext`"},
-	IsTemporary: whereHelpernull_Int64{field: "`ipa_version`.`is_temporary`"},
+	IsTemporary: whereHelperint64{field: "`ipa_version`.`is_temporary`"},
 	CreatedAt:   whereHelpertime_Time{field: "`ipa_version`.`created_at`"},
 	UpdatedAt:   whereHelpertime_Time{field: "`ipa_version`.`updated_at`"},
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -19,7 +20,6 @@ type Ipa struct {
 	ID        int64  `json:"id,string"`
 	Name      string `json:"name"`
 	BundleID  string `json:"bundle_id"`
-	Type      string `json:"type"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 
@@ -29,10 +29,11 @@ type Ipa struct {
 }
 
 type Version struct {
-	ID        int64  `json:"id,string"`
-	Version   string `json:"version"`
-	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
+	ID        int64        `json:"id,string"`
+	Version   string       `json:"version"`
+	IpaType   enum.IpaType `json:"ipa_type"`
+	CreatedAt int64        `json:"created_at"`
+	UpdatedAt int64        `json:"updated_at"`
 	// URL     string `json:"url"`
 }
 
@@ -140,7 +141,6 @@ func (f *IpaRender) fetch(ctx context.Context) {
 			ID:        a.ID,
 			Name:      a.Name,
 			BundleID:  a.BundleID,
-			Type:      a.Type.String(),
 			CreatedAt: a.CreatedAt.Unix(),
 			UpdatedAt: a.UpdatedAt.Unix(),
 		}
@@ -169,6 +169,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 			version := &Version{
 				ID:        v.ID,
 				Version:   v.Version,
+				IpaType:   v.IpaType,
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
 			}
