@@ -46,7 +46,7 @@ func run() {
 
 		filters := []qm.QueryMod{
 			models.IpaVersionWhere.IsTemporary.EQ(1), /// 被标记为临时ipa
-			models.IpaWhere.UpdatedAt.LT(tm),
+			models.IpaVersionWhere.UpdatedAt.LT(tm),
 		}
 
 		ids, err := impl.DefaultIpaVersionDAO.ListIDs(ctx, offset, bulkSize, filters, nil)
