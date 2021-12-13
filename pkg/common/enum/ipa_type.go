@@ -5,7 +5,6 @@ package enum
 type IpaType int
 
 const (
-	IpaTypeNormal    IpaType = iota + 1 /// 正常破解包
-	IpaTypeTemporary                    /// 临时 ipa
-	IpaTypeCrack                        /// 破解带插件
+	IpaTypeNormal IpaType = iota + 1 /// 正常破解包
+	IpaTypeCrack                     /// 破解带插件
 )

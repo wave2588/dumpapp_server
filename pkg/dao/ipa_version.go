@@ -5,6 +5,7 @@ package dao
 import (
 	"context"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -20,13 +21,12 @@ type IpaVersionDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
-	// GetByIpaIDVersion retrieves a single record by uniq key ipaID, version from db.
-	GetByIpaIDVersion(ctx context.Context, ipaID int64, version string) (*models.IpaVersion, error)
-	// GetIpaVersionSliceByIpaID retrieves a slice of records by first field of uniq key [ipaID] with an executor.
-	GetIpaVersionSliceByIpaID(ctx context.Context, ipaID int64) ([]*models.IpaVersion, error)
 	// GetByTokenPath retrieves a single record by uniq key tokenPath from db.
 	GetByTokenPath(ctx context.Context, tokenPath string) (*models.IpaVersion, error)
 	// BatchGetByTokenPath retrieves multiple records by uniq key tokenPath from db.
 	BatchGetByTokenPath(ctx context.Context, tokenPaths []string) (map[string]*models.IpaVersion, error)
 	BatchGetIpaVersions(ctx context.Context, ipaIDs []int64) (map[int64][]*models.IpaVersion, error)
+	GetByIpaIDAndIpaType(ctx context.Context, ipaID int64, ipaType enum.IpaType) ([]*models.IpaVersion, error)
+	GetByIpaIDAndIpaTypeAndVersion(ctx context.Context, ipaID int64, ipaType enum.IpaType, version string) ([]*models.IpaVersion, error)
+	GetByIpaID(ctx context.Context, ipaID int64) ([]*models.IpaVersion, error)
 }

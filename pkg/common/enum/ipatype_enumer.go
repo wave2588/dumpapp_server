@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _IpaTypeName = "normaltemporarycrack"
+const _IpaTypeName = "normalcrack"
 
-var _IpaTypeIndex = [...]uint8{0, 6, 15, 20}
+var _IpaTypeIndex = [...]uint8{0, 6, 11}
 
-const _IpaTypeLowerName = "normaltemporarycrack"
+const _IpaTypeLowerName = "normalcrack"
 
 func (i IpaType) String() string {
 	i -= 1
@@ -28,25 +28,21 @@ func (i IpaType) String() string {
 func _IpaTypeNoOp() {
 	var x [1]struct{}
 	_ = x[IpaTypeNormal-(1)]
-	_ = x[IpaTypeTemporary-(2)]
-	_ = x[IpaTypeCrack-(3)]
+	_ = x[IpaTypeCrack-(2)]
 }
 
-var _IpaTypeValues = []IpaType{IpaTypeNormal, IpaTypeTemporary, IpaTypeCrack}
+var _IpaTypeValues = []IpaType{IpaTypeNormal, IpaTypeCrack}
 
 var _IpaTypeNameToValueMap = map[string]IpaType{
-	_IpaTypeName[0:6]:        IpaTypeNormal,
-	_IpaTypeLowerName[0:6]:   IpaTypeNormal,
-	_IpaTypeName[6:15]:       IpaTypeTemporary,
-	_IpaTypeLowerName[6:15]:  IpaTypeTemporary,
-	_IpaTypeName[15:20]:      IpaTypeCrack,
-	_IpaTypeLowerName[15:20]: IpaTypeCrack,
+	_IpaTypeName[0:6]:       IpaTypeNormal,
+	_IpaTypeLowerName[0:6]:  IpaTypeNormal,
+	_IpaTypeName[6:11]:      IpaTypeCrack,
+	_IpaTypeLowerName[6:11]: IpaTypeCrack,
 }
 
 var _IpaTypeNames = []string{
 	_IpaTypeName[0:6],
-	_IpaTypeName[6:15],
-	_IpaTypeName[15:20],
+	_IpaTypeName[6:11],
 }
 
 // IpaTypeString retrieves an enum value from the enum constants string name.

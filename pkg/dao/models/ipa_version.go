@@ -13,7 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,49 +25,87 @@ import (
 
 // IpaVersion is an object representing the database table.
 type IpaVersion struct {
-	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	IpaID     int64     `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
-	Version   string    `boil:"version" json:"version" toml:"version" yaml:"version"`
-	TokenPath string    `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID          int64        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	IpaID       int64        `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
+	Version     string       `boil:"version" json:"version" toml:"version" yaml:"version"`
+	IpaType     enum.IpaType `boil:"ipa_type" json:"ipa_type" toml:"ipa_type" yaml:"ipa_type"`
+	TokenPath   string       `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
+	BizExt      string       `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	IsTemporary null.Int64   `boil:"is_temporary" json:"is_temporary,omitempty" toml:"is_temporary" yaml:"is_temporary,omitempty"`
+	CreatedAt   time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *ipaVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L ipaVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var IpaVersionColumns = struct {
-	ID        string
-	IpaID     string
-	Version   string
-	TokenPath string
-	CreatedAt string
-	UpdatedAt string
+	ID          string
+	IpaID       string
+	Version     string
+	IpaType     string
+	TokenPath   string
+	BizExt      string
+	IsTemporary string
+	CreatedAt   string
+	UpdatedAt   string
 }{
-	ID:        "id",
-	IpaID:     "ipa_id",
-	Version:   "version",
-	TokenPath: "token_path",
-	CreatedAt: "created_at",
-	UpdatedAt: "updated_at",
+	ID:          "id",
+	IpaID:       "ipa_id",
+	Version:     "version",
+	IpaType:     "ipa_type",
+	TokenPath:   "token_path",
+	BizExt:      "biz_ext",
+	IsTemporary: "is_temporary",
+	CreatedAt:   "created_at",
+	UpdatedAt:   "updated_at",
 }
 
 // Generated where
 
+type whereHelpernull_Int64 struct{ field string }
+
+func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var IpaVersionWhere = struct {
-	ID        whereHelperint64
-	IpaID     whereHelperint64
-	Version   whereHelperstring
-	TokenPath whereHelperstring
-	CreatedAt whereHelpertime_Time
-	UpdatedAt whereHelpertime_Time
+	ID          whereHelperint64
+	IpaID       whereHelperint64
+	Version     whereHelperstring
+	IpaType     whereHelperenum_IpaType
+	TokenPath   whereHelperstring
+	BizExt      whereHelperstring
+	IsTemporary whereHelpernull_Int64
+	CreatedAt   whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
 }{
-	ID:        whereHelperint64{field: "`ipa_version`.`id`"},
-	IpaID:     whereHelperint64{field: "`ipa_version`.`ipa_id`"},
-	Version:   whereHelperstring{field: "`ipa_version`.`version`"},
-	TokenPath: whereHelperstring{field: "`ipa_version`.`token_path`"},
-	CreatedAt: whereHelpertime_Time{field: "`ipa_version`.`created_at`"},
-	UpdatedAt: whereHelpertime_Time{field: "`ipa_version`.`updated_at`"},
+	ID:          whereHelperint64{field: "`ipa_version`.`id`"},
+	IpaID:       whereHelperint64{field: "`ipa_version`.`ipa_id`"},
+	Version:     whereHelperstring{field: "`ipa_version`.`version`"},
+	IpaType:     whereHelperenum_IpaType{field: "`ipa_version`.`ipa_type`"},
+	TokenPath:   whereHelperstring{field: "`ipa_version`.`token_path`"},
+	BizExt:      whereHelperstring{field: "`ipa_version`.`biz_ext`"},
+	IsTemporary: whereHelpernull_Int64{field: "`ipa_version`.`is_temporary`"},
+	CreatedAt:   whereHelpertime_Time{field: "`ipa_version`.`created_at`"},
+	UpdatedAt:   whereHelpertime_Time{field: "`ipa_version`.`updated_at`"},
 }
 
 // IpaVersionRels is where relationship names are stored.
@@ -85,8 +125,8 @@ func (*ipaVersionR) NewStruct() *ipaVersionR {
 type ipaVersionL struct{}
 
 var (
-	ipaVersionAllColumns            = []string{"id", "ipa_id", "version", "token_path", "created_at", "updated_at"}
-	ipaVersionColumnsWithoutDefault = []string{"ipa_id", "version", "token_path"}
+	ipaVersionAllColumns            = []string{"id", "ipa_id", "version", "ipa_type", "token_path", "biz_ext", "is_temporary", "created_at", "updated_at"}
+	ipaVersionColumnsWithoutDefault = []string{"ipa_id", "version", "ipa_type", "token_path", "biz_ext", "is_temporary"}
 	ipaVersionColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	ipaVersionPrimaryKeyColumns     = []string{"id"}
 )

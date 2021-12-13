@@ -29,6 +29,7 @@ type MemberDownloadNumber struct {
 	MemberID  int64                           `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status    enum.MemberDownloadNumberStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	IpaID     null.Int64                      `boil:"ipa_id" json:"ipa_id,omitempty" toml:"ipa_id" yaml:"ipa_id,omitempty"`
+	IpaType   null.String                     `boil:"ipa_type" json:"ipa_type,omitempty" toml:"ipa_type" yaml:"ipa_type,omitempty"`
 	Version   null.String                     `boil:"version" json:"version,omitempty" toml:"version" yaml:"version,omitempty"`
 	CreatedAt time.Time                       `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                       `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -42,6 +43,7 @@ var MemberDownloadNumberColumns = struct {
 	MemberID  string
 	Status    string
 	IpaID     string
+	IpaType   string
 	Version   string
 	CreatedAt string
 	UpdatedAt string
@@ -50,6 +52,7 @@ var MemberDownloadNumberColumns = struct {
 	MemberID:  "member_id",
 	Status:    "status",
 	IpaID:     "ipa_id",
+	IpaType:   "ipa_type",
 	Version:   "version",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -75,29 +78,6 @@ func (w whereHelperenum_MemberDownloadNumberStatus) GT(x enum.MemberDownloadNumb
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
 func (w whereHelperenum_MemberDownloadNumberStatus) GTE(x enum.MemberDownloadNumberStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_Int64 struct{ field string }
-
-func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -129,6 +109,7 @@ var MemberDownloadNumberWhere = struct {
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberDownloadNumberStatus
 	IpaID     whereHelpernull_Int64
+	IpaType   whereHelpernull_String
 	Version   whereHelpernull_String
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
@@ -137,6 +118,7 @@ var MemberDownloadNumberWhere = struct {
 	MemberID:  whereHelperint64{field: "`member_download_number`.`member_id`"},
 	Status:    whereHelperenum_MemberDownloadNumberStatus{field: "`member_download_number`.`status`"},
 	IpaID:     whereHelpernull_Int64{field: "`member_download_number`.`ipa_id`"},
+	IpaType:   whereHelpernull_String{field: "`member_download_number`.`ipa_type`"},
 	Version:   whereHelpernull_String{field: "`member_download_number`.`version`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_download_number`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_download_number`.`updated_at`"},
@@ -159,8 +141,8 @@ func (*memberDownloadNumberR) NewStruct() *memberDownloadNumberR {
 type memberDownloadNumberL struct{}
 
 var (
-	memberDownloadNumberAllColumns            = []string{"id", "member_id", "status", "ipa_id", "version", "created_at", "updated_at"}
-	memberDownloadNumberColumnsWithoutDefault = []string{"member_id", "status", "ipa_id", "version"}
+	memberDownloadNumberAllColumns            = []string{"id", "member_id", "status", "ipa_id", "ipa_type", "version", "created_at", "updated_at"}
+	memberDownloadNumberColumnsWithoutDefault = []string{"member_id", "status", "ipa_id", "ipa_type", "version"}
 	memberDownloadNumberColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberDownloadNumberPrimaryKeyColumns     = []string{"id"}
 )

@@ -80,16 +80,17 @@ type createIpaArgs struct {
 }
 
 type ipaArgs struct {
-	IpaID    string       `json:"ipa_id" validate:"required"`
-	Name     string       `json:"name" validate:"required"`
-	BundleID string       `json:"bundle_id" validate:"required"`
-	Type     enum.IpaType `json:"type" validate:"required"`
-	Versions []*Version   `json:"versions"`
+	IpaID    string     `json:"ipa_id" validate:"required"`
+	Name     string     `json:"name" validate:"required"`
+	BundleID string     `json:"bundle_id" validate:"required"`
+	Versions []*Version `json:"versions"`
 }
 
 type Version struct {
-	Version string `json:"version" validate:"required"`
-	Token   string `json:"token" validate:"required"`
+	Version     string       `json:"version" validate:"required"`
+	Token       string       `json:"token" validate:"required"`
+	IpaType     enum.IpaType `json:"ipa_type" validate:"required"`
+	DescribeURL *string      `json:"describe_url"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -124,9 +125,6 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
-	ipaVersionMap, err := h.ipaVersionDAO.BatchGetIpaVersions(ctx, ipaIDs)
-	util.PanicIf(err)
-
 	for _, ipaArgs := range args.Ipas {
 		ipaID := cast.ToInt64(ipaArgs.IpaID)
 		ipa := ipaMap[ipaID]
@@ -135,42 +133,35 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 				ID:       ipaID,
 				Name:     ipaArgs.Name,
 				BundleID: ipaArgs.BundleID,
-				Type:     ipaArgs.Type,
+				Type:     enum.IpaTypeNormal, /// todo: 要删掉
 			}))
 		} else {
 			ipa.Name = ipaArgs.Name
 			ipa.BundleID = ipaArgs.BundleID
-			ipa.Type = ipaArgs.Type
+			ipa.Type = enum.IpaTypeNormal /// todo: 要删掉
 			util.PanicIf(h.ipaDAO.Update(ctx, ipa))
 		}
 		for _, version := range ipaArgs.Versions {
-			ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, version.Version)
+			/// 找出 ipa_id ipa_type version 相同的数据，全部删掉重新上传
+			ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, version.IpaType, version.Version)
 			if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 				panic(err)
+			}
+			for _, ipaVersion := range ipaVersions {
+				util.PanicIf(h.ipaVersionDAO.Delete(ctx, ipaVersion.ID))
 			}
 
 			/// 删除 dump order 记录
 			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, version.Version))
 
-			if ipaVersion == nil {
-
-				util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-					IpaID:     ipaID,
-					Version:   version.Version,
-					TokenPath: version.Token,
-				}))
-				continue
-			}
-
-			ipaVersion.TokenPath = version.Token
-			util.PanicIf(h.ipaVersionDAO.Update(ctx, ipaVersion))
-		}
-		/// 删除最久的一个 ipa version, 保证库里永远只存入三个 ipa
-		versions := ipaVersionMap[ipaID]
-		if len(versions) > 3 {
-			version := versions[len(versions)-1]
-			util.PanicIf(h.ipaVersionDAO.Delete(ctx, version.ID))
-			util.PanicIf(h.tencentCtl.DeleteFile(ctx, version.TokenPath))
+			ipaVersionBizExt := &constant.IpaVersionBizExt{DescribeURL: version.DescribeURL}
+			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
+				IpaID:     ipaID,
+				Version:   version.Version,
+				TokenPath: version.Token,
+				IpaType:   version.IpaType,
+				BizExt:    ipaVersionBizExt.String(),
+			}))
 		}
 	}
 
@@ -323,9 +314,10 @@ func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64) er
 }
 
 type deleteIpaArgs struct {
-	IpaID                 string `json:"ipa_id" validate:"required"`
-	IpaVersion            string `json:"ipa_version"`              /// 指定删除某个版本
-	IsRetainLatestVersion bool   `json:"is_retain_latest_version"` /// 是否保留最新版本
+	IpaID                 string       `json:"ipa_id" validate:"required"`
+	IpaType               enum.IpaType `json:"ipa_type" validate:"required"`
+	IpaVersion            string       `json:"ipa_version"`              /// 指定删除某个版本
+	IsRetainLatestVersion bool         `json:"is_retain_latest_version"` /// 是否保留最新版本
 }
 
 func (p *deleteIpaArgs) Validate() error {
@@ -346,64 +338,55 @@ func (h *AdminIpaHandler) DeleteIpa(w http.ResponseWriter, r *http.Request) {
 	args := &deleteIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
 	ipaID := cast.ToInt64(args.IpaID)
 	if args.IpaVersion == "" {
 		/// 保留最新版本, 删除其他的
 		if args.IsRetainLatestVersion {
-			util.PanicIf(h.deleteIpaRetainLatestVersion(ctx, ipaID))
+			util.PanicIf(h.deleteIpaRetainLatestVersion(ctx, ipaID, args.IpaType))
 		} else {
 			/// 删除操作
 			util.PanicIf(h.deleteIpa(ctx, ipaID))
 		}
 	} else {
-		util.PanicIf(h.deleteIpaVersion(ctx, ipaID, args.IpaVersion))
-	}
-
-	util.RenderJSON(w, "ok")
-}
-
-func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaID int64) error {
-	ipaMap := render.NewIpaRender([]int64{ipaID}, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
-
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-
-	for _, ipa := range ipaMap {
-		for idx, version := range ipa.Versions {
-			if idx == 0 {
-				continue
-			}
-			err := h.ipaVersionDAO.Delete(ctx, version.ID)
-			return err
-		}
+		util.PanicIf(h.deleteIpaVersion(ctx, ipaID, args.IpaType, args.IpaVersion))
 	}
 
 	clients.MustCommit(ctx, txn)
 	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
+	util.RenderJSON(w, "ok")
+}
+
+func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaID int64, ipaType enum.IpaType) error {
+	ivs, err := h.ipaVersionDAO.GetByIpaIDAndIpaType(ctx, ipaID, ipaType)
+	if err != nil {
+		return err
+	}
+	for idx, iv := range ivs {
+		if idx == 0 {
+			continue
+		}
+		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
+		if err != nil {
+			return err
+		}
+		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64) error {
-	ipa, err := h.ipaDAO.Get(ctx, ipaID)
+	ivs, err := h.ipaVersionDAO.GetByIpaID(ctx, ipaID)
 	if err != nil {
 		return err
 	}
-	ivs, err := h.ipaVersionDAO.GetIpaVersionSliceByIpaID(ctx, ipaID)
-	if err != nil {
-		return err
-	}
-
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-
-	err = h.ipaDAO.Delete(ctx, ipa.ID)
-	if err != nil {
-		return err
-	}
-
 	for _, iv := range ivs {
 		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
 		if err != nil {
@@ -414,21 +397,23 @@ func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64) error {
 			return err
 		}
 	}
-
-	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
-
 	return nil
 }
 
-func (h *AdminIpaHandler) deleteIpaVersion(ctx context.Context, ipaID int64, ipaVersion string) error {
-	iv, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, ipaVersion)
+func (h *AdminIpaHandler) deleteIpaVersion(ctx context.Context, ipaID int64, ipaType enum.IpaType, ipaVersion string) error {
+	ivs, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, ipaType, ipaVersion)
 	if err != nil {
 		return err
 	}
-	err = h.ipaVersionDAO.Delete(ctx, iv.ID)
-	if err != nil {
-		return err
+	for _, iv := range ivs {
+		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
+		if err != nil {
+			return err
+		}
+		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
+		if err != nil {
+			return err
+		}
 	}
-	return h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
+	return nil
 }

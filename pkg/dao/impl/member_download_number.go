@@ -175,16 +175,16 @@ func (d *MemberDownloadNumberDAO) Count(ctx context.Context, filters []qm.QueryM
 	return models.MemberDownloadNumbers(qs...).Count(ctx, exec)
 }
 
-// GetByMemberIDIpaIDVersion retrieves a single record by uniq key memberID, ipaID, version from db.
-func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDVersion(ctx context.Context, memberID int64, ipaID null.Int64, version null.String) (*models.MemberDownloadNumber, error) {
+// GetByMemberIDIpaIDIpaTypeVersion retrieves a single record by uniq key memberID, ipaID, ipaType, version from db.
+func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDIpaTypeVersion(ctx context.Context, memberID int64, ipaID null.Int64, ipaType null.String, version null.String) (*models.MemberDownloadNumber, error) {
 	memberDownloadNumberObj := &models.MemberDownloadNumber{}
 
 	sel := "*"
 	query := fmt.Sprintf(
-		"select %s from `member_download_number` where `member_id`=? AND `ipa_id`=? AND `version`=?", sel,
+		"select %s from `member_download_number` where `member_id`=? AND `ipa_id`=? AND `ipa_type`=? AND `version`=?", sel,
 	)
 
-	q := queries.Raw(query, memberID, ipaID, version)
+	q := queries.Raw(query, memberID, ipaID, ipaType, version)
 
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
@@ -197,7 +197,7 @@ func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDVersion(ctx context.Context,
 	err := q.Bind(ctx, exec, memberDownloadNumberObj)
 	if err != nil {
 		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID:%v ipaID:%v version :%v", query, memberID, ipaID, version)
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID:%v ipaID:%v ipaType:%v version :%v", query, memberID, ipaID, ipaType, version)
 		}
 		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_number")
 	}

@@ -49,13 +49,17 @@ func NewDownloadHandler() *DownloadHandler {
 }
 
 type checkCanDownloadArgs struct {
-	Version string `form:"version" validate:"required"`
+	Version string       `form:"version" validate:"required"`
+	IpaType enum.IpaType `form:"ipa_type"`
 }
 
 func (args *checkCanDownloadArgs) Validate() error {
 	err := validator.New().Struct(args)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if !args.IpaType.IsAIpaType() {
+		args.IpaType = enum.IpaTypeNormal
 	}
 	return nil
 }
@@ -71,18 +75,22 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 
 	loginID := middleware.MustGetMemberID(ctx)
 
-	ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
-	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-		util.PanicIf(err)
-	}
-	if ipaVersion == nil {
+	/// 检查是否有下载次数
+	_, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
+	util.PanicIf(err)
+
+	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, args.IpaType, args.Version)
+	util.PanicIf(err)
+
+	if len(ipaVersions) == 0 {
 		util.RenderJSON(w, map[string]interface{}{
 			"can_download": false,
 		})
 		return
 	}
 
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
+	/// 判断之前是否下载过
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.IpaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
@@ -94,13 +102,17 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 }
 
 type getDownloadURLArgs struct {
-	Version string `form:"version" validate:"required"`
+	Version string       `form:"version" validate:"required"`
+	IpaType enum.IpaType `form:"ipa_type"`
 }
 
 func (args *getDownloadURLArgs) Validate() error {
 	err := validator.New().Struct(args)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if !args.IpaType.IsAIpaType() {
+		args.IpaType = enum.IpaTypeNormal
 	}
 	return nil
 }
@@ -115,6 +127,10 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	util.PanicIf(args.Validate())
 
 	loginID := middleware.MustGetMemberID(ctx)
+
+	/// 检查是否有下载次数
+	_, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
+	util.PanicIf(err)
 
 	/// 以下是一套反作弊的机制
 	isBlackList, err := h.cribberDAO.GetBlacklistByMemberID(ctx, loginID)
@@ -136,7 +152,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	/// 操作数 +1
 	util.PanicIf(h.cribberDAO.IncrMemberRemoteIP(ctx, loginID, remoteIP))
 
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.Version))
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.IpaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
@@ -151,18 +167,16 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 	}
 
-	ipaVersion, err := h.ipaVersionDAO.GetByIpaIDVersion(ctx, ipaID, args.Version)
-	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-		util.PanicIf(err)
-	}
-	if ipaVersion == nil {
+	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, args.IpaType, args.Version)
+	util.PanicIf(err)
+	if len(ipaVersions) == 0 {
 		util.RenderJSON(w, map[string]interface{}{
 			"can_download": false,
 		})
 		return
 	}
 
-	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath)
+	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersions[0].TokenPath)
 	util.PanicIf(err)
 	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	resJSON := map[string]interface{}{

@@ -33,6 +33,19 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
+# ipa_version table
+[[types]]
+  [types.match]
+    name = "ipa_type"
+    type = "string"
+    tables = ["ipa_version"]
+
+  [types.replace]
+    type = "enum.IpaType"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
 # member_vip_order table
 [[types]]
   [types.match]
@@ -81,6 +94,20 @@
 
   [types.replace]
     type = "enum.AdminDumpOrderStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+
+# member_download_number table
+[[types]]
+  [types.match]
+    name = "ipa_type"
+    type = "string"
+    tables = ["member_download_number"]
+
+  [types.replace]
+    type = "enum.IpaType"
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']

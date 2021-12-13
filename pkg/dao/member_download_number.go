@@ -21,8 +21,8 @@ type MemberDownloadNumberDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
-	// GetByMemberIDIpaIDVersion retrieves a single record by uniq key memberID, ipaID, version from db.
-	GetByMemberIDIpaIDVersion(ctx context.Context, memberID int64, ipaID null.Int64, version null.String) (*models.MemberDownloadNumber, error)
+	// GetByMemberIDIpaIDIpaTypeVersion retrieves a single record by uniq key memberID, ipaID, ipaType, version from db.
+	GetByMemberIDIpaIDIpaTypeVersion(ctx context.Context, memberID int64, ipaID null.Int64, ipaType null.String, version null.String) (*models.MemberDownloadNumber, error)
 	// GetMemberDownloadNumberSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
 	GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error)
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)

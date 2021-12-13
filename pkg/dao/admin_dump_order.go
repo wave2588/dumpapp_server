@@ -25,10 +25,3 @@ type AdminDumpOrderDAO interface {
 	// GetAdminDumpOrderSliceByIpaID retrieves a slice of records by first field of uniq key [ipaID] with an executor.
 	GetAdminDumpOrderSliceByIpaID(ctx context.Context, ipaID int64) ([]*models.AdminDumpOrder, error)
 }
-
-type AdminDumpOrderBizExt struct {
-	IpaName         string  `json:"ipa_name"`
-	IpaBundleID     string  `json:"ipa_bundle_id"`
-	IpaAppStoreLink string  `json:"ipa_app_store_link"`
-	DemanderIDs     []int64 `json:"demander_ids"`
-}

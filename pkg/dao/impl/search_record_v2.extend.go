@@ -3,7 +3,7 @@ package impl
 import (
 	"context"
 
-	"dumpapp_server/pkg/dao"
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/dao/models"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -26,7 +26,7 @@ func (d *SearchRecordV2DAO) BatchGetByIpaIDs(ctx context.Context, ipaIDs []int64
 	return res, nil
 }
 
-func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*dao.SearchCount, error) {
+func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*constant.SearchCount, error) {
 	qm := []qm.QueryMod{
 		qm.Select("ipa_id, name, count(id) as count"),
 		qm.GroupBy("ipa_id"),
@@ -41,9 +41,9 @@ func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, l
 		return nil, err
 	}
 
-	result := make([]*dao.SearchCount, 0)
+	result := make([]*constant.SearchCount, 0)
 	for res.Next() {
-		r := &dao.SearchCount{}
+		r := &constant.SearchCount{}
 		err = res.Scan(&r.IpaID, &r.Name, &r.Count)
 		if err != nil {
 			return nil, err

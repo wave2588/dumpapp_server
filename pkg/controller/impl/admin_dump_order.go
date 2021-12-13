@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao"
@@ -36,7 +37,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 	}
 
 	if order == nil {
-		bizExt := dao.AdminDumpOrderBizExt{
+		bizExt := constant.AdminDumpOrderBizExt{
 			IpaName:         ipaName,
 			IpaBundleID:     ipaBundleID,
 			IpaAppStoreLink: ipaAppStoreLink,
@@ -54,7 +55,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 			Status:     enum.AdminDumpOrderStatusProgressing,
 		})
 	}
-	var bizExt dao.AdminDumpOrderBizExt
+	var bizExt constant.AdminDumpOrderBizExt
 	err = json.Unmarshal([]byte(order.IpaBizExt), &bizExt)
 	if err != nil {
 		return err

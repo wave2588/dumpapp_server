@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -51,7 +52,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 
 	memberIDs := make([]int64, 0)
 	for _, do := range dumpOrderMap {
-		var bizExt dao.AdminDumpOrderBizExt
+		var bizExt constant.AdminDumpOrderBizExt
 		util.PanicIf(json.Unmarshal([]byte(do.IpaBizExt), &bizExt))
 		memberIDs = append(memberIDs, do.DemanderID)
 		if do.OperatorID != 0 {
@@ -68,7 +69,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 		if !ok {
 			continue
 		}
-		var bizExt dao.AdminDumpOrderBizExt
+		var bizExt constant.AdminDumpOrderBizExt
 		util.PanicIf(json.Unmarshal([]byte(do.IpaBizExt), &bizExt))
 		otherDemanderMembers := make([]*render.Member, 0)
 		for _, otherDemanderMemberID := range bizExt.DemanderIDs {

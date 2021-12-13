@@ -174,62 +174,6 @@ func (d *IpaVersionDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64
 	return models.IpaVersions(qs...).Count(ctx, exec)
 }
 
-// GetByIpaIDVersion retrieves a single record by uniq key ipaID, version from db.
-func (d *IpaVersionDAO) GetByIpaIDVersion(ctx context.Context, ipaID int64, version string) (*models.IpaVersion, error) {
-	ipaVersionObj := &models.IpaVersion{}
-
-	sel := "*"
-	query := fmt.Sprintf(
-		"select %s from `ipa_version` where `ipa_id`=? AND `version`=?", sel,
-	)
-
-	q := queries.Raw(query, ipaID, version)
-
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-
-	err := q.Bind(ctx, exec, ipaVersionObj)
-	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=ipa_version, query=%s, args=ipaID:%v version :%v", query, ipaID, version)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from ipa_version")
-	}
-
-	return ipaVersionObj, nil
-}
-
-// GetIpaVersionSliceByIpaID retrieves a slice of records by first field of uniq key [ipaID] with an executor.
-func (d *IpaVersionDAO) GetIpaVersionSliceByIpaID(ctx context.Context, ipaID int64) ([]*models.IpaVersion, error) {
-	var o []*models.IpaVersion
-
-	query := "select `ipa_version`.* from `ipa_version` where `ipa_id`=?"
-
-	q := queries.Raw(query, ipaID)
-
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-
-	err := q.Bind(ctx, exec, &o)
-	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=ipa_version, query=%s, args=ipaID :%v", query, ipaID)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from ipa_version")
-	}
-	return o, nil
-}
-
 // GetByTokenPath retrieves a single record by uniq key tokenPath from db.
 func (d *IpaVersionDAO) GetByTokenPath(ctx context.Context, tokenPath string) (*models.IpaVersion, error) {
 	ipaVersionObj := &models.IpaVersion{}
