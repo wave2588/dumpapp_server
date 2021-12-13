@@ -67,7 +67,7 @@ func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
 	totalCount, err := h.ipaDAO.Count(ctx, nil)
 	util.PanicIf(err)
 
-	ipa := render.NewIpaRender(ids, loginID, render.IpaAdminRenderFields...).RenderSlice(ctx)
+	ipa := render.NewIpaRender(ids, loginID, []enum.IpaType{enum.IpaTypeNormal, enum.IpaTypeCrack}, render.IpaAdminRenderFields...).RenderSlice(ctx)
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
 		Data:   ipa,
@@ -90,6 +90,7 @@ type Version struct {
 	Version     string       `json:"version" validate:"required"`
 	Token       string       `json:"token" validate:"required"`
 	IpaType     enum.IpaType `json:"ipa_type" validate:"required"`
+	IsTemporary bool         `json:"is_temporary" validate:"required"`
 	DescribeURL *string      `json:"describe_url"`
 }
 
@@ -154,11 +155,12 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 			ipaVersionBizExt := &constant.IpaVersionBizExt{DescribeURL: version.DescribeURL}
 			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-				IpaID:     ipaID,
-				Version:   version.Version,
-				TokenPath: version.Token,
-				IpaType:   version.IpaType,
-				BizExt:    ipaVersionBizExt.String(),
+				IpaID:       ipaID,
+				Version:     version.Version,
+				IpaType:     version.IpaType,
+				TokenPath:   version.Token,
+				BizExt:      ipaVersionBizExt.String(),
+				IsTemporary: cast.ToInt64(version.IsTemporary),
 			}))
 		}
 	}
@@ -226,8 +228,9 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 }
 
 type batchDeleteIpaArgs struct {
-	IpaIDs                []string `json:"ipa_ids" validate:"required"`
-	IsRetainLatestVersion bool     `json:"is_retain_latest_version"` /// 是否保留最新版本
+	IpaIDs                []string     `json:"ipa_ids" validate:"required"`
+	IpaType               enum.IpaType `json:"ipa_type" validate:"required"`
+	IsRetainLatestVersion bool         `json:"is_retain_latest_version"` /// 是否保留最新版本
 }
 
 func (p *batchDeleteIpaArgs) Validate() error {
@@ -253,19 +256,22 @@ func (h *AdminIpaHandler) BatchDeleteIpa(w http.ResponseWriter, r *http.Request)
 		ipaIDs = append(ipaIDs, cast.ToInt64(id))
 	}
 
-	if args.IsRetainLatestVersion {
-		util.PanicIf(h.batchDeleteByRetainLatestVersion(ctx, ipaIDs))
-	} else {
-		util.PanicIf(h.batchDeleteAll(ctx, ipaIDs))
-	}
-}
-
-func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, ipaIDs []int64) error {
-	ipaMap := render.NewIpaRender(ipaIDs, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
-
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	if args.IsRetainLatestVersion {
+		util.PanicIf(h.batchDeleteByRetainLatestVersion(ctx, ipaIDs, args.IpaType))
+	} else {
+		util.PanicIf(h.batchDeleteAll(ctx, ipaIDs, args.IpaType))
+	}
+
+	clients.MustCommit(ctx, txn)
+	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+}
+
+func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, ipaIDs []int64, ipaType enum.IpaType) error {
+	ipaMap := render.NewIpaRender(ipaIDs, 0, []enum.IpaType{ipaType}, render.IpaDefaultRenderFields...).RenderMap(ctx)
 
 	for _, ipa := range ipaMap {
 		for idx, version := range ipa.Versions {
@@ -278,35 +284,20 @@ func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, 
 			}
 		}
 	}
-
-	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
-
 	return nil
 }
 
-func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64) error {
-	ipaMap := render.NewIpaRender(ipaIDs, 0, render.IpaDefaultRenderFields...).RenderMap(ctx)
-
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64, ipaType enum.IpaType) error {
+	ipaMap := render.NewIpaRender(ipaIDs, 0, []enum.IpaType{ipaType}, render.IpaDefaultRenderFields...).RenderMap(ctx)
 
 	for _, ipa := range ipaMap {
-		err := h.ipaDAO.Delete(ctx, ipa.ID)
-		if err != nil {
-			return err
-		}
 		for _, version := range ipa.Versions {
-			err = h.ipaVersionDAO.Delete(ctx, version.ID)
+			err := h.ipaVersionDAO.Delete(ctx, version.ID)
 			if err != nil {
 				return err
 			}
 		}
 	}
-
-	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	return nil
 }

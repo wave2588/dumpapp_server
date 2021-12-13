@@ -29,4 +29,5 @@ type IpaVersionDAO interface {
 	GetByIpaIDAndIpaType(ctx context.Context, ipaID int64, ipaType enum.IpaType) ([]*models.IpaVersion, error)
 	GetByIpaIDAndIpaTypeAndVersion(ctx context.Context, ipaID int64, ipaType enum.IpaType, version string) ([]*models.IpaVersion, error)
 	GetByIpaID(ctx context.Context, ipaID int64) ([]*models.IpaVersion, error)
+	GetByIpaType(ctx context.Context, ipaType enum.IpaType) ([]*models.IpaVersion, error)
 }

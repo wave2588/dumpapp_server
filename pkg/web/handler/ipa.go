@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -51,16 +52,20 @@ func NewIpaHandler() *IpaHandler {
 }
 
 type getIpaArgs struct {
-	Name         string `form:"name" validate:"required"`
-	BundleID     string `form:"bundle_id"`
-	Version      string `form:"version"`
-	AppStoreLink string `from:"appstorelink"`
+	Name         string       `form:"name" validate:"required"`
+	BundleID     string       `form:"bundle_id"`
+	Version      string       `form:"version"`
+	AppStoreLink string       `from:"appstorelink"`
+	IpaType      enum.IpaType `json:"ipa_type"`
 }
 
 func (p *getIpaArgs) Validate() error {
 	err := validator.New().Struct(p)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if !p.IpaType.IsAIpaType() {
+		p.IpaType = enum.IpaTypeNormal
 	}
 	return nil
 }
@@ -88,7 +93,7 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 	/// 如果找到了, 正常返回结构即可, 子页面会判断是否有下载次数
 	if ipa != nil {
-		data := render.NewIpaRender([]int64{ipaID}, loginID, render.IpaDefaultRenderFields...).RenderMap(ctx)
+		data := render.NewIpaRender([]int64{ipaID}, loginID, []enum.IpaType{args.IpaType}, render.IpaDefaultRenderFields...).RenderMap(ctx)
 		util.RenderJSON(w, data[ipaID])
 		return
 	}

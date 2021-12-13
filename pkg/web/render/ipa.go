@@ -2,8 +2,10 @@ package render
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -29,12 +31,12 @@ type Ipa struct {
 }
 
 type Version struct {
-	ID        int64        `json:"id,string"`
-	Version   string       `json:"version"`
-	IpaType   enum.IpaType `json:"ipa_type"`
-	CreatedAt int64        `json:"created_at"`
-	UpdatedAt int64        `json:"updated_at"`
-	// URL     string `json:"url"`
+	ID          int64        `json:"id,string"`
+	Version     string       `json:"version"`
+	IpaType     enum.IpaType `json:"ipa_type"`
+	DescribeURL *string      `json:"describe_url,omitempty"`
+	CreatedAt   int64        `json:"created_at"`
+	UpdatedAt   int64        `json:"updated_at"`
 }
 
 type Counter struct {
@@ -43,9 +45,10 @@ type Counter struct {
 }
 
 type IpaRender struct {
-	ids           []int64
-	loginID       int64
-	includeFields []string
+	ids               []int64
+	loginID           int64
+	supportIpaTypeMap map[enum.IpaType]struct{}
+	includeFields     []string
 
 	IpaMap map[int64]*Ipa
 
@@ -89,7 +92,7 @@ var IpaDefaultRenderFields = []IpaOption{
 	}),
 }
 
-func NewIpaRender(ids []int64, loginID int64, opts ...IpaOption) *IpaRender {
+func NewIpaRender(ids []int64, loginID int64, ipaTypes []enum.IpaType, opts ...IpaOption) *IpaRender {
 	f := &IpaRender{
 		ids:     ids,
 		loginID: loginID,
@@ -99,6 +102,9 @@ func NewIpaRender(ids []int64, loginID int64, opts ...IpaOption) *IpaRender {
 		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
 
 		tencentCtl: impl2.DefaultTencentController,
+	}
+	for _, ipaType := range ipaTypes {
+		f.supportIpaTypeMap[ipaType] = struct{}{}
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -166,12 +172,21 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 
 		res := make([]*Version, 0)
 		for _, v := range vs {
+			_, ok := f.supportIpaTypeMap[v.IpaType]
+			if !ok {
+				continue
+			}
 			version := &Version{
 				ID:        v.ID,
 				Version:   v.Version,
 				IpaType:   v.IpaType,
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
+			}
+			if v.BizExt != "" {
+				var ipaVersionBizExt *constant.IpaVersionBizExt
+				util.PanicIf(json.Unmarshal([]byte(v.BizExt), &ipaVersionBizExt))
+				version.DescribeURL = ipaVersionBizExt.DescribeURL
 			}
 			res = append(res, version)
 		}

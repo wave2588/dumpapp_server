@@ -50,3 +50,10 @@ func (d *IpaVersionDAO) GetByIpaID(ctx context.Context, ipaID int64) ([]*models.
 	}
 	return models.IpaVersions(qs...).All(ctx, d.mysqlPool)
 }
+
+func (d *IpaVersionDAO) GetByIpaType(ctx context.Context, ipaType enum.IpaType) ([]*models.IpaVersion, error) {
+	qs := []qm.QueryMod{
+		models.IpaVersionWhere.IpaType.EQ(ipaType),
+	}
+	return models.IpaVersions(qs...).All(ctx, d.mysqlPool)
+}
