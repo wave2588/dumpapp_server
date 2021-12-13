@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
@@ -67,6 +68,12 @@ func (h *AccountHandler) SendEmailCaptcha(w http.ResponseWriter, r *http.Request
 
 	args := &sendEmailCaptchaQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	for _, registerString := range constant.RefusedRegisterStrings {
+		if strings.Contains(args.Email, registerString) {
+			panic(errors.ErrEmailRefusedRegister)
+		}
+	}
 
 	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
@@ -163,6 +170,12 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	args := &registerQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	for _, registerString := range constant.RefusedRegisterStrings {
+		if strings.Contains(args.Email, registerString) {
+			panic(errors.ErrEmailRefusedRegister)
+		}
+	}
 
 	captcha, err := h.captchaDAO.GetEmailCaptcha(ctx, args.Email)
 	util.PanicIf(err)
