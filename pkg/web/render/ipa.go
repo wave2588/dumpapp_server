@@ -2,9 +2,6 @@ package render
 
 import (
 	"context"
-	"encoding/json"
-	"sort"
-
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -14,6 +11,8 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"encoding/json"
+	"sort"
 )
 
 type Ipa struct {
@@ -93,9 +92,15 @@ var IpaDefaultRenderFields = []IpaOption{
 }
 
 func NewIpaRender(ids []int64, loginID int64, ipaTypes []enum.IpaType, opts ...IpaOption) *IpaRender {
+	ipaTypeMap := make(map[enum.IpaType]struct{})
+	for _, ipaType := range ipaTypes {
+		ipaTypeMap[ipaType] = struct{}{}
+	}
+
 	f := &IpaRender{
-		ids:     ids,
-		loginID: loginID,
+		ids:               ids,
+		loginID:           loginID,
+		supportIpaTypeMap: ipaTypeMap,
 
 		ipaDAO:                  impl.DefaultIpaDAO,
 		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
@@ -103,9 +108,7 @@ func NewIpaRender(ids []int64, loginID int64, ipaTypes []enum.IpaType, opts ...I
 
 		tencentCtl: impl2.DefaultTencentController,
 	}
-	for _, ipaType := range ipaTypes {
-		f.supportIpaTypeMap[ipaType] = struct{}{}
-	}
+
 	for _, opt := range opts {
 		opt(f)
 	}
@@ -139,7 +142,6 @@ func (f *IpaRender) RenderMap(ctx context.Context) map[int64]*Ipa {
 func (f *IpaRender) fetch(ctx context.Context) {
 	aMap, err := f.ipaDAO.BatchGet(ctx, f.ids)
 	util.PanicIf(err)
-
 	res := make(map[int64]*Ipa)
 	for _, a := range aMap {
 		res[a.ID] = &Ipa{
@@ -160,9 +162,10 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 
 	for _, ipa := range f.IpaMap {
 		vs := totalVersionMap[ipa.ID]
-		if vs == nil {
+		if vs == nil || len(vs) == 0 {
 			continue
 		}
+
 		sort.Slice(vs, func(i, j int) bool {
 			re1 := vs[i].Version
 			re2 := vs[j].Version

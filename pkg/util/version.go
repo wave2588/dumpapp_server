@@ -55,7 +55,7 @@ func Compare(verA, verB string) VersionCompareRes {
 	for idx, ver := range a {
 		av := cast.ToInt(ver)
 		bv := 0
-		if len(b) >= idx {
+		if len(b) > idx {
 			bv = cast.ToInt(b[idx])
 		}
 		if av > bv {
