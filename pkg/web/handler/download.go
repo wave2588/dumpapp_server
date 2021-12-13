@@ -164,6 +164,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		dn.Status = enum.MemberDownloadNumberStatusUsed
 		dn.IpaID = null.Int64From(ipaID)
 		dn.Version = null.StringFrom(args.Version)
+		dn.IpaType = null.StringFrom(args.IpaType.String())
 		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 	}
 
