@@ -99,6 +99,13 @@ func (p *createIpaArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
+	for _, ipa := range p.Ipas {
+		for _, version := range ipa.Versions {
+			if !version.IpaType.IsAIpaType() {
+				return errors.UnproccessableError("无效的 ipa_type")
+			}
+		}
+	}
 	return nil
 }
 
@@ -238,6 +245,9 @@ func (p *batchDeleteIpaArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
+	if !p.IpaType.IsAIpaType() {
+		return errors.UnproccessableError("无效的 ipa_type")
+	}
 	return nil
 }
 
@@ -313,6 +323,9 @@ func (p *deleteIpaArgs) Validate() error {
 	err := validator.New().Struct(p)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if !p.IpaType.IsAIpaType() {
+		return errors.UnproccessableError("无效的 ipa_type")
 	}
 	return nil
 }
