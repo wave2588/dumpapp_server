@@ -24,7 +24,7 @@ type Ipa struct {
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
 
-	Counter *Counter `json:"counter" render:"method=RenderCounter"`
+	Counter *Counter `json:"counter,omitempty" render:"method=RenderCounter"`
 
 	Versions []*Version `json:"versions,omitempty" render:"method=RenderVersions"`
 }

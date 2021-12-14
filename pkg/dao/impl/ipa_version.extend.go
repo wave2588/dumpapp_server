@@ -54,6 +54,7 @@ func (d *IpaVersionDAO) GetByIpaID(ctx context.Context, ipaID int64) ([]*models.
 func (d *IpaVersionDAO) GetByIpaType(ctx context.Context, ipaType enum.IpaType) ([]*models.IpaVersion, error) {
 	qs := []qm.QueryMod{
 		models.IpaVersionWhere.IpaType.EQ(ipaType),
+		qm.OrderBy("created_at desc"),
 	}
 	return models.IpaVersions(qs...).All(ctx, d.mysqlPool)
 }

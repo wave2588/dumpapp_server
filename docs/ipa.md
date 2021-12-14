@@ -59,3 +59,44 @@ GET /ipa/{country}/{ipa_id}
     "data": 
 }
 ```
+
+
+### 获取某个类型所有 ipa 列表
+GET /ipa/{ipa_type}/list
+```json
+{
+  "paging": {
+    "is_end": true,
+    "is_start": true,
+    "next": "/api/ipa/normal/list?limit=10&offset=10",
+    "previous": "/api/ipa/normal/list?limit=10&offset=0",
+    "totals": 239
+  },
+  "data": [
+    {
+      "id": "11111",
+      "name": "xxxx",
+      "bundle_id": "xxxxx",
+      "created_at": 1637728013,
+      "updated_at": 1639460435,
+      "versions": [
+        {
+          "id": "2777",
+          "version": "2.3.0",
+          "ipa_type": "normal",
+          "created_at": 1637728013,
+          "updated_at": 1639406962
+        },
+        {
+          "id": "3088",
+          "version": "2.2.0",
+          "ipa_type": "normal",
+          "describe_url": "",
+          "created_at": 1639460435,
+          "updated_at": 1639460435
+        }
+      ]
+    }
+  ]
+}
+```
