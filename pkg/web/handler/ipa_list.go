@@ -28,8 +28,6 @@ func (h *IpaListHandler) GetByIpaType(w http.ResponseWriter, r *http.Request) {
 	offset := GetIntArgument(r, "offset", 0)
 	limit := GetIntArgument(r, "limit", 10)
 
-	loginID := mustGetLoginID(ctx)
-
 	ivs, err := h.ipaVersionDAO.GetByIpaType(ctx, ipaType)
 	util.PanicIf(err)
 	ipaIDs := make([]int64, 0)
@@ -41,7 +39,7 @@ func (h *IpaListHandler) GetByIpaType(w http.ResponseWriter, r *http.Request) {
 	paging := util.GenerateOffsetPaging(ctx, r, len(ipaIDs), offset, limit)
 	paging.IsEnd = true
 
-	ipa := render.NewIpaRender(ipaIDs, loginID, []enum.IpaType{ipaType}, render.IpaDefaultRenderFields...).RenderSlice(ctx)
+	ipa := render.NewIpaRender(ipaIDs, 0, []enum.IpaType{ipaType}, render.IpaDefaultRenderFields...).RenderSlice(ctx)
 	util.RenderJSON(w, util.ListOutput{
 		Paging: paging,
 		Data:   ipa,
