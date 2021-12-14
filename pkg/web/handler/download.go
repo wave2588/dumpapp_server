@@ -75,10 +75,6 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 
 	loginID := middleware.MustGetMemberID(ctx)
 
-	/// 检查是否有下载次数
-	_, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
-	util.PanicIf(err)
-
 	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, args.IpaType, args.Version)
 	util.PanicIf(err)
 
@@ -127,10 +123,6 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	util.PanicIf(args.Validate())
 
 	loginID := middleware.MustGetMemberID(ctx)
-
-	/// 检查是否有下载次数
-	_, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
-	util.PanicIf(err)
 
 	/// 以下是一套反作弊的机制
 	isBlackList, err := h.cribberDAO.GetBlacklistByMemberID(ctx, loginID)
