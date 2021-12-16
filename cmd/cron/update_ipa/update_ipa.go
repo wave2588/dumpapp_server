@@ -47,4 +47,5 @@ func (r *UpdateIpa) sss() {
 		offset += limit
 		hasNext = len(ids) < limit
 	}
+
 }
