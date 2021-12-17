@@ -92,6 +92,7 @@ type Version struct {
 	IpaType     enum.IpaType `json:"ipa_type" validate:"required"`
 	IsTemporary bool         `json:"is_temporary" validate:"required"`
 	DescribeURL *string      `json:"describe_url"`
+	Describe    *string      `json:"describe"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -160,7 +161,10 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			/// 删除 dump order 记录
 			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, version.Version))
 
-			ipaVersionBizExt := &constant.IpaVersionBizExt{DescribeURL: version.DescribeURL}
+			ipaVersionBizExt := &constant.IpaVersionBizExt{
+				DescribeURL: version.DescribeURL,
+				Describe:    version.Describe,
+			}
 			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
 				IpaID:       ipaID,
 				Version:     version.Version,

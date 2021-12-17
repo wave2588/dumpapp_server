@@ -49,8 +49,8 @@ func NewDownloadHandler() *DownloadHandler {
 }
 
 type checkCanDownloadArgs struct {
-	Version string       `form:"version" validate:"required"`
-	IpaType enum.IpaType `form:"ipa_type"`
+	Version string `form:"version" validate:"required"`
+	IpaType string `form:"ipa_type"`
 }
 
 func (args *checkCanDownloadArgs) Validate() error {
@@ -58,8 +58,8 @@ func (args *checkCanDownloadArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
-	if !args.IpaType.IsAIpaType() {
-		args.IpaType = enum.IpaTypeNormal
+	if args.IpaType == "" {
+		args.IpaType = enum.IpaTypeNormal.String()
 	}
 	return nil
 }
@@ -73,9 +73,12 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
+	ipaType, err := enum.IpaTypeString(args.IpaType)
+	util.PanicIf(err)
+
 	loginID := middleware.MustGetMemberID(ctx)
 
-	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, args.IpaType, args.Version)
+	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, ipaType, args.Version)
 	util.PanicIf(err)
 
 	if len(ipaVersions) == 0 {
@@ -86,7 +89,7 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	}
 
 	/// 判断之前是否下载过
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.IpaType.String()), null.StringFrom(args.Version))
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
@@ -98,8 +101,8 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 }
 
 type getDownloadURLArgs struct {
-	Version string       `form:"version" validate:"required"`
-	IpaType enum.IpaType `form:"ipa_type"`
+	Version string `form:"version" validate:"required"`
+	IpaType string `form:"ipa_type"`
 }
 
 func (args *getDownloadURLArgs) Validate() error {
@@ -107,8 +110,8 @@ func (args *getDownloadURLArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
-	if !args.IpaType.IsAIpaType() {
-		args.IpaType = enum.IpaTypeNormal
+	if args.IpaType == "" {
+		args.IpaType = enum.IpaTypeNormal.String()
 	}
 	return nil
 }
@@ -121,6 +124,9 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	args := getDownloadURLArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
+
+	ipaType, err := enum.IpaTypeString(args.IpaType)
+	util.PanicIf(err)
 
 	loginID := middleware.MustGetMemberID(ctx)
 
@@ -144,7 +150,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	/// 操作数 +1
 	util.PanicIf(h.cribberDAO.IncrMemberRemoteIP(ctx, loginID, remoteIP))
 
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(args.IpaType.String()), null.StringFrom(args.Version))
+	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
@@ -156,12 +162,13 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		dn.Status = enum.MemberDownloadNumberStatusUsed
 		dn.IpaID = null.Int64From(ipaID)
 		dn.Version = null.StringFrom(args.Version)
-		dn.IpaType = null.StringFrom(args.IpaType.String())
+		dn.IpaType = null.StringFrom(ipaType.String())
 		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
 	}
 
-	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, args.IpaType, args.Version)
+	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, ipaType, args.Version)
 	util.PanicIf(err)
+	fmt.Println(len(ipaVersions))
 	if len(ipaVersions) == 0 {
 		util.RenderJSON(w, map[string]interface{}{
 			"can_download": false,
