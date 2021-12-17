@@ -21,3 +21,12 @@ func RemoveDuplicates(dedup []int64) []int64 {
 
 	return dedup
 }
+
+func IsContainStrings(items []string, item string) bool {
+	for _, eachItem := range items {
+		if eachItem == item {
+			return true
+		}
+	}
+	return false
+}

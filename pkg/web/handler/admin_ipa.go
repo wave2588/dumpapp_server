@@ -384,8 +384,8 @@ func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaI
 	return nil
 }
 
-func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64) error {
-	ivs, err := h.ipaVersionDAO.GetByIpaID(ctx, ipaID)
+func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64, ipaType enum.IpaType) error {
+	ivs, err := h.ipaVersionDAO.GetByIpaIDAndIpaType(ctx, ipaID, ipaType)
 	if err != nil {
 		return err
 	}
