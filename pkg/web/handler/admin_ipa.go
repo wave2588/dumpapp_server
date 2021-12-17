@@ -351,7 +351,7 @@ func (h *AdminIpaHandler) DeleteIpa(w http.ResponseWriter, r *http.Request) {
 			util.PanicIf(h.deleteIpaRetainLatestVersion(ctx, ipaID, args.IpaType))
 		} else {
 			/// 删除操作
-			util.PanicIf(h.deleteIpa(ctx, ipaID))
+			util.PanicIf(h.deleteIpa(ctx, ipaID, args.IpaType))
 		}
 	} else {
 		util.PanicIf(h.deleteIpaVersion(ctx, ipaID, args.IpaType, args.IpaVersion))
