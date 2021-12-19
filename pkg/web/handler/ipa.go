@@ -94,8 +94,10 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	/// 如果找到了, 正常返回结构即可, 子页面会判断是否有下载次数
 	if ipa != nil {
 		data := render.NewIpaRender([]int64{ipaID}, loginID, []enum.IpaType{args.IpaType}, render.IpaDefaultRenderFields...).RenderMap(ctx)
-		util.RenderJSON(w, data[ipaID])
-		return
+		if len(data[ipaID].Versions) != 0 {
+			util.RenderJSON(w, data[ipaID])
+			return
+		}
 	}
 
 	/// 判断是否有下载次数
