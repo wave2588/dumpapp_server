@@ -3,6 +3,7 @@ package render
 import (
 	"context"
 	"dumpapp_server/pkg/common/enum"
+	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	util2 "dumpapp_server/pkg/util"
@@ -89,5 +90,50 @@ func (f *MemberDownloadRecordRender) RenderMap(ctx context.Context) map[int64]*M
 }
 
 func (f *MemberDownloadRecordRender) fetch(ctx context.Context) {
-	ids, err := f.memberDownloadNumberDAO.batch
+	memberDownloadMap, err := f.memberDownloadNumberDAO.BatchGet(ctx, f.ids)
+	util.PanicIf(err)
+
+	ipaIDs := make([]int64, 0)
+	for _, id := range f.ids {
+		d, ok := memberDownloadMap[id]
+		if !ok {
+			continue
+		}
+		if d.IpaID.Int64 == 0 {
+			continue
+		}
+		ipaIDs = append(ipaIDs, d.IpaID.Int64)
+	}
+	ipaMap := NewIpaRender(ipaIDs, f.loginID, []enum.IpaType{enum.IpaTypeNormal, enum.IpaTypeCrack}, IpaDefaultRenderFields...).RenderMap(ctx)
+
+	result := make(map[int64]*MemberDownloadRecord)
+	for _, id := range f.ids {
+		d, ok := memberDownloadMap[id]
+		if !ok {
+			continue
+		}
+		if d.IpaID.Int64 == 0 {
+			continue
+		}
+		/// version 没有说明是证书记录，则忽略
+		if !d.Version.Valid || !d.IpaType.Valid {
+			continue
+		}
+		/// 小于 2021-12-09 号之前的记录不下发
+		if d.CreatedAt.Unix() <= 1638979200 {
+			continue
+		}
+		ipaType, _ := enum.IpaTypeString(d.IpaType.String)
+		result[id] = &MemberDownloadRecord{
+			ID:        d.ID,
+			Version:   d.Version.String,
+			Status:    d.Status,
+			IpaType:   ipaType,
+			Ipa:       ipaMap[d.IpaID.Int64],
+			CreatedAt: d.CreatedAt.Unix(),
+			UpdateAt:  d.UpdatedAt.Unix(),
+		}
+	}
+
+	f.memberDownloadRecordMap = result
 }
