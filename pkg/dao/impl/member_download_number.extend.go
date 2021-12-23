@@ -59,3 +59,18 @@ func (d *MemberDownloadNumberDAO) GetIpaDownloadCount(ctx context.Context, ipaID
 
 	return data.Count, data.UpdatedAt.Unix(), nil
 }
+
+func (d *MemberDownloadNumberDAO) BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDownloadNumber, error) {
+	qs := []qm.QueryMod{
+		models.MemberDownloadNumberWhere.MemberID.IN(memberIDs),
+	}
+	data, err := models.MemberDownloadNumbers(qs...).All(ctx, d.mysqlPool)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[int64][]*models.MemberDownloadNumber)
+	for _, datum := range data {
+		result[datum.MemberID] = append(result[datum.MemberID], datum)
+	}
+	return result, nil
+}

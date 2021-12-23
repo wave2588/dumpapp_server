@@ -27,4 +27,5 @@ type MemberDownloadNumberDAO interface {
 	GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error)
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)
 	GetIpaDownloadCount(ctx context.Context, ipaID int64) (int64, int64, error)
+	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDownloadNumber, error)
 }
