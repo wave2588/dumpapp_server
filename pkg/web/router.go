@@ -39,7 +39,7 @@ func NewRouter() chi.Router {
 	// member download record
 	memberDownloadRecord := handler.NewMemberDownloadRecordHandler()
 	r.With(middleware.OAuthRegister).Get("/member/self/download_record", memberDownloadRecord.GetSelfDownloadRecord)
-	//endregion
+	// endregion
 
 	// ipa
 	ipaHandler := handler.NewIpaHandler()
