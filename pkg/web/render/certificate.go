@@ -13,7 +13,7 @@ import (
 )
 
 type Certificate struct {
-	meta *models.Certificate
+	Meta *models.Certificate
 
 	ID        int64 `json:"id,string"`
 	CreatedAt int64 `json:"created_at"`
@@ -108,7 +108,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[meta.ID] = &Certificate{
-			meta:      meta,
+			Meta:      meta,
 			ID:        meta.ID,
 			CreatedAt: meta.CreatedAt.Unix(),
 			UpdatedAt: meta.UpdatedAt.Unix(),
@@ -123,7 +123,7 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 	for _, certificate := range f.CertificateMap {
 		batch.Append(func(cer *Certificate) util2.FutureFunc {
 			return func() error {
-				response, err := f.certificateServe.CheckP12File(ctx, cer.meta.P12FileDate, "1")
+				response, err := f.certificateServe.CheckP12File(ctx, cer.Meta.P12FileDate, "1")
 				if err != nil {
 					return err
 				}
@@ -145,10 +145,10 @@ func (f *CertificateRender) RenderIsValidate(ctx context.Context) {
 	for _, certificate := range f.CertificateMap {
 		batch.Append(func(cer *Certificate) util2.FutureFunc {
 			return func() error {
-				if cer.meta.UdidBatchNo == "" {
+				if cer.Meta.UdidBatchNo == "" {
 					return nil
 				}
-				response, err := f.certificateServe.CheckCerByUDIDBatchNo(ctx, cer.meta.UdidBatchNo)
+				response, err := f.certificateServe.CheckCerByUDIDBatchNo(ctx, cer.Meta.UdidBatchNo)
 				if err != nil {
 					return err
 				}

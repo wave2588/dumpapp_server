@@ -24,6 +24,10 @@ var (
 	ErrDownloadNumberLessThanSix = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 6 次")
 	ErrCreateCertificateFail     = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
+	/// 证书相关错误
+	ErrNotFoundCertificate = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")
+	ErrCertificateInvalid  = NewDefaultAPIError(404, 40001, "CertificateInvalid", "证书已失效")
+
 	/// 业务 dao 层错误
 	ErrRedisFail       = NewDefaultAPIError(500, 50000, "RedisFail", "redis 发生错误")
 	ErrMemberBlacklist = NewDefaultAPIError(403, 50001, "MemberBlacklist", "该账户已被拉黑, 请稍后重试。")

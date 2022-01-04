@@ -54,6 +54,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/ipa/{ipa_type}/list", ipaListHandler.GetByIpaType)
 	// endregion
 
+	// ipa sign
+	ipaSignHandler := handler.NewIpaSignHandler()
+	r.With(middleware.OAuthRegister).Post("/ipa/{ipa_type}/sign", ipaSignHandler.PostSign)
+	// endregion
+
 	// dump order
 	dumpOrderHandler := handler.NewDumpOrderHandler()
 	r.With(middleware.OAuthRegister).Post("/ipa/dump_order", dumpOrderHandler.Post)
