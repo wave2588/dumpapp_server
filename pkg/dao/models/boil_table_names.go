@@ -10,6 +10,7 @@ var TableNames = struct {
 	CertificateDevice    string
 	Feedback             string
 	Ipa                  string
+	IpaSign              string
 	IpaVersion           string
 	MemberDevice         string
 	MemberDownloadNumber string
@@ -27,6 +28,7 @@ var TableNames = struct {
 	CertificateDevice:    "certificate_device",
 	Feedback:             "feedback",
 	Ipa:                  "ipa",
+	IpaSign:              "ipa_sign",
 	IpaVersion:           "ipa_version",
 	MemberDevice:         "member_device",
 	MemberDownloadNumber: "member_download_number",

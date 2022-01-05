@@ -54,7 +54,7 @@ func (c *IpaSignWebController) Sign(ctx context.Context, loginID, certificateID,
 		return err
 	}
 
-	fmt.Println(ipaVersion, cer)
+	fmt.Println(ipaVersion, cer, pemFilePath, mpFilePath)
 
 	return nil
 }

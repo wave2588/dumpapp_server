@@ -111,3 +111,17 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+
+# member_download_number table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["ipa_sign"]
+
+  [types.replace]
+    type = "enum.IpaSignStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
