@@ -5,6 +5,7 @@ package dao
 import (
 	"context"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao/models"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -20,8 +21,5 @@ type IpaSignDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
-	// GetByTokenPath retrieves a single record by uniq key tokenPath from db.
-	GetByTokenPath(ctx context.Context, tokenPath string) (*models.IpaSign, error)
-	// BatchGetByTokenPath retrieves multiple records by uniq key tokenPath from db.
-	BatchGetByTokenPath(ctx context.Context, tokenPaths []string) (map[string]*models.IpaSign, error)
+	GetByStatus(ctx context.Context, status enum.IpaSignStatus) ([]*models.IpaSign, error)
 }

@@ -691,7 +691,6 @@ func (o IpaSignSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 var mySQLIpaSignUniqueColumns = []string{
 	"id",
-	"token_path",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
