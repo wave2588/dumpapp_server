@@ -58,6 +58,7 @@ func NewRouter() chi.Router {
 	ipaSignHandler := handler.NewIpaSignHandler()
 	r.With(middleware.OAuthRegister).Post("/ipa/sign", ipaSignHandler.PostSign)
 	r.With(middleware.OAuthRegister).Get("/ipa/sign", ipaSignHandler.GetMemberSignList)
+	r.With(middleware.OAuthRegister).Get("/ipa/sign/{ipa_sign_id}/url", ipaSignHandler.GetIpaSignURL)
 	// endregion
 
 	// dump order

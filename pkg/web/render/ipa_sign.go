@@ -18,7 +18,6 @@ type IpaSign struct {
 
 	ID        int64              `json:"id,string"`
 	Status    enum.IpaSignStatus `json:"status"`
-	URL       string             `json:"url"`
 	CreatedAt int64              `json:"created_at"`
 	UpdateAt  int64              `json:"update_at"`
 
@@ -114,7 +113,6 @@ func (f *IpaSignRender) fetch(ctx context.Context) {
 			meta:              ipaSign,
 			ID:                ipaSign.ID,
 			Status:            ipaSign.Status,
-			URL:               "",
 			CreatedAt:         ipaSign.CreatedAt.Unix(),
 			UpdateAt:          ipaSign.UpdatedAt.Unix(),
 			CurrentIpaVersion: ipaSignBizExt.IpaVersion,

@@ -24,4 +24,12 @@ GET /ipa/sign
     "is_end": false
   }
 }
+```  
+
+### 获取签名下载地址  
+GET /ipa/sign/{ipa_sign_id}/url  
+```json
+{
+  "open_url": "https://xxxx"
+}
 ```

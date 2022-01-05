@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
+	controller2 "dumpapp_server/pkg/controller"
+	impl3 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -13,18 +16,21 @@ import (
 	"dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type IpaSignHandler struct {
 	ipaSignWebCtl controller.IpaSignWebController
 	ipaSignDAO    dao.IpaSignDAO
+	tencentCtl    controller2.TencentController
 }
 
 func NewIpaSignHandler() *IpaSignHandler {
 	return &IpaSignHandler{
 		ipaSignWebCtl: impl.DefaultIpaSignWebController,
 		ipaSignDAO:    impl2.DefaultIpaSignDAO,
+		tencentCtl:    impl3.DefaultTencentController,
 	}
 }
 
@@ -75,4 +81,40 @@ func (h *IpaSignHandler) GetMemberSignList(w http.ResponseWriter, r *http.Reques
 		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
 		Data:   data,
 	})
+}
+
+func (h *IpaSignHandler) GetIpaSignURL(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	ipaSignID := cast.ToInt64(util.URLParam(r, "ipa_sign_id"))
+	ipaSignMap, err := h.ipaSignDAO.BatchGet(ctx, []int64{ipaSignID})
+	util.PanicIf(err)
+
+	ipaSign, ok := ipaSignMap[ipaSignID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundIpaSign)
+		return
+	}
+	if ipaSign.Status == enum.IpaSignStatusUnprocessed {
+		util.PanicIf(errors.ErrIpaSignStatusUnprocessed)
+		return
+	}
+	if ipaSign.Status == enum.IpaSignStatusProcessing {
+		util.PanicIf(errors.ErrIpaSignStatusProcessing)
+		return
+	}
+	if ipaSign.Status == enum.IpaSignStatusFail {
+		util.PanicIf(errors.ErrIpaSignStatusFail)
+		return
+	}
+
+	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaSign.TokenPath)
+	util.PanicIf(err)
+	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
+	resJSON := map[string]interface{}{
+		"open_url": openURL,
+	}
+	util.RenderJSON(w, resJSON)
 }

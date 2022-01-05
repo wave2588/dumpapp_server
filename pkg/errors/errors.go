@@ -28,6 +28,12 @@ var (
 	ErrNotFoundCertificate = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")
 	ErrCertificateInvalid  = NewDefaultAPIError(404, 40001, "CertificateInvalid", "证书已失效")
 
+	/// 签名相关
+	ErrNotFoundIpaSign          = NewDefaultAPIError(404, 60000, "NotFoundIpaSign", "未找到对应的签名任务")
+	ErrIpaSignStatusProcessing  = NewDefaultAPIError(401, 60001, "IpaSignStatusProcessing", "签名任务进行中")
+	ErrIpaSignStatusFail        = NewDefaultAPIError(401, 60002, "IpaSignStatusFail", "签名任务失败")
+	ErrIpaSignStatusUnprocessed = NewDefaultAPIError(401, 60003, "IpaSignStatusFail", "签名任务未开始，请稍等。")
+
 	/// 业务 dao 层错误
 	ErrRedisFail       = NewDefaultAPIError(500, 50000, "RedisFail", "redis 发生错误")
 	ErrMemberBlacklist = NewDefaultAPIError(403, 50001, "MemberBlacklist", "该账户已被拉黑, 请稍后重试。")
