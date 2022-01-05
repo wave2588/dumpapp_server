@@ -114,7 +114,7 @@ func (c *IpaSignWebController) generatePemAndMpFilePath(ctx context.Context, cer
 
 	/// p12 convert pem
 	pemFilePath := fmt.Sprintf("%s/templates/ipa_sign/%d.pem", path, cer.ID)
-	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"dumpapp" -passout pass:"" -out %s`, p12FilePath, pemFilePath)
+	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"dumpapp" -passout pass:"123" -out %s`, p12FilePath, pemFilePath)
 	err = util2.Cmd(cmd)
 	if err != nil {
 		return "", "", err
