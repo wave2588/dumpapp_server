@@ -16,7 +16,9 @@ GET /ipa/sign
       "id": "222",
       "name": "hhhh"
     },
-    "status": "processing"
+    "status": "processing",
+    "current_ipa_version": "1.1.1",
+    "current_ipa_type": "normal"
   }],
   "paging": {
     "is_end": false
