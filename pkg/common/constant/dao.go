@@ -3,6 +3,7 @@ package constant
 import (
 	"encoding/json"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 )
 
@@ -29,6 +30,19 @@ type IpaVersionBizExt struct {
 }
 
 func (d *IpaVersionBizExt) String() string {
+	data, err := json.Marshal(d)
+	util.PanicIf(err)
+	return string(data)
+}
+
+type IpaSignBizExt struct {
+	IpaVersionID int64        `json:"ipa_version_id"`
+	IpaVersion   string       `json:"ipa_version"`
+	IpaType      enum.IpaType `json:"ipa_type"`
+	TokenPath    string       `json:"token_path"`
+}
+
+func (d *IpaSignBizExt) String() string {
 	data, err := json.Marshal(d)
 	util.PanicIf(err)
 	return string(data)

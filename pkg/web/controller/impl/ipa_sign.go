@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -54,12 +55,18 @@ func (c *IpaSignWebController) AddSignTask(ctx context.Context, loginID, certifi
 		return err
 	}
 
+	bizExt := constant.IpaSignBizExt{
+		IpaVersionID: ipaVersionID,
+		IpaVersion:   ipaVersion.Version,
+		IpaType:      ipaVersion.IpaType,
+		TokenPath:    ipaVersion.TokenPath,
+	}
 	return c.ipaSignDAO.Insert(ctx, &models.IpaSign{
 		IpaID:         ipaVersion.IpaID,
 		CertificateID: certificateID,
 		MemberID:      loginID,
 		Status:        enum.IpaSignStatusUnprocessed,
-		BizExt:        "",
+		BizExt:        bizExt.String(),
 	})
 }
 

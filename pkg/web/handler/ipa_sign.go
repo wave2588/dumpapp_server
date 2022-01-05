@@ -41,6 +41,7 @@ func (h *IpaSignHandler) PostSign(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	loginID := mustGetLoginID(ctx)
+	util.PanicIf(h.ipaSignWebCtl.AddSignTask(ctx, loginID, args.CertificateID, args.IpaVersionID))
 
-	h.ipaSignWebCtl.Sign(ctx, loginID, args.CertificateID, args.IpaVersionID)
+	util.RenderJSON(w, "ok")
 }
