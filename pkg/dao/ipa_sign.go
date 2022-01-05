@@ -22,4 +22,5 @@ type IpaSignDAO interface {
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	GetByStatus(ctx context.Context, status enum.IpaSignStatus) ([]*models.IpaSign, error)
+	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.IpaSign, error)
 }
