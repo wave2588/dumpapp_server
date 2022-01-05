@@ -22,9 +22,9 @@ type IpaSign struct {
 	CreatedAt int64              `json:"created_at"`
 	UpdateAt  int64              `json:"update_at"`
 
-	IpaID      int64        `json:"ipa_id"`
-	IpaVersion string       `json:"ipa_version"`
-	IpaType    enum.IpaType `json:"ipa_type"`
+	CurrentIpaVersion string       `json:"current_ipa_version"`
+	CurrentIpaType    enum.IpaType `json:"current_ipa_type"`
+	Ipa               *Ipa         `json:"ipa,omitempty" render:"method=RenderIpa"`
 }
 
 type IpaSignRender struct {
@@ -58,7 +58,9 @@ func IpaSignIncludes(fields []string) IpaSignOption {
 }
 
 var IpaSignDefaultRenderFields = []IpaSignOption{
-	IpaSignIncludes([]string{}),
+	IpaSignIncludes([]string{
+		"Ipa",
+	}),
 }
 
 func NewIpaSignRender(ids []int64, loginID int64, opts ...IpaSignOption) *IpaSignRender {
@@ -109,17 +111,28 @@ func (f *IpaSignRender) fetch(ctx context.Context) {
 		util.PanicIf(json.Unmarshal([]byte(ipaSign.BizExt), &ipaSignBizExt))
 
 		result[ipaSignID] = &IpaSign{
-			meta:       ipaSign,
-			ID:         ipaSign.ID,
-			Status:     ipaSign.Status,
-			URL:        "",
-			CreatedAt:  ipaSign.CreatedAt.Unix(),
-			UpdateAt:   ipaSign.UpdatedAt.Unix(),
-			IpaID:      ipaSign.IpaID,
-			IpaVersion: ipaSignBizExt.IpaVersion,
-			IpaType:    ipaSignBizExt.IpaType,
+			meta:              ipaSign,
+			ID:                ipaSign.ID,
+			Status:            ipaSign.Status,
+			URL:               "",
+			CreatedAt:         ipaSign.CreatedAt.Unix(),
+			UpdateAt:          ipaSign.UpdatedAt.Unix(),
+			CurrentIpaVersion: ipaSignBizExt.IpaVersion,
+			CurrentIpaType:    ipaSignBizExt.IpaType,
 		}
 	}
 
 	f.ipaSignMap = result
+}
+
+func (f *IpaSignRender) RenderIpa(ctx context.Context) {
+	ipaIDs := make([]int64, 0)
+	for _, sign := range f.ipaSignMap {
+		ipaIDs = append(ipaIDs, sign.meta.IpaID)
+	}
+	ipaMap := NewIpaRender(ipaIDs, f.loginID, []enum.IpaType{enum.IpaTypeNormal, enum.IpaTypeCrack}, IpaDefaultRenderFields...).RenderMap(ctx)
+
+	for _, sign := range f.ipaSignMap {
+		sign.Ipa = ipaMap[sign.meta.IpaID]
+	}
 }
