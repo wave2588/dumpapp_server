@@ -13,7 +13,6 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	pkgErr "github.com/pkg/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -176,7 +175,7 @@ func (d *IpaSignDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, e
 }
 
 // GetByTokenPath retrieves a single record by uniq key tokenPath from db.
-func (d *IpaSignDAO) GetByTokenPath(ctx context.Context, tokenPath null.String) (*models.IpaSign, error) {
+func (d *IpaSignDAO) GetByTokenPath(ctx context.Context, tokenPath string) (*models.IpaSign, error) {
 	ipaSignObj := &models.IpaSign{}
 
 	sel := "*"
@@ -206,7 +205,7 @@ func (d *IpaSignDAO) GetByTokenPath(ctx context.Context, tokenPath null.String) 
 }
 
 // BatchGetByTokenPath retrieves multiple records by uniq key tokenPath from db.
-func (d *IpaSignDAO) BatchGetByTokenPath(ctx context.Context, tokenPaths []null.String) (map[null.String]*models.IpaSign, error) {
+func (d *IpaSignDAO) BatchGetByTokenPath(ctx context.Context, tokenPaths []string) (map[string]*models.IpaSign, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -219,7 +218,7 @@ func (d *IpaSignDAO) BatchGetByTokenPath(ctx context.Context, tokenPaths []null.
 		return nil, pkgErr.WithStack(err)
 	}
 
-	result := make(map[null.String]*models.IpaSign)
+	result := make(map[string]*models.IpaSign)
 	for _, c := range datas {
 		result[c.TokenPath] = c
 	}

@@ -15,7 +15,6 @@ import (
 
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,7 +29,7 @@ type IpaSign struct {
 	CertificateID int64              `boil:"certificate_id" json:"certificate_id" toml:"certificate_id" yaml:"certificate_id"`
 	MemberID      int64              `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status        enum.IpaSignStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
-	TokenPath     null.String        `boil:"token_path" json:"token_path,omitempty" toml:"token_path" yaml:"token_path,omitempty"`
+	TokenPath     string             `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
 	BizExt        string             `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	CreatedAt     time.Time          `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt     time.Time          `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -84,36 +83,13 @@ func (w whereHelperenum_IpaSignStatus) GTE(x enum.IpaSignStatus) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var IpaSignWhere = struct {
 	ID            whereHelperint64
 	IpaID         whereHelperint64
 	CertificateID whereHelperint64
 	MemberID      whereHelperint64
 	Status        whereHelperenum_IpaSignStatus
-	TokenPath     whereHelpernull_String
+	TokenPath     whereHelperstring
 	BizExt        whereHelperstring
 	CreatedAt     whereHelpertime_Time
 	UpdatedAt     whereHelpertime_Time
@@ -123,7 +99,7 @@ var IpaSignWhere = struct {
 	CertificateID: whereHelperint64{field: "`ipa_sign`.`certificate_id`"},
 	MemberID:      whereHelperint64{field: "`ipa_sign`.`member_id`"},
 	Status:        whereHelperenum_IpaSignStatus{field: "`ipa_sign`.`status`"},
-	TokenPath:     whereHelpernull_String{field: "`ipa_sign`.`token_path`"},
+	TokenPath:     whereHelperstring{field: "`ipa_sign`.`token_path`"},
 	BizExt:        whereHelperstring{field: "`ipa_sign`.`biz_ext`"},
 	CreatedAt:     whereHelpertime_Time{field: "`ipa_sign`.`created_at`"},
 	UpdatedAt:     whereHelpertime_Time{field: "`ipa_sign`.`updated_at`"},

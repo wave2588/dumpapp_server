@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -20,6 +21,7 @@ type IpaSignWebController struct {
 	memberDeviceDAO      dao.MemberDeviceDAO
 	certificateDAO       dao.CertificateDAO
 	certificateDeviceDAO dao.CertificateDeviceDAO
+	ipaSignDAO           dao.IpaSignDAO
 }
 
 var DefaultIpaSignWebController *IpaSignWebController
@@ -34,7 +36,31 @@ func NewIpaSignWebController() *IpaSignWebController {
 		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
 		certificateDAO:       impl.DefaultCertificateDAO,
 		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
+		ipaSignDAO:           impl.DefaultIpaSignDAO,
 	}
+}
+
+func (c *IpaSignWebController) AddSignTask(ctx context.Context, loginID, certificateID, ipaVersionID int64) error {
+	/// fixme: 检查次数
+
+	/// 检测 ipaVersionID
+	ipaVersion, err := c.checkIpaVersionID(ctx, ipaVersionID)
+	if err != nil {
+		return err
+	}
+	/// 检测 certificateID
+	_, err = c.checkCertificateID(ctx, loginID, certificateID)
+	if err != nil {
+		return err
+	}
+
+	return c.ipaSignDAO.Insert(ctx, &models.IpaSign{
+		IpaID:         ipaVersion.IpaID,
+		CertificateID: certificateID,
+		MemberID:      loginID,
+		Status:        enum.IpaSignStatusUnprocessed,
+		BizExt:        "",
+	})
 }
 
 func (c *IpaSignWebController) Sign(ctx context.Context, loginID, certificateID, ipaVersionID int64) error {
