@@ -29,3 +29,26 @@ func (d *CertificateDeviceDAO) BatchGetByDeviceIDs(ctx context.Context, deviceID
 	}
 	return result, nil
 }
+
+func (d *CertificateDeviceDAO) GetByCertificateID(ctx context.Context, certificateID int64) ([]*models.CertificateDevice, error) {
+	result, err := d.BatchGetByCertificateIDs(ctx, []int64{certificateID})
+	if err != nil {
+		return nil, err
+	}
+	return result[certificateID], nil
+}
+
+func (d *CertificateDeviceDAO) BatchGetByCertificateIDs(ctx context.Context, certificateIDs []int64) (map[int64][]*models.CertificateDevice, error) {
+	qs := []qm.QueryMod{
+		models.CertificateDeviceWhere.CertificateID.IN(certificateIDs),
+	}
+	data, err := models.CertificateDevices(qs...).All(ctx, d.mysqlPool)
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[int64][]*models.CertificateDevice)
+	for _, datum := range data {
+		result[datum.CertificateID] = append(result[datum.CertificateID], datum)
+	}
+	return result, nil
+}

@@ -13,8 +13,10 @@ import (
 )
 
 type IpaSignWebController struct {
-	ipaVersionDAO dao.IpaVersionDAO
-	ipaSignDAO    dao.IpaSignDAO
+	ipaVersionDAO        dao.IpaVersionDAO
+	ipaSignDAO           dao.IpaSignDAO
+	certificateDeviceDAO dao.CertificateDeviceDAO
+	memberDeviceDAO      dao.MemberDeviceDAO
 }
 
 var DefaultIpaSignWebController *IpaSignWebController
@@ -25,8 +27,10 @@ func init() {
 
 func NewIpaSignWebController() *IpaSignWebController {
 	return &IpaSignWebController{
-		ipaVersionDAO: impl.DefaultIpaVersionDAO,
-		ipaSignDAO:    impl.DefaultIpaSignDAO,
+		ipaVersionDAO:        impl.DefaultIpaVersionDAO,
+		ipaSignDAO:           impl.DefaultIpaSignDAO,
+		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
+		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
 	}
 }
 
@@ -77,8 +81,28 @@ func (c *IpaSignWebController) checkCertificateID(ctx context.Context, loginID, 
 	if !ok {
 		return nil, errors.ErrNotFoundCertificate
 	}
-	if !cer.IsValidate || !cer.P12IsActive {
+	if !cer.P12IsActive {
 		return nil, errors.ErrCertificateInvalid
 	}
-	return cer.Meta, nil
+	/// 查看证书和当前登录人的关系
+	/// 1. 根据证书查出所有的设备 id
+	certificateDevices, err := c.certificateDeviceDAO.GetByCertificateID(ctx, certificateID)
+	if err != nil {
+		return nil, err
+	}
+	deviceIDs := make([]int64, 0)
+	for _, device := range certificateDevices {
+		deviceIDs = append(deviceIDs, device.DeviceID)
+	}
+	/// 根据设备 id 获取所有的 member_id
+	memberDeviceMap, err := c.memberDeviceDAO.BatchGet(ctx, deviceIDs)
+	if err != nil {
+		return nil, err
+	}
+	for _, device := range memberDeviceMap {
+		if device.MemberID == loginID {
+			return cer.Meta, nil
+		}
+	}
+	return nil, errors.ErrCertificateUnavailByAccount
 }

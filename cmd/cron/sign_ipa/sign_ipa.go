@@ -4,7 +4,10 @@ import (
 	"context"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
@@ -18,7 +21,7 @@ import (
 )
 
 func Run() {
-	fmt.Println("SignIpa")
+	fmt.Println("sign ipa")
 	run()
 }
 
@@ -53,26 +56,65 @@ func run() {
 }
 
 func sign(ctx context.Context, memberID, certificateID, ipaVersionID int64) error {
+	/// ipa sign folder path
+	ipaSignPath := ipaSignFolderPath()
+
 	/// 检测 ipaVersionID
 	ipaVersion, err := checkIpaVersionID(ctx, ipaVersionID)
 	if err != nil {
 		return err
 	}
+
 	/// 检测 certificateID
 	cer, err := checkCertificateID(ctx, memberID, certificateID)
 	if err != nil {
 		return err
 	}
+
 	/// 获取 pem 文件路径
-	pemFilePath, mpFilePath, err := generatePemAndMpFilePath(ctx, cer)
+	pemFilePath, mpFilePath, err := generatePemAndMpFilePath(ctx, cer, ipaSignPath)
 	if err != nil {
 		return err
 	}
 
-	err = startSign(ctx, ipaVersion, pemFilePath, mpFilePath)
+	/// 获取签名工具
+	zsignPath, err := getZsignPath()
 	if err != nil {
 		return err
 	}
+
+	/// 下载原始 ipa
+	originIpaID := util2.MustGenerateCode(ctx, 8)
+	originIpaName := fmt.Sprintf("%s.ipa", originIpaID)
+	originIpaPath := fmt.Sprintf("%s/%d.ipa", ipaSignPath, originIpaName)
+	err = impl2.DefaultTencentController.GetToFile(ctx, ipaVersion.TokenPath, originIpaPath)
+	if err != nil {
+		return err
+	}
+
+	/// 生成签名过后 ipa 路径
+	signIpaID := util2.MustGenerateCode(ctx, 8)
+	signIpaName := fmt.Sprintf("%s.ipa", signIpaID)
+	signedIpaPath := fmt.Sprintf("%s/%d.ipa", ipaSignPath, signIpaName)
+
+	/// 开始签名
+	//./zsign/build/zsign -k developer.pem -p 123 -m developer.mobileprovision -o output.ipa -z 9 test.ipa
+	cmd := fmt.Sprintf("%s -k %s -p dumpapp -m %s -o %s -z 9 %s", zsignPath, pemFilePath, mpFilePath, signedIpaPath, originIpaPath)
+	err = util2.Cmd(cmd)
+	if err != nil {
+		return err
+	}
+
+	/// 签名结束上传结果
+	err = impl2.DefaultTencentController.PutByFile(ctx, signIpaName, signedIpaPath)
+	if err != nil {
+		return err
+	}
+
+	os.Remove(pemFilePath)
+	os.Remove(mpFilePath)
+	os.Remove(originIpaPath)
+	os.Remove(signedIpaPath)
 
 	return err
 }
@@ -95,14 +137,14 @@ func checkCertificateID(ctx context.Context, memberID, certificateID int64) (*mo
 	if !ok {
 		return nil, errors.ErrNotFoundCertificate
 	}
-	if !cer.IsValidate || !cer.P12IsActive {
+	if !cer.P12IsActive {
 		return nil, errors.ErrCertificateInvalid
 	}
 	return cer.Meta, nil
 }
 
-func generatePemAndMpFilePath(ctx context.Context, cer *models.Certificate) (string, string, error) {
-	p12Data, err := base64.StdEncoding.DecodeString(cer.P12FileDate)
+func generatePemAndMpFilePath(ctx context.Context, cer *models.Certificate, ipaSignPath string) (string, string, error) {
+	p12Data, err := base64.StdEncoding.DecodeString(cer.ModifiedP12FileDate)
 	if err != nil {
 		return "", "", err
 	}
@@ -111,28 +153,23 @@ func generatePemAndMpFilePath(ctx context.Context, cer *models.Certificate) (str
 		return "", "", err
 	}
 
-	path, err := os.Getwd()
-	if err != nil {
-		return "", "", err
-	}
-
 	/// 生成 p12 file
-	p12FilePath := fmt.Sprintf("%s/templates/ipa_sign/%d.p12", path, cer.ID)
+	p12FilePath := fmt.Sprintf("%s/%d.p12", ipaSignPath, cer.ID)
 	err = ioutil.WriteFile(p12FilePath, p12Data, 0o644)
 	if err != nil {
 		return "", "", err
 	}
 
 	/// 生成 mp file
-	mpFilePath := fmt.Sprintf("%s/templates/ipa_sign/%d.mobileprovision", path, cer.ID)
+	mpFilePath := fmt.Sprintf("%s/%d.mobileprovision", ipaSignPath, cer.ID)
 	err = ioutil.WriteFile(mpFilePath, mpData, 0o644)
 	if err != nil {
 		return "", "", err
 	}
 
 	/// p12 convert pem
-	pemFilePath := fmt.Sprintf("%s/templates/ipa_sign/%d.pem", path, cer.ID)
-	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"dumpapp" -passout pass:"123" -out %s`, p12FilePath, pemFilePath)
+	pemFilePath := fmt.Sprintf("%s/%d.pem", ipaSignPath, cer.ID)
+	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"dumpapp" -passout pass:"dumpapp" -out %s`, p12FilePath, pemFilePath)
 	err = util2.Cmd(cmd)
 	if err != nil {
 		return "", "", err
@@ -143,9 +180,30 @@ func generatePemAndMpFilePath(ctx context.Context, cer *models.Certificate) (str
 	if err != nil {
 		return "", "", err
 	}
-	return pemFilePath, pemFilePath, nil
+	return pemFilePath, mpFilePath, nil
 }
 
-func startSign(ctx context.Context, ipaVersion *models.IpaVersion, pemFilePath, mpFilePath string) error {
-	return nil
+func getZsignPath() (string, error) {
+	path := rootPath()
+	zsignPath := ""
+	switch config.DumpConfig.AppConfig.Env {
+	case config.DumpEnvProduction:
+		zsignPath = fmt.Sprintf("%s/tools/bin/linux/zsign", path)
+	case config.DumpEnvDev:
+		zsignPath = fmt.Sprintf("%s/tools/bin/macos/zsign", path)
+	default:
+		return "", errors2.NewError(1000, "env fail", "为识别的 env")
+	}
+	return zsignPath, nil
+}
+
+func ipaSignFolderPath() string {
+	path := rootPath()
+	return fmt.Sprintf("%s/templates/ipa_sign", path)
+}
+
+func rootPath() string {
+	path, err := os.Getwd()
+	util.PanicIf(err)
+	return path
 }

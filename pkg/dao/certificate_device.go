@@ -26,4 +26,5 @@ type CertificateDeviceDAO interface {
 	GetCertificateDeviceSliceByDeviceID(ctx context.Context, deviceID int64) ([]*models.CertificateDevice, error)
 	GetByDeviceID(ctx context.Context, deviceID int64) ([]*models.CertificateDevice, error)
 	BatchGetByDeviceIDs(ctx context.Context, deviceIDs []int64) (map[int64][]*models.CertificateDevice, error)
+	GetByCertificateID(ctx context.Context, certificateID int64) ([]*models.CertificateDevice, error)
 }

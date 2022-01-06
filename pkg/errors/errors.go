@@ -25,8 +25,9 @@ var (
 	ErrCreateCertificateFail     = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
 	/// 证书相关错误
-	ErrNotFoundCertificate = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")
-	ErrCertificateInvalid  = NewDefaultAPIError(404, 40001, "CertificateInvalid", "证书已失效")
+	ErrNotFoundCertificate         = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")
+	ErrCertificateInvalid          = NewDefaultAPIError(404, 40001, "CertificateInvalid", "证书已失效")
+	ErrCertificateUnavailByAccount = NewDefaultAPIError(404, 40001, "CertificateUnavail", "当前账号不能使用此证书")
 
 	/// 签名相关
 	ErrNotFoundIpaSign          = NewDefaultAPIError(404, 60000, "NotFoundIpaSign", "未找到对应的签名任务")

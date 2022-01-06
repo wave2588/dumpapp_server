@@ -82,6 +82,16 @@ func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (s
 	return res.String(), nil
 }
 
+func (c *TencentController) GetToFile(ctx context.Context, name, path string) error {
+	_, err := c.client.Object.GetToFile(ctx, name, path, nil)
+	return err
+}
+
+func (c *TencentController) PutByFile(ctx context.Context, name, path string) error {
+	_, err := c.client.Object.PutFromFile(ctx, name, path, nil)
+	return err
+}
+
 func (c *TencentController) SendPhoneRegisterCaptcha(ctx context.Context, captcha, phone string) error {
 	client, err := sms.NewClient(c.credential, regions.Beijing, profile.NewClientProfile())
 	if err != nil {

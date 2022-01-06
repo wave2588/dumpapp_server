@@ -38,6 +38,8 @@ var config = appConfig{
 	},
 	Cookie: &Cookie{HMACKey: os.Getenv("COOKIE_HMAC_KEY"), AESKey: os.Getenv("COOKIE_AES_KEY")},
 
+	Env: DumpEnv(os.Getenv("DumpEnv")),
+
 	SentryDSN: os.Getenv("SENTRY_DSN"),
 
 	TencentCOSAppID:        os.Getenv("TENCENT_COS_APP_ID"),
@@ -78,6 +80,8 @@ type appConfig struct {
 	MySQL  *MySQL
 	Redis  *Redis
 	Cookie *Cookie
+
+	Env DumpEnv
 
 	SentryDSN string
 
@@ -130,3 +134,10 @@ type Cookie struct {
 	HMACKey string
 	AESKey  string
 }
+
+type DumpEnv string
+
+const (
+	DumpEnvProduction = "production"
+	DumpEnvDev        = "dev"
+)

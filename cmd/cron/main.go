@@ -19,7 +19,7 @@ func main() {
 	//	conclusion.Run()
 	//})
 
-	spec := "*/30 * * * * ?" //cron表达式，每秒一次
+	spec := "*/2 * * * * ?" //cron表达式，每秒一次
 	c.AddFunc(spec, func() {
 		sign_ipa.Run()
 	})
