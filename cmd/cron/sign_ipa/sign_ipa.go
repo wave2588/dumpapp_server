@@ -105,12 +105,13 @@ func sign(ctx context.Context, memberID, certificateID, ipaVersionID int64) erro
 		return err
 	}
 
-	/// 签名结束上传结果
+	/// 上传签名 ipa
 	err = impl2.DefaultTencentController.PutByFile(ctx, signIpaName, signedIpaPath)
 	if err != nil {
 		return err
 	}
 
+	/// 签名结束 删除所有文件
 	os.Remove(pemFilePath)
 	os.Remove(mpFilePath)
 	os.Remove(originIpaPath)
