@@ -101,7 +101,6 @@ crashlytics-build.properties
 fabric.properties
 
 .idea/
-bin/
 gen-py/
 *.pyc
 coverage.xml
