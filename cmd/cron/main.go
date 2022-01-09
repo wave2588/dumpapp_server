@@ -3,7 +3,6 @@ package main
 import (
 	"dumpapp_server/cmd/cron/conclusion"
 	"dumpapp_server/cmd/cron/delete_ipa"
-	"dumpapp_server/cmd/cron/sign_ipa"
 	"github.com/robfig/cron/v3"
 )
 
