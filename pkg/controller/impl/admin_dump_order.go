@@ -61,6 +61,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 		return err
 	}
 	bizExt.DemanderIDs = append(bizExt.DemanderIDs, demanderID)
+	order.Status = enum.AdminDumpOrderStatusProgressing
 	return c.adminDumpOrderDAO.Update(ctx, order)
 }
 
