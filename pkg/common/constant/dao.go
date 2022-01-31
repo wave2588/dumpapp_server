@@ -7,7 +7,7 @@ import (
 	"dumpapp_server/pkg/common/util"
 )
 
-type TransactionKey string
+type TransactionKey = string
 
 const TransactionKeyTxn TransactionKey = "txn"
 

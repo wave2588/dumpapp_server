@@ -20,7 +20,7 @@ func main() {
 	hasNext := true
 
 	var amount int64 = 0
-	month := time.Month(12)
+	month := time.Month(1)
 
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
 	//endAt := time.Date(time.Now().Year(), month, 30, 23, 59, 59, 0, time.Local)
