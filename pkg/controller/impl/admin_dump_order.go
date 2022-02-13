@@ -2,14 +2,13 @@ package impl
 
 import (
 	"context"
-	"encoding/json"
-
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
+	"encoding/json"
 	pkgErr "github.com/pkg/errors"
 )
 
@@ -61,7 +60,12 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 		return err
 	}
 	bizExt.DemanderIDs = append(bizExt.DemanderIDs, demanderID)
+	bizExtData, err := json.Marshal(bizExt)
+	if err != nil {
+		return err
+	}
 	order.Status = enum.AdminDumpOrderStatusProgressing
+	order.IpaBizExt = string(bizExtData)
 	return c.adminDumpOrderDAO.Update(ctx, order)
 }
 
