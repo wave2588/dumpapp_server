@@ -177,7 +177,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	if args.IsSendEmail {
 		util.PanicIf(h.sendEmail(ctx, ipaArgsMap))
