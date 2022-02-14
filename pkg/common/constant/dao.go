@@ -16,6 +16,7 @@ type AdminDumpOrderBizExt struct {
 	IpaBundleID     string  `json:"ipa_bundle_id"`
 	IpaAppStoreLink string  `json:"ipa_app_store_link"`
 	DemanderIDs     []int64 `json:"demander_ids"`
+	IsOld           bool    `json:"is_old"`
 }
 
 type SearchCount struct {

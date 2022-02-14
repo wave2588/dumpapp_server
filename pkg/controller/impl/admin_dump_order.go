@@ -2,13 +2,14 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
+
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
-	"encoding/json"
 	pkgErr "github.com/pkg/errors"
 )
 
@@ -29,7 +30,7 @@ func NewAdminDumpOrderController() *AdminDumpOrderController {
 }
 
 /// demanderID 需求者 id
-func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID int64, ipaName, ipaVersion, ipaBundleID, ipaAppStoreLink string) error {
+func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID int64, ipaName, ipaVersion, ipaBundleID, ipaAppStoreLink string, isOld bool) error {
 	order, err := c.adminDumpOrderDAO.GetByIpaIDIpaVersion(ctx, ipaID, ipaVersion)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		return err
@@ -41,6 +42,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 			IpaBundleID:     ipaBundleID,
 			IpaAppStoreLink: ipaAppStoreLink,
 			DemanderIDs:     []int64{demanderID},
+			IsOld:           isOld,
 		}
 		data, err := json.Marshal(bizExt)
 		if err != nil {
@@ -60,6 +62,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 		return err
 	}
 	bizExt.DemanderIDs = append(bizExt.DemanderIDs, demanderID)
+	bizExt.IsOld = isOld
 	bizExtData, err := json.Marshal(bizExt)
 	if err != nil {
 		return err

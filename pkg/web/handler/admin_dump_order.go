@@ -84,6 +84,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 			IpaName:             bizExt.IpaName,
 			IpaBundleID:         bizExt.IpaBundleID,
 			IpaAppStoreLink:     bizExt.IpaAppStoreLink,
+			IsOld:               bizExt.IsOld,
 			CreatedAt:           do.CreatedAt.Unix(),
 			UpdatedAt:           do.UpdatedAt.Unix(),
 		}
@@ -104,6 +105,7 @@ type DumpOrderResult struct {
 	IpaName             string           `json:"ipa_name"`
 	IpaBundleID         string           `json:"ipa_bundle_id"`
 	IpaAppStoreLink     string           `json:"ipa_app_store_link"`
+	IsOld               bool             `json:"is_old"`
 	CreatedAt           int64            `json:"created_at"`
 	UpdatedAt           int64            `json:"updated_at"`
 }
