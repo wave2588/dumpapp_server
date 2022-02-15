@@ -213,6 +213,7 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 
 	// 已发过滤
 	filterMap := make(map[string]struct{})
+	sendCount := 0
 
 	batch := util2.NewBatch(ctx)
 	for _, record := range records {
@@ -230,7 +231,15 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		}
 		filterMap[key] = struct{}{}
 		batch.Append(func() error {
-			return h.emailWebCtl.SendUpdateIpaEmail(ctx, cast.ToInt64(ipaArgs.IpaID), member.Email, ipaArgs.Name)
+			if sendCount >= 15 { /// 最多只发送 15 个人
+				return nil
+			}
+			err = h.emailWebCtl.SendUpdateIpaEmail(ctx, cast.ToInt64(ipaArgs.IpaID), member.Email, ipaArgs.Name)
+			if err != nil {
+				return err
+			}
+			sendCount += 1
+			return nil
 		})
 	}
 	batch.Wait()
