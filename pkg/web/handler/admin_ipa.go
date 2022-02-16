@@ -229,17 +229,15 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		if _, ok := filterMap[key]; ok {
 			continue
 		}
+
+		if sendCount >= 15 { /// 最多只发送 15 个人
+			continue
+		}
+		sendCount += 1
+
 		filterMap[key] = struct{}{}
 		batch.Append(func() error {
-			if sendCount >= 15 { /// 最多只发送 15 个人
-				return nil
-			}
-			err = h.emailWebCtl.SendUpdateIpaEmail(ctx, cast.ToInt64(ipaArgs.IpaID), member.Email, ipaArgs.Name)
-			if err != nil {
-				return err
-			}
-			sendCount += 1
-			return nil
+			return h.emailWebCtl.SendUpdateIpaEmail(ctx, cast.ToInt64(ipaArgs.IpaID), member.Email, ipaArgs.Name)
 		})
 	}
 	batch.Wait()
