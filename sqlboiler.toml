@@ -46,32 +46,6 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
-# member_vip_order table
-[[types]]
-  [types.match]
-    name = "status"
-    type = "string"
-    tables = ["member_vip_order"]
-
-  [types.replace]
-    type = "enum.MemberVipOrderStatus"
-
-  [types.imports]
-    third_party = ['"dumpapp_server/pkg/common/enum"']
-
-# member_download_count table
-[[types]]
-  [types.match]
-    name = "status"
-    type = "string"
-    tables = ["member_download_number"]
-
-  [types.replace]
-    type = "enum.MemberDownloadNumberStatus"
-
-  [types.imports]
-    third_party = ['"dumpapp_server/pkg/common/enum"']
-
 # member_download_order table
 [[types]]
   [types.match]
@@ -99,12 +73,12 @@
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
 
-# member_download_number table
+# member_download_ipa_record table
 [[types]]
   [types.match]
     name = "ipa_type"
     type = "string"
-    tables = ["member_download_number"]
+    tables = ["member_download_ipa_record"]
 
   [types.replace]
     type = "enum.IpaType"
@@ -113,7 +87,7 @@
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
 
-# member_download_number table
+# ipa_sign table
 [[types]]
   [types.match]
     name = "status"
@@ -122,6 +96,45 @@
 
   [types.replace]
     type = "enum.IpaSignStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_pay_order table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_pay_order"]
+
+  [types.replace]
+    type = "enum.MemberPayOrderStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_pay_count table
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_pay_count"]
+
+  [types.replace]
+    type = "enum.MemberPayCountStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_pay_count table
+[[types]]
+  [types.match]
+    name = "source"
+    type = "string"
+    tables = ["member_pay_count"]
+
+  [types.replace]
+    type = "enum.MemberPayCountSource"
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']

@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -17,15 +19,15 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type AdminDownloadNumberHandler struct {
-	accountDAO              dao.AccountDAO
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+type AdminMemberPayCountHandler struct {
+	accountDAO        dao.AccountDAO
+	memberPayCountDAO dao.MemberPayCountDAO
 }
 
-func NewAdminDownloadNumberHandler() *AdminDownloadNumberHandler {
-	return &AdminDownloadNumberHandler{
-		accountDAO:              impl.DefaultAccountDAO,
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+func NewAdminMemberPayCountHandler() *AdminMemberPayCountHandler {
+	return &AdminMemberPayCountHandler{
+		accountDAO:        impl.DefaultAccountDAO,
+		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
 	}
 }
 
@@ -42,7 +44,7 @@ func (p *addDownloadNumber) Validate() error {
 	return nil
 }
 
-func (h *AdminDownloadNumberHandler) AddNumber(w http.ResponseWriter, r *http.Request) {
+func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
@@ -56,9 +58,10 @@ func (h *AdminDownloadNumberHandler) AddNumber(w http.ResponseWriter, r *http.Re
 	util.PanicIf(err)
 
 	for i := 0; i < cast.ToInt(args.Number); i++ {
-		util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
+		util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
 			MemberID: account.ID,
-			Status:   enum.MemberDownloadNumberStatusNormal,
+			Status:   enum.MemberPayCountStatusNormal,
+			Source:   enum.MemberPayCountSourceAdminPresented,
 		}))
 	}
 }
@@ -76,7 +79,7 @@ func (p *deleteDownloadNumber) Validate() error {
 	return nil
 }
 
-func (h *AdminDownloadNumberHandler) DeleteNumber(w http.ResponseWriter, r *http.Request) {
+func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
@@ -90,17 +93,28 @@ func (h *AdminDownloadNumberHandler) DeleteNumber(w http.ResponseWriter, r *http
 	util.PanicIf(err)
 
 	filter := []qm.QueryMod{
-		models.MemberDownloadNumberWhere.MemberID.EQ(account.ID),
-		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
+		models.MemberPayCountWhere.MemberID.EQ(account.ID),
+		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
 	}
-	dnIDs, err := h.memberDownloadNumberDAO.ListIDs(ctx, 0, 10000, filter, nil)
+
+	ids, err := h.memberPayCountDAO.ListIDs(ctx, 0, int(args.Number), filter, nil)
+	util.PanicIf(err)
+	pcMap, err := h.memberPayCountDAO.BatchGet(ctx, ids)
 	util.PanicIf(err)
 
-	for i := 0; i < cast.ToInt(args.Number); i++ {
-		if i >= len(dnIDs) {
-			break
-		}
-		id := dnIDs[i]
-		util.PanicIf(h.memberDownloadNumberDAO.Delete(ctx, id))
+	if int(args.Number) != len(ids) {
+		util.PanicIf(errors.UnproccessableError("没有足够的次数可以扣除"))
+		return
 	}
+
+	/// 事物
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+	for _, count := range pcMap {
+		count.Status = enum.MemberPayCountStatusAdminDelete
+		util.PanicIf(h.memberPayCountDAO.Update(ctx, count))
+	}
+	clients.MustCommit(ctx, txn)
+	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 }

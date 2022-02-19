@@ -3,7 +3,6 @@ package handler
 import (
 	"net/http"
 
-	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	dao2 "dumpapp_server/pkg/dao"
 	impl4 "dumpapp_server/pkg/dao/impl"
@@ -13,12 +12,12 @@ import (
 )
 
 type MemberDownloadRecordHandler struct {
-	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
+	memberDownloadIpaRecordDAO dao2.MemberDownloadIpaRecordDAO
 }
 
 func NewMemberDownloadRecordHandler() *MemberDownloadRecordHandler {
 	return &MemberDownloadRecordHandler{
-		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
+		memberDownloadIpaRecordDAO: impl4.DefaultMemberDownloadIpaRecordDAO,
 	}
 }
 
@@ -32,13 +31,13 @@ func (h *MemberDownloadRecordHandler) GetSelfDownloadRecord(w http.ResponseWrite
 	account := GetAccountByLoginID(ctx, loginID)
 
 	filter := []qm.QueryMod{
-		models.MemberDownloadNumberWhere.MemberID.EQ(loginID),
-		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusUsed),
-		models.MemberDownloadNumberWhere.Version.IsNotNull(),
+		models.MemberDownloadIpaRecordWhere.MemberID.EQ(loginID),
+		models.MemberDownloadIpaRecordWhere.Status.EQ("used"),
+		models.MemberDownloadIpaRecordWhere.Version.IsNotNull(),
 	}
-	ids, err := h.memberDownloadNumberDAO.ListIDs(ctx, offset, limit, filter, nil)
+	ids, err := h.memberDownloadIpaRecordDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
-	count, err := h.memberDownloadNumberDAO.Count(ctx, filter)
+	count, err := h.memberDownloadIpaRecordDAO.Count(ctx, filter)
 	util.PanicIf(err)
 
 	data := render.NewMemberDownloadRecordRender(ids, account.ID, render.MemberDownloadRecordDefaultRenderFields...).RenderSlice(ctx)

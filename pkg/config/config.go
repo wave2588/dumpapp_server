@@ -61,6 +61,7 @@ var config = appConfig{
 	ALiPayPublicKey:      os.Getenv("ALIPAY_PUBLIC_KEY"),
 	ALiPayNotifyURL:      os.Getenv("ALIPAY_NOTIFY_URL"),
 	ALiPayNotifyURLV2:    os.Getenv("ALIPAY_NOTIFY_URL_v2"),
+	ALiPayNotifyURLV3:    os.Getenv("ALIPAY_NOTIFY_URL_v3"),
 
 	DumpAppEmail:             os.Getenv("DUMP_APP_EMAIL"),
 	DumpAppFromEmail:         os.Getenv("DUMP_APP_FROM_EMAIL"),
@@ -104,6 +105,7 @@ type appConfig struct {
 	ALiPayPublicKey      string
 	ALiPayNotifyURL      string
 	ALiPayNotifyURLV2    string
+	ALiPayNotifyURLV3    string
 
 	DumpAppEmail             string
 	DumpAppFromEmail         string

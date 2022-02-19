@@ -26,10 +26,9 @@ import (
 )
 
 type IpaHandler struct {
-	ipaDAO                  dao.IpaDAO
-	ipaVersionDAO           dao.IpaVersionDAO
-	searchRecordV2DAO       dao.SearchRecordV2DAO
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	ipaDAO            dao.IpaDAO
+	ipaVersionDAO     dao.IpaVersionDAO
+	searchRecordV2DAO dao.SearchRecordV2DAO
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
@@ -39,10 +38,9 @@ type IpaHandler struct {
 
 func NewIpaHandler() *IpaHandler {
 	return &IpaHandler{
-		ipaDAO:                  impl.DefaultIpaDAO,
-		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
-		searchRecordV2DAO:       impl.DefaultSearchRecordV2DAO,
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		ipaDAO:            impl.DefaultIpaDAO,
+		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
@@ -101,7 +99,7 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/// 判断是否有下载次数
-	_, err = h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
+	err = h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9)
 	util.PanicIf(err)
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
@@ -135,7 +133,7 @@ func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(args.Validate())
 
 	/// 判断是否有下载次数
-	_, err := h.memberDownloadCtl.GetDownloadNumber(ctx, loginID)
+	err := h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9)
 	util.PanicIf(err)
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。

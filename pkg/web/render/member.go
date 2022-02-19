@@ -3,7 +3,6 @@ package render
 import (
 	"context"
 	"fmt"
-	"time"
 
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -24,10 +23,8 @@ type Member struct {
 	Status string  `json:"status"`
 	Phone  *string `json:"phone,omitempty"`
 
-	/// 可下载次数
-	DownloadCount int64 `json:"download_count" render:"method=RenderDownloadCount"`
-	/// todo: 已经没有这个东西了
-	Vip *Vip `json:"vip,omitempty" render:"method=RenderMemberVip"`
+	PayCount int64 `json:"pay_count" render:"method=RenderPayCount"`
+
 	/// 邀请链接
 	InviteURL *string `json:"invite_url" render:"method=RenderInviteURL"`
 	/// 用户绑定的设备信息
@@ -40,12 +37,6 @@ type Member struct {
 	Admin *Admin `json:"admin,omitempty" render:"method=RenderAdmin"`
 }
 
-type Vip struct {
-	IsVip   bool   `json:"is_vip"`
-	StartAt *int64 `json:"start_at,omitempty"`
-	EndAt   *int64 `json:"end_at,omitempty"`
-}
-
 type MemberRender struct {
 	ids           []int64
 	loginID       int64
@@ -53,13 +44,12 @@ type MemberRender struct {
 
 	memberMap map[int64]*Member
 
-	accountDAO              dao.AccountDAO
-	memberVipDAO            dao.MemberVipDAO
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
-	memberInviteCodeDAO     dao.MemberInviteCodeDAO
-	memberDeviceDAO         dao.MemberDeviceDAO
-	certificateDeviceDAO    dao.CertificateDeviceDAO
-	certificateService      http.CertificateServer
+	accountDAO           dao.AccountDAO
+	memberPayCountDAO    dao.MemberPayCountDAO
+	memberInviteCodeDAO  dao.MemberInviteCodeDAO
+	memberDeviceDAO      dao.MemberDeviceDAO
+	certificateDeviceDAO dao.CertificateDeviceDAO
+	certificateService   http.CertificateServer
 }
 
 type MemberOption func(*MemberRender)
@@ -82,16 +72,13 @@ func MemberIncludes(fields []string) MemberOption {
 
 var MemberAdminRenderFields = []MemberOption{
 	MemberIncludes([]string{
-		"DownloadCount",
-		"Vip",
 		"Admin",
 	}),
 }
 
 var MemberDefaultRenderFields = []MemberOption{
 	MemberIncludes([]string{
-		"DownloadCount",
-		"Vip",
+		"PayCount",
 		"InviteURL",
 		"Devices",
 	}),
@@ -102,13 +89,12 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		ids:     ids,
 		loginID: loginID,
 
-		accountDAO:              impl.DefaultAccountDAO,
-		memberVipDAO:            impl.DefaultMemberVipDAO,
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
-		memberInviteCodeDAO:     impl.DefaultMemberInviteCodeDAO,
-		memberDeviceDAO:         impl.DefaultMemberDeviceDAO,
-		certificateDeviceDAO:    impl.DefaultCertificateDeviceDAO,
-		certificateService:      impl2.DefaultCertificateServer,
+		accountDAO:           impl.DefaultAccountDAO,
+		memberPayCountDAO:    impl.DefaultMemberPayCountDAO,
+		memberInviteCodeDAO:  impl.DefaultMemberInviteCodeDAO,
+		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
+		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
+		certificateService:   impl2.DefaultCertificateServer,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -159,32 +145,11 @@ func (f *MemberRender) fetch(ctx context.Context) {
 	f.memberMap = res
 }
 
-func (f *MemberRender) RenderMemberVip(ctx context.Context) {
-	memberVipMap, err := f.memberVipDAO.BatchGet(ctx, f.ids)
+func (f *MemberRender) RenderPayCount(ctx context.Context) {
+	countMap, err := f.memberPayCountDAO.BatchGetMemberNormalCount(ctx, f.ids)
 	util.PanicIf(err)
 	for _, member := range f.memberMap {
-		if v, ok := memberVipMap[member.ID]; ok {
-			now := time.Now().Unix()
-			if v.StartAt.Unix() < now && v.EndAt.Unix() > now {
-				member.Vip = &Vip{
-					IsVip:   true,
-					StartAt: util2.Int64Ptr(v.StartAt.Unix()),
-					EndAt:   util2.Int64Ptr(v.EndAt.Unix()),
-				}
-				continue
-			}
-		}
-		member.Vip = &Vip{
-			IsVip: false,
-		}
-	}
-}
-
-func (f *MemberRender) RenderDownloadCount(ctx context.Context) {
-	countMap, err := f.memberDownloadNumberDAO.BatchGetMemberNormalCount(ctx, f.ids)
-	util.PanicIf(err)
-	for _, member := range f.memberMap {
-		member.DownloadCount = countMap[member.ID]
+		member.PayCount = countMap[member.ID]
 	}
 }
 

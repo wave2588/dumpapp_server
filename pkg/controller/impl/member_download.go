@@ -8,11 +8,12 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	errors2 "dumpapp_server/pkg/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type MemberDownloadController struct {
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	memberPayCountDAO dao.MemberPayCountDAO
 }
 
 var DefaultMemberDownloadController *MemberDownloadController
@@ -23,48 +24,48 @@ func init() {
 
 func NewMemberDownloadController() *MemberDownloadController {
 	return &MemberDownloadController{
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
 	}
 }
 
-func (c *MemberDownloadController) GetDownloadNumber(ctx context.Context, loginID int64) (*models.MemberDownloadNumber, error) {
+func (c *MemberDownloadController) CheckPayCount(ctx context.Context, loginID, limit int64) error {
 	filter := []qm.QueryMod{
-		models.MemberDownloadNumberWhere.MemberID.EQ(loginID),
-		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
+		models.MemberPayCountWhere.MemberID.EQ(loginID),
+		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
 	}
-	ids, err := c.memberDownloadNumberDAO.ListIDs(ctx, 0, 1, filter, nil)
+	ids, err := c.memberPayCountDAO.ListIDs(ctx, 0, int(limit), filter, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if len(ids) == 0 {
-		return nil, errors2.ErrNotDownloadNumber
+	if len(ids) < int(limit) {
+		return errors2.ErrNotPayCount
 	}
-	return c.memberDownloadNumberDAO.Get(ctx, ids[0])
+	return nil
 }
 
-/// 获取一个整数消费 5 个下载次数
-func (c *MemberDownloadController) GetCertificateDownloadNumbers(ctx context.Context, loginID int64) ([]*models.MemberDownloadNumber, error) {
+func (c *MemberDownloadController) DeductPayCount(ctx context.Context, loginID, limit int64, use enum.MemberPayCountUse) error {
 	filter := []qm.QueryMod{
-		models.MemberDownloadNumberWhere.MemberID.EQ(loginID),
-		models.MemberDownloadNumberWhere.Status.EQ(enum.MemberDownloadNumberStatusNormal),
+		models.MemberPayCountWhere.MemberID.EQ(loginID),
+		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
 	}
-	ids, err := c.memberDownloadNumberDAO.ListIDs(ctx, 0, 6, filter, nil)
+	ids, err := c.memberPayCountDAO.ListIDs(ctx, 0, int(limit), filter, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	if len(ids) < 6 {
-		return nil, errors2.ErrDownloadNumberLessThanSix
+	if len(ids) < int(limit) {
+		return errors2.ErrNotPayCount
 	}
-
-	ids = ids[0:6]
-	data, err := c.memberDownloadNumberDAO.BatchGet(ctx, ids)
+	res, err := c.memberPayCountDAO.BatchGet(ctx, ids)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	result := make([]*models.MemberDownloadNumber, 0)
-	for _, number := range data {
-		result = append(result, number)
+	for _, count := range res {
+		count.Status = enum.MemberPayCountStatusUsed
+		count.Use = null.StringFrom(use.String())
+		err = c.memberPayCountDAO.Update(ctx, count)
+		if err != nil {
+			return err
+		}
 	}
-	return result, nil
+	return nil
 }

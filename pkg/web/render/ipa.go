@@ -53,9 +53,9 @@ type IpaRender struct {
 
 	IpaMap map[int64]*Ipa
 
-	ipaDAO                  dao.IpaDAO
-	ipaVersionDAO           dao.IpaVersionDAO
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	ipaDAO                     dao.IpaDAO
+	ipaVersionDAO              dao.IpaVersionDAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 
 	tencentCtl controller.TencentController
 }
@@ -104,9 +104,9 @@ func NewIpaRender(ids []int64, loginID int64, ipaTypes []enum.IpaType, opts ...I
 		loginID:           loginID,
 		supportIpaTypeMap: ipaTypeMap,
 
-		ipaDAO:                  impl.DefaultIpaDAO,
-		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		ipaDAO:                     impl.DefaultIpaDAO,
+		ipaVersionDAO:              impl.DefaultIpaVersionDAO,
+		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 
 		tencentCtl: impl2.DefaultTencentController,
 	}
@@ -202,7 +202,7 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 
 func (f *IpaRender) RenderCounter(ctx context.Context) {
 	for _, ipa := range f.IpaMap {
-		count, updatedAt, err := f.memberDownloadNumberDAO.GetIpaDownloadCount(ctx, ipa.ID)
+		count, updatedAt, err := f.memberDownloadIpaRecordDAO.GetIpaDownloadCount(ctx, ipa.ID)
 		util.PanicIf(err)
 		if count != 0 {
 			ipa.Counter = &Counter{

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -15,6 +16,7 @@ import (
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/util"
@@ -25,11 +27,11 @@ import (
 )
 
 type DownloadHandler struct {
-	accountDAO              dao.AccountDAO
-	ipaDAO                  dao.IpaDAO
-	ipaVersionDAO           dao.IpaVersionDAO
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
-	cribberDAO              dao.CribberDAO
+	accountDAO                 dao.AccountDAO
+	ipaDAO                     dao.IpaDAO
+	ipaVersionDAO              dao.IpaVersionDAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
+	cribberDAO                 dao.CribberDAO
 
 	memberDownloadNumberCtl controller.MemberDownloadController
 	tencentCtl              controller.TencentController
@@ -37,11 +39,11 @@ type DownloadHandler struct {
 
 func NewDownloadHandler() *DownloadHandler {
 	return &DownloadHandler{
-		accountDAO:              impl.DefaultAccountDAO,
-		ipaDAO:                  impl.DefaultIpaDAO,
-		ipaVersionDAO:           impl.DefaultIpaVersionDAO,
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
-		cribberDAO:              impl.DefaultCribberDAO,
+		accountDAO:                 impl.DefaultAccountDAO,
+		ipaDAO:                     impl.DefaultIpaDAO,
+		ipaVersionDAO:              impl.DefaultIpaVersionDAO,
+		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
+		cribberDAO:                 impl.DefaultCribberDAO,
 
 		memberDownloadNumberCtl: impl2.DefaultMemberDownloadController,
 		tencentCtl:              impl2.DefaultTencentController,
@@ -89,7 +91,7 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	}
 
 	/// 判断之前是否下载过
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
+	dn, err := h.memberDownloadIpaRecordDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
@@ -150,25 +152,33 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	/// 操作数 +1
 	util.PanicIf(h.cribberDAO.IncrMemberRemoteIP(ctx, loginID, remoteIP))
 
-	dn, err := h.memberDownloadNumberDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
+	dn, err := h.memberDownloadIpaRecordDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
 
-	/// 如果之前没有下载过, 则需要扣除一次下载次数
+	/// 如果之前没有下载过, 则需要扣除 9 个积分
 	if dn == nil {
-		dn, err := h.memberDownloadNumberCtl.GetDownloadNumber(ctx, loginID)
-		util.PanicIf(err)
-		dn.Status = enum.MemberDownloadNumberStatusUsed
-		dn.IpaID = null.Int64From(ipaID)
-		dn.Version = null.StringFrom(args.Version)
-		dn.IpaType = null.StringFrom(ipaType.String())
-		util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
+		/// 事物
+		txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+		defer clients.MustClearMySQLTransaction(ctx, txn)
+		ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+		/// 消费 9 个积分
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountUseIpa))
+		/// 添加下载记录
+		util.PanicIf(h.memberDownloadIpaRecordDAO.Insert(ctx, &models.MemberDownloadIpaRecord{
+			MemberID: loginID,
+			Status:   "used",
+			IpaID:    null.Int64From(ipaID),
+			IpaType:  null.StringFrom(ipaType.String()),
+			Version:  null.StringFrom(args.Version),
+		}))
+		clients.MustCommit(ctx, txn)
+		ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 	}
 
 	ipaVersions, err := h.ipaVersionDAO.GetByIpaIDAndIpaTypeAndVersion(ctx, ipaID, ipaType, args.Version)
 	util.PanicIf(err)
-	fmt.Println(len(ipaVersions))
 	if len(ipaVersions) == 0 {
 		util.RenderJSON(w, map[string]interface{}{
 			"can_download": false,

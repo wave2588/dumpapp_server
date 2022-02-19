@@ -6,13 +6,12 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func NewRouterV2() chi.Router {
+func NewRouterV3() chi.Router {
 	r := chi.NewRouter()
 
-	// member_vip
-	memberVipV2Handler := handler.NewMemberVipV2Handler()
-	r.With(middleware.OAuthRegister).Get("/member/vip", memberVipV2Handler.GetV2)
-	r.With(middleware.OAuthRegister).Post("/member/vip", memberVipV2Handler.GetPayURL)
+	// member pay order
+	memberPayOrder := handler.NewMemberPayOrderHandler()
+	r.With(middleware.OAuthRegister).Get("/member/order", memberPayOrder.GetPayOrderURL)
 
 	// ipa
 	downloadHandler := handler.NewDownloadHandler()
@@ -20,10 +19,10 @@ func NewRouterV2() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}/check_can_download", downloadHandler.CheckCanDownload)
 
 	/// callback_pay
-	callbackPayV2Handler := handler.NewCallbackPayV2Handler()
-	r.With().Post("/callback_alipay", callbackPayV2Handler.ALiPayCallback)
+	callbackPayV3Handler := handler.NewCallbackPayV3Handler()
+	r.With().Post("/callback_alipay", callbackPayV3Handler.ALiPayCallback)
 
 	return r
 }
 
-var DefaultRouterV2 = NewRouterV2()
+var DefaultRouterV3 = NewRouterV3()

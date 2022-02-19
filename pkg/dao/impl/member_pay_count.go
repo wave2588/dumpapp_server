@@ -17,24 +17,24 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type MemberVipOrderDAO struct {
+type MemberPayCountDAO struct {
 	mysqlPool *sql.DB
 }
 
-var DefaultMemberVipOrderDAO *MemberVipOrderDAO
+var DefaultMemberPayCountDAO *MemberPayCountDAO
 
 func init() {
-	DefaultMemberVipOrderDAO = NewMemberVipOrderDAO()
+	DefaultMemberPayCountDAO = NewMemberPayCountDAO()
 }
 
-func NewMemberVipOrderDAO() *MemberVipOrderDAO {
-	d := &MemberVipOrderDAO{
+func NewMemberPayCountDAO() *MemberPayCountDAO {
+	d := &MemberPayCountDAO{
 		mysqlPool: clients.MySQLConnectionsPool,
 	}
 	return d
 }
 
-func (d *MemberVipOrderDAO) Insert(ctx context.Context, data *models.MemberVipOrder) error {
+func (d *MemberPayCountDAO) Insert(ctx context.Context, data *models.MemberPayCount) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -52,7 +52,7 @@ func (d *MemberVipOrderDAO) Insert(ctx context.Context, data *models.MemberVipOr
 	return nil
 }
 
-func (d *MemberVipOrderDAO) Update(ctx context.Context, data *models.MemberVipOrder) error {
+func (d *MemberPayCountDAO) Update(ctx context.Context, data *models.MemberPayCount) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -64,9 +64,9 @@ func (d *MemberVipOrderDAO) Update(ctx context.Context, data *models.MemberVipOr
 	return pkgErr.WithStack(err)
 }
 
-func (d *MemberVipOrderDAO) Delete(ctx context.Context, id int64) error {
+func (d *MemberPayCountDAO) Delete(ctx context.Context, id int64) error {
 	qs := []qm.QueryMod{
-		models.MemberVipOrderWhere.ID.EQ(id),
+		models.MemberPayCountWhere.ID.EQ(id),
 	}
 
 	var exec boil.ContextExecutor
@@ -76,27 +76,27 @@ func (d *MemberVipOrderDAO) Delete(ctx context.Context, id int64) error {
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	_, err := models.MemberVipOrders(qs...).DeleteAll(ctx, exec)
+	_, err := models.MemberPayCounts(qs...).DeleteAll(ctx, exec)
 	if err != nil {
 		return pkgErr.WithStack(err)
 	}
 	return nil
 }
 
-func (d *MemberVipOrderDAO) Get(ctx context.Context, id int64) (*models.MemberVipOrder, error) {
+func (d *MemberPayCountDAO) Get(ctx context.Context, id int64) (*models.MemberPayCount, error) {
 	result, err := d.BatchGet(ctx, []int64{id})
 	if err != nil {
 		return nil, err
 	}
 	if v, ok := result[id]; !ok {
-		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_vip_order, id=%d", id)
+		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_pay_count, id=%d", id)
 	} else {
 		return v, nil
 	}
 }
 
 // BatchGet retrieves multiple records by primary key from db.
-func (d *MemberVipOrderDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberVipOrder, error) {
+func (d *MemberPayCountDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberPayCount, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -104,12 +104,12 @@ func (d *MemberVipOrderDAO) BatchGet(ctx context.Context, ids []int64) (map[int6
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	datas, err := models.MemberVipOrders(models.MemberVipOrderWhere.ID.IN(ids)).All(ctx, exec)
+	datas, err := models.MemberPayCounts(models.MemberPayCountWhere.ID.IN(ids)).All(ctx, exec)
 	if err != nil {
 		return nil, pkgErr.WithStack(err)
 	}
 
-	result := make(map[int64]*models.MemberVipOrder)
+	result := make(map[int64]*models.MemberPayCount)
 	for _, c := range datas {
 		result[c.ID] = c
 	}
@@ -118,11 +118,11 @@ func (d *MemberVipOrderDAO) BatchGet(ctx context.Context, ids []int64) (map[int6
 }
 
 // 后台和脚本使用：倒序列出所有
-func (d *MemberVipOrderDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
+func (d *MemberPayCountDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
 	if offset < 0 || limit <= 0 || limit > 10000 {
 		return nil, pkgErr.Errorf("invalid offset or limit")
 	}
-	qs := []qm.QueryMod{qm.Select(models.MemberVipOrderColumns.ID)}
+	qs := []qm.QueryMod{qm.Select(models.MemberPayCountColumns.ID)}
 	qs = append(qs, filters...)
 
 	if len(orderBys) > 0 {
@@ -146,9 +146,9 @@ func (d *MemberVipOrderDAO) ListIDs(ctx context.Context, offset, limit int, filt
 		exec = txn.(*sql.Tx)
 	}
 
-	datas, err := models.MemberVipOrders(qs...).All(ctx, exec)
+	datas, err := models.MemberPayCounts(qs...).All(ctx, exec)
 	if err != nil {
-		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_vip_order offset=%d limit=%d filters=%v", offset, limit, filters))
+		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_pay_count offset=%d limit=%d filters=%v", offset, limit, filters))
 	}
 
 	result := make([]int64, 0)
@@ -158,8 +158,8 @@ func (d *MemberVipOrderDAO) ListIDs(ctx context.Context, offset, limit int, filt
 	return result, nil
 }
 
-func (d *MemberVipOrderDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
-	qs := []qm.QueryMod{qm.Select(models.MemberVipOrderColumns.ID)}
+func (d *MemberPayCountDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
+	qs := []qm.QueryMod{qm.Select(models.MemberPayCountColumns.ID)}
 	qs = append(qs, filters...)
 
 	var exec boil.ContextExecutor
@@ -170,5 +170,5 @@ func (d *MemberVipOrderDAO) Count(ctx context.Context, filters []qm.QueryMod) (i
 		exec = txn.(*sql.Tx)
 	}
 
-	return models.MemberVipOrders(qs...).Count(ctx, exec)
+	return models.MemberPayCounts(qs...).Count(ctx, exec)
 }

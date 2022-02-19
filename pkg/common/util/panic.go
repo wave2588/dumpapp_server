@@ -1,8 +1,9 @@
 package util
 
 import (
-	"github.com/pkg/errors"
 	"io"
+
+	"github.com/pkg/errors"
 )
 
 func PanicIf(err error) {
