@@ -247,7 +247,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
 
 	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	/// 必须使用手机号注册, 才能送一次下载次数
 	//if args.Phone != "" {
