@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -88,6 +89,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
 
+	sss, _ := json.Marshal(result)
+	fmt.Println(string(sss))
 	if result.Data == nil || result.IsSuccess == false {
 		/// 创建失败推送
 		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, result.ErrorMessage)
@@ -159,7 +162,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clients.MustCommit(ctx, txn)
-	util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
 	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, memberMap[loginID])
