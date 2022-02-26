@@ -14,12 +14,12 @@ import (
 )
 
 type AlterWebController struct {
-	emailCtl          controller3.EmailController
-	accountDAO        dao.AccountDAO
-	orderDAO          dao.MemberDownloadOrderDAO
-	downloadNumberDAO dao.MemberDownloadNumberDAO
-	memberDevieDAO    dao.MemberDeviceDAO
-	certificateDAO    dao.CertificateDAO
+	emailCtl                   controller3.EmailController
+	accountDAO                 dao.AccountDAO
+	orderDAO                   dao.MemberDownloadOrderDAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
+	memberDeviceDAO            dao.MemberDeviceDAO
+	certificateDAO             dao.CertificateDAO
 }
 
 var DefaultAlterWebController *AlterWebController
@@ -30,12 +30,12 @@ func init() {
 
 func NewAlterWebController() *AlterWebController {
 	return &AlterWebController{
-		emailCtl:          impl.DefaultEmailController,
-		accountDAO:        impl2.DefaultAccountDAO,
-		orderDAO:          impl2.DefaultMemberDownloadOrderDAO,
-		downloadNumberDAO: impl2.DefaultMemberDownloadNumberDAO,
-		memberDevieDAO:    impl2.DefaultMemberDeviceDAO,
-		certificateDAO:    impl2.DefaultCertificateDAO,
+		emailCtl:                   impl.DefaultEmailController,
+		accountDAO:                 impl2.DefaultAccountDAO,
+		orderDAO:                   impl2.DefaultMemberDownloadOrderDAO,
+		memberDownloadIpaRecordDAO: impl2.DefaultMemberDownloadIpaRecordDAO,
+		memberDeviceDAO:            impl2.DefaultMemberDeviceDAO,
+		certificateDAO:             impl2.DefaultCertificateDAO,
 	}
 }
 
@@ -63,7 +63,7 @@ func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64
 	if err != nil {
 		return
 	}
-	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
 	if err != nil {
 		return
 	}
@@ -87,7 +87,7 @@ func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaI
 	if err != nil {
 		return
 	}
-	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
 	if err != nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, l
 	if err != nil {
 		return
 	}
-	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
 	if err != nil {
 		return
 	}
@@ -185,11 +185,11 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	if err != nil {
 		return
 	}
-	countMap, err := c.downloadNumberDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
+	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
 	if err != nil {
 		return
 	}
-	device, err := c.memberDevieDAO.Get(ctx, deviceID)
+	device, err := c.memberDeviceDAO.Get(ctx, deviceID)
 	if err != nil {
 		return
 	}

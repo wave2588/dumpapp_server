@@ -28,9 +28,9 @@ func NewRouterAdmin() chi.Router {
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
 	r.With(middleware.OAuthAdmin).Get("/ipa", adminIpaHandler.List)
-	r.With(middleware.OAuthRegister).Post("/ipa", adminIpaHandler.Post)
-	r.With(middleware.OAuthRegister).Delete("/ipa", adminIpaHandler.DeleteIpa)
-	r.With(middleware.OAuthRegister).Delete("/batch_ipa", adminIpaHandler.BatchDeleteIpa)
+	r.With(middleware.OAuthAdmin).Post("/ipa", adminIpaHandler.Post)
+	r.With(middleware.OAuthAdmin).Delete("/ipa", adminIpaHandler.DeleteIpa)
+	r.With(middleware.OAuthAdmin).Delete("/batch_ipa", adminIpaHandler.BatchDeleteIpa)
 	// endregion
 
 	/// admin 查看未砸壳列表
@@ -50,9 +50,9 @@ func NewRouterAdmin() chi.Router {
 	// endregion
 
 	/// admin download number
-	adminDownloadNumberHandler := handler.NewAdminDownloadNumberHandler()
-	r.With(middleware.OAuthRegister).Post("/member/download_number", adminDownloadNumberHandler.AddNumber)
-	r.With(middleware.OAuthRegister).Delete("/member/download_number", adminDownloadNumberHandler.DeleteNumber)
+	adminMemberPayCountHandler := handler.NewAdminMemberPayCountHandler()
+	r.With(middleware.OAuthAdmin).Post("/member/order", adminMemberPayCountHandler.AddNumber)
+	r.With(middleware.OAuthAdmin).Delete("/member/order", adminMemberPayCountHandler.DeleteNumber)
 	// endregion
 
 	return r

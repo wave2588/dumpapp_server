@@ -6,7 +6,7 @@ web:
 	go build -o bin/web cmd/web/main.go && chmod +x bin/web
 
 fmt-fetch:
-	go get github.com/daixiang0/gci
+	go get github.com/daixiang0/gci@v0.2.9
 	go get mvdan.cc/gofumpt@v0.1.0
 
 fmt: fmt-fetch

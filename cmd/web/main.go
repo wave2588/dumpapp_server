@@ -4,10 +4,9 @@ import (
 	"dumpapp_server/pkg/common/util"
 	middleware2 "dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web"
-
-	"fmt"
 	"net/http"
 
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -29,7 +28,7 @@ func main() {
 
 	r.Mount("/api/admin/", web.DefaultRouterAdmin)
 	r.Mount("/api/", web.DefaultRouter)
-	r.Mount("/api/v2/", web.DefaultRouterV2)
+	r.Mount("/api/v3/", web.DefaultRouterV3)
 
 	util.PanicIf(http.ListenAndServe(":1995", r))
 }

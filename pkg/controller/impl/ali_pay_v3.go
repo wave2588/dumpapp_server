@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
@@ -15,26 +14,25 @@ import (
 	util2 "dumpapp_server/pkg/util"
 	"github.com/smartwalle/alipay/v3"
 	"github.com/spf13/cast"
-	"github.com/volatiletech/null/v8"
 )
 
-type ALiPayController struct {
+type ALiPayV3Controller struct {
 	client *alipay.Client
 
 	appID        string
 	privateKey   string
 	aliPublicKey string
 
-	memberDownloadOrderDAO dao.MemberDownloadOrderDAO
+	memberPayOrderDAO dao.MemberPayOrderDAO
 }
 
-var DefaultALiPayController *ALiPayController
+var DefaultALiPayV3Controller *ALiPayV3Controller
 
 func init() {
-	DefaultALiPayController = NewALiPayController()
+	DefaultALiPayV3Controller = NewALiPayV3Controller()
 }
 
-func NewALiPayController() *ALiPayController {
+func NewALiPayV3Controller() *ALiPayV3Controller {
 	appID := config.DumpConfig.AppConfig.ALiPayDumpAppID
 	privateKey := config.DumpConfig.AppConfig.ALiPayDumpPrivateKey
 	aliPublicKey := config.DumpConfig.AppConfig.ALiPayPublicKey
@@ -43,29 +41,27 @@ func NewALiPayController() *ALiPayController {
 	// 加载alipay公钥
 	err = c.LoadAliPayPublicKey(aliPublicKey)
 	util.PanicIf(err)
-	return &ALiPayController{
-		client: c,
-
-		memberDownloadOrderDAO: impl.DefaultMemberDownloadOrderDAO,
+	return &ALiPayV3Controller{
+		client:            c,
+		memberPayOrderDAO: impl.DefaultMemberPayOrderDAO,
 	}
 }
 
-func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
+func (c *ALiPayV3Controller) GetPayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
-	totalAmount := number * constant.DownloadIpaPrice
-	err := c.memberDownloadOrderDAO.Insert(ctx, &models.MemberDownloadOrder{
+	totalAmount := number
+	err := c.memberPayOrderDAO.Insert(ctx, &models.MemberPayOrder{
 		ID:       id,
 		MemberID: loginID,
-		Status:   enum.MemberDownloadOrderStatusPending,
-		Number:   number,
-		Amount:   null.Float64From(cast.ToFloat64(totalAmount)),
+		Status:   enum.MemberPayOrderStatusPending,
+		Amount:   cast.ToFloat64(totalAmount),
 	})
 	if err != nil {
 		return 0, "", err
 	}
 
 	p := alipay.TradePagePay{}
-	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLV2
+	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLV3
 	p.ReturnURL = "https://www.dumpapp.com"
 	p.Subject = "Dumpapp"
 	p.OutTradeNo = fmt.Sprintf("%d", id)
@@ -82,7 +78,7 @@ func (c *ALiPayController) GetPayURLByNumber(ctx context.Context, loginID, numbe
 	return id, url.String(), nil
 }
 
-func (c *ALiPayController) CheckPayStatus(ctx context.Context, orderID int64) error {
+func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) error {
 	p := alipay.TradeQuery{}
 	p.OutTradeNo = fmt.Sprintf("%d", orderID)
 	p.QueryOptions = []string{"TRADE_SETTLE_INFO"}

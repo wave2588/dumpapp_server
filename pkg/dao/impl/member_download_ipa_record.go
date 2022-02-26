@@ -19,24 +19,24 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type MemberDownloadNumberDAO struct {
+type MemberDownloadIpaRecordDAO struct {
 	mysqlPool *sql.DB
 }
 
-var DefaultMemberDownloadNumberDAO *MemberDownloadNumberDAO
+var DefaultMemberDownloadIpaRecordDAO *MemberDownloadIpaRecordDAO
 
 func init() {
-	DefaultMemberDownloadNumberDAO = NewMemberDownloadNumberDAO()
+	DefaultMemberDownloadIpaRecordDAO = NewMemberDownloadIpaRecordDAO()
 }
 
-func NewMemberDownloadNumberDAO() *MemberDownloadNumberDAO {
-	d := &MemberDownloadNumberDAO{
+func NewMemberDownloadIpaRecordDAO() *MemberDownloadIpaRecordDAO {
+	d := &MemberDownloadIpaRecordDAO{
 		mysqlPool: clients.MySQLConnectionsPool,
 	}
 	return d
 }
 
-func (d *MemberDownloadNumberDAO) Insert(ctx context.Context, data *models.MemberDownloadNumber) error {
+func (d *MemberDownloadIpaRecordDAO) Insert(ctx context.Context, data *models.MemberDownloadIpaRecord) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -54,7 +54,7 @@ func (d *MemberDownloadNumberDAO) Insert(ctx context.Context, data *models.Membe
 	return nil
 }
 
-func (d *MemberDownloadNumberDAO) Update(ctx context.Context, data *models.MemberDownloadNumber) error {
+func (d *MemberDownloadIpaRecordDAO) Update(ctx context.Context, data *models.MemberDownloadIpaRecord) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -66,9 +66,9 @@ func (d *MemberDownloadNumberDAO) Update(ctx context.Context, data *models.Membe
 	return pkgErr.WithStack(err)
 }
 
-func (d *MemberDownloadNumberDAO) Delete(ctx context.Context, id int64) error {
+func (d *MemberDownloadIpaRecordDAO) Delete(ctx context.Context, id int64) error {
 	qs := []qm.QueryMod{
-		models.MemberDownloadNumberWhere.ID.EQ(id),
+		models.MemberDownloadIpaRecordWhere.ID.EQ(id),
 	}
 
 	var exec boil.ContextExecutor
@@ -78,27 +78,27 @@ func (d *MemberDownloadNumberDAO) Delete(ctx context.Context, id int64) error {
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	_, err := models.MemberDownloadNumbers(qs...).DeleteAll(ctx, exec)
+	_, err := models.MemberDownloadIpaRecords(qs...).DeleteAll(ctx, exec)
 	if err != nil {
 		return pkgErr.WithStack(err)
 	}
 	return nil
 }
 
-func (d *MemberDownloadNumberDAO) Get(ctx context.Context, id int64) (*models.MemberDownloadNumber, error) {
+func (d *MemberDownloadIpaRecordDAO) Get(ctx context.Context, id int64) (*models.MemberDownloadIpaRecord, error) {
 	result, err := d.BatchGet(ctx, []int64{id})
 	if err != nil {
 		return nil, err
 	}
 	if v, ok := result[id]; !ok {
-		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, id=%d", id)
+		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_ipa_record, id=%d", id)
 	} else {
 		return v, nil
 	}
 }
 
 // BatchGet retrieves multiple records by primary key from db.
-func (d *MemberDownloadNumberDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberDownloadNumber, error) {
+func (d *MemberDownloadIpaRecordDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.MemberDownloadIpaRecord, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -106,12 +106,12 @@ func (d *MemberDownloadNumberDAO) BatchGet(ctx context.Context, ids []int64) (ma
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	datas, err := models.MemberDownloadNumbers(models.MemberDownloadNumberWhere.ID.IN(ids)).All(ctx, exec)
+	datas, err := models.MemberDownloadIpaRecords(models.MemberDownloadIpaRecordWhere.ID.IN(ids)).All(ctx, exec)
 	if err != nil {
 		return nil, pkgErr.WithStack(err)
 	}
 
-	result := make(map[int64]*models.MemberDownloadNumber)
+	result := make(map[int64]*models.MemberDownloadIpaRecord)
 	for _, c := range datas {
 		result[c.ID] = c
 	}
@@ -120,11 +120,11 @@ func (d *MemberDownloadNumberDAO) BatchGet(ctx context.Context, ids []int64) (ma
 }
 
 // 后台和脚本使用：倒序列出所有
-func (d *MemberDownloadNumberDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
+func (d *MemberDownloadIpaRecordDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
 	if offset < 0 || limit <= 0 || limit > 10000 {
 		return nil, pkgErr.Errorf("invalid offset or limit")
 	}
-	qs := []qm.QueryMod{qm.Select(models.MemberDownloadNumberColumns.ID)}
+	qs := []qm.QueryMod{qm.Select(models.MemberDownloadIpaRecordColumns.ID)}
 	qs = append(qs, filters...)
 
 	if len(orderBys) > 0 {
@@ -148,9 +148,9 @@ func (d *MemberDownloadNumberDAO) ListIDs(ctx context.Context, offset, limit int
 		exec = txn.(*sql.Tx)
 	}
 
-	datas, err := models.MemberDownloadNumbers(qs...).All(ctx, exec)
+	datas, err := models.MemberDownloadIpaRecords(qs...).All(ctx, exec)
 	if err != nil {
-		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_download_number offset=%d limit=%d filters=%v", offset, limit, filters))
+		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=member_download_ipa_record offset=%d limit=%d filters=%v", offset, limit, filters))
 	}
 
 	result := make([]int64, 0)
@@ -160,8 +160,8 @@ func (d *MemberDownloadNumberDAO) ListIDs(ctx context.Context, offset, limit int
 	return result, nil
 }
 
-func (d *MemberDownloadNumberDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
-	qs := []qm.QueryMod{qm.Select(models.MemberDownloadNumberColumns.ID)}
+func (d *MemberDownloadIpaRecordDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
+	qs := []qm.QueryMod{qm.Select(models.MemberDownloadIpaRecordColumns.ID)}
 	qs = append(qs, filters...)
 
 	var exec boil.ContextExecutor
@@ -172,16 +172,16 @@ func (d *MemberDownloadNumberDAO) Count(ctx context.Context, filters []qm.QueryM
 		exec = txn.(*sql.Tx)
 	}
 
-	return models.MemberDownloadNumbers(qs...).Count(ctx, exec)
+	return models.MemberDownloadIpaRecords(qs...).Count(ctx, exec)
 }
 
 // GetByMemberIDIpaIDIpaTypeVersion retrieves a single record by uniq key memberID, ipaID, ipaType, version from db.
-func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDIpaTypeVersion(ctx context.Context, memberID int64, ipaID null.Int64, ipaType null.String, version null.String) (*models.MemberDownloadNumber, error) {
-	memberDownloadNumberObj := &models.MemberDownloadNumber{}
+func (d *MemberDownloadIpaRecordDAO) GetByMemberIDIpaIDIpaTypeVersion(ctx context.Context, memberID int64, ipaID null.Int64, ipaType null.String, version null.String) (*models.MemberDownloadIpaRecord, error) {
+	memberDownloadIpaRecordObj := &models.MemberDownloadIpaRecord{}
 
 	sel := "*"
 	query := fmt.Sprintf(
-		"select %s from `member_download_number` where `member_id`=? AND `ipa_id`=? AND `ipa_type`=? AND `version`=?", sel,
+		"select %s from `member_download_ipa_record` where `member_id`=? AND `ipa_id`=? AND `ipa_type`=? AND `version`=?", sel,
 	)
 
 	q := queries.Raw(query, memberID, ipaID, ipaType, version)
@@ -194,22 +194,22 @@ func (d *MemberDownloadNumberDAO) GetByMemberIDIpaIDIpaTypeVersion(ctx context.C
 		exec = txn.(*sql.Tx)
 	}
 
-	err := q.Bind(ctx, exec, memberDownloadNumberObj)
+	err := q.Bind(ctx, exec, memberDownloadIpaRecordObj)
 	if err != nil {
 		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID:%v ipaID:%v ipaType:%v version :%v", query, memberID, ipaID, ipaType, version)
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_ipa_record, query=%s, args=memberID:%v ipaID:%v ipaType:%v version :%v", query, memberID, ipaID, ipaType, version)
 		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_number")
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_ipa_record")
 	}
 
-	return memberDownloadNumberObj, nil
+	return memberDownloadIpaRecordObj, nil
 }
 
-// GetMemberDownloadNumberSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
-func (d *MemberDownloadNumberDAO) GetMemberDownloadNumberSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadNumber, error) {
-	var o []*models.MemberDownloadNumber
+// GetMemberDownloadIpaRecordSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
+func (d *MemberDownloadIpaRecordDAO) GetMemberDownloadIpaRecordSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDownloadIpaRecord, error) {
+	var o []*models.MemberDownloadIpaRecord
 
-	query := "select `member_download_number`.* from `member_download_number` where `member_id`=?"
+	query := "select `member_download_ipa_record`.* from `member_download_ipa_record` where `member_id`=?"
 
 	q := queries.Raw(query, memberID)
 
@@ -224,9 +224,9 @@ func (d *MemberDownloadNumberDAO) GetMemberDownloadNumberSliceByMemberID(ctx con
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
 		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_number, query=%s, args=memberID :%v", query, memberID)
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_download_ipa_record, query=%s, args=memberID :%v", query, memberID)
 		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_number")
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_download_ipa_record")
 	}
 	return o, nil
 }

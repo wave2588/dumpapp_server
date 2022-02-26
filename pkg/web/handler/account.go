@@ -25,12 +25,12 @@ import (
 )
 
 type AccountHandler struct {
-	accountDAO              dao2.AccountDAO
-	captchaDAO              dao2.CaptchaDAO
-	memberDownloadNumberDAO dao2.MemberDownloadNumberDAO
-	memberInviteCodeDAO     dao2.MemberInviteCodeDAO
-	memberInviteDAO         dao2.MemberInviteDAO
-	memberIDEncryptionDAO   dao2.MemberIDEncryptionDAO
+	accountDAO            dao2.AccountDAO
+	captchaDAO            dao2.CaptchaDAO
+	memberInviteCodeDAO   dao2.MemberInviteCodeDAO
+	memberInviteDAO       dao2.MemberInviteDAO
+	memberIDEncryptionDAO dao2.MemberIDEncryptionDAO
+	memberPayCountDAO     dao2.MemberPayCountDAO
 
 	emailCtl   controller2.EmailController
 	tencentCtl controller2.TencentController
@@ -38,12 +38,12 @@ type AccountHandler struct {
 
 func NewAccountHandler() *AccountHandler {
 	return &AccountHandler{
-		accountDAO:              impl4.DefaultAccountDAO,
-		captchaDAO:              impl4.DefaultCaptchaDAO,
-		memberDownloadNumberDAO: impl4.DefaultMemberDownloadNumberDAO,
-		memberInviteCodeDAO:     impl4.DefaultMemberInviteCodeDAO,
-		memberInviteDAO:         impl4.DefaultMemberInviteDAO,
-		memberIDEncryptionDAO:   impl4.DefaultMemberIDEncryptionDAO,
+		accountDAO:            impl4.DefaultAccountDAO,
+		captchaDAO:            impl4.DefaultCaptchaDAO,
+		memberInviteCodeDAO:   impl4.DefaultMemberInviteCodeDAO,
+		memberInviteDAO:       impl4.DefaultMemberInviteDAO,
+		memberIDEncryptionDAO: impl4.DefaultMemberIDEncryptionDAO,
+		memberPayCountDAO:     impl4.DefaultMemberPayCountDAO,
 
 		emailCtl:   impl2.DefaultEmailController,
 		tencentCtl: impl2.DefaultTencentController,
@@ -223,11 +223,15 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 			InviterID: inviteCode.MemberID,
 			InviteeID: accountID,
 		}))
-		/// 送给邀请人下载 1 次数
-		util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
-			MemberID: inviteCode.MemberID,
-			Status:   enum.MemberDownloadNumberStatusNormal,
-		}))
+
+		/// 送给邀请人 9 个积分
+		for i := 0; i < 9; i++ {
+			util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+				MemberID: inviteCode.MemberID,
+				Status:   enum.MemberPayCountStatusNormal,
+				Source:   enum.MemberPayCountSourceInvitedPresented,
+			}))
+		}
 	}
 	/// end
 

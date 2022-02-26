@@ -11,11 +11,11 @@ import (
 )
 
 type MemberDownloadRecord struct {
-	ID      int64                           `json:"id,string"`
-	Version string                          `json:"version"`
-	Status  enum.MemberDownloadNumberStatus `json:"status"`
-	IpaType enum.IpaType                    `json:"ipa_type"`
-	Ipa     *Ipa                            `json:"ipa"`
+	ID      int64        `json:"id,string"`
+	Version string       `json:"version"`
+	Status  string       `json:"status"`
+	IpaType enum.IpaType `json:"ipa_type"`
+	Ipa     *Ipa         `json:"ipa"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdateAt  int64 `json:"update_at"`
@@ -28,7 +28,7 @@ type MemberDownloadRecordRender struct {
 
 	memberDownloadRecordMap map[int64]*MemberDownloadRecord
 
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 }
 
 type MemberDownloadRecordOption func(*MemberDownloadRecordRender)
@@ -58,7 +58,7 @@ func NewMemberDownloadRecordRender(ids []int64, loginID int64, opts ...MemberDow
 		ids:     ids,
 		loginID: loginID,
 
-		memberDownloadNumberDAO: impl.DefaultMemberDownloadNumberDAO,
+		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -91,7 +91,7 @@ func (f *MemberDownloadRecordRender) RenderMap(ctx context.Context) map[int64]*M
 }
 
 func (f *MemberDownloadRecordRender) fetch(ctx context.Context) {
-	memberDownloadMap, err := f.memberDownloadNumberDAO.BatchGet(ctx, f.ids)
+	memberDownloadMap, err := f.memberDownloadIpaRecordDAO.BatchGet(ctx, f.ids)
 	util.PanicIf(err)
 
 	ipaIDs := make([]int64, 0)

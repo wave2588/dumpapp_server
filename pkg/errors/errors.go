@@ -20,9 +20,8 @@ var (
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
 	/// 支付相关的错误
-	ErrNotDownloadNumber         = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "没有下载次数")
-	ErrDownloadNumberLessThanSix = NewDefaultAPIError(403, 30002, "DownloadNumberLessThanFive", "下载次数不足 6 次")
-	ErrCreateCertificateFail     = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
+	ErrNotPayCount           = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "积分不足")
+	ErrCreateCertificateFail = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
 	/// 证书相关错误
 	ErrNotFoundCertificate         = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")

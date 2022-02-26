@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -36,7 +35,6 @@ type CertificateHandler struct {
 	certificateWebCtl       controller2.CertificateWebController
 	memberDownloadNumberCtl controller.MemberDownloadController
 	certificateServer       http2.CertificateServer
-	memberDownloadNumberDAO dao.MemberDownloadNumberDAO
 	memberDeviceDAO         dao.MemberDeviceDAO
 	certificateDAO          dao.CertificateDAO
 	certificateDeviceDAO    dao.CertificateDeviceDAO
@@ -48,7 +46,6 @@ func NewCertificateHandler() *CertificateHandler {
 		certificateWebCtl:       impl5.DefaultCertificateWebController,
 		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
 		certificateServer:       impl3.DefaultCertificateServer,
-		memberDownloadNumberDAO: impl2.DefaultMemberDownloadNumberDAO,
 		memberDeviceDAO:         impl2.DefaultMemberDeviceDAO,
 		certificateDAO:          impl2.DefaultCertificateDAO,
 		certificateDeviceDAO:    impl2.DefaultCertificateDeviceDAO,
@@ -71,8 +68,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 
-	dns, err := h.memberDownloadNumberCtl.GetCertificateDownloadNumbers(ctx, loginID)
-	util.PanicIf(err)
+	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, 54))
 
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -89,8 +85,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
 	util.PanicIf(err)
 
-	sss, _ := json.Marshal(result)
-	fmt.Println(string(sss))
 	if result.Data == nil || result.IsSuccess == false {
 		/// 创建失败推送
 		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, result.ErrorMessage)
@@ -136,10 +130,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 			CertificateID: cerID,
 		}))
 		/// 消费 6 次, 这是因为完全新创建, 所以进行消费
-		for _, dn := range dns {
-			dn.Status = enum.MemberDownloadNumberStatusUsed
-			util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
-		}
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 54, enum.MemberPayCountUseCertificate))
+
 		h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
 	} else {
 		/// 发现设备和此证书没绑定过, 则进行绑定
@@ -153,10 +145,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 				CertificateID: cer.ID,
 			}))
 			/// 消费 6 次, 这是因为有证书了, 但是没绑定, 所以进行消费
-			for _, dn := range dns {
-				dn.Status = enum.MemberDownloadNumberStatusUsed
-				util.PanicIf(h.memberDownloadNumberDAO.Update(ctx, dn))
-			}
+			util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 54, enum.MemberPayCountUseCertificate))
 			h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cer.ID)
 		}
 	}
