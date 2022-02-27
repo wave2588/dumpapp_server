@@ -43,28 +43,29 @@ func run() {
 	}
 
 	/// 计算支付过的新用户
-	memberOrderMap, err := impl.DefaultMemberDownloadOrderDAO.BatchGetByMemberIDs(ctx, memberIDs)
+	memberOrderMap, err := impl.DefaultMemberPayOrderDAO.BatchGetByMemberIDs(ctx, memberIDs)
 	util.PanicIf(err)
 	paidMemberIDs := make([]int64, 0)
 	for memberID, orders := range memberOrderMap {
 		for _, order := range orders {
-			if order.Status == enum.MemberDownloadOrderStatusPaid {
+			if order.Status == enum.MemberPayOrderStatusPaid {
 				paidMemberIDs = append(paidMemberIDs, memberID)
 			}
 		}
 	}
+	paidMemberIDs = util2.RemoveDuplicates(paidMemberIDs)
 
 	/// 计算总费用
 	filters := []qm.QueryMod{
-		models.MemberDownloadOrderWhere.CreatedAt.GT(startAt),
+		models.MemberPayOrderWhere.CreatedAt.GT(startAt),
 	}
-	totalMemberOrders, err := impl.DefaultMemberDownloadOrderDAO.GetByFilters(ctx, filters, nil)
+	orders, err := impl.DefaultMemberPayOrderDAO.GetByFilters(ctx, filters, nil)
 	util.PanicIf(err)
 	amount := 0.0
 	orderCount := 0
-	for _, order := range totalMemberOrders {
-		if order.Status == enum.MemberDownloadOrderStatusPaid {
-			amount += order.Amount.Float64
+	for _, order := range orders {
+		if order.Status == enum.MemberPayOrderStatusPaid {
+			amount += order.Amount
 			orderCount += 1
 		}
 	}
@@ -74,7 +75,7 @@ func run() {
 	downloadedCount := 0
 	downloadedMember := make(map[int64]struct{}, 0)
 	for _, number := range numbers {
-		if number.Status == enum.MemberDownloadNumberStatusUsed {
+		if number.Status == "used" {
 			downloadedCount++
 			downloadedMember[number.MemberID] = struct{}{}
 		}
@@ -98,22 +99,20 @@ func run() {
 	util2.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{"@all"})
 }
 
-func getMemberDownloadMap(ctx context.Context, startAt time.Time) []*models.MemberDownloadNumber {
+func getMemberDownloadMap(ctx context.Context, startAt time.Time) []*models.MemberDownloadIpaRecord {
 	offset := 0
 	bulkSize := 100
 	hasNext := true
 
-	result := make([]*models.MemberDownloadNumber, 0)
+	result := make([]*models.MemberDownloadIpaRecord, 0)
 	for hasNext {
-		fmt.Println(fmt.Sprintf("offset: %d...", offset))
-
 		filter := []qm.QueryMod{
-			models.MemberDownloadNumberWhere.CreatedAt.GT(startAt),
+			models.MemberDownloadIpaRecordWhere.CreatedAt.GT(startAt),
 		}
-		ids, err := impl.DefaultMemberDownloadNumberDAO.ListIDs(ctx, offset, bulkSize, filter, nil)
+		ids, err := impl.DefaultMemberDownloadIpaRecordDAO.ListIDs(ctx, offset, bulkSize, filter, nil)
 		util.PanicIf(err)
 
-		data, err := impl.DefaultMemberDownloadNumberDAO.BatchGet(ctx, ids)
+		data, err := impl.DefaultMemberDownloadIpaRecordDAO.BatchGet(ctx, ids)
 		util.PanicIf(err)
 
 		hasNext = len(ids) >= bulkSize
