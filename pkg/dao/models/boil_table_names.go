@@ -8,6 +8,7 @@ var TableNames = struct {
 	AdminDumpOrder          string
 	Certificate             string
 	CertificateDevice       string
+	DailyFreeRecord         string
 	Feedback                string
 	Ipa                     string
 	IpaSign                 string
@@ -26,6 +27,7 @@ var TableNames = struct {
 	AdminDumpOrder:          "admin_dump_order",
 	Certificate:             "certificate",
 	CertificateDevice:       "certificate_device",
+	DailyFreeRecord:         "daily_free_record",
 	Feedback:                "feedback",
 	Ipa:                     "ipa",
 	IpaSign:                 "ipa_sign",

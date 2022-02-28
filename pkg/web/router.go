@@ -98,6 +98,10 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get)
 	// endregion
 
+	// regis daily_free
+	dailyFreeHandler := handler.NewDailyFreeIpaHandler()
+	r.With(middleware.OAuthRegister).Post("/daily_free", dailyFreeHandler.PostIpa)
+
 	return r
 }
 

@@ -24,7 +24,8 @@ func NewAdminConfigHandler() *AdminConfigHandler {
 }
 
 type postConfigArgs struct {
-	AdminBusy *bool `json:"admin_busy"`
+	AdminBusy      *bool  `json:"admin_busy"`
+	DailyFreeCount *int64 `json:"daily_free_count"`
 }
 
 func (p *postConfigArgs) Validate() error {
@@ -44,6 +45,9 @@ func (h *AdminConfigHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	if args.AdminBusy != nil {
 		util.PanicIf(h.configDAO.SetAdminBusy(ctx, *args.AdminBusy))
+	}
+	if args.DailyFreeCount != nil {
+		util.PanicIf(h.configDAO.SetDailyFreeCount(ctx, *args.DailyFreeCount))
 	}
 
 	util.RenderJSON(w, render.NewConfigRender(loginID).Render(ctx))

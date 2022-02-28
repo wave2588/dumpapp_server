@@ -31,7 +31,7 @@ func (d *AdminConfigDAO) generateAdminBusyKey() string {
 
 func (d *AdminConfigDAO) SetAdminBusy(ctx context.Context, busy bool) error {
 	key := d.generateAdminBusyKey()
-	_, err := d.redis.Set(ctx, key, busy, -1).Result()
+	_, err := d.redis.Set(ctx, key, busy, 0).Result()
 	return err
 }
 
@@ -42,4 +42,23 @@ func (d *AdminConfigDAO) GetAdminBusy(ctx context.Context) (bool, error) {
 		return false, err
 	}
 	return cast.ToBool(re), nil
+}
+
+func (d *AdminConfigDAO) generateDailyFreeCount() string {
+	return "dump:daily_free_count"
+}
+
+func (d *AdminConfigDAO) SetDailyFreeCount(ctx context.Context, count int64) error {
+	key := d.generateDailyFreeCount()
+	_, err := d.redis.Set(ctx, key, cast.ToString(count), 0).Result()
+	return err
+}
+
+func (d *AdminConfigDAO) GetDailyFreeCount(ctx context.Context) (int64, error) {
+	key := d.generateDailyFreeCount()
+	re, err := d.redis.Get(ctx, key).Result()
+	if err != nil && err != redis.Nil {
+		return 0, err
+	}
+	return cast.ToInt64(re), nil
 }

@@ -4,13 +4,15 @@
 POST /admin/config
 ```json
 {
-  "admin_busy": true
+  "admin_busy": true,   // 管理员是否忙碌
+  "daily_free_count":10  // 每日免费限额
 }
 ```  
 Response:
 ```json
 {
-  "admin_busy": true
+  "admin_busy": true,
+  "daily_free_count": 10
 }
 ```
 
@@ -19,6 +21,7 @@ GET /admin/config
 Response:
 ```json
 {
-  "admin_busy": true
+  "admin_busy": true,
+  "daily_free_count": 10
 }
 ```
