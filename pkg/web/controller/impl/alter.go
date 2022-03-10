@@ -106,7 +106,7 @@ func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaI
 				ipaIDStr + ipaNameStr + versionStr + bundleIDStr + numberStr + emailStr + timeStr,
 		},
 	}
-	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
 
 	data = map[string]interface{}{
 		"msgtype": "text",
@@ -115,7 +115,7 @@ func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaI
 			"mentioned_list": []string{"@all"},
 		},
 	}
-	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
 }
 
 func (c *AlterWebController) SendFeedbackMsg(ctx context.Context, loginID int64, content string) {
