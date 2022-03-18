@@ -2,9 +2,11 @@ package render
 
 import (
 	"context"
-
+	"dumpapp_server/pkg/common/enum"
+	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	"github.com/spf13/cast"
 )
 
 type Admin struct {
@@ -19,7 +21,7 @@ type AdminRender struct {
 
 	adminMap map[int64]*Admin
 
-	downloadOrderDAO dao.MemberDownloadOrderDAO
+	memberPayOrderDAO dao.MemberPayOrderDAO
 }
 
 func NewAdminRender(memberIDs []int64, loginID int64) *AdminRender {
@@ -27,7 +29,7 @@ func NewAdminRender(memberIDs []int64, loginID int64) *AdminRender {
 		memberIDs: memberIDs,
 		loginID:   loginID,
 
-		downloadOrderDAO: impl.DefaultMemberDownloadOrderDAO,
+		memberPayOrderDAO: impl.DefaultMemberPayOrderDAO,
 	}
 	return f
 }
@@ -57,22 +59,22 @@ func (f *AdminRender) RenderMap(ctx context.Context) map[int64]*Admin {
 }
 
 func (f *AdminRender) fetch(ctx context.Context) {
-	//memberOrderMap, err := f.downloadOrderDAO.BatchGetByMemberIDs(ctx, f.memberIDs)
-	//util.PanicIf(err)
+	memberOrderMap, err := f.memberPayOrderDAO.BatchGetByMemberIDs(ctx, f.memberIDs)
+	util.PanicIf(err)
 
 	result := make(map[int64]*Admin)
-	//for _, memberID := range f.memberIDs {
-	//	orders := memberOrderMap[memberID]
-	//	paidCount := 0
-	//	for _, order := range orders {
-	//		if order.Status == enum.MemberDownloadOrderStatusPaid {
-	//			paidCount++
-	//		}
-	//	}
-	//	result[memberID] = &Admin{
-	//		OrderCount: cast.ToInt64(len(orders)),
-	//		PaidCount:  cast.ToInt64(paidCount),
-	//	}
-	//}
+	for _, memberID := range f.memberIDs {
+		orders := memberOrderMap[memberID]
+		paidCount := 0
+		for _, order := range orders {
+			if order.Status == enum.MemberPayOrderStatusPaid {
+				paidCount++
+			}
+		}
+		result[memberID] = &Admin{
+			OrderCount: cast.ToInt64(len(orders)),
+			PaidCount:  cast.ToInt64(paidCount),
+		}
+	}
 	f.adminMap = result
 }

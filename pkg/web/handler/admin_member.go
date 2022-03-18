@@ -17,14 +17,12 @@ import (
 )
 
 type AdminMemberHandler struct {
-	accountDAO     dao.AccountDAO
-	memberOrderDAO dao.MemberDownloadOrderDAO
+	accountDAO dao.AccountDAO
 }
 
 func NewAdminMemberHandler() *AdminMemberHandler {
 	return &AdminMemberHandler{
-		accountDAO:     impl.DefaultAccountDAO,
-		memberOrderDAO: impl.DefaultMemberDownloadOrderDAO,
+		accountDAO: impl.DefaultAccountDAO,
 	}
 }
 

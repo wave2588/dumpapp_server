@@ -15,7 +15,6 @@ var TableNames = struct {
 	IpaVersion              string
 	MemberDevice            string
 	MemberDownloadIpaRecord string
-	MemberDownloadOrder     string
 	MemberIDEncryption      string
 	MemberInvite            string
 	MemberInviteCode        string
@@ -34,7 +33,6 @@ var TableNames = struct {
 	IpaVersion:              "ipa_version",
 	MemberDevice:            "member_device",
 	MemberDownloadIpaRecord: "member_download_ipa_record",
-	MemberDownloadOrder:     "member_download_order",
 	MemberIDEncryption:      "member_id_encryption",
 	MemberInvite:            "member_invite",
 	MemberInviteCode:        "member_invite_code",

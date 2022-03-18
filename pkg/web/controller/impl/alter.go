@@ -16,7 +16,6 @@ import (
 type AlterWebController struct {
 	emailCtl                   controller3.EmailController
 	accountDAO                 dao.AccountDAO
-	orderDAO                   dao.MemberDownloadOrderDAO
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	memberDeviceDAO            dao.MemberDeviceDAO
 	certificateDAO             dao.CertificateDAO
@@ -32,7 +31,6 @@ func NewAlterWebController() *AlterWebController {
 	return &AlterWebController{
 		emailCtl:                   impl.DefaultEmailController,
 		accountDAO:                 impl2.DefaultAccountDAO,
-		orderDAO:                   impl2.DefaultMemberDownloadOrderDAO,
 		memberDownloadIpaRecordDAO: impl2.DefaultMemberDownloadIpaRecordDAO,
 		memberDeviceDAO:            impl2.DefaultMemberDeviceDAO,
 		certificateDAO:             impl2.DefaultCertificateDAO,
