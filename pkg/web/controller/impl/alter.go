@@ -54,40 +54,8 @@ func (c *AlterWebController) SendMsg(ctx context.Context, memberID int64, name, 
 	//SendWeiXinBot(ctx, keyID, data, receivers)
 }
 
-func (c *AlterWebController) SendPaidOrderMsg(ctx context.Context, orderID int64) {
-	order, err := c.orderDAO.Get(ctx, orderID)
-	if err != nil {
-		return
-	}
-	account, err := c.accountDAO.Get(ctx, order.MemberID)
-	if err != nil {
-		return
-	}
-	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
-	if err != nil {
-		return
-	}
-	email := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n", account.Email)
-	number := fmt.Sprintf("充值次数：<font color=\"comment\">%d</font>\n", order.Number)
-	number2 := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
-	amount := fmt.Sprintf("充值金额：<font color=\"comment\">%v</font>\n", order.Amount.Float64)
-	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
-	data := map[string]interface{}{
-		"msgtype": "markdown",
-		"markdown": map[string]interface{}{
-			"content": "<font color=\"info\">支付成功</font>\n>" +
-				email + number + amount + number2 + timeStr,
-		},
-	}
-	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
-}
-
 func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, bundleID, ipaName, version string) {
 	account, err := c.accountDAO.Get(ctx, loginID)
-	if err != nil {
-		return
-	}
-	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
 	if err != nil {
 		return
 	}
@@ -96,14 +64,13 @@ func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaI
 	ipaNameStr := fmt.Sprintf("应用名称：<font color=\"comment\">%s</font>\n", ipaName)
 	versionStr := fmt.Sprintf("应用版本：<font color=\"comment\">%s</font>\n", version)
 	bundleIDStr := fmt.Sprintf("BundleID：<font color=\"comment\">%s</font>\n", bundleID)
-	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"warning\">需求来了</font>\n>" +
-				ipaIDStr + ipaNameStr + versionStr + bundleIDStr + numberStr + emailStr + timeStr,
+				ipaIDStr + ipaNameStr + versionStr + bundleIDStr + emailStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
@@ -151,21 +118,16 @@ func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, l
 	if err != nil {
 		return
 	}
-	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
-	if err != nil {
-		return
-	}
 
 	errorStr := fmt.Sprintf("错误信息：<font color=\"comment\">%s</font>\n", errorMessage)
 	deviceStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", deviceID)
-	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"warning\">内侧侠报错了!</font>\n>" +
-				errorStr + deviceStr + numberStr + emailStr + timeStr,
+				errorStr + deviceStr + emailStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
@@ -185,10 +147,6 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	if err != nil {
 		return
 	}
-	countMap, err := c.memberDownloadIpaRecordDAO.BatchGetMemberNormalCount(ctx, []int64{account.ID})
-	if err != nil {
-		return
-	}
 	device, err := c.memberDeviceDAO.Get(ctx, deviceID)
 	if err != nil {
 		return
@@ -203,13 +161,12 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
 	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
-	numberStr := fmt.Sprintf("剩余次数：<font color=\"comment\">%d</font>\n", countMap[account.ID])
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"info\">证书购买成功</font>\n>" +
-				cerIDStr + cerBatchNoStr + deviceIDStr + udidStr + emailStr + numberStr + timeStr,
+				cerIDStr + cerBatchNoStr + deviceIDStr + udidStr + emailStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
