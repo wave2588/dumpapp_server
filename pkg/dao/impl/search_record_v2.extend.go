@@ -9,12 +9,8 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func (d *SearchRecordV2DAO) BatchGetByIpaIDs(ctx context.Context, ipaIDs []int64, filters []qm.QueryMod) ([]*models.SearchRecordV2, error) {
-	qs := []qm.QueryMod{
-		models.SearchRecordV2Where.IpaID.IN(ipaIDs),
-	}
-	qs = append(qs, filters...)
-	data, err := models.SearchRecordV2S(qs...).All(ctx, d.mysqlPool)
+func (d *SearchRecordV2DAO) BatchGetByIpaIDs(ctx context.Context, filters []qm.QueryMod) ([]*models.SearchRecordV2, error) {
+	data, err := models.SearchRecordV2S(filters...).All(ctx, d.mysqlPool)
 	if err != nil {
 		return nil, err
 	}

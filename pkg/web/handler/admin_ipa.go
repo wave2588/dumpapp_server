@@ -197,7 +197,7 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		models.SearchRecordV2Where.IpaID.IN(ipaIDs),
 		models.SearchRecordV2Where.CreatedAt.GTE(time.Date(0, 0, -3, 0, 0, 0, 0, time.Now().Location())),
 	}
-	records, err := h.searchRecordV2DAO.BatchGetByIpaIDs(ctx, ipaIDs, filters)
+	records, err := h.searchRecordV2DAO.BatchGetByIpaIDs(ctx, filters)
 	if err != nil {
 		return err
 	}

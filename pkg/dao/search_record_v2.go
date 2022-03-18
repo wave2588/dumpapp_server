@@ -21,7 +21,7 @@ type SearchRecordV2DAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
-	BatchGetByIpaIDs(ctx context.Context, ipaIDs []int64, filters []qm.QueryMod) ([]*models.SearchRecordV2, error)
+	BatchGetByIpaIDs(ctx context.Context, filters []qm.QueryMod) ([]*models.SearchRecordV2, error)
 	GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*constant.SearchCount, error)
 	CountOrderBySearchCount(ctx context.Context, filter []qm.QueryMod) (int64, error)
 }

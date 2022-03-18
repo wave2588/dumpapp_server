@@ -60,8 +60,18 @@ func (h *DailyFreeIpaHandler) PostIpa(w http.ResponseWriter, r *http.Request) {
 	}, nil)
 	util.PanicIf(err)
 
+	if len(ids) != 0 {
+		recordMap, err := h.dailyFreeDAO.BatchGet(ctx, ids)
+		util.PanicIf(err)
+		for _, freeRecord := range recordMap {
+			if freeRecord.MemberID == loginID {
+				util.PanicIf(errors.ErrDailyFreeUnique)
+			}
+		}
+	}
+
 	if len(ids) >= int(dailyFreeCount) {
-		util.PanicIf(errors.HttpUnprocessableError)
+		util.PanicIf(errors.ErrDailyFreeNone)
 		return
 	}
 
