@@ -19,8 +19,8 @@ func main() {
 	bulkSize := 100
 	hasNext := true
 
-	var amount int64 = 0
-	month := time.Month(2)
+	var amount float64 = 0
+	month := time.Now().Month()
 
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
 	//endAt := time.Date(time.Now().Year(), month, 30, 23, 59, 59, 0, time.Local)
@@ -28,11 +28,11 @@ func main() {
 	resIDs := make([]int64, 0)
 	for hasNext {
 		filter := []qm.QueryMod{
-			models.MemberDownloadOrderWhere.CreatedAt.GTE(startAt),
+			models.MemberPayOrderWhere.CreatedAt.GTE(startAt),
 			//models.MemberDownloadOrderWhere.CreatedAt.LTE(endAt),
-			models.MemberDownloadOrderWhere.Status.EQ(enum.MemberDownloadOrderStatusPaid),
+			models.MemberPayOrderWhere.Status.EQ(enum.MemberPayOrderStatusPaid),
 		}
-		ids, err := impl.DefaultMemberDownloadOrderDAO.ListIDs(ctx, offset, bulkSize, filter, nil)
+		ids, err := impl.DefaultMemberPayOrderDAO.ListIDs(ctx, offset, bulkSize, filter, nil)
 		util.PanicIf(err)
 
 		resIDs = append(resIDs, ids...)
@@ -40,11 +40,11 @@ func main() {
 		hasNext = len(ids) >= bulkSize
 		offset += len(ids)
 
-		res, err := impl.DefaultMemberDownloadOrderDAO.BatchGet(ctx, ids)
+		res, err := impl.DefaultMemberPayOrderDAO.BatchGet(ctx, ids)
 		util.PanicIf(err)
 
 		for _, order := range res {
-			amount += order.Number * 9
+			amount += order.Amount
 		}
 	}
 
@@ -65,5 +65,5 @@ func main() {
 
 	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
 	fmt.Println(fmt.Sprintf("%d 支付成功的订单-->: %d", month, len(resIDs)))
-	fmt.Println(fmt.Sprintf("%d 总收入-->: %d", month, amount))
+	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, amount))
 }
