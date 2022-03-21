@@ -167,7 +167,10 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(err)
 	}
 	if md != nil {
-		util.PanicIf(errors.UnproccessableError("次设备已经绑定其他账号"))
+		account, err := h.accountDAO.Get(ctx, md.MemberID)
+		util.PanicIf(err)
+		w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s&exist_email=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version, account.Email))
+		w.WriteHeader(301)
 		return
 	}
 	util.PanicIf(h.memberDeivceDAO.Insert(ctx, memberDevice))
