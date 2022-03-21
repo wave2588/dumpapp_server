@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -110,7 +111,7 @@ func (h *IpaSignHandler) GetIpaSignURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaSign.TokenPath)
+	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaSign.TokenPath, 30*time.Minute)
 	util.PanicIf(err)
 	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	resJSON := map[string]interface{}{

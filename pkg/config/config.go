@@ -48,6 +48,7 @@ var config = appConfig{
 	TencentCosSecretID:     os.Getenv("TENCENT_COS_SECRET_ID"),
 	TencentCosSecretKey:    os.Getenv("TENCENT_COS_SECRET_KEY"),
 	TencentCosIpaHost:      os.Getenv("TENCENT_COS_IPA_HOST"),
+	TencentCosSignIpaHost:  os.Getenv("TENCENT_COS_SIGN_IPA_HOST"),
 
 	TencentSMSAppSDKID:   os.Getenv("TENCENT_SMS_APP_SKD_ID"),
 	TencentSMSTemplateID: os.Getenv("TENCENT_SMS_TEMPLATE_ID"),
@@ -92,6 +93,7 @@ type appConfig struct {
 	TencentCosSecretID     string
 	TencentCosSecretKey    string
 	TencentCosIpaHost      string
+	TencentCosSignIpaHost  string
 
 	TencentSMSAppSDKID   string
 	TencentSMSTemplateID string

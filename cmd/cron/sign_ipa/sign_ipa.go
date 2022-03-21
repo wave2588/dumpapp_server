@@ -106,7 +106,7 @@ func sign(ctx context.Context, memberID, certificateID, ipaVersionID int64) erro
 	}
 
 	/// 上传签名 ipa
-	err = impl2.DefaultTencentController.PutByFile(ctx, signIpaName, signedIpaPath)
+	err = impl2.DefaultTencentController.PutSignIpaByFile(ctx, signIpaName, signedIpaPath)
 	if err != nil {
 		return err
 	}

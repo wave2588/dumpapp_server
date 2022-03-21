@@ -19,7 +19,8 @@ import (
 )
 
 type TencentController struct {
-	client *cos.Client
+	client        *cos.Client
+	signIpaClient *cos.Client
 
 	credential *common.Credential
 }
@@ -33,12 +34,23 @@ func init() {
 func NewTencentController() *TencentController {
 	//u, err := url.Parse(config.DumpConfig.AppConfig.TencentCosIpaHost)
 	/// 删除暂时用这个地址
-	u, err := url.Parse(config.DumpConfig.AppConfig.TencentCosIpaHost)
+	ipaURL, err := url.Parse(config.DumpConfig.AppConfig.TencentCosIpaHost)
 	util.PanicIf(err)
-	b := &cos.BaseURL{BucketURL: u}
+	ipaBase := &cos.BaseURL{BucketURL: ipaURL}
+
+	/// sign ipa bucket
+	signIpaURL, err := url.Parse(config.DumpConfig.AppConfig.TencentCosSignIpaHost)
+	util.PanicIf(err)
+	signIpaBase := &cos.BaseURL{BucketURL: signIpaURL}
 
 	return &TencentController{
-		client: cos.NewClient(b, &http.Client{
+		client: cos.NewClient(ipaBase, &http.Client{
+			Transport: &cos.AuthorizationTransport{
+				SecretID:  config.DumpConfig.AppConfig.TencentCosSecretID,
+				SecretKey: config.DumpConfig.AppConfig.TencentCosSecretKey,
+			},
+		}),
+		signIpaClient: cos.NewClient(signIpaBase, &http.Client{
 			Transport: &cos.AuthorizationTransport{
 				SecretID:  config.DumpConfig.AppConfig.TencentCosSecretID,
 				SecretKey: config.DumpConfig.AppConfig.TencentCosSecretKey,
@@ -76,8 +88,8 @@ func (c *TencentController) ListFile(ctx context.Context, marker *string, limit 
 	return result, nil
 }
 
-func (c *TencentController) GetSignatureURL(ctx context.Context, name string) (string, error) {
-	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, 30*time.Minute, nil)
+func (c *TencentController) GetSignatureURL(ctx context.Context, name string, expired time.Duration) (string, error) {
+	res, err := c.client.Object.GetPresignedURL(ctx, http.MethodGet, name, config.DumpConfig.AppConfig.TencentCosSecretID, config.DumpConfig.AppConfig.TencentCosSecretKey, expired, nil)
 	util.PanicIf(err)
 	return res.String(), nil
 }
@@ -87,8 +99,8 @@ func (c *TencentController) GetToFile(ctx context.Context, name, path string) er
 	return err
 }
 
-func (c *TencentController) PutByFile(ctx context.Context, name, path string) error {
-	_, err := c.client.Object.PutFromFile(ctx, name, path, nil)
+func (c *TencentController) PutSignIpaByFile(ctx context.Context, name, path string) error {
+	_, err := c.signIpaClient.Object.PutFromFile(ctx, name, path, nil)
 	return err
 }
 

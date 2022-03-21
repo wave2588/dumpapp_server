@@ -186,7 +186,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersions[0].TokenPath)
+	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersions[0].TokenPath, 30*time.Minute)
 	util.PanicIf(err)
 	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	resJSON := map[string]interface{}{
