@@ -42,6 +42,9 @@ var (
 	ErrDailyFreeNone   = NewDefaultAPIError(403, 70001, "ErrDailyFreeNone", "每次免费次数已用完")
 	ErrDailyFreeUnique = NewDefaultAPIError(403, 70002, "ErrDailyFreeUnique", "每个人每天只有一次机会")
 
+	/// 设备相关的错误
+	ErrDeviceNotFound = NewDefaultAPIError(404, 80001, "ErrDailyFreeNone", "未找到对应的设备")
+
 	///
 	ErrHttpFail = NewDefaultAPIError(403, 403, "HttpFail", "http 请求失败")
 	ErrNotFound = NewDefaultAPIError(404, 404, "NotFound", "记录未找到")

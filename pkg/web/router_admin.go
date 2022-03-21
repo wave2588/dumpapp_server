@@ -50,6 +50,11 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdmin).Delete("/member/order", adminMemberPayCountHandler.DeleteNumber)
 	// endregion
 
+	// admin device
+	adminDeviceHandler := handler.NewAdminDeviceHandler()
+	r.With(middleware.OAuthAdmin).Delete("/device/unbind", adminDeviceHandler.Unbind)
+	// endregion
+
 	return r
 }
 
