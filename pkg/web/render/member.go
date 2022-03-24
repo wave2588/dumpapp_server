@@ -23,10 +23,10 @@ type Member struct {
 	Status string  `json:"status"`
 	Phone  *string `json:"phone,omitempty"`
 
-	PayCount int64 `json:"pay_count" render:"method=RenderPayCount"`
+	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
 
 	/// 邀请链接
-	InviteURL *string `json:"invite_url" render:"method=RenderInviteURL"`
+	InviteURL *string `json:"invite_url,omitempty" render:"method=RenderInviteURL"`
 	/// 用户绑定的设备信息
 	Devices []*Device `json:"devices,omitempty" render:"method=RenderDevices"`
 
@@ -149,7 +149,7 @@ func (f *MemberRender) RenderPayCount(ctx context.Context) {
 	countMap, err := f.memberPayCountDAO.BatchGetMemberNormalCount(ctx, f.ids)
 	util.PanicIf(err)
 	for _, member := range f.memberMap {
-		member.PayCount = countMap[member.ID]
+		member.PayCount = util2.Int64Ptr(countMap[member.ID])
 	}
 }
 

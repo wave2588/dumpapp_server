@@ -13,6 +13,7 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
@@ -80,4 +81,58 @@ func (h *DailyFreeIpaHandler) PostIpa(w http.ResponseWriter, r *http.Request) {
 		IpaID:      args.IpaID,
 		IpaVersion: args.IpaVersion,
 	}))
+}
+
+type GetDailyFreeRecordItem struct {
+	IpaID      int64          `json:"ipa_id,string"`
+	IpaVersion string         `json:"ipa_version"`
+	Member     *render.Member `json:"member"`
+}
+
+func (h *DailyFreeIpaHandler) GetDailyFreeRecords(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	now := time.Now()
+	ids, err := h.dailyFreeDAO.ListIDs(ctx, 0, 10, []qm.QueryMod{
+		models.DailyFreeRecordWhere.CreatedAt.GT(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())),
+	}, []string{})
+	util.PanicIf(err)
+
+	records, err := h.dailyFreeDAO.BatchGet(ctx, ids)
+	util.PanicIf(err)
+
+	memberIDs := make([]int64, 0)
+	for _, freeRecord := range records {
+		memberIDs = append(memberIDs, freeRecord.MemberID)
+	}
+
+	options := []render.MemberOption{
+		render.MemberIncludes([]string{}),
+	}
+	memberMap := render.NewMemberRender(memberIDs, loginID, options...).RenderMap(ctx)
+	for _, member := range memberMap {
+		email := member.Email
+		member.Email = fmt.Sprintf("***%s", email[3:])
+		member.Phone = nil
+	}
+
+	result := make([]*GetDailyFreeRecordItem, 0)
+	for _, freeRecord := range records {
+		member, ok := memberMap[freeRecord.MemberID]
+		if !ok {
+			continue
+		}
+		result = append(result, &GetDailyFreeRecordItem{
+			IpaID:      freeRecord.IpaID,
+			IpaVersion: freeRecord.IpaVersion,
+			Member:     member,
+		})
+	}
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: nil,
+		Data:   result,
+	})
 }

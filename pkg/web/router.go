@@ -101,6 +101,13 @@ func NewRouter() chi.Router {
 	// regis daily_free
 	dailyFreeHandler := handler.NewDailyFreeIpaHandler()
 	r.With(middleware.OAuthRegister).Post("/daily_free", dailyFreeHandler.PostIpa)
+	r.With(middleware.OAuthRegister).Get("/daily_free", dailyFreeHandler.GetDailyFreeRecords)
+	// endregion
+
+	// action
+	memberActionHandler := handler.NewMemberActionHandler()
+	r.With(middleware.OAuthGuest).Get("/member/action", memberActionHandler.GetMemberActions)
+	// endregion
 
 	return r
 }
