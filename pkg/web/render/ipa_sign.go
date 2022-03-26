@@ -21,9 +21,9 @@ type IpaSign struct {
 	CreatedAt int64              `json:"created_at"`
 	UpdateAt  int64              `json:"update_at"`
 
-	CurrentIpaVersion string       `json:"current_ipa_version"`
-	CurrentIpaType    enum.IpaType `json:"current_ipa_type"`
-	Ipa               *Ipa         `json:"ipa,omitempty" render:"method=RenderIpa"`
+	IpaVersion string       `json:"ipa_version"`
+	IpaType    enum.IpaType `json:"ipa_type"`
+	Ipa        *Ipa         `json:"ipa,omitempty" render:"method=RenderIpa"`
 }
 
 type IpaSignRender struct {
@@ -110,13 +110,13 @@ func (f *IpaSignRender) fetch(ctx context.Context) {
 		util.PanicIf(json.Unmarshal([]byte(ipaSign.BizExt), &ipaSignBizExt))
 
 		result[ipaSignID] = &IpaSign{
-			meta:              ipaSign,
-			ID:                ipaSign.ID,
-			Status:            ipaSign.Status,
-			CreatedAt:         ipaSign.CreatedAt.Unix(),
-			UpdateAt:          ipaSign.UpdatedAt.Unix(),
-			CurrentIpaVersion: ipaSignBizExt.IpaVersion,
-			CurrentIpaType:    ipaSignBizExt.IpaType,
+			meta:       ipaSign,
+			ID:         ipaSign.ID,
+			Status:     ipaSign.Status,
+			CreatedAt:  ipaSign.CreatedAt.Unix(),
+			UpdateAt:   ipaSign.UpdatedAt.Unix(),
+			IpaVersion: ipaSignBizExt.IpaVersion,
+			IpaType:    ipaSignBizExt.IpaType,
 		}
 	}
 
