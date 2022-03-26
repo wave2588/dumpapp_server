@@ -33,10 +33,10 @@ func (h *MemberDownloadRecordHandler) GetSelfDownloadRecord(w http.ResponseWrite
 	filter := []qm.QueryMod{
 		models.MemberDownloadIpaRecordWhere.MemberID.EQ(loginID),
 		models.MemberDownloadIpaRecordWhere.Status.EQ("used"),
-		models.MemberDownloadIpaRecordWhere.Version.IsNotNull(),
 	}
 	ids, err := h.memberDownloadIpaRecordDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
+
 	count, err := h.memberDownloadIpaRecordDAO.Count(ctx, filter)
 	util.PanicIf(err)
 

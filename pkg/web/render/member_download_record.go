@@ -120,10 +120,6 @@ func (f *MemberDownloadRecordRender) fetch(ctx context.Context) {
 		if !d.Version.Valid || !d.IpaType.Valid {
 			continue
 		}
-		/// 小于 2021-12-09 号之前的记录不下发
-		if d.CreatedAt.Unix() <= 1638979200 {
-			continue
-		}
 		ipaType, _ := enum.IpaTypeString(d.IpaType.String)
 		result[id] = &MemberDownloadRecord{
 			ID:        d.ID,
