@@ -3,7 +3,9 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
@@ -209,6 +211,9 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
+	util.PanicIf(h.captchaDAO.RemoveEmailCaptcha(ctx, args.Email))
+	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
+
 	/// start 判断是否有邀请码
 	if args.InviteCode != "" {
 		inviteCode, err := h.memberInviteCodeDAO.GetByCode(ctx, args.InviteCode)
@@ -218,6 +223,18 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		if inviteCode == nil {
 			panic(errors.ErrMemberInviteCodeInvalid)
 		}
+
+		/// 限制每天最多只能邀请三个人
+		now := time.Now()
+		ids, err := h.memberInviteDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
+			models.MemberInviteWhere.InviterID.EQ(inviteCode.MemberID),
+			models.MemberInviteWhere.CreatedAt.GT(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())),
+		}, []string{})
+		util.PanicIf(err)
+		if len(ids) > 3 {
+			panic(errors.ErrMemberInviterTooMuch)
+		}
+
 		/// 记录邀请关系
 		util.PanicIf(h.memberInviteDAO.Insert(ctx, &models.MemberInvite{
 			InviterID: inviteCode.MemberID,
@@ -246,9 +263,6 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		MemberID: accountID,
 		Code:     util3.MustGenerateCode(ctx, 10),
 	}))
-
-	util.PanicIf(h.captchaDAO.RemoveEmailCaptcha(ctx, args.Email))
-	util.PanicIf(h.captchaDAO.RemovePhoneCaptcha(ctx, args.Phone))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
