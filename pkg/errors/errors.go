@@ -39,7 +39,7 @@ var (
 	ErrIpaSignStatusUnprocessed = NewDefaultAPIError(401, 60003, "IpaSignStatusFail", "签名任务未开始，请稍等。")
 
 	/// 每日免费相关
-	ErrDailyFreeNone   = NewDefaultAPIError(403, 70001, "ErrDailyFreeNone", "每次免费次数已用完")
+	ErrDailyFreeNone   = NewDefaultAPIError(403, 70001, "ErrDailyFreeNone", "每日免费次数已用完")
 	ErrDailyFreeUnique = NewDefaultAPIError(403, 70002, "ErrDailyFreeUnique", "每个人每天只有一次机会")
 
 	/// 设备相关的错误
