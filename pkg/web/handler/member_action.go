@@ -1,6 +1,7 @@
 package handler
 
 import (
+	util2 "dumpapp_server/pkg/util"
 	"fmt"
 	"net/http"
 	"time"
@@ -15,16 +16,19 @@ import (
 
 type MemberActionHandler struct {
 	memberDownloadIpaRecordDAO dao2.MemberDownloadIpaRecordDAO
+	ipaDAO                     dao2.IpaDAO
 }
 
 func NewMemberActionHandler() *MemberActionHandler {
 	return &MemberActionHandler{
 		memberDownloadIpaRecordDAO: impl4.DefaultMemberDownloadIpaRecordDAO,
+		ipaDAO:                     impl4.DefaultIpaDAO,
 	}
 }
 
 type GetMemberActionItem struct {
 	IpaID      int64          `json:"ipa_id,string"`
+	IpaName    string         `json:"ipa_name"`
 	IpaVersion string         `json:"ipa_version"`
 	Type       string         `json:"action"` /// download
 	Member     *render.Member `json:"member"`
@@ -55,6 +59,17 @@ func (h *MemberActionHandler) GetMemberActions(w http.ResponseWriter, r *http.Re
 		member.Phone = nil
 	}
 
+	ipaIDs := make([]int64, 0)
+	for _, ipaRecord := range ipaRecords {
+		if ipaRecord.IpaID.IsZero() {
+			continue
+		}
+		ipaIDs = append(ipaIDs, ipaRecord.IpaID.Int64)
+	}
+	ipaIDs = util2.RemoveDuplicates(ipaIDs)
+	ipaMap, err := h.ipaDAO.BatchGet(ctx, ipaIDs)
+	util.PanicIf(err)
+
 	result := make([]*GetMemberActionItem, 0)
 	for _, recordID := range ids {
 		ipaRecord, ok := ipaRecords[recordID]
@@ -65,8 +80,13 @@ func (h *MemberActionHandler) GetMemberActions(w http.ResponseWriter, r *http.Re
 		if !ok {
 			continue
 		}
+		ipa, ok := ipaMap[ipaRecord.IpaID.Int64]
+		if !ok {
+			continue
+		}
 		result = append(result, &GetMemberActionItem{
 			IpaID:      ipaRecord.IpaID.Int64,
+			IpaName:    ipa.Name,
 			IpaVersion: ipaRecord.Version.String,
 			Type:       "download",
 			Member:     member,
