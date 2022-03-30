@@ -22,7 +22,7 @@ func main() {
 	var amount float64 = 0
 	month := time.Now().Month()
 
-	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
+	startAt := time.Date(time.Now().Year(), month, 30, 0, 0, 0, 0, time.Local)
 	//endAt := time.Date(time.Now().Year(), month, 30, 23, 59, 59, 0, time.Local)
 
 	resIDs := make([]int64, 0)

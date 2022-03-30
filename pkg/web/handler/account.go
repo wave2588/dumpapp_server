@@ -3,9 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"net/http"
-	"time"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
@@ -24,6 +22,7 @@ import (
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AccountHandler struct {
@@ -224,30 +223,26 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 			panic(errors.ErrMemberInviteCodeInvalid)
 		}
 
-		/// 限制每天最多只能邀请三个人
-		now := time.Now()
-		ids, err := h.memberInviteDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
-			models.MemberInviteWhere.InviterID.EQ(inviteCode.MemberID),
-			models.MemberInviteWhere.CreatedAt.GT(time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())),
-		}, []string{})
-		util.PanicIf(err)
-		if len(ids) > 3 {
-			panic(errors.ErrMemberInviterTooMuch)
-		}
-
 		/// 记录邀请关系
 		util.PanicIf(h.memberInviteDAO.Insert(ctx, &models.MemberInvite{
 			InviterID: inviteCode.MemberID,
 			InviteeID: accountID,
 		}))
 
-		/// 送给邀请人 9 个积分
-		for i := 0; i < 9; i++ {
-			util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-				MemberID: inviteCode.MemberID,
-				Status:   enum.MemberPayCountStatusNormal,
-				Source:   enum.MemberPayCountSourceInvitedPresented,
-			}))
+		/// 限制最多只能邀请三个人
+		ids, err := h.memberInviteDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
+			models.MemberInviteWhere.InviterID.EQ(inviteCode.MemberID),
+		}, []string{})
+		util.PanicIf(err)
+		if len(ids) <= 3 {
+			/// 送给邀请人 9 个积分
+			for i := 0; i < 9; i++ {
+				util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+					MemberID: inviteCode.MemberID,
+					Status:   enum.MemberPayCountStatusNormal,
+					Source:   enum.MemberPayCountSourceInvitedPresented,
+				}))
+			}
 		}
 	}
 	/// end
