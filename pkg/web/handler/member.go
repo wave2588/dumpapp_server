@@ -13,12 +13,14 @@ import (
 )
 
 type MemberHandler struct {
-	accountDAO dao2.AccountDAO
+	accountDAO    dao2.AccountDAO
+	statisticsDAO dao2.StatisticsDAO
 }
 
 func NewMemberHandler() *MemberHandler {
 	return &MemberHandler{
-		accountDAO: impl4.DefaultAccountDAO,
+		accountDAO:    impl4.DefaultAccountDAO,
+		statisticsDAO: impl4.DefaultStatisticsDAO,
 	}
 }
 
@@ -56,6 +58,8 @@ func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
 	ticket, err := util2.GenerateRegisterTicket(account.ID)
 	util.PanicIf(err)
 	middleware.SetTicketCookie(w, r, ticket)
+
+	_ = h.statisticsDAO.AddStatistics(ctx, loginID)
 
 	util.RenderJSON(w, members[0])
 }
