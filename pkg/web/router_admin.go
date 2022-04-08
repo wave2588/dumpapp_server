@@ -12,6 +12,7 @@ func NewRouterAdmin() chi.Router {
 	/// account
 	adminAccountHandler := handler.NewAdminAccountHandler()
 	r.With(middleware.OAuthAdmin).Post("/account", adminAccountHandler.AddAccount)
+	r.With(middleware.OAuthAdmin).Put("/account", adminAccountHandler.PutAccount)
 	// endregion
 
 	/// config

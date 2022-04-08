@@ -61,3 +61,31 @@ func (h *AdminAccountHandler) AddAccount(w http.ResponseWriter, r *http.Request)
 
 	util2.RenderJSON(w, "ok")
 }
+
+type putAccountArgs struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (p *putAccountArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminAccountHandler) PutAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := &putAccountArgs{}
+	util2.PanicIf(util2.JSONArgs(r, args))
+
+	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
+	util2.PanicIf(err)
+
+	account.Password = args.Password
+	util2.PanicIf(h.accountDAO.Update(ctx, account))
+
+	util2.RenderJSON(w, "ok")
+}
