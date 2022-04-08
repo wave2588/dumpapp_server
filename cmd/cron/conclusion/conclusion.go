@@ -87,11 +87,8 @@ func run() {
 	inviterMemberIDs, err := impl.DefaultMemberInviteDAO.ListIDs(ctx, 0, 1000, filters, nil)
 	util.PanicIf(err)
 
-	uv, err := impl.DefaultStatisticsDAO.GetUserView(ctx, startAt)
-	util.PanicIf(err)
-
-	pv, err := impl.DefaultStatisticsDAO.GetPageView(ctx, startAt)
-	util.PanicIf(err)
+	uv, _ := impl.DefaultStatisticsDAO.GetUserView(ctx, startAt)
+	pv, _ := impl.DefaultStatisticsDAO.GetPageView(ctx, startAt)
 
 	contentStr := fmt.Sprintf("<font color=\"info\">每日总结\n截止昨日此时数据统计如下：</font>\n>")
 	newMemberStr := fmt.Sprintf("新注册用户：<font color=\"comment\">%d</font> 人\n其中邀请注册用户：<font color=\"comment\">%d</font> 人\n", len(memberIDs), len(inviterMemberIDs))
