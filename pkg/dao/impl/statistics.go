@@ -33,19 +33,12 @@ func (d *StatisticsDAO) generateStatisticsKey(time time.Time) string {
 
 func (d *StatisticsDAO) AddStatistics(ctx context.Context, memberID int64) error {
 	key := d.generateStatisticsKey(time.Now())
-	cmd := d.redis.ZIncr(ctx, key, &redis.Z{
-		Score:  1,
-		Member: memberID,
-	})
+	cmd := d.redis.ZIncrBy(ctx, key, 1, cast.ToString(memberID))
 	_, err := cmd.Result()
 	return err
 }
 
 func (d *StatisticsDAO) GetPageView(ctx context.Context, time time.Time) (int64, error) {
-
-	c, _ := d.GetUserView(ctx, time)
-	fmt.Println(111, c)
-
 	key := d.generateStatisticsKey(time)
 	data, err := d.redis.ZRevRange(ctx, key, 0, 1000).Result()
 	if err != nil {
@@ -53,7 +46,6 @@ func (d *StatisticsDAO) GetPageView(ctx context.Context, time time.Time) (int64,
 	}
 	var count int64 = 0
 	for _, datum := range data {
-		fmt.Println(datum)
 		var item redis.Z
 		err = json.Unmarshal([]byte(datum), &item)
 		if err != nil {
