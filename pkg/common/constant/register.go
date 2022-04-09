@@ -20,6 +20,11 @@ var SupportedEmailAddress = []string{
 }
 
 func CheckEmailValid(email string) bool {
+	/// 为了防止临时邮箱, 类似这种  jocktmp+r7g599@gmail.com
+	if strings.Contains(email, "+") {
+		return false
+	}
+
 	address := strings.Split(email, "@")
 	if len(address) < 2 {
 		return false
