@@ -169,3 +169,24 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
+
+func (c *AlterWebController) SendAccountMsg(ctx context.Context) {
+	accountCount, err := c.accountDAO.ListIDs(ctx, 0, 10000, nil, nil)
+	if err != nil {
+		return
+	}
+
+	message := fmt.Sprintf("有新用户注册，距离 10000+ 注册用户还剩：<font color=\"comment\">%d</font>\n", 10000-len(accountCount))
+	if len(accountCount) == 10000 {
+		message = fmt.Sprintf("目标达成!!!，注册用户已突破 10000+ ！")
+	}
+
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"warning\">注册用户实时同步</font>\n>" +
+				message,
+		},
+	}
+	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
+}

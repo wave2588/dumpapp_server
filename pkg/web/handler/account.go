@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/web/controller"
+	"dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -33,8 +35,9 @@ type AccountHandler struct {
 	memberIDEncryptionDAO dao2.MemberIDEncryptionDAO
 	memberPayCountDAO     dao2.MemberPayCountDAO
 
-	emailCtl   controller2.EmailController
-	tencentCtl controller2.TencentController
+	emailCtl    controller2.EmailController
+	tencentCtl  controller2.TencentController
+	alertWebCtl controller.AlterWebController
 }
 
 func NewAccountHandler() *AccountHandler {
@@ -46,8 +49,9 @@ func NewAccountHandler() *AccountHandler {
 		memberIDEncryptionDAO: impl4.DefaultMemberIDEncryptionDAO,
 		memberPayCountDAO:     impl4.DefaultMemberPayCountDAO,
 
-		emailCtl:   impl2.DefaultEmailController,
-		tencentCtl: impl2.DefaultTencentController,
+		emailCtl:    impl2.DefaultEmailController,
+		tencentCtl:  impl2.DefaultTencentController,
+		alertWebCtl: impl.DefaultAlterWebController,
 	}
 }
 
@@ -276,6 +280,8 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	ticket, err := util2.GenerateRegisterTicket(accountID)
 	util.PanicIf(err)
 	middleware.SetTicketCookie(w, r, ticket)
+
+	h.alertWebCtl.SendAccountMsg(ctx)
 
 	util.RenderJSON(w, members[0])
 }
