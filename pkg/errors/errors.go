@@ -15,6 +15,7 @@ var (
 	ErrAccountUnusual           = NewDefaultAPIError(401, 10011, "AccountUnusual", "账户异常，请联系管理员。")
 	ErrEmailRefusedRegister     = NewDefaultAPIError(401, 10012, "EmailRefusedRegister", "该邮箱不允许注册。")
 	ErrMemberInviterTooMuch     = NewDefaultAPIError(403, 10013, "ErrMemberInviterTooMuch", "此邀请码今日邀请过多，请稍后重试。")
+	ErrPhoneRefusedRegister     = NewDefaultAPIError(401, 10014, "PhoneRefusedRegister", "该手机号不允许注册。")
 
 	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 app")
 	ErrNotFoundIpa        = NewDefaultAPIError(404, 20002, "NotFoundIpa", "未找到 ipa")

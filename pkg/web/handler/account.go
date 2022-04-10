@@ -125,6 +125,11 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 	args := &sendPhoneCaptchaQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// 检测手机号
+	if !constant.CheckPhoneValid(args.Phone) {
+		panic(errors.ErrPhoneRefusedRegister)
+	}
+
 	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
 	util.PanicIf(err)
 	account := accountMap[args.Phone]
@@ -177,6 +182,10 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	/// 检测邮箱
 	if !constant.CheckEmailValid(args.Email) {
 		panic(errors.ErrEmailRefusedRegister)
+	}
+	/// 检测手机号
+	if !constant.CheckPhoneValid(args.Phone) {
+		panic(errors.ErrPhoneRefusedRegister)
 	}
 
 	captcha, err := h.captchaDAO.GetEmailCaptcha(ctx, args.Email)
