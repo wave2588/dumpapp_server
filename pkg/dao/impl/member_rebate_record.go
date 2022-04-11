@@ -132,7 +132,7 @@ func (d *MemberRebateRecordDAO) ListIDs(ctx context.Context, offset, limit int, 
 			qs = append(qs, qm.OrderBy(orderBy))
 		}
 	} else {
-		qs = append(qs, qm.OrderBy("created_at DESC, id DESC"))
+		qs = append(qs, qm.OrderBy("id DESC"))
 	}
 
 	if offset >= 0 && limit >= 0 {

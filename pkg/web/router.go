@@ -41,6 +41,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/self/download_record", memberDownloadRecord.GetSelfDownloadRecord)
 	// endregion
 
+	// member rebate record
+	memberRebateRecord := handler.NewMemberRebateRecordHandler()
+	r.With(middleware.OAuthRegister).Get("/member/self/rebate_record", memberRebateRecord.GetRebateRecords)
+	// endregion
+
 	// ipa
 	ipaHandler := handler.NewIpaHandler()
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}", ipaHandler.Get)
