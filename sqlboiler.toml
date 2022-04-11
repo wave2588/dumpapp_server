@@ -138,3 +138,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# account table
+[[types]]
+  [types.match]
+    name = "role"
+    type = "string"
+    tables = ["account"]
+
+  [types.replace]
+    type = "enum.AccountRole"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']

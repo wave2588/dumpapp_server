@@ -2,8 +2,6 @@ package handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/web/controller"
-	"dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -21,10 +19,11 @@ import (
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/middleware/util"
 	util3 "dumpapp_server/pkg/util"
+	"dumpapp_server/pkg/web/controller"
+	"dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AccountHandler struct {
@@ -242,20 +241,13 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 			InviteeID: accountID,
 		}))
 
-		/// 限制最多只能邀请三个人
-		ids, err := h.memberInviteDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
-			models.MemberInviteWhere.InviterID.EQ(inviteCode.MemberID),
-		}, []string{})
-		util.PanicIf(err)
-		if len(ids) <= 3 {
-			/// 送给邀请人 9 个积分
-			for i := 0; i < 9; i++ {
-				util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-					MemberID: inviteCode.MemberID,
-					Status:   enum.MemberPayCountStatusNormal,
-					Source:   enum.MemberPayCountSourceInvitedPresented,
-				}))
-			}
+		/// 邀请一个人只送 2 个币
+		for i := 0; i < 2; i++ {
+			util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+				MemberID: inviteCode.MemberID,
+				Status:   enum.MemberPayCountStatusNormal,
+				Source:   enum.MemberPayCountSourceInvitedPresented,
+			}))
 		}
 	}
 	/// end

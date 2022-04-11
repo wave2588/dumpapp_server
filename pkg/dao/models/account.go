@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,13 +24,14 @@ import (
 
 // Account is an object representing the database table.
 type Account struct {
-	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Email     string    `boil:"email" json:"email" toml:"email" yaml:"email"`
-	Phone     string    `boil:"phone" json:"phone" toml:"phone" yaml:"phone"`
-	Password  string    `boil:"password" json:"password" toml:"password" yaml:"password"`
-	Status    uint8     `boil:"status" json:"status" toml:"status" yaml:"status"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64            `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Email     string           `boil:"email" json:"email" toml:"email" yaml:"email"`
+	Phone     string           `boil:"phone" json:"phone" toml:"phone" yaml:"phone"`
+	Password  string           `boil:"password" json:"password" toml:"password" yaml:"password"`
+	Role      enum.AccountRole `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Status    uint8            `boil:"status" json:"status" toml:"status" yaml:"status"`
+	CreatedAt time.Time        `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time        `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *accountR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L accountL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,6 +42,7 @@ var AccountColumns = struct {
 	Email     string
 	Phone     string
 	Password  string
+	Role      string
 	Status    string
 	CreatedAt string
 	UpdatedAt string
@@ -48,6 +51,7 @@ var AccountColumns = struct {
 	Email:     "email",
 	Phone:     "phone",
 	Password:  "password",
+	Role:      "role",
 	Status:    "status",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -101,6 +105,27 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelperenum_AccountRole struct{ field string }
+
+func (w whereHelperenum_AccountRole) EQ(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_AccountRole) NEQ(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_AccountRole) LT(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_AccountRole) LTE(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_AccountRole) GT(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_AccountRole) GTE(x enum.AccountRole) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 type whereHelperuint8 struct{ field string }
 
 func (w whereHelperuint8) EQ(x uint8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -150,6 +175,7 @@ var AccountWhere = struct {
 	Email     whereHelperstring
 	Phone     whereHelperstring
 	Password  whereHelperstring
+	Role      whereHelperenum_AccountRole
 	Status    whereHelperuint8
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
@@ -158,6 +184,7 @@ var AccountWhere = struct {
 	Email:     whereHelperstring{field: "`account`.`email`"},
 	Phone:     whereHelperstring{field: "`account`.`phone`"},
 	Password:  whereHelperstring{field: "`account`.`password`"},
+	Role:      whereHelperenum_AccountRole{field: "`account`.`role`"},
 	Status:    whereHelperuint8{field: "`account`.`status`"},
 	CreatedAt: whereHelpertime_Time{field: "`account`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`account`.`updated_at`"},
@@ -180,9 +207,9 @@ func (*accountR) NewStruct() *accountR {
 type accountL struct{}
 
 var (
-	accountAllColumns            = []string{"id", "email", "phone", "password", "status", "created_at", "updated_at"}
+	accountAllColumns            = []string{"id", "email", "phone", "password", "role", "status", "created_at", "updated_at"}
 	accountColumnsWithoutDefault = []string{"id", "email", "phone", "password"}
-	accountColumnsWithDefault    = []string{"status", "created_at", "updated_at"}
+	accountColumnsWithDefault    = []string{"role", "status", "created_at", "updated_at"}
 	accountPrimaryKeyColumns     = []string{"id"}
 )
 

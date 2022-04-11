@@ -20,6 +20,7 @@ var TableNames = struct {
 	MemberInviteCode        string
 	MemberPayCount          string
 	MemberPayOrder          string
+	MemberRebateRecord      string
 	SearchRecordV2          string
 }{
 	Account:                 "account",
@@ -38,5 +39,6 @@ var TableNames = struct {
 	MemberInviteCode:        "member_invite_code",
 	MemberPayCount:          "member_pay_count",
 	MemberPayOrder:          "member_pay_order",
+	MemberRebateRecord:      "member_rebate_record",
 	SearchRecordV2:          "search_record_v2",
 }
