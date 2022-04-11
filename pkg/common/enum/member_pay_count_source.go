@@ -9,4 +9,5 @@ const (
 	MemberPayCountSourcePayForFree                                       /// 多买多送
 	MemberPayCountSourceAdminPresented                                   /// 管理员添加
 	MemberPayCountSourceInvitedPresented                                 /// 邀请赠送
+	MemberPayCountSourceRebate                                           /// 被邀请的人充值后返还给邀请人
 )

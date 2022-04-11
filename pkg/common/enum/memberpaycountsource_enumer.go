@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _MemberPayCountSourceName = "normalpay_for_freeadmin_presentedinvited_presented"
+const _MemberPayCountSourceName = "normalpay_for_freeadmin_presentedinvited_presentedrebate"
 
-var _MemberPayCountSourceIndex = [...]uint8{0, 6, 18, 33, 50}
+var _MemberPayCountSourceIndex = [...]uint8{0, 6, 18, 33, 50, 56}
 
-const _MemberPayCountSourceLowerName = "normalpay_for_freeadmin_presentedinvited_presented"
+const _MemberPayCountSourceLowerName = "normalpay_for_freeadmin_presentedinvited_presentedrebate"
 
 func (i MemberPayCountSource) String() string {
 	i -= 1
@@ -31,9 +31,10 @@ func _MemberPayCountSourceNoOp() {
 	_ = x[MemberPayCountSourcePayForFree-(2)]
 	_ = x[MemberPayCountSourceAdminPresented-(3)]
 	_ = x[MemberPayCountSourceInvitedPresented-(4)]
+	_ = x[MemberPayCountSourceRebate-(5)]
 }
 
-var _MemberPayCountSourceValues = []MemberPayCountSource{MemberPayCountSourceNormal, MemberPayCountSourcePayForFree, MemberPayCountSourceAdminPresented, MemberPayCountSourceInvitedPresented}
+var _MemberPayCountSourceValues = []MemberPayCountSource{MemberPayCountSourceNormal, MemberPayCountSourcePayForFree, MemberPayCountSourceAdminPresented, MemberPayCountSourceInvitedPresented, MemberPayCountSourceRebate}
 
 var _MemberPayCountSourceNameToValueMap = map[string]MemberPayCountSource{
 	_MemberPayCountSourceName[0:6]:        MemberPayCountSourceNormal,
@@ -44,6 +45,8 @@ var _MemberPayCountSourceNameToValueMap = map[string]MemberPayCountSource{
 	_MemberPayCountSourceLowerName[18:33]: MemberPayCountSourceAdminPresented,
 	_MemberPayCountSourceName[33:50]:      MemberPayCountSourceInvitedPresented,
 	_MemberPayCountSourceLowerName[33:50]: MemberPayCountSourceInvitedPresented,
+	_MemberPayCountSourceName[50:56]:      MemberPayCountSourceRebate,
+	_MemberPayCountSourceLowerName[50:56]: MemberPayCountSourceRebate,
 }
 
 var _MemberPayCountSourceNames = []string{
@@ -51,6 +54,7 @@ var _MemberPayCountSourceNames = []string{
 	_MemberPayCountSourceName[6:18],
 	_MemberPayCountSourceName[18:33],
 	_MemberPayCountSourceName[33:50],
+	_MemberPayCountSourceName[50:56],
 }
 
 // MemberPayCountSourceString retrieves an enum value from the enum constants string name.

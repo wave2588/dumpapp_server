@@ -26,7 +26,7 @@ type MemberRebateRecord struct {
 	ID               int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	OrderID          int64     `boil:"order_id" json:"order_id" toml:"order_id" yaml:"order_id"`
 	ReceiverMemberID int64     `boil:"receiver_member_id" json:"receiver_member_id" toml:"receiver_member_id" yaml:"receiver_member_id"`
-	Count            uint      `boil:"count" json:"count" toml:"count" yaml:"count"`
+	Count            int       `boil:"count" json:"count" toml:"count" yaml:"count"`
 	CreatedAt        time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt        time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -52,22 +52,22 @@ var MemberRebateRecordColumns = struct {
 
 // Generated where
 
-type whereHelperuint struct{ field string }
+type whereHelperint struct{ field string }
 
-func (w whereHelperuint) EQ(x uint) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperuint) NEQ(x uint) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperuint) LT(x uint) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperuint) LTE(x uint) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperuint) GT(x uint) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperuint) GTE(x uint) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperuint) IN(slice []uint) qm.QueryMod {
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint) IN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
-func (w whereHelperuint) NIN(slice []uint) qm.QueryMod {
+func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -79,14 +79,14 @@ var MemberRebateRecordWhere = struct {
 	ID               whereHelperint64
 	OrderID          whereHelperint64
 	ReceiverMemberID whereHelperint64
-	Count            whereHelperuint
+	Count            whereHelperint
 	CreatedAt        whereHelpertime_Time
 	UpdatedAt        whereHelpertime_Time
 }{
 	ID:               whereHelperint64{field: "`member_rebate_record`.`id`"},
 	OrderID:          whereHelperint64{field: "`member_rebate_record`.`order_id`"},
 	ReceiverMemberID: whereHelperint64{field: "`member_rebate_record`.`receiver_member_id`"},
-	Count:            whereHelperuint{field: "`member_rebate_record`.`count`"},
+	Count:            whereHelperint{field: "`member_rebate_record`.`count`"},
 	CreatedAt:        whereHelpertime_Time{field: "`member_rebate_record`.`created_at`"},
 	UpdatedAt:        whereHelpertime_Time{field: "`member_rebate_record`.`updated_at`"},
 }

@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -103,7 +104,6 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 }
 
 func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *models.MemberPayOrder) error {
-
 	inviteeID := order.MemberID
 
 	/// 支付成功后要送邀请者
@@ -134,7 +134,16 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 		ratio = 0.6
 	}
 
-	count := cast.ToUint(order.Amount * ratio)
+	/// 写入返还次数
+	count := cast.ToInt(order.Amount * ratio)
+	for i := 0; i < count; i++ {
+		_ = c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+			MemberID: inviterID,
+			Status:   enum.MemberPayCountStatusNormal,
+			Source:   enum.MemberPayCountSourceRebate,
+		})
+	}
+
 	return c.memberRebateRecordDAO.Insert(ctx, &models.MemberRebateRecord{
 		OrderID:          order.ID,
 		ReceiverMemberID: inviterID,

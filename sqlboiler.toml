@@ -7,6 +7,13 @@
 
 [[types]]
     [types.match]
+        type = "uint"
+
+    [types.replace]
+        type = "int"
+
+[[types]]
+    [types.match]
         type = "null.Uint64"
         nullable = true
 
