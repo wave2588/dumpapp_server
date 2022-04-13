@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"dumpapp_server/pkg/web/render"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -12,18 +13,21 @@ import (
 
 type MemberRebateRecordHandler struct {
 	memberRebateRecordDAO dao.MemberRebateRecordDAO
+	memberPayOrderDAO     dao.MemberPayOrderDAO
 }
 
 func NewMemberRebateRecordHandler() *MemberRebateRecordHandler {
 	return &MemberRebateRecordHandler{
 		memberRebateRecordDAO: impl.DefaultMemberRebateRecordDAO,
+		memberPayOrderDAO:     impl.DefaultMemberPayOrderDAO,
 	}
 }
 
 type rebateRecord struct {
-	ID        int64 `json:"id,string"`
-	Count     int   `json:"count"`
-	CreatedAt int64 `json:"created_at"`
+	ID        int64          `json:"id,string"`
+	Count     int            `json:"count"`
+	Member    *render.Member `json:"member"`
+	CreatedAt int64          `json:"created_at"`
 }
 
 func (h *MemberRebateRecordHandler) GetRebateRecords(w http.ResponseWriter, r *http.Request) {
@@ -44,15 +48,37 @@ func (h *MemberRebateRecordHandler) GetRebateRecords(w http.ResponseWriter, r *h
 	rebateRecordMap, err := h.memberRebateRecordDAO.BatchGet(ctx, ids)
 	util.PanicIf(err)
 
+	orderIDs := make([]int64, 0)
+	for _, memberRebateRecord := range rebateRecordMap {
+		orderIDs = append(orderIDs, memberRebateRecord.OrderID)
+	}
+
+	orderMap, err := h.memberPayOrderDAO.BatchGet(ctx, orderIDs)
+	util.PanicIf(err)
+	memberIDs := make([]int64, 0)
+	for _, order := range orderMap {
+		memberIDs = append(memberIDs, order.MemberID)
+	}
+	memberMap := render.NewMemberRender(memberIDs, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)
+
 	result := make([]*rebateRecord, 0)
 	for _, id := range ids {
 		record, ok := rebateRecordMap[id]
 		if !ok {
 			continue
 		}
+		order, ok := orderMap[record.OrderID]
+		if !ok {
+			continue
+		}
+		member, ok := memberMap[order.MemberID]
+		if !ok {
+			continue
+		}
 		result = append(result, &rebateRecord{
 			ID:        record.ID,
 			Count:     record.Count,
+			Member:    member,
 			CreatedAt: record.CreatedAt.Unix(),
 		})
 	}

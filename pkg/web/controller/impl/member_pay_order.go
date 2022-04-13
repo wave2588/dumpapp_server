@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"math"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
@@ -129,13 +130,13 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 	}
 
 	/// 正常是返还 30%，如果是大 V 则返还 60%
-	ratio := 0.3
+	ratio := 0.2
 	if account.Role == enum.AccountRoleInfluential {
-		ratio = 0.6
+		ratio = 0.4
 	}
 
 	/// 写入返还次数
-	count := cast.ToInt(order.Amount * ratio)
+	count := cast.ToInt(math.Ceil(order.Amount * ratio))
 	for i := 0; i < count; i++ {
 		_ = c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
 			MemberID: inviterID,

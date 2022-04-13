@@ -171,15 +171,11 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 }
 
 func (c *AlterWebController) SendAccountMsg(ctx context.Context) {
-	accountCount, err := c.accountDAO.ListIDs(ctx, 0, 10000, nil, nil)
+	count, err := c.accountDAO.Count(ctx, nil)
 	if err != nil {
 		return
 	}
-
-	message := fmt.Sprintf("有新用户注册，距离 10000+ 注册用户还剩：<font color=\"comment\">%d</font>\n", 10000-len(accountCount))
-	if len(accountCount) == 10000 {
-		message = fmt.Sprintf("目标达成!!!，注册用户已突破 10000+ ！")
-	}
+	message := fmt.Sprintf("当前注册用户总数：%d", count)
 
 	data := map[string]interface{}{
 		"msgtype": "markdown",
