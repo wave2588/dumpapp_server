@@ -28,7 +28,7 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.C
 	}, map[string]string{
 		"token":            config.DumpConfig.AppConfig.CerServerToken,
 		"udid":             udid,
-		"udid_region_pool": "private",
+		"udid_region_pool": "auto",
 	})
 	if err != nil {
 		return nil, err
