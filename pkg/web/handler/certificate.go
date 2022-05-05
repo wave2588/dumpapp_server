@@ -54,12 +54,16 @@ func NewCertificateHandler() *CertificateHandler {
 
 type postCertificate struct {
 	UDID string `json:"udid" validate:"required"`
+	Type int    `json:"type"`
 }
 
 func (p *postCertificate) Validate() error {
 	err := validator.New().Struct(p)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.Type < 1 || p.Type > 3 {
+		return errors.UnproccessableError("type 类型错误")
 	}
 	return nil
 }
@@ -68,10 +72,24 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 
-	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, 54))
-
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	payCount := cast.ToInt64(30)
+	payType := "private"
+	switch args.Type {
+	case 1: /// 30 售后七天，理论 1 年不掉签
+		payCount = 30
+		payType = "public"
+	case 2: // 60 售后一年，等 1 - 7 天
+		payCount = 60
+		payType = "private"
+	case 3: /// 90 售后一年，立即出
+		payCount = 90
+		payType = "private"
+	}
+
+	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, payCount))
 
 	memberDevice, err := h.memberDeviceDAO.GetByUdid(ctx, args.UDID)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
@@ -82,7 +100,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/// 请求整数接口
-	result, err := h.certificateServer.CreateCer(ctx, args.UDID)
+	result, err := h.certificateServer.CreateCer(ctx, args.UDID, payType)
 	util.PanicIf(err)
 
 	if result.Data == nil || result.IsSuccess == false {
@@ -130,7 +148,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 			CertificateID: cerID,
 		}))
 		/// 消费 6 次, 这是因为完全新创建, 所以进行消费
-		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 54, enum.MemberPayCountUseCertificate))
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
 
 		h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
 	} else {
@@ -145,7 +163,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 				CertificateID: cer.ID,
 			}))
 			/// 消费 6 次, 这是因为有证书了, 但是没绑定, 所以进行消费
-			util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 54, enum.MemberPayCountUseCertificate))
+			util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
 			h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cer.ID)
 		}
 	}

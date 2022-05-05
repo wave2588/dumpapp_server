@@ -21,14 +21,14 @@ func NewCertificateServer() *CertificateServer {
 	return &CertificateServer{}
 }
 
-func (h *CertificateServer) CreateCer(ctx context.Context, udid string) (*http.CreateCerResponse, error) {
+func (h *CertificateServer) CreateCer(ctx context.Context, udid, regionPool string) (*http.CreateCerResponse, error) {
 	endpoint := config.DumpConfig.AppConfig.CerCreateURL
 	body, err := util.HttpRequest("POST", endpoint, map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 	}, map[string]string{
 		"token":            config.DumpConfig.AppConfig.CerServerToken,
 		"udid":             udid,
-		"udid_region_pool": "auto",
+		"udid_region_pool": regionPool,
 	})
 	if err != nil {
 		return nil, err
