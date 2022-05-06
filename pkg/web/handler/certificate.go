@@ -86,7 +86,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payType = "private"
 	case 3: /// 90 售后一年，立即出
 		payCount = 90
-		payType = "private"
+		payType = "public"
 	}
 
 	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, payCount))
