@@ -80,10 +80,10 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	switch args.Type {
 	case 1: /// 30 售后七天，理论 1 年不掉签
 		payCount = 30
-		payType = "public"
+		payType = "private"
 	case 2: // 60 售后一年，等 1 - 7 天
 		payCount = 60
-		payType = "private"
+		payType = "public"
 	case 3: /// 90 售后一年，立即出
 		payCount = 90
 		payType = "public"
