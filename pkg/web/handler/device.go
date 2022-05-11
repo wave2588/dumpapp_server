@@ -1,13 +1,6 @@
 package handler
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -20,10 +13,16 @@ import (
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type DeviceHandler struct {
@@ -177,4 +176,41 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version))
 	w.WriteHeader(301)
+}
+
+type postUDIDArgs struct {
+	UDID string `json:"udid" validate:"required"`
+}
+
+func (p *postUDIDArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	args := &postUDIDArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	deviceMap, err := h.memberDeivceDAO.BatchGetByUdid(ctx, []string{args.UDID})
+	util.PanicIf(err)
+
+	if _, ok := deviceMap[args.UDID]; ok {
+		panic(errors.UnproccessableError("此 udid 已绑定其他账号，如有疑问请联系客服。"))
+	}
+
+	id := util2.MustGenerateID(ctx)
+	util.PanicIf(h.memberDeivceDAO.Insert(ctx, &models.MemberDevice{
+		ID:       id,
+		MemberID: loginID,
+		Udid:     args.UDID,
+	}))
+
+	util.RenderJSON(w, "ok")
 }

@@ -80,7 +80,6 @@ var MemberDefaultRenderFields = []MemberOption{
 	MemberIncludes([]string{
 		"PayCount",
 		"InviteURL",
-		"Devices",
 	}),
 }
 

@@ -34,6 +34,7 @@ func NewRouter() chi.Router {
 	// member
 	memberHandler := handler.NewMemberHandler()
 	r.With(middleware.OAuthRegister).Get("/member/self", memberHandler.GetSelf)
+	r.With(middleware.OAuthRegister).Get("/member/self/devices", memberHandler.GetSelfDevice)
 	// endregion
 
 	// member download record
@@ -79,6 +80,8 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/device/config/file", deviceHandler.GetMobileConfigFile)
 	/// 绑定设备
 	r.With(middleware.OAuthGuest).Post("/device/bind/{code}", deviceHandler.Bind)
+	// 绑定 udid
+	r.With(middleware.OAuthRegister).Post("/device/udid", deviceHandler.PostUDID)
 	// endregion
 
 	// certificate

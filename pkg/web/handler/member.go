@@ -63,3 +63,21 @@ func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
 
 	util.RenderJSON(w, members[0])
 }
+
+func (h *MemberHandler) GetSelfDevice(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	account := GetAccountByLoginID(ctx, loginID)
+
+	members := render.NewMemberRender([]int64{account.ID}, loginID, render.MemberIncludes([]string{"Devices", "PayCount"})).RenderSlice(ctx)
+
+	ticket, err := util2.GenerateRegisterTicket(account.ID)
+	util.PanicIf(err)
+	middleware.SetTicketCookie(w, r, ticket)
+
+	_ = h.statisticsDAO.AddStatistics(ctx, loginID)
+
+	util.RenderJSON(w, members[0])
+}
