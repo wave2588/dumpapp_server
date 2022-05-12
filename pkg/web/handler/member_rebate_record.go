@@ -2,6 +2,7 @@ package handler
 
 import (
 	"dumpapp_server/pkg/web/render"
+	"github.com/spf13/cast"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -24,10 +25,12 @@ func NewMemberRebateRecordHandler() *MemberRebateRecordHandler {
 }
 
 type rebateRecord struct {
-	ID        int64          `json:"id,string"`
-	Count     int            `json:"count"`
-	Member    *render.Member `json:"member"`
-	CreatedAt int64          `json:"created_at"`
+	ID          int64          `json:"id,string"`
+	Count       int            `json:"count"`
+	RebateCount int            `json:"rebate_count"` /// 返利
+	OrderCount  int            `json:"order_count"`  /// 充值
+	Member      *render.Member `json:"member"`
+	CreatedAt   int64          `json:"created_at"`
 }
 
 func (h *MemberRebateRecordHandler) GetRebateRecords(w http.ResponseWriter, r *http.Request) {
@@ -76,10 +79,12 @@ func (h *MemberRebateRecordHandler) GetRebateRecords(w http.ResponseWriter, r *h
 			continue
 		}
 		result = append(result, &rebateRecord{
-			ID:        record.ID,
-			Count:     record.Count,
-			Member:    member,
-			CreatedAt: record.CreatedAt.Unix(),
+			ID:          record.ID,
+			Count:       record.Count,
+			RebateCount: record.Count,
+			OrderCount:  cast.ToInt(order.Amount),
+			Member:      member,
+			CreatedAt:   record.CreatedAt.Unix(),
 		})
 	}
 	util.RenderJSON(w, util.ListOutput{
