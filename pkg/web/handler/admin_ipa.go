@@ -193,9 +193,10 @@ func (h *AdminIpaHandler) sendEmail(ctx context.Context, ipaArgsMap map[int64]*i
 		ipaIDs = append(ipaIDs, ipaID)
 	}
 
+	createdAt := time.Now().AddDate(0, 0, -3)
 	filters := []qm.QueryMod{
 		models.SearchRecordV2Where.IpaID.IN(ipaIDs),
-		models.SearchRecordV2Where.CreatedAt.GTE(time.Date(0, 0, -3, 0, 0, 0, 0, time.Now().Location())),
+		models.SearchRecordV2Where.CreatedAt.GTE(createdAt),
 	}
 	records, err := h.searchRecordV2DAO.BatchGetByIpaIDs(ctx, filters)
 	if err != nil {
