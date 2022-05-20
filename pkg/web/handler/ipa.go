@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -176,13 +177,17 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
+	/// 如果没有传 start_at 和 end_at，则返回过去一天排行榜
+	if args.StartAt == 0 {
+		args.StartAt = time.Now().AddDate(0, 0, -1).Unix()
+	}
+	if args.EndAt == 0 {
+		args.EndAt = time.Now().Unix()
+	}
+
 	filter := make([]qm.QueryMod, 0)
-	if args.StartAt != 0 {
-		filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(args.StartAt)))
-	}
-	if args.EndAt != 0 {
-		filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
-	}
+	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(args.StartAt)))
+	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
 
 	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 20, filter)
 	util.PanicIf(err)
