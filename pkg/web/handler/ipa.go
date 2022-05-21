@@ -33,6 +33,7 @@ type IpaHandler struct {
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
+	appleCtl          controller.AppleController
 
 	adminDumpOrderCtl controller.AdminDumpOrderController
 }
@@ -45,6 +46,7 @@ func NewIpaHandler() *IpaHandler {
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
+		appleCtl:          impl2.DefaultAppleController,
 
 		adminDumpOrderCtl: impl2.DefaultAdminDumpOrderController,
 	}
@@ -192,12 +194,21 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 20, filter)
 	util.PanicIf(err)
 
-	result := make([]*searchRanking, 0)
+	ipaIDs := make([]int64, 0)
 	for _, datum := range data {
-		result = append(result, &searchRanking{
-			IpaID: datum.IpaID,
-			Name:  datum.Name,
-		})
+		ipaIDs = append(ipaIDs, datum.IpaID)
+	}
+	appleDataMap, err := h.appleCtl.BatchGetAppInfoByAppIDs(ctx, ipaIDs)
+	util.PanicIf(err)
+
+	result := make([]interface{}, 0)
+	fmt.Println(ipaIDs)
+	for _, ipaID := range ipaIDs {
+		appleData, ok := appleDataMap[ipaID]
+		if !ok {
+			continue
+		}
+		result = append(result, appleData)
 	}
 
 	util.RenderJSON(w, util.ListOutput{

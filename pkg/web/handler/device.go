@@ -1,6 +1,13 @@
 package handler
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -13,16 +20,10 @@ import (
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 type DeviceHandler struct {

@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/constant"
 	"net/http"
+
+	"dumpapp_server/pkg/common/constant"
 )
 
 func RequestContext(h http.Handler) http.Handler {
