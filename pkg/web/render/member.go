@@ -30,6 +30,8 @@ type Member struct {
 	/// 用户绑定的设备信息
 	Devices []*Device `json:"devices,omitempty" render:"method=RenderDevices"`
 
+	ShareInfo *ShareInfo `json:"share_info"`
+
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
 
@@ -142,6 +144,8 @@ func (f *MemberRender) fetch(ctx context.Context) {
 		}
 	}
 	f.memberMap = res
+
+	f.RenderShareInfo(ctx)
 }
 
 func (f *MemberRender) RenderPayCount(ctx context.Context) {
@@ -213,6 +217,15 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 		deviceResult = append(deviceResult, device)
 	}
 	f.memberMap[f.loginID].Devices = deviceResult
+}
+
+func (f *MemberRender) RenderShareInfo(ctx context.Context) {
+	for _, member := range f.memberMap {
+		member.ShareInfo = &ShareInfo{
+			Content:    "这是一段分享文案",
+			QQGroupURL: "https://jq.qq.com/?_wv=1027&k=jPKZ0Uk7",
+		}
+	}
 }
 
 func (f *MemberRender) RenderAdmin(ctx context.Context) {
