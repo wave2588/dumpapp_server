@@ -1,15 +1,19 @@
 package handler
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
 	dao2 "dumpapp_server/pkg/dao"
 	impl4 "dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
 	util2 "dumpapp_server/pkg/middleware/util"
 	"dumpapp_server/pkg/web/render"
+	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
 )
 
 type MemberHandler struct {
@@ -64,8 +68,24 @@ func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, members[0])
 }
 
+type getSelfDeviceArgs struct {
+	IsFilterEmptyCer int `form:"is_filter_empty_cer"`
+}
+
+func (p *getSelfDeviceArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
 func (h *MemberHandler) GetSelfDevice(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	args := getSelfDeviceArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
 
 	loginID := mustGetLoginID(ctx)
 
@@ -73,11 +93,22 @@ func (h *MemberHandler) GetSelfDevice(w http.ResponseWriter, r *http.Request) {
 
 	members := render.NewMemberRender([]int64{account.ID}, loginID, render.MemberIncludes([]string{"Devices", "PayCount"})).RenderSlice(ctx)
 
-	ticket, err := util2.GenerateRegisterTicket(account.ID)
-	util.PanicIf(err)
-	middleware.SetTicketCookie(w, r, ticket)
-
-	_ = h.statisticsDAO.AddStatistics(ctx, loginID)
+	/// 过滤掉没有证书的设备信息
+	if cast.ToBool(args.IsFilterEmptyCer) {
+		for _, member := range members {
+			devices := member.Devices
+			if len(devices) == 0 {
+				continue
+			}
+			resDevice := make([]*render.Device, 0)
+			for _, device := range devices {
+				if len(device.Certificates) != 0 {
+					resDevice = append(resDevice, device)
+				}
+			}
+			member.Devices = resDevice
+		}
+	}
 
 	util.RenderJSON(w, members[0])
 }
