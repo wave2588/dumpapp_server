@@ -221,10 +221,7 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 
 func (f *MemberRender) RenderShareInfo(ctx context.Context) {
 	for _, member := range f.memberMap {
-		member.ShareInfo = &ShareInfo{
-			Content:    "这是一段分享文案",
-			QQGroupURL: "https://jq.qq.com/?_wv=1027&k=jPKZ0Uk7",
-		}
+		member.ShareInfo = MustRenderShareInfo()
 	}
 }
 

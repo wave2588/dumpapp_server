@@ -117,6 +117,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/member/action", memberActionHandler.GetMemberActions)
 	// endregion
 
+	// share_info
+	shareInfoHandler := handler.NewShareInfoHandler()
+	r.With(middleware.OAuthGuest).Get("/share_info", shareInfoHandler.Get)
+	// endregion
+
 	return r
 }
 
