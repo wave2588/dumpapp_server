@@ -13,7 +13,7 @@ import (
 )
 
 type Certificate struct {
-	Meta *models.Certificate
+	Meta *models.Certificate `json:"-"`
 
 	ID        int64 `json:"id,string"`
 	CreatedAt int64 `json:"created_at"`
