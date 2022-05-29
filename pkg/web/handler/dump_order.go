@@ -58,5 +58,5 @@ func (h *DumpOrderHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
 
-	util.RenderJSON(w, "ok")
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }

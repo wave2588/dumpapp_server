@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/constant"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -104,4 +105,18 @@ func GetAccountByPhone(ctx context.Context, phone string) *models.Account {
 		panic(errors.ErrNotFoundMember)
 	}
 	return account
+}
+
+func DefaultSuccessBody(ctx context.Context) interface{} {
+	appPlatform, ok := ctx.Value(constant.CtxKeyAppPlatform).(string)
+	if !ok {
+		return "ok"
+	}
+	/// 判断是否是 ios 平台
+	if appPlatform == "ios" {
+		return map[string]bool{
+			"success": true,
+		}
+	}
+	return "ok"
 }
