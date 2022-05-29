@@ -86,6 +86,7 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 	if len(ipaVersions) == 0 {
 		util.RenderJSON(w, map[string]interface{}{
 			"can_download": false,
+			"message":      "此 ipa 没有检索到对应的版本",
 		})
 		return
 	}
@@ -96,8 +97,14 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 		util.PanicIf(err)
 	}
 
+	message := ""
+	if dn == nil {
+		message = "花费 9 个 D 币进行下载（有任何异常问题，可联系客服返还 D 币）"
+	}
+
 	resJSON := map[string]interface{}{
 		"can_download": dn != nil,
+		"message":      message,
 	}
 	util.RenderJSON(w, resJSON)
 }
