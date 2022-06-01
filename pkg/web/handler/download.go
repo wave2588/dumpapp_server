@@ -91,16 +91,6 @@ func (h *DownloadHandler) CheckCanDownload(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	/// 判断 D 币数量是否足够
-	err = h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, 9)
-	if err != nil {
-		util.RenderJSON(w, map[string]interface{}{
-			"can_download": false,
-			"message":      "D 币数量不足",
-		})
-		return
-	}
-
 	/// 判断之前是否下载过
 	dn, err := h.memberDownloadIpaRecordDAO.GetByMemberIDIpaIDIpaTypeVersion(ctx, loginID, null.Int64From(ipaID), null.StringFrom(ipaType.String()), null.StringFrom(args.Version))
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
