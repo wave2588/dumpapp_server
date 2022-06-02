@@ -23,13 +23,13 @@ func main() {
 	month := time.Now().Month()
 
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
-	//endAt := time.Date(time.Now().Year(), month, 30, 23, 59, 59, 0, time.Local)
+	//endAt := time.Date(time.Now().Year(), month, 31, 23, 59, 59, 0, time.Local)
 
 	resIDs := make([]int64, 0)
 	for hasNext {
 		filter := []qm.QueryMod{
 			models.MemberPayOrderWhere.CreatedAt.GTE(startAt),
-			//models.MemberDownloadOrderWhere.CreatedAt.LTE(endAt),
+			//models.MemberPayOrderWhere.CreatedAt.LTE(endAt),
 			models.MemberPayOrderWhere.Status.EQ(enum.MemberPayOrderStatusPaid),
 		}
 		ids, err := impl.DefaultMemberPayOrderDAO.ListIDs(ctx, offset, bulkSize, filter, nil)

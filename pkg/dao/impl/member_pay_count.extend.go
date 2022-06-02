@@ -32,3 +32,18 @@ func (d *MemberPayCountDAO) BatchGetMemberNormalCount(ctx context.Context, membe
 	}
 	return result, nil
 }
+
+func (d *MemberPayCountDAO) BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberPayCount, error) {
+	qs := []qm.QueryMod{
+		models.MemberPayCountWhere.MemberID.IN(memberIDs),
+	}
+	data, err := models.MemberPayCounts(qs...).All(ctx, d.mysqlPool)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[int64][]*models.MemberPayCount)
+	for _, datum := range data {
+		res[datum.MemberID] = append(res[datum.MemberID], datum)
+	}
+	return res, nil
+}
