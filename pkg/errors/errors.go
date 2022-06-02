@@ -23,7 +23,7 @@ var (
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
 	/// 支付相关的错误
-	ErrNotPayCount           = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "积分不足")
+	ErrNotPayCount           = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "D 币不足，请充值 D 币。")
 	ErrCreateCertificateFail = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
 
 	/// 证书相关错误

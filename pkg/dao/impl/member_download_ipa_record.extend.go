@@ -73,3 +73,11 @@ func (d *MemberDownloadIpaRecordDAO) BatchGetByMemberIDs(ctx context.Context, me
 	}
 	return result, nil
 }
+
+func (d *MemberDownloadIpaRecordDAO) GetByMemberIDAndIpaID(ctx context.Context, memberID, ipaID int64) ([]*models.MemberDownloadIpaRecord, error) {
+	qs := []qm.QueryMod{
+		models.MemberDownloadIpaRecordWhere.MemberID.EQ(memberID),
+		models.MemberDownloadIpaRecordWhere.IpaID.EQ(null.Int64From(ipaID)),
+	}
+	return models.MemberDownloadIpaRecords(qs...).All(ctx, d.mysqlPool)
+}

@@ -28,4 +28,5 @@ type MemberDownloadIpaRecordDAO interface {
 	BatchGetMemberNormalCount(ctx context.Context, memberIDs []int64) (map[int64]int64, error)
 	GetIpaDownloadCount(ctx context.Context, ipaID int64) (int64, int64, error)
 	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDownloadIpaRecord, error)
+	GetByMemberIDAndIpaID(ctx context.Context, memberID, ipaID int64) ([]*models.MemberDownloadIpaRecord, error)
 }

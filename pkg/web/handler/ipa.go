@@ -27,9 +27,10 @@ import (
 )
 
 type IpaHandler struct {
-	ipaDAO            dao.IpaDAO
-	ipaVersionDAO     dao.IpaVersionDAO
-	searchRecordV2DAO dao.SearchRecordV2DAO
+	ipaDAO                     dao.IpaDAO
+	ipaVersionDAO              dao.IpaVersionDAO
+	searchRecordV2DAO          dao.SearchRecordV2DAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
@@ -40,9 +41,10 @@ type IpaHandler struct {
 
 func NewIpaHandler() *IpaHandler {
 	return &IpaHandler{
-		ipaDAO:            impl.DefaultIpaDAO,
-		ipaVersionDAO:     impl.DefaultIpaVersionDAO,
-		searchRecordV2DAO: impl.DefaultSearchRecordV2DAO,
+		ipaDAO:                     impl.DefaultIpaDAO,
+		ipaVersionDAO:              impl.DefaultIpaVersionDAO,
+		searchRecordV2DAO:          impl.DefaultSearchRecordV2DAO,
+		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
@@ -101,13 +103,24 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	/// 判断是否有下载次数
-	err = h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9)
+	/// 走到这就说明站内已经没有此 ipa 的所有版本信息了。
+
+	memberDownloadRecords, err := h.memberDownloadIpaRecordDAO.GetByMemberIDAndIpaID(ctx, loginID, ipaID)
 	util.PanicIf(err)
+
+	openHistoryDownloadPage := true
+	/// 说明用户没有下载过，并且需要检查 D 币个数是否足够
+	if len(memberDownloadRecords) == 0 {
+		/// 判断是否有 D 币
+		util.PanicIf(h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9))
+
+		openHistoryDownloadPage = false
+	}
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
 	util.RenderJSON(w, map[string]bool{
-		"send_email": true,
+		"send_email":                 true,
+		"open_history_download_page": openHistoryDownloadPage, /// 是否打开历史下载页面
 	})
 }
 
