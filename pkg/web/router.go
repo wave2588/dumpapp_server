@@ -122,6 +122,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/share_info", shareInfoHandler.Get)
 	// endregion
 
+	// app_version
+	appVersionHandler := handler.NewAppVersionHandler()
+	r.With(middleware.OAuthGuest).Get("/app_version", appVersionHandler.CheckAppVersion)
+	// endregion
+
 	return r
 }
 
