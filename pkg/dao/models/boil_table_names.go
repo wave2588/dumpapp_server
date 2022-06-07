@@ -9,6 +9,7 @@ var TableNames = struct {
 	Certificate             string
 	CertificateDevice       string
 	DailyFreeRecord         string
+	DumpappVersion          string
 	Feedback                string
 	Ipa                     string
 	IpaSign                 string
@@ -28,6 +29,7 @@ var TableNames = struct {
 	Certificate:             "certificate",
 	CertificateDevice:       "certificate_device",
 	DailyFreeRecord:         "daily_free_record",
+	DumpappVersion:          "dumpapp_version",
 	Feedback:                "feedback",
 	Ipa:                     "ipa",
 	IpaSign:                 "ipa_sign",
