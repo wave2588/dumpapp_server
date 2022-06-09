@@ -81,12 +81,12 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	case 1: /// 30 售后七天，理论 1 年不掉签
 		payCount = 30
 		payType = "private"
-	case 2: // 60 售后一年，等 1 - 7 天
+	case 2: // 60 售后一年，等 1 - 7 天   public
 		payCount = 60
-		payType = "public"
-	case 3: /// 90 售后一年，立即出
+		payType = "private"
+	case 3: /// 90 售后一年，立即出   public
 		payCount = 90
-		payType = "public"
+		payType = "private"
 	}
 
 	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, payCount))
