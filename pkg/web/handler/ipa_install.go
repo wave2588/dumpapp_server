@@ -37,7 +37,7 @@ func (h *IpaInstallHandler) GetInstallIpaPlistFile(w http.ResponseWriter, r *htt
 
 	plistFile := fmt.Sprintf(plistTemplate, args.FileName, args.FileName, args.FileName, args.Title, args.Title, args.BundleIdentifier, args.BundleVersion)
 
-	w.Header().Add("Content-Type", "text/html;text/xml;charset=UTF-8")
+	w.Header().Add("Content-Type", "text/xml;charset=UTF-8")
 	w.Write([]byte(plistFile))
 }
 
