@@ -13,7 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,16 +25,18 @@ import (
 
 // Certificate is an object representing the database table.
 type Certificate struct {
-	ID                         int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	P12FileDate                string    `boil:"p12_file_date" json:"p12_file_date" toml:"p12_file_date" yaml:"p12_file_date"`
-	P12FileDateMD5             string    `boil:"p12_file_date_md5" json:"p12_file_date_md5" toml:"p12_file_date_md5" yaml:"p12_file_date_md5"`
-	ModifiedP12FileDate        string    `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
-	MobileProvisionFileData    string    `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
-	MobileProvisionFileDataMD5 string    `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
-	UdidBatchNo                string    `boil:"udid_batch_no" json:"udid_batch_no" toml:"udid_batch_no" yaml:"udid_batch_no"`
-	CerAppleid                 string    `boil:"cer_appleid" json:"cer_appleid" toml:"cer_appleid" yaml:"cer_appleid"`
-	CreatedAt                  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt                  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	P12FileDate                string                 `boil:"p12_file_date" json:"p12_file_date" toml:"p12_file_date" yaml:"p12_file_date"`
+	P12FileDateMD5             string                 `boil:"p12_file_date_md5" json:"p12_file_date_md5" toml:"p12_file_date_md5" yaml:"p12_file_date_md5"`
+	ModifiedP12FileDate        string                 `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
+	MobileProvisionFileData    string                 `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
+	MobileProvisionFileDataMD5 string                 `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
+	UdidBatchNo                string                 `boil:"udid_batch_no" json:"udid_batch_no" toml:"udid_batch_no" yaml:"udid_batch_no"`
+	CerAppleid                 string                 `boil:"cer_appleid" json:"cer_appleid" toml:"cer_appleid" yaml:"cer_appleid"`
+	Source                     enum.CertificateSource `boil:"source" json:"source" toml:"source" yaml:"source"`
+	BizExt                     null.String            `boil:"biz_ext" json:"biz_ext,omitempty" toml:"biz_ext" yaml:"biz_ext,omitempty"`
+	CreatedAt                  time.Time              `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt                  time.Time              `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *certificateR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L certificateL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +51,8 @@ var CertificateColumns = struct {
 	MobileProvisionFileDataMD5 string
 	UdidBatchNo                string
 	CerAppleid                 string
+	Source                     string
+	BizExt                     string
 	CreatedAt                  string
 	UpdatedAt                  string
 }{
@@ -58,11 +64,57 @@ var CertificateColumns = struct {
 	MobileProvisionFileDataMD5: "mobile_provision_file_data_md5",
 	UdidBatchNo:                "udid_batch_no",
 	CerAppleid:                 "cer_appleid",
+	Source:                     "source",
+	BizExt:                     "biz_ext",
 	CreatedAt:                  "created_at",
 	UpdatedAt:                  "updated_at",
 }
 
 // Generated where
+
+type whereHelperenum_CertificateSource struct{ field string }
+
+func (w whereHelperenum_CertificateSource) EQ(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_CertificateSource) NEQ(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_CertificateSource) LT(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_CertificateSource) LTE(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_CertificateSource) GT(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_CertificateSource) GTE(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var CertificateWhere = struct {
 	ID                         whereHelperint64
@@ -73,6 +125,8 @@ var CertificateWhere = struct {
 	MobileProvisionFileDataMD5 whereHelperstring
 	UdidBatchNo                whereHelperstring
 	CerAppleid                 whereHelperstring
+	Source                     whereHelperenum_CertificateSource
+	BizExt                     whereHelpernull_String
 	CreatedAt                  whereHelpertime_Time
 	UpdatedAt                  whereHelpertime_Time
 }{
@@ -84,6 +138,8 @@ var CertificateWhere = struct {
 	MobileProvisionFileDataMD5: whereHelperstring{field: "`certificate`.`mobile_provision_file_data_md5`"},
 	UdidBatchNo:                whereHelperstring{field: "`certificate`.`udid_batch_no`"},
 	CerAppleid:                 whereHelperstring{field: "`certificate`.`cer_appleid`"},
+	Source:                     whereHelperenum_CertificateSource{field: "`certificate`.`source`"},
+	BizExt:                     whereHelpernull_String{field: "`certificate`.`biz_ext`"},
 	CreatedAt:                  whereHelpertime_Time{field: "`certificate`.`created_at`"},
 	UpdatedAt:                  whereHelpertime_Time{field: "`certificate`.`updated_at`"},
 }
@@ -105,9 +161,9 @@ func (*certificateR) NewStruct() *certificateR {
 type certificateL struct{}
 
 var (
-	certificateAllColumns            = []string{"id", "p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "created_at", "updated_at"}
-	certificateColumnsWithoutDefault = []string{"p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid"}
-	certificateColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	certificateAllColumns            = []string{"id", "p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "source", "biz_ext", "created_at", "updated_at"}
+	certificateColumnsWithoutDefault = []string{"p12_file_date", "p12_file_date_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "udid_batch_no", "cer_appleid", "biz_ext"}
+	certificateColumnsWithDefault    = []string{"id", "source", "created_at", "updated_at"}
 	certificatePrimaryKeyColumns     = []string{"id"}
 )
 
