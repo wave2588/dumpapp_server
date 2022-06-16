@@ -28,8 +28,8 @@ type DeviceRender struct {
 
 	DeviceMap map[int64]*Device
 
-	memberDeviceDAO      dao.MemberDeviceDAO
-	certificateDeviceDAO dao.CertificateDeviceDAO
+	memberDeviceDAO dao.MemberDeviceDAO
+	certificateDAO  dao.CertificateV2DAO
 }
 
 type DeviceOption func(*DeviceRender)
@@ -61,8 +61,8 @@ func NewDeviceRender(ids []int64, loginID int64, opts ...DeviceOption) *DeviceRe
 		ids:     ids,
 		loginID: loginID,
 
-		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
-		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
+		memberDeviceDAO: impl.DefaultMemberDeviceDAO,
+		certificateDAO:  impl.DefaultCertificateV2DAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -117,23 +117,22 @@ func (f *DeviceRender) fetch(ctx context.Context) {
 }
 
 func (f *DeviceRender) RenderCertificates(ctx context.Context) {
-	deviceCerMap, err := f.certificateDeviceDAO.BatchGetByDeviceIDs(ctx, f.ids)
+	cerIDMap, err := f.certificateDAO.ListIDsByDeviceIDs(ctx, f.ids)
 	util.PanicIf(err)
+
 	cerIDs := make([]int64, 0)
-	for _, devices := range deviceCerMap {
-		for _, device := range devices {
-			cerIDs = append(cerIDs, device.CertificateID)
-		}
+	for _, cIDs := range cerIDMap {
+		cerIDs = append(cerIDs, cIDs...)
 	}
 	cerMap := NewCertificateRender(cerIDs, f.loginID, CertificateDefaultRenderFields...).RenderMap(ctx)
 	for _, device := range f.DeviceMap {
-		deviceCers, ok := deviceCerMap[device.ID]
+		cIDs, ok := cerIDMap[device.ID]
 		if !ok {
 			continue
 		}
 		certificates := make([]*Certificate, 0)
-		for _, dc := range deviceCers {
-			cer, ok := cerMap[dc.CertificateID]
+		for _, cID := range cIDs {
+			cer, ok := cerMap[cID]
 			if !ok {
 				continue
 			}

@@ -46,12 +46,11 @@ type MemberRender struct {
 
 	memberMap map[int64]*Member
 
-	accountDAO           dao.AccountDAO
-	memberPayCountDAO    dao.MemberPayCountDAO
-	memberInviteCodeDAO  dao.MemberInviteCodeDAO
-	memberDeviceDAO      dao.MemberDeviceDAO
-	certificateDeviceDAO dao.CertificateDeviceDAO
-	certificateService   http.CertificateServer
+	accountDAO          dao.AccountDAO
+	memberPayCountDAO   dao.MemberPayCountDAO
+	memberInviteCodeDAO dao.MemberInviteCodeDAO
+	memberDeviceDAO     dao.MemberDeviceDAO
+	certificateService  http.CertificateServer
 }
 
 type MemberOption func(*MemberRender)
@@ -90,12 +89,11 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		ids:     ids,
 		loginID: loginID,
 
-		accountDAO:           impl.DefaultAccountDAO,
-		memberPayCountDAO:    impl.DefaultMemberPayCountDAO,
-		memberInviteCodeDAO:  impl.DefaultMemberInviteCodeDAO,
-		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
-		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
-		certificateService:   impl2.DefaultCertificateServer,
+		accountDAO:          impl.DefaultAccountDAO,
+		memberPayCountDAO:   impl.DefaultMemberPayCountDAO,
+		memberInviteCodeDAO: impl.DefaultMemberInviteCodeDAO,
+		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
+		certificateService:  impl2.DefaultCertificateServer,
 	}
 	for _, opt := range opts {
 		opt(f)

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/cast"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -181,10 +182,18 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 	if md != nil {
 		account, err := h.accountDAO.Get(ctx, md.MemberID)
 		util.PanicIf(err)
+		impl3.NewAlterWebController().SendDeviceLog(ctx, "错误啦!!!，发现此 udid 已经绑定过了。！！！", memberID, map[string]string{
+			"code":            code,
+			"udid":            memberDevice.Udid,
+			"exist_email":     account.Email,
+			"exist_member_id": cast.ToString(md.MemberID),
+		})
 		w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s&exist_email=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version, account.Email))
 		w.WriteHeader(301)
 		return
 	}
+
+	/// 没查到的话进行写库操作
 	util.PanicIf(h.memberDeivceDAO.Insert(ctx, memberDevice))
 
 	w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version))

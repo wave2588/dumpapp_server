@@ -34,10 +34,12 @@ type CertificateHandler struct {
 	alterWebCtl             controller2.AlterWebController
 	certificateWebCtl       controller2.CertificateWebController
 	memberDownloadNumberCtl controller.MemberDownloadController
-	certificateServer       http2.CertificateServer
-	memberDeviceDAO         dao.MemberDeviceDAO
-	certificateDAO          dao.CertificateDAO
-	certificateDeviceDAO    dao.CertificateDeviceDAO
+	certificateV1Controller controller.CertificateController
+	certificateV2Controller controller.CertificateController
+
+	certificateServer http2.CertificateServer
+	memberDeviceDAO   dao.MemberDeviceDAO
+	certificateDAO    dao.CertificateV2DAO
 }
 
 func NewCertificateHandler() *CertificateHandler {
@@ -45,16 +47,18 @@ func NewCertificateHandler() *CertificateHandler {
 		alterWebCtl:             impl5.DefaultAlterWebController,
 		certificateWebCtl:       impl5.DefaultCertificateWebController,
 		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
-		certificateServer:       impl3.DefaultCertificateServer,
-		memberDeviceDAO:         impl2.DefaultMemberDeviceDAO,
-		certificateDAO:          impl2.DefaultCertificateDAO,
-		certificateDeviceDAO:    impl2.DefaultCertificateDeviceDAO,
+		certificateV1Controller: impl.DefaultCertificateV1Controller,
+		certificateV2Controller: impl.DefaultCertificateV2Controller,
+
+		certificateServer: impl3.DefaultCertificateServer,
+		memberDeviceDAO:   impl2.DefaultMemberDeviceDAO,
+		certificateDAO:    impl2.DefaultCertificateV2DAO,
 	}
 }
 
 type postCertificate struct {
 	UDID string `json:"udid" validate:"required"`
-	Type int    `json:"type"`
+	Type int    `json:"type" validate:"required"`
 }
 
 func (p *postCertificate) Validate() error {
@@ -71,6 +75,11 @@ func (p *postCertificate) Validate() error {
 func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
+
+	/// todo: 上线后下掉
+	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+		util.PanicIf(errors.UnproccessableError("证书服务维护中，请稍后再试。"))
+	}
 
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -98,80 +107,60 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	if memberDevice == nil {
 		panic(errors.ErrNotFound)
 	}
+	if memberDevice.MemberID != loginID {
+		panic(errors.ErrCreateCertificateFailV2)
+	}
 
 	/// 请求整数接口
-	result, err := h.certificateServer.CreateCer(ctx, args.UDID, payType)
-	util.PanicIf(err)
-
-	if result.Data == nil || result.IsSuccess == false {
+	response := h.certificateV2Controller.CreateCer(ctx, args.UDID, payType)
+	if response.ErrorMessage != nil {
 		/// 创建失败推送
-		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, result.ErrorMessage)
+		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, *response.ErrorMessage)
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
-	cerData := result.Data
+	if response.BizExt == nil {
+		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, "response biz_ext is nil")
+		util.PanicIf(errors.ErrCreateCertificateFail)
+	}
 
-	p12FileData := cerData.P12FileDate
-	mpFileData := cerData.MobileProvisionFileData
+	p12FileData := response.P12Data
+	mpFileData := response.MobileProvisionData
 	/// p12 文件修改内容
-	modifiedP12FileData, err := h.certificateWebCtl.GetModifiedCertificateData(ctx, cerData.P12FileDate)
+	modifiedP12FileData, err := h.certificateWebCtl.GetModifiedCertificateData(ctx, p12FileData, response.BizExt.OriginalP12Password, response.BizExt.NewP12Password)
 	util.PanicIf(err)
 
-	/// 查看证书是否已经存在, p12 文件还是按照元数据计算
+	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)
 	mpFileMd5 := util2.StringMd5(mpFileData)
-	cer, err := h.certificateDAO.GetByP12FileDateMD5MobileProvisionFileDataMD5(ctx, p12FileMd5, mpFileMd5)
-	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-		panic(err)
-	}
 
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
-	if cer == nil {
-		/// 创建证书
-		cerID := util2.MustGenerateID(ctx)
-		util.PanicIf(h.certificateDAO.Insert(ctx, &models.Certificate{
-			ID:                         cerID,
-			P12FileDate:                p12FileData,
-			P12FileDateMD5:             p12FileMd5,
-			ModifiedP12FileDate:        modifiedP12FileData,
-			MobileProvisionFileData:    mpFileData,
-			MobileProvisionFileDataMD5: mpFileMd5,
-			UdidBatchNo:                cerData.UdidBatchNo,
-			CerAppleid:                 cerData.CerAppleid,
-		}))
-		/// 绑定证书和设备关系
-		util.PanicIf(h.certificateDeviceDAO.Insert(ctx, &models.CertificateDevice{
-			DeviceID:      memberDevice.ID,
-			CertificateID: cerID,
-		}))
-		/// 消费 6 次, 这是因为完全新创建, 所以进行消费
-		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
+	cerID := util2.MustGenerateID(ctx)
+	util.PanicIf(h.certificateDAO.Insert(ctx, &models.CertificateV2{
+		ID:                         cerID,
+		DeviceID:                   memberDevice.ID,
+		P12FileData:                p12FileData,
+		P12FileDataMD5:             p12FileMd5,
+		ModifiedP12FileDate:        modifiedP12FileData,
+		MobileProvisionFileData:    mpFileData,
+		MobileProvisionFileDataMD5: mpFileMd5,
+		Source:                     response.Source,
+		BizExt:                     response.BizExt.String(),
+	}))
 
-		h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
-	} else {
-		/// 发现设备和此证书没绑定过, 则进行绑定
-		mc, err := h.certificateDeviceDAO.GetByDeviceIDCertificateID(ctx, memberDevice.ID, cer.ID)
-		if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-			util.PanicIf(err)
-		}
-		if mc == nil {
-			util.PanicIf(h.certificateDeviceDAO.Insert(ctx, &models.CertificateDevice{
-				DeviceID:      memberDevice.ID,
-				CertificateID: cer.ID,
-			}))
-			/// 消费 6 次, 这是因为有证书了, 但是没绑定, 所以进行消费
-			util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
-			h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cer.ID)
-		}
-	}
+	/// 扣除消费的 D 币
+	util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 
-	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberDefaultRenderFields...).RenderMap(ctx)
+	/// 发送消费成功通知
+	h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
+
+	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberIncludes([]string{"Devices", "PayCount"})).RenderMap(ctx)
 	util.RenderJSON(w, memberMap[loginID])
 }
 

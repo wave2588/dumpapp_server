@@ -23,8 +23,9 @@ var (
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
 	/// 支付相关的错误
-	ErrNotPayCount           = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "D 币不足，请充值 D 币。")
-	ErrCreateCertificateFail = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
+	ErrNotPayCount             = NewDefaultAPIError(403, 30001, "NotDownloadNumber", "D 币不足，请充值 D 币。")
+	ErrCreateCertificateFail   = NewDefaultAPIError(403, 30003, "CreateCertificateFail", "生成证书失败")
+	ErrCreateCertificateFailV2 = NewDefaultAPIError(403, 30004, "CreateCertificateFailV2", "UDID 和当前账号未绑定")
 
 	/// 证书相关错误
 	ErrNotFoundCertificate         = NewDefaultAPIError(404, 40000, "NotFoundCertificate", "未找到对应的证书")

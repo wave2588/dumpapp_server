@@ -23,12 +23,11 @@ func NewCertificateWebController() *CertificateWebController {
 	return &CertificateWebController{}
 }
 
-func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Context, p12Data string) (string, error) {
+func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Context, p12Data, originalPassword, newPassword string) (string, error) {
 	path, err := c.mobileconfigPath()
 	if err != nil {
 		return "", err
 	}
-
 	originFileID := util2.MustGenerateID(ctx)
 	data, err := base64.StdEncoding.DecodeString(p12Data)
 	util.PanicIf(err)
@@ -41,7 +40,7 @@ func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Contex
 
 	pemFileID := util2.MustGenerateID(ctx)
 	pemFilePath := fmt.Sprintf("%s/%d.pem", path, pemFileID)
-	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"1" -passout pass:"123" -name "www.dumpapp.com" -out %s`, originFilePath, pemFilePath)
+	cmd := fmt.Sprintf(`openssl pkcs12 -in %s -password pass:"%s" -passout pass:"%s" -name "www.dumpapp.com" -out %s`, originFilePath, originalPassword, newPassword, pemFilePath)
 	err = util2.Cmd(cmd)
 	if err != nil {
 		return "", err
@@ -49,7 +48,7 @@ func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Contex
 
 	resultFileID := util2.MustGenerateID(ctx)
 	resultFilePath := fmt.Sprintf("%s/%d.p12", path, resultFileID)
-	cmd = fmt.Sprintf(`openssl pkcs12 -passin pass:"123" -passout pass:"123" -export -in %s  -name "www.dumpapp.com" -out %s`, pemFilePath, resultFilePath)
+	cmd = fmt.Sprintf(`openssl pkcs12 -passin pass:"%s" -passout pass:"%s" -export -in %s  -name "www.dumpapp.com" -out %s`, newPassword, newPassword, pemFilePath, resultFilePath)
 	err = util2.Cmd(cmd)
 	if err != nil {
 		return "", err

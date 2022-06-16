@@ -18,7 +18,7 @@ type AlterWebController struct {
 	accountDAO                 dao.AccountDAO
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	memberDeviceDAO            dao.MemberDeviceDAO
-	certificateDAO             dao.CertificateDAO
+	certificateDAO             dao.CertificateV2DAO
 }
 
 var DefaultAlterWebController *AlterWebController
@@ -33,7 +33,7 @@ func NewAlterWebController() *AlterWebController {
 		accountDAO:                 impl2.DefaultAccountDAO,
 		memberDownloadIpaRecordDAO: impl2.DefaultMemberDownloadIpaRecordDAO,
 		memberDeviceDAO:            impl2.DefaultMemberDeviceDAO,
-		certificateDAO:             impl2.DefaultCertificateDAO,
+		certificateDAO:             impl2.DefaultCertificateV2DAO,
 	}
 }
 
@@ -124,7 +124,7 @@ func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, l
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
-			"content": "<font color=\"warning\">内侧侠报错了!</font>\n>" +
+			"content": "<font color=\"warning\">证书服务报错了!</font>\n>" +
 				errorStr + deviceStr + emailStr + timeStr,
 		},
 	}
@@ -155,7 +155,6 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	}
 
 	cerIDStr := fmt.Sprintf("证书 ID：<font color=\"comment\">%d</font>\n", cer.ID)
-	cerBatchNoStr := fmt.Sprintf("证书批次：<font color=\"comment\">%s</font>\n", cer.UdidBatchNo)
 	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
 	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
@@ -164,7 +163,7 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"info\">证书购买成功</font>\n>" +
-				cerIDStr + cerBatchNoStr + deviceIDStr + udidStr + emailStr + timeStr,
+				cerIDStr + deviceIDStr + udidStr + emailStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})

@@ -48,3 +48,22 @@ func (d *IpaSignBizExt) String() string {
 	util.PanicIf(err)
 	return string(data)
 }
+
+type CertificateBizExt struct {
+	/// v1 扩展字段
+	V1UDIDBatchNo string `json:"v1_udid_batch_no,omitempty"`
+	V1CerAppleID  string `json:"v1_cer_apple_id,omitempty"`
+
+	/// v2 扩展字段
+	V2DeviceID string `json:"v2_device_id,omitempty"`
+
+	/// 公共字段
+	OriginalP12Password string `json:"original_p12_password"` /// 原本的密码
+	NewP12Password      string `json:"new_p12_password"`      /// 新密码
+}
+
+func (d *CertificateBizExt) String() string {
+	data, err := json.Marshal(d)
+	util.PanicIf(err)
+	return string(data)
+}

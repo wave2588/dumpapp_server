@@ -78,9 +78,10 @@ var config = appConfig{
 	CerServerToken:      os.Getenv("CER_SERVER_TOKEN"),
 
 	/// cer v2 server
-	CerCreateTokenV2:   os.Getenv("CER_SERVER_TOKEN_V2"),
+	CerServerTokenV2:   os.Getenv("CER_SERVER_TOKEN_V2"),
 	CerCreateURLV2:     os.Getenv("CER_CREATE_URL_V2"),
 	CerGetDeviceListV2: os.Getenv("CER_GET_DEVICE_LIST_V2"),
+	CerGetV2:           os.Getenv("CER_GET_CER_V2"),
 }
 
 type appConfig struct {
@@ -129,9 +130,10 @@ type appConfig struct {
 	CerServerToken      string
 
 	/// cer v2
-	CerCreateTokenV2   string
+	CerServerTokenV2   string
 	CerCreateURLV2     string
 	CerGetDeviceListV2 string
+	CerGetV2           string
 }
 
 type MySQL struct {
