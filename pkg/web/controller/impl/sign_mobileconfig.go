@@ -31,10 +31,15 @@ func NewSignMobileconfigWebController() *SignMobileconfigWebController {
 }
 
 func (c *SignMobileconfigWebController) Sign(ctx context.Context, memberCode string) ([]byte, error) {
-	_, err := c.memberIDEncryptionCtl.GetMemberIDByCode(ctx, memberCode)
+	memberID, err := c.memberIDEncryptionCtl.GetMemberIDByCode(ctx, memberCode)
 	if err != nil {
 		return nil, err
 	}
+
+	/// 日志
+	NewAlterWebController().SendDeviceLog(ctx, "用户开始获取描述文件", memberID, map[string]string{
+		"code": memberCode,
+	})
 
 	/// 签名过后文件路径
 	mcPath, err := c.mobileconfigPath()

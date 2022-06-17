@@ -51,6 +51,12 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 	util.PanicIf(err)
 
 	url := fmt.Sprintf("%s/device/config/file?code=%s", constant.HOST, code)
+
+	impl3.NewAlterWebController().SendDeviceLog(ctx, "用户获取绑定设备二维码", loginID, map[string]string{
+		"code": code,
+		"url":  url,
+	})
+
 	q, err := qrcode.New(url, qrcode.Medium)
 	if err != nil {
 		return
@@ -161,6 +167,11 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 			panic(errors.UnproccessableError(fmt.Sprintf("发现未识别的 key。 key = %s", key)))
 		}
 	}
+
+	impl3.NewAlterWebController().SendDeviceLog(ctx, "用户获取绑定设备二维码", memberID, map[string]string{
+		"code": code,
+		"udid": memberDevice.Udid,
+	})
 
 	md, err := h.memberDeivceDAO.GetByUdid(ctx, memberDevice.Udid)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {

@@ -80,7 +80,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/device/config/file", deviceHandler.GetMobileConfigFile)
 	/// 绑定设备
 	r.With(middleware.OAuthGuest).Post("/device/bind/{code}", deviceHandler.Bind)
-	// 绑定 udid
+	// 手动绑定 udid
 	r.With(middleware.OAuthRegister).Post("/device/udid", deviceHandler.PostUDID)
 	// endregion
 
