@@ -49,7 +49,7 @@ func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Contex
 
 	resultFileID := util2.MustGenerateID(ctx)
 	resultFilePath := fmt.Sprintf("%s/%d.p12", path, resultFileID)
-	cmd = fmt.Sprintf(`openssl pkcs12 -passin pass:"dumpapp" -passout pass:"dumpapp" -export -in %s  -name "www.dumpapp.com" -out %s`, pemFilePath, resultFilePath)
+	cmd = fmt.Sprintf(`openssl pkcs12 -passin pass:"123" -passout pass:"123" -export -in %s  -name "www.dumpapp.com" -out %s`, pemFilePath, resultFilePath)
 	err = util2.Cmd(cmd)
 	if err != nil {
 		return "", err
