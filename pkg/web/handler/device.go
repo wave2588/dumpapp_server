@@ -52,7 +52,7 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 
 	url := fmt.Sprintf("%s/device/config/file?code=%s", constant.HOST, code)
 
-	impl3.NewAlterWebController().SendDeviceLog(ctx, "用户获取绑定设备二维码", loginID, map[string]string{
+	impl3.NewAlterWebController().SendDeviceLog(ctx, "1. 用户获取绑定设备二维码", loginID, map[string]string{
 		"code": code,
 		"url":  url,
 	})
@@ -168,15 +168,16 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	impl3.NewAlterWebController().SendDeviceLog(ctx, "用户获取绑定设备二维码", memberID, map[string]string{
-		"code": code,
-		"udid": memberDevice.Udid,
-	})
-
 	md, err := h.memberDeivceDAO.GetByUdid(ctx, memberDevice.Udid)
 	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
 		util.PanicIf(err)
 	}
+
+	impl3.NewAlterWebController().SendDeviceLog(ctx, "3. 用户绑定设备成功", memberID, map[string]string{
+		"code": code,
+		"udid": memberDevice.Udid,
+	})
+
 	if md != nil {
 		account, err := h.accountDAO.Get(ctx, md.MemberID)
 		util.PanicIf(err)

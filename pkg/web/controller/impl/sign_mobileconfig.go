@@ -37,7 +37,7 @@ func (c *SignMobileconfigWebController) Sign(ctx context.Context, memberCode str
 	}
 
 	/// 日志
-	NewAlterWebController().SendDeviceLog(ctx, "用户开始获取描述文件", memberID, map[string]string{
+	NewAlterWebController().SendDeviceLog(ctx, "2. 用户已经拿到了描述文件", memberID, map[string]string{
 		"code": memberCode,
 	})
 

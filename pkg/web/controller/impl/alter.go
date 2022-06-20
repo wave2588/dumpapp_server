@@ -192,7 +192,7 @@ func (c *AlterWebController) SendDeviceLog(ctx context.Context, title string, me
 	if err != nil {
 		return
 	}
-	message := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	message := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n member_id: <font color=\"comment\">%d</font>\n", account.Email, memberID)
 	for key, value := range values {
 		msg := fmt.Sprintf("%s：<font color=\"comment\">%s</font>\n", key, value)
 		message += msg
