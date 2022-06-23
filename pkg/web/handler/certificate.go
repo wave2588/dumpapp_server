@@ -76,11 +76,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 
-	/// todo: 上线后下掉
-	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
-		util.PanicIf(errors.UnproccessableError("证书服务维护中，请稍后再试。"))
-	}
-
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
