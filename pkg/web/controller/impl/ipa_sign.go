@@ -72,34 +72,34 @@ func (c *IpaSignWebController) checkIpaVersionID(ctx context.Context, ipaVersion
 	return ipaVersion, nil
 }
 
-func (c *IpaSignWebController) checkCertificateID(ctx context.Context, loginID, certificateID int64) (*models.Certificate, error) {
-	//cerMap := render.NewCertificateRender([]int64{certificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-	//cer, ok := cerMap[certificateID]
-	//if !ok {
-	//	return nil, errors.ErrNotFoundCertificate
-	//}
-	//if !cer.P12IsActive {
-	//	return nil, errors.ErrCertificateInvalid
-	//}
-	///// 查看证书和当前登录人的关系
-	///// 1. 根据证书查出所有的设备 id
-	//certificateDevices, err := c.certificateDeviceDAO.GetByCertificateID(ctx, certificateID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//deviceIDs := make([]int64, 0)
-	//for _, device := range certificateDevices {
-	//	deviceIDs = append(deviceIDs, device.DeviceID)
-	//}
-	///// 根据设备 id 获取所有的 member_id
-	//memberDeviceMap, err := c.memberDeviceDAO.BatchGet(ctx, deviceIDs)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//for _, device := range memberDeviceMap {
-	//	if device.MemberID == loginID {
-	//		//return cer.Meta, nil
-	//	}
-	//}
-	return nil, errors.ErrCertificateUnavailByAccount
-}
+//func (c *IpaSignWebController) checkCertificateID(ctx context.Context, loginID, certificateID int64) (*models.Certificate, error) {
+//cerMap := render.NewCertificateRender([]int64{certificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+//cer, ok := cerMap[certificateID]
+//if !ok {
+//	return nil, errors.ErrNotFoundCertificate
+//}
+//if !cer.P12IsActive {
+//	return nil, errors.ErrCertificateInvalid
+//}
+///// 查看证书和当前登录人的关系
+///// 1. 根据证书查出所有的设备 id
+//certificateDevices, err := c.certificateDeviceDAO.GetByCertificateID(ctx, certificateID)
+//if err != nil {
+//	return nil, err
+//}
+//deviceIDs := make([]int64, 0)
+//for _, device := range certificateDevices {
+//	deviceIDs = append(deviceIDs, device.DeviceID)
+//}
+///// 根据设备 id 获取所有的 member_id
+//memberDeviceMap, err := c.memberDeviceDAO.BatchGet(ctx, deviceIDs)
+//if err != nil {
+//	return nil, err
+//}
+//for _, device := range memberDeviceMap {
+//	if device.MemberID == loginID {
+//		//return cer.Meta, nil
+//	}
+//}
+//	return nil, errors.ErrCertificateUnavailByAccount
+//}

@@ -18,9 +18,13 @@ type Certificate struct {
 
 	ID        int64 `json:"id,string"`
 	CreatedAt int64 `json:"created_at"`
+	ExpireAt  int64 `json:"expire_at"`
 	UpdatedAt int64 `json:"updated_at"`
 
+	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
+	/// 证书对应绑定的设备
+	Device *Device `json:"device" render:"method=RenderDevice"`
 }
 
 type CertificateRender struct {
@@ -56,6 +60,7 @@ func CertificateIncludes(fields []string) CertificateOption {
 var CertificateDefaultRenderFields = []CertificateOption{
 	CertificateIncludes([]string{
 		"P12IsActive",
+		"Device",
 	}),
 }
 
@@ -112,6 +117,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			Meta:      meta,
 			ID:        meta.ID,
 			CreatedAt: meta.CreatedAt.Unix(),
+			ExpireAt:  meta.CreatedAt.AddDate(1, 0, 0).Unix(),
 			UpdatedAt: meta.UpdatedAt.Unix(),
 		}
 	}
@@ -146,5 +152,18 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 
 	for _, certificate := range f.certificateMap {
 		certificate.P12IsActive = isActiveMap[certificate.ID]
+	}
+}
+
+func (f *CertificateRender) RenderDevice(ctx context.Context) {
+	deviceIDs := make([]int64, 0)
+	for _, certificate := range f.certificateMap {
+		deviceIDs = append(deviceIDs, certificate.Meta.DeviceID)
+	}
+	deviceIDs = util2.RemoveDuplicates(deviceIDs)
+
+	deviceMap := NewDeviceRender(deviceIDs, f.loginID).RenderMap(ctx)
+	for _, certificate := range f.certificateMap {
+		certificate.Device = deviceMap[certificate.Meta.DeviceID]
 	}
 }

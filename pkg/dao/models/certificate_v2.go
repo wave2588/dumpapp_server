@@ -68,6 +68,27 @@ var CertificateV2Columns = struct {
 
 // Generated where
 
+type whereHelperenum_CertificateSource struct{ field string }
+
+func (w whereHelperenum_CertificateSource) EQ(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_CertificateSource) NEQ(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_CertificateSource) LT(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_CertificateSource) LTE(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_CertificateSource) GT(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_CertificateSource) GTE(x enum.CertificateSource) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var CertificateV2Where = struct {
 	ID                         whereHelperint64
 	DeviceID                   whereHelperint64

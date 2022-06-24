@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cast"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -25,6 +24,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
+	"github.com/spf13/cast"
 )
 
 type DeviceHandler struct {

@@ -4,7 +4,6 @@ go 1.15
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
-	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/basgys/goxml2json v1.1.0
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
@@ -37,6 +36,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.238
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.10
 	github.com/tencentyun/qcloud-cos-sts-sdk v0.0.0-20201001014220-f25178b7257d
+	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.5.0
 	github.com/volatiletech/strmangle v0.0.1
