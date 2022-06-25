@@ -56,13 +56,12 @@ var config = appConfig{
 
 	TencentGroupKey: os.Getenv("TENCENT_GROUP_KEY"),
 
-	ALiPayDumpAppID:      os.Getenv("ALIPAY_DUMP_APP_ID"),
-	ALiPayDumpPublicKey:  os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
-	ALiPayDumpPrivateKey: os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
-	ALiPayPublicKey:      os.Getenv("ALIPAY_PUBLIC_KEY"),
-	ALiPayNotifyURL:      os.Getenv("ALIPAY_NOTIFY_URL"),
-	ALiPayNotifyURLV2:    os.Getenv("ALIPAY_NOTIFY_URL_v2"),
-	ALiPayNotifyURLV3:    os.Getenv("ALIPAY_NOTIFY_URL_v3"),
+	ALiPayDumpAppID:             os.Getenv("ALIPAY_DUMP_APP_ID"),
+	ALiPayDumpPublicKey:         os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
+	ALiPayDumpPrivateKey:        os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
+	ALiPayPublicKey:             os.Getenv("ALIPAY_PUBLIC_KEY"),
+	ALiPayNotifyURLV3:           os.Getenv("ALIPAY_NOTIFY_URL_v3"),
+	ALiPayNotifyURLByInstallApp: os.Getenv("ALIPAY_NOTIFY_URL_BY_INSTALL_APP"),
 
 	DumpAppEmail:             os.Getenv("DUMP_APP_EMAIL"),
 	DumpAppFromEmail:         os.Getenv("DUMP_APP_FROM_EMAIL"),
@@ -111,9 +110,10 @@ type appConfig struct {
 	ALiPayDumpPublicKey  string
 	ALiPayDumpPrivateKey string
 	ALiPayPublicKey      string
-	ALiPayNotifyURL      string
-	ALiPayNotifyURLV2    string
 	ALiPayNotifyURLV3    string
+
+	/// 安装 app 支付订单回调
+	ALiPayNotifyURLByInstallApp string
 
 	DumpAppEmail             string
 	DumpAppFromEmail         string

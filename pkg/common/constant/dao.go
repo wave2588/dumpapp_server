@@ -67,3 +67,14 @@ func (d *CertificateBizExt) String() string {
 	util.PanicIf(err)
 	return string(data)
 }
+
+/// install_app
+type InstallAppCDKEYOrderBizExt struct {
+	ContactWay string `json:"contact_way"`
+}
+
+func (d *InstallAppCDKEYOrderBizExt) String() string {
+	data, err := json.Marshal(d)
+	util.PanicIf(err)
+	return string(data)
+}

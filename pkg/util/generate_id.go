@@ -33,3 +33,14 @@ func MustGenerateCode(ctx context.Context, l int) string {
 	}
 	return cast.ToString(result)
 }
+
+func MustGenerateAppCDKEY() string {
+	str := "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	bytes := []byte(str)
+	result := []byte{}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < 10; i++ {
+		result = append(result, bytes[r.Intn(len(bytes))])
+	}
+	return fmt.Sprintf("DP%s", cast.ToString(result))
+}

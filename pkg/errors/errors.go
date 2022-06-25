@@ -52,6 +52,9 @@ var (
 	///
 	ErrHttpFail = NewDefaultAPIError(403, 403, "HttpFail", "http 请求失败")
 	ErrNotFound = NewDefaultAPIError(404, 404, "NotFound", "记录未找到")
+
+	/// install_app 系列错误
+	ErrInstallAppGenerateCDKeyFail = NewDefaultAPIError(401, 900001, "ErrInstallAppGenerateCDKeyFail", "生成 out_id 失败")
 )
 
 func UnproccessableError(msg string) *APIError {

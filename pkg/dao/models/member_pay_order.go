@@ -53,56 +53,6 @@ var MemberPayOrderColumns = struct {
 
 // Generated where
 
-type whereHelperenum_MemberPayOrderStatus struct{ field string }
-
-func (w whereHelperenum_MemberPayOrderStatus) EQ(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelperenum_MemberPayOrderStatus) NEQ(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelperenum_MemberPayOrderStatus) LT(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelperenum_MemberPayOrderStatus) LTE(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelperenum_MemberPayOrderStatus) GT(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelperenum_MemberPayOrderStatus) GTE(x enum.MemberPayOrderStatus) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelperfloat64 struct{ field string }
-
-func (w whereHelperfloat64) EQ(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperfloat64) NEQ(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelperfloat64) LT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperfloat64) LTE(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelperfloat64) GT(x float64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperfloat64) GTE(x float64) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelperfloat64) IN(slice []float64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
 var MemberPayOrderWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
