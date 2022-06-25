@@ -17,24 +17,24 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type InstallAppCDKEYOrderHandler struct {
+type CDKEYOrderHandler struct {
 	aliPayCtl          install_app.ALiPayInstallAppController
 	installAppCDKEYDAO dao2.InstallAppCdkeyDAO
 }
 
-func NewInstallAppCDKEYOrderHandler() *InstallAppCDKEYOrderHandler {
-	return &InstallAppCDKEYOrderHandler{
+func NewCDKEYOrderHandler() *CDKEYOrderHandler {
+	return &CDKEYOrderHandler{
 		aliPayCtl:          impl.DefaultALiPayInstallAppController,
 		installAppCDKEYDAO: impl2.DefaultInstallAppCdkeyDAO,
 	}
 }
 
-type getMemberPayOrderArgs struct {
+type getCDKEYOrderArgs struct {
 	Number     int64  `form:"number" validate:"required"`
 	ContactWay string `form:"contact_way" validate:"required"`
 }
 
-func (args *getMemberPayOrderArgs) Validate() error {
+func (args *getCDKEYOrderArgs) Validate() error {
 	err := validator.New().Struct(args)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
@@ -45,10 +45,10 @@ func (args *getMemberPayOrderArgs) Validate() error {
 	return nil
 }
 
-func (h *InstallAppCDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http.Request) {
+func (h *CDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := getMemberPayOrderArgs{}
+	args := getCDKEYOrderArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
@@ -61,7 +61,7 @@ func (h *InstallAppCDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http
 	util.RenderJSON(w, res)
 }
 
-func (h *InstallAppCDKEYOrderHandler) GetOrderInfo(w http.ResponseWriter, r *http.Request) {
+func (h *CDKEYOrderHandler) GetOrderInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	orderID := cast.ToInt64(util.URLParam(r, "order_id"))

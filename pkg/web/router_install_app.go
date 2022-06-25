@@ -9,10 +9,16 @@ import (
 func NewRouterInstallApp() chi.Router {
 	r := chi.NewRouter()
 
-	orderHandler := install_app_handler.NewInstallAppCDKEYOrderHandler()
+	/// order
+	orderHandler := install_app_handler.NewCDKEYOrderHandler()
 	r.With(middleware.OAuthGuest).Get("/order", orderHandler.GetOrderURL)
 	r.With(middleware.OAuthGuest).Get("/order/{order_id}", orderHandler.GetOrderInfo)
 
+	/// cdkey
+	cdkeyHandler := install_app_handler.NewCDKEYHandler()
+	r.With(middleware.OAuthGuest).Get("/cdkey/{out_id}", cdkeyHandler.GetCDKEYInfo)
+
+	/// ali_pay callback
 	callbackPayHandler := install_app_handler.NewCallbackPayHandler()
 	r.With().Post("/callback_alipay", callbackPayHandler.ALiPayCallback)
 
