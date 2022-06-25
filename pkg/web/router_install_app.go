@@ -11,6 +11,7 @@ func NewRouterInstallApp() chi.Router {
 
 	orderHandler := install_app_handler.NewInstallAppCDKEYOrderHandler()
 	r.With(middleware.OAuthGuest).Get("/order", orderHandler.GetOrderURL)
+	r.With(middleware.OAuthGuest).Get("/order/{order_id}", orderHandler.GetOrderInfo)
 
 	callbackPayHandler := install_app_handler.NewCallbackPayHandler()
 	r.With().Post("/callback_alipay", callbackPayHandler.ALiPayCallback)

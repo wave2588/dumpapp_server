@@ -2,7 +2,9 @@ package install_app_handler
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/url"
+	"strconv"
 
 	"github.com/go-playground/form"
 )
@@ -42,4 +44,16 @@ func (sv *SortValues) Decode(text string) (err error) {
 func (sv SortValues) Encode() (string, error) {
 	v, err := json.Marshal(sv)
 	return string(v), err
+}
+
+func GetIntArgument(r *http.Request, key string, fallback int) int {
+	if v, err := getIntArgument(r, key, 32); err != nil {
+		return fallback
+	} else {
+		return int(v)
+	}
+}
+
+func getIntArgument(r *http.Request, key string, bitSize int) (int64, error) {
+	return strconv.ParseInt(r.URL.Query().Get(key), 10, bitSize)
 }

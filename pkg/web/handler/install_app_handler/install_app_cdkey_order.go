@@ -7,17 +7,25 @@ import (
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller/install_app"
 	"dumpapp_server/pkg/controller/install_app/impl"
+	dao2 "dumpapp_server/pkg/dao"
+	impl2 "dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/web/render/install_app_render"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type InstallAppCDKEYOrderHandler struct {
-	aliPayCtl install_app.ALiPayInstallAppController
+	aliPayCtl          install_app.ALiPayInstallAppController
+	installAppCDKEYDAO dao2.InstallAppCdkeyDAO
 }
 
 func NewInstallAppCDKEYOrderHandler() *InstallAppCDKEYOrderHandler {
 	return &InstallAppCDKEYOrderHandler{
-		aliPayCtl: impl.DefaultALiPayInstallAppController,
+		aliPayCtl:          impl.DefaultALiPayInstallAppController,
+		installAppCDKEYDAO: impl2.DefaultInstallAppCdkeyDAO,
 	}
 }
 
@@ -51,4 +59,26 @@ func (h *InstallAppCDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http
 		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)
+}
+
+func (h *InstallAppCDKEYOrderHandler) GetOrderInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	orderID := cast.ToInt64(util.URLParam(r, "order_id"))
+	offset := GetIntArgument(r, "offset", 0)
+	limit := GetIntArgument(r, "limit", 10)
+
+	filter := []qm.QueryMod{
+		models.InstallAppCdkeyWhere.OrderID.EQ(orderID),
+	}
+	ids, err := h.installAppCDKEYDAO.ListIDs(ctx, offset, limit, filter, nil)
+	util.PanicIf(err)
+
+	count, err := h.installAppCDKEYDAO.Count(ctx, filter)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
+		Data:   install_app_render.NewCDKEYRender(ids, 0).RenderSlice(ctx),
+	})
 }
