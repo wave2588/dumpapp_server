@@ -198,3 +198,17 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# install_app_cdkey
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["install_app_cdkey"]
+
+  [types.replace]
+    type = "enum.InstallAppCDKeyStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+

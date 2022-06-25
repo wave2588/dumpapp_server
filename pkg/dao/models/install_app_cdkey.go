@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,12 +24,13 @@ import (
 
 // InstallAppCdkey is an object representing the database table.
 type InstallAppCdkey struct {
-	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	OutID     string    `boil:"out_id" json:"out_id" toml:"out_id" yaml:"out_id"`
-	Udid      string    `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
-	OrderID   int64     `boil:"order_id" json:"order_id" toml:"order_id" yaml:"order_id"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64                      `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	OutID     string                     `boil:"out_id" json:"out_id" toml:"out_id" yaml:"out_id"`
+	Status    enum.InstallAppCDKeyStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Udid      string                     `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
+	OrderID   int64                      `boil:"order_id" json:"order_id" toml:"order_id" yaml:"order_id"`
+	CreatedAt time.Time                  `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time                  `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *installAppCdkeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L installAppCdkeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,6 +39,7 @@ type InstallAppCdkey struct {
 var InstallAppCdkeyColumns = struct {
 	ID        string
 	OutID     string
+	Status    string
 	Udid      string
 	OrderID   string
 	CreatedAt string
@@ -44,6 +47,7 @@ var InstallAppCdkeyColumns = struct {
 }{
 	ID:        "id",
 	OutID:     "out_id",
+	Status:    "status",
 	Udid:      "udid",
 	OrderID:   "order_id",
 	CreatedAt: "created_at",
@@ -52,9 +56,31 @@ var InstallAppCdkeyColumns = struct {
 
 // Generated where
 
+type whereHelperenum_InstallAppCDKeyStatus struct{ field string }
+
+func (w whereHelperenum_InstallAppCDKeyStatus) EQ(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperenum_InstallAppCDKeyStatus) NEQ(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperenum_InstallAppCDKeyStatus) LT(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperenum_InstallAppCDKeyStatus) LTE(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperenum_InstallAppCDKeyStatus) GT(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperenum_InstallAppCDKeyStatus) GTE(x enum.InstallAppCDKeyStatus) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var InstallAppCdkeyWhere = struct {
 	ID        whereHelperint64
 	OutID     whereHelperstring
+	Status    whereHelperenum_InstallAppCDKeyStatus
 	Udid      whereHelperstring
 	OrderID   whereHelperint64
 	CreatedAt whereHelpertime_Time
@@ -62,6 +88,7 @@ var InstallAppCdkeyWhere = struct {
 }{
 	ID:        whereHelperint64{field: "`install_app_cdkey`.`id`"},
 	OutID:     whereHelperstring{field: "`install_app_cdkey`.`out_id`"},
+	Status:    whereHelperenum_InstallAppCDKeyStatus{field: "`install_app_cdkey`.`status`"},
 	Udid:      whereHelperstring{field: "`install_app_cdkey`.`udid`"},
 	OrderID:   whereHelperint64{field: "`install_app_cdkey`.`order_id`"},
 	CreatedAt: whereHelpertime_Time{field: "`install_app_cdkey`.`created_at`"},
@@ -85,8 +112,8 @@ func (*installAppCdkeyR) NewStruct() *installAppCdkeyR {
 type installAppCdkeyL struct{}
 
 var (
-	installAppCdkeyAllColumns            = []string{"id", "out_id", "udid", "order_id", "created_at", "updated_at"}
-	installAppCdkeyColumnsWithoutDefault = []string{"out_id", "udid", "order_id"}
+	installAppCdkeyAllColumns            = []string{"id", "out_id", "status", "udid", "order_id", "created_at", "updated_at"}
+	installAppCdkeyColumnsWithoutDefault = []string{"out_id", "status", "udid", "order_id"}
 	installAppCdkeyColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	installAppCdkeyPrimaryKeyColumns     = []string{"id"}
 )

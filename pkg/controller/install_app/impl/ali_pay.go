@@ -121,6 +121,7 @@ func (c *ALiPayInstallAppController) AliPayCallbackOrder(ctx context.Context, or
 			ID:      id,
 			OutID:   oID,
 			Udid:    "",
+			Status:  enum.InstallAppCDKeyStatusNormal,
 			OrderID: orderID,
 		})
 	}

@@ -3,6 +3,7 @@ package install_app_render
 import (
 	"context"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -10,9 +11,9 @@ import (
 )
 
 type CDKEY struct {
-	ID      int64  `json:"id,string"`
-	OutID   string `json:"out_id"`
-	IsValid bool   `json:"is_valid"`
+	ID     int64                      `json:"id,string"`
+	OutID  string                     `json:"out_id"`
+	Status enum.InstallAppCDKeyStatus `json:"status"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
@@ -104,7 +105,7 @@ func (f *CDKEYRender) fetch(ctx context.Context) {
 		result[id] = &CDKEY{
 			ID:        c.ID,
 			OutID:     c.OutID,
-			IsValid:   c.Udid == "",
+			Status:    c.Status,
 			CreatedAt: c.CreatedAt.Unix(),
 			UpdatedAt: c.UpdatedAt.Unix(),
 		}
