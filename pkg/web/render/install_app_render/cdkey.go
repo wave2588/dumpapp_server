@@ -7,16 +7,21 @@ import (
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
 )
 
 type CDKEY struct {
+	Meta *models.InstallAppCdkey `json:"-"`
+
 	ID     int64                      `json:"id,string"`
 	OutID  string                     `json:"out_id"`
 	Status enum.InstallAppCDKeyStatus `json:"status"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
+
+	Certificate *Certificate `json:"certificate,omitempty" render:"method=RenderCertificate"`
 }
 
 type CDKEYRender struct {
@@ -49,9 +54,9 @@ func DeviceIncludes(fields []string) DeviceOption {
 	}
 }
 
-var DeviceDefaultRenderFields = []DeviceOption{
+var CDKeyDefaultRenderFields = []DeviceOption{
 	DeviceIncludes([]string{
-		"Certificates",
+		"Certificate",
 	}),
 }
 
@@ -103,6 +108,7 @@ func (f *CDKEYRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[id] = &CDKEY{
+			Meta:      c,
 			ID:        c.ID,
 			OutID:     c.OutID,
 			Status:    c.Status,
@@ -111,4 +117,19 @@ func (f *CDKEYRender) fetch(ctx context.Context) {
 		}
 	}
 	f.cKeyMap = result
+}
+
+func (f *CDKEYRender) RenderCertificate(ctx context.Context) {
+	certificateIDs := make([]int64, 0)
+	for _, cdkey := range f.cKeyMap {
+		if cdkey.Meta.CertificateID == 0 {
+			continue
+		}
+		certificateIDs = append(certificateIDs, cdkey.Meta.CertificateID)
+	}
+	cerMap := NewCertificateRender(certificateIDs, 0, CertificateDefaultRenderFields...).RenderMap(ctx)
+
+	for _, cdkey := range f.cKeyMap {
+		cdkey.Certificate = cerMap[cdkey.Meta.CertificateID]
+	}
 }

@@ -204,3 +204,27 @@ func (c *AlterWebController) SendDeviceLog(ctx context.Context, title string, me
 	}
 	util.SendWeiXinBot(ctx, "c8e8a862-4d4a-44ea-8250-de9297b5e8bc", data, []string{})
 }
+
+func (c *AlterWebController) SendInstallAppCreateCertificateFailMsg(ctx context.Context, cdkey, udid string, errorMessage string) {
+	errorStr := fmt.Sprintf("错误信息：<font color=\"comment\">%s</font>\n", errorMessage)
+	deviceStr := fmt.Sprintf("udid：<font color=\"comment\">%s</font>\n", udid)
+	emailStr := fmt.Sprintf("兑换码：<font color=\"comment\">%s</font>\n", cdkey)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"warning\">证书服务报错了!</font>\n>" +
+				errorStr + deviceStr + emailStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	data = map[string]interface{}{
+		"msgtype": "text",
+		"text": map[string]interface{}{
+			"content":        "",
+			"mentioned_list": []string{"@all"},
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+}

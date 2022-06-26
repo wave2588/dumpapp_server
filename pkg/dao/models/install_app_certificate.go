@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,16 +24,17 @@ import (
 
 // InstallAppCertificate is an object representing the database table.
 type InstallAppCertificate struct {
-	ID                         int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Udid                       string    `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
-	P12FileData                string    `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
-	P12FileDataMD5             string    `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
-	ModifiedP12FileDate        string    `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
-	MobileProvisionFileData    string    `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
-	MobileProvisionFileDataMD5 string    `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
-	BizExt                     string    `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
-	CreatedAt                  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt                  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Udid                       string                 `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
+	P12FileData                string                 `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
+	P12FileDataMD5             string                 `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
+	ModifiedP12FileDate        string                 `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
+	MobileProvisionFileData    string                 `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
+	MobileProvisionFileDataMD5 string                 `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
+	Source                     enum.CertificateSource `boil:"source" json:"source" toml:"source" yaml:"source"`
+	BizExt                     string                 `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	CreatedAt                  time.Time              `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt                  time.Time              `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *installAppCertificateR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L installAppCertificateL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -46,6 +48,7 @@ var InstallAppCertificateColumns = struct {
 	ModifiedP12FileDate        string
 	MobileProvisionFileData    string
 	MobileProvisionFileDataMD5 string
+	Source                     string
 	BizExt                     string
 	CreatedAt                  string
 	UpdatedAt                  string
@@ -57,6 +60,7 @@ var InstallAppCertificateColumns = struct {
 	ModifiedP12FileDate:        "modified_p12_file_date",
 	MobileProvisionFileData:    "mobile_provision_file_data",
 	MobileProvisionFileDataMD5: "mobile_provision_file_data_md5",
+	Source:                     "source",
 	BizExt:                     "biz_ext",
 	CreatedAt:                  "created_at",
 	UpdatedAt:                  "updated_at",
@@ -72,6 +76,7 @@ var InstallAppCertificateWhere = struct {
 	ModifiedP12FileDate        whereHelperstring
 	MobileProvisionFileData    whereHelperstring
 	MobileProvisionFileDataMD5 whereHelperstring
+	Source                     whereHelperenum_CertificateSource
 	BizExt                     whereHelperstring
 	CreatedAt                  whereHelpertime_Time
 	UpdatedAt                  whereHelpertime_Time
@@ -83,6 +88,7 @@ var InstallAppCertificateWhere = struct {
 	ModifiedP12FileDate:        whereHelperstring{field: "`install_app_certificate`.`modified_p12_file_date`"},
 	MobileProvisionFileData:    whereHelperstring{field: "`install_app_certificate`.`mobile_provision_file_data`"},
 	MobileProvisionFileDataMD5: whereHelperstring{field: "`install_app_certificate`.`mobile_provision_file_data_md5`"},
+	Source:                     whereHelperenum_CertificateSource{field: "`install_app_certificate`.`source`"},
 	BizExt:                     whereHelperstring{field: "`install_app_certificate`.`biz_ext`"},
 	CreatedAt:                  whereHelpertime_Time{field: "`install_app_certificate`.`created_at`"},
 	UpdatedAt:                  whereHelpertime_Time{field: "`install_app_certificate`.`updated_at`"},
@@ -105,9 +111,9 @@ func (*installAppCertificateR) NewStruct() *installAppCertificateR {
 type installAppCertificateL struct{}
 
 var (
-	installAppCertificateAllColumns            = []string{"id", "udid", "p12_file_data", "p12_file_data_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "biz_ext", "created_at", "updated_at"}
+	installAppCertificateAllColumns            = []string{"id", "udid", "p12_file_data", "p12_file_data_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "source", "biz_ext", "created_at", "updated_at"}
 	installAppCertificateColumnsWithoutDefault = []string{"udid", "p12_file_data", "p12_file_data_md5", "modified_p12_file_date", "mobile_provision_file_data", "mobile_provision_file_data_md5", "biz_ext"}
-	installAppCertificateColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	installAppCertificateColumnsWithDefault    = []string{"id", "source", "created_at", "updated_at"}
 	installAppCertificatePrimaryKeyColumns     = []string{"id"}
 )
 

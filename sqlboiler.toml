@@ -212,3 +212,15 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
+# install_app_certificate table
+[[types]]
+  [types.match]
+    name = "source"
+    type = "string"
+    tables = ["install_app_certificate"]
+
+  [types.replace]
+    type = "enum.CertificateSource"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']

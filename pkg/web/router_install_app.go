@@ -18,6 +18,10 @@ func NewRouterInstallApp() chi.Router {
 	cdkeyHandler := install_app_handler.NewCDKEYHandler()
 	r.With(middleware.OAuthGuest).Get("/cdkey/{out_id}", cdkeyHandler.GetCDKEYInfo)
 
+	/// certificate
+	certificateHandler := install_app_handler.NewCertificateHandler()
+	r.With(middleware.OAuthGuest).Post("/certificate", certificateHandler.Post)
+
 	/// ali_pay callback
 	callbackPayHandler := install_app_handler.NewCallbackPayHandler()
 	r.With().Post("/callback_alipay", callbackPayHandler.ALiPayCallback)

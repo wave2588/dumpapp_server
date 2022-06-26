@@ -79,6 +79,6 @@ func (h *CDKEYOrderHandler) GetOrderInfo(w http.ResponseWriter, r *http.Request)
 
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
-		Data:   install_app_render.NewCDKEYRender(ids, 0).RenderSlice(ctx),
+		Data:   install_app_render.NewCDKEYRender(ids, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
 	})
 }

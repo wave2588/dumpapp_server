@@ -54,8 +54,9 @@ var (
 	ErrNotFound = NewDefaultAPIError(404, 404, "NotFound", "记录未找到")
 
 	/// install_app 系列错误
-	ErrInstallAppGenerateCDKeyFail     = NewDefaultAPIError(401, 900001, "ErrInstallAppGenerateCDKeyFail", "兑换码生成失败")
-	ErrInstallAppGenerateCDKeyNotFound = NewDefaultAPIError(404, 900002, "ErrInstallAppGenerateCDKeyNotFound", "未找到对应的兑换码")
+	ErrInstallAppGenerateCDKeyFail = NewDefaultAPIError(401, 900001, "ErrInstallAppGenerateCDKeyFail", "兑换码生成失败")
+	ErrInstallAppCDKeyNotFound     = NewDefaultAPIError(404, 900002, "ErrInstallAppCDKeyNotFound", "未找到对应的兑换码")
+	ErrInstallAppCDKeyAdminDelete  = NewDefaultAPIError(403, 900003, "ErrInstallAppCDKeyAdminDelete", "该兑换码已被管理员删除")
 )
 
 func UnproccessableError(msg string) *APIError {

@@ -30,9 +30,9 @@ func (h *CDKEYHandler) GetCDKEYInfo(w http.ResponseWriter, r *http.Request) {
 
 	cdkey, ok := res[outID]
 	if !ok {
-		util.PanicIf(errors.ErrInstallAppGenerateCDKeyNotFound)
+		util.PanicIf(errors.ErrInstallAppCDKeyNotFound)
 	}
-	data := install_app_render.NewCDKEYRender([]int64{cdkey.ID}, 0).RenderMap(ctx)
+	data := install_app_render.NewCDKEYRender([]int64{cdkey.ID}, 0, install_app_render.CDKeyDefaultRenderFields...).RenderMap(ctx)
 
 	util.RenderJSON(w, data[cdkey.ID])
 }

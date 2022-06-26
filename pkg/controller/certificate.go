@@ -21,10 +21,3 @@ type CertificateResponse struct {
 	/// 生成错误这里会有错误原因
 	ErrorMessage *string `json:"error_message"`
 }
-
-///// 创建证书
-//CreateCer(ctx context.Context, udid, regionPool string) (*CreateCerResponse, error)
-///// 检测p12证书是否有效
-//CheckP12File(ctx context.Context, p12FileData, p12Password string) (*CheckCerResponse, error)
-///// 检测证书是否有效
-//CheckCerByUDIDBatchNo(ctx context.Context, udidBatchNo string) (*CheckCerResponse, error)
