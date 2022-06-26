@@ -12,6 +12,7 @@ var TableNames = struct {
 	Feedback                string
 	InstallAppCdkey         string
 	InstallAppCdkeyOrder    string
+	InstallAppCertificate   string
 	Ipa                     string
 	IpaSign                 string
 	IpaVersion              string
@@ -33,6 +34,7 @@ var TableNames = struct {
 	Feedback:                "feedback",
 	InstallAppCdkey:         "install_app_cdkey",
 	InstallAppCdkeyOrder:    "install_app_cdkey_order",
+	InstallAppCertificate:   "install_app_certificate",
 	Ipa:                     "ipa",
 	IpaSign:                 "ipa_sign",
 	IpaVersion:              "ipa_version",

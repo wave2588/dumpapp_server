@@ -120,7 +120,6 @@ func (c *ALiPayInstallAppController) AliPayCallbackOrder(ctx context.Context, or
 		err = c.installAppCDKEYDAO.Insert(ctx, &models.InstallAppCdkey{
 			ID:      id,
 			OutID:   oID,
-			Udid:    "",
 			Status:  enum.InstallAppCDKeyStatusNormal,
 			OrderID: orderID,
 		})
