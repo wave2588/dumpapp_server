@@ -2,6 +2,8 @@ package render
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/constant"
+	"encoding/json"
 
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -20,6 +22,9 @@ type Certificate struct {
 	CreatedAt int64 `json:"created_at"`
 	ExpireAt  int64 `json:"expire_at"`
 	UpdatedAt int64 `json:"updated_at"`
+
+	/// p12 文件密码
+	P12Password string `json:"p12_password"`
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -113,12 +118,15 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		if !ok {
 			continue
 		}
+		var bizExt constant.CertificateBizExt
+		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
 		result[meta.ID] = &Certificate{
-			Meta:      meta,
-			ID:        meta.ID,
-			CreatedAt: meta.CreatedAt.Unix(),
-			ExpireAt:  meta.CreatedAt.AddDate(1, 0, 0).Unix(),
-			UpdatedAt: meta.UpdatedAt.Unix(),
+			Meta:        meta,
+			ID:          meta.ID,
+			CreatedAt:   meta.CreatedAt.Unix(),
+			ExpireAt:    meta.CreatedAt.AddDate(1, 0, 0).Unix(),
+			UpdatedAt:   meta.UpdatedAt.Unix(),
+			P12Password: bizExt.NewP12Password,
 		}
 	}
 	f.certificateMap = result
