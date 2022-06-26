@@ -2,6 +2,8 @@ package install_app_render
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/constant"
+	"encoding/json"
 
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -19,6 +21,7 @@ type Certificate struct {
 	ID              int64  `json:"id,string"`
 	CreatedAt       int64  `json:"created_at"`
 	P12             string `json:"p12"`
+	P12Password     string `json:"p12_password"`
 	Mobileprovision string `json:"mobileprovision"`
 	UpdatedAt       int64  `json:"updated_at"`
 
@@ -111,10 +114,13 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		if !ok {
 			continue
 		}
+		var bizExt constant.CertificateBizExt
+		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
 		result[meta.ID] = &Certificate{
 			Meta:            meta,
 			ID:              meta.ID,
 			P12:             meta.ModifiedP12FileDate,
+			P12Password:     bizExt.NewP12Password,
 			Mobileprovision: meta.MobileProvisionFileData,
 			CreatedAt:       meta.CreatedAt.Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
