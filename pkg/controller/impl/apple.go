@@ -62,15 +62,13 @@ func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []
 }
 
 func (c *AppleController) GetAppInfoByAppID(ctx context.Context, appID int64) (interface{}, error) {
-	res, err := http.Get(fmt.Sprintf("https://itunes.apple.com/cn/lookup?id=%d", appID))
+	url := fmt.Sprintf("https://itunes.apple.com/cn/lookup?id=%d", appID)
+	resp, err := http.DefaultClient.Post(url, "application/json", nil)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
 
 	app := &appResult{}
 	err = json.Unmarshal(body, app)
