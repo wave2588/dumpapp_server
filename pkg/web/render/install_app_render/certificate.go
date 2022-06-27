@@ -19,6 +19,7 @@ type Certificate struct {
 	Meta *models.InstallAppCertificate `json:"-"`
 
 	ID              int64  `json:"id,string"`
+	UDID            string `json:"udid"`
 	CreatedAt       int64  `json:"created_at"`
 	P12             string `json:"p12"`
 	P12Password     string `json:"p12_password"`
@@ -119,6 +120,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		result[meta.ID] = &Certificate{
 			Meta:            meta,
 			ID:              meta.ID,
+			UDID:            meta.Udid,
 			P12:             meta.ModifiedP12FileDate,
 			P12Password:     bizExt.NewP12Password,
 			Mobileprovision: meta.MobileProvisionFileData,
