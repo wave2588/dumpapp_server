@@ -21,6 +21,7 @@ func NewRouterInstallApp() chi.Router {
 	/// certificate
 	certificateHandler := install_app_handler.NewCertificateHandler()
 	r.With(middleware.OAuthGuest).Post("/certificate", certificateHandler.Post)
+	r.With(middleware.OAuthGuest).Get("/certificate/udid/{udid}", certificateHandler.GetByUDID) /// 根据 udid 获取证书
 
 	/// ali_pay callback
 	callbackPayHandler := install_app_handler.NewCallbackPayHandler()

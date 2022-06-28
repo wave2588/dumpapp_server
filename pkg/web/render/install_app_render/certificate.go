@@ -2,9 +2,9 @@ package install_app_render
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/constant"
 	"encoding/json"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"

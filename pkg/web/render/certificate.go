@@ -2,9 +2,9 @@ package render
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/constant"
 	"encoding/json"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -24,7 +24,9 @@ type Certificate struct {
 	UpdatedAt int64 `json:"updated_at"`
 
 	/// p12 文件密码
-	P12Password string `json:"p12_password"`
+	P12Password     string `json:"p12_password"`
+	P12             string `json:"p12"`
+	Mobileprovision string `json:"mobileprovision"`
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -121,12 +123,14 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		var bizExt constant.CertificateBizExt
 		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
 		result[meta.ID] = &Certificate{
-			Meta:        meta,
-			ID:          meta.ID,
-			CreatedAt:   meta.CreatedAt.Unix(),
-			ExpireAt:    meta.CreatedAt.AddDate(1, 0, 0).Unix(),
-			UpdatedAt:   meta.UpdatedAt.Unix(),
-			P12Password: bizExt.NewP12Password,
+			Meta:            meta,
+			ID:              meta.ID,
+			CreatedAt:       meta.CreatedAt.Unix(),
+			ExpireAt:        meta.CreatedAt.AddDate(1, 0, 0).Unix(),
+			UpdatedAt:       meta.UpdatedAt.Unix(),
+			P12Password:     bizExt.NewP12Password,
+			P12:             meta.P12FileData,
+			Mobileprovision: meta.MobileProvisionFileData,
 		}
 	}
 	f.certificateMap = result

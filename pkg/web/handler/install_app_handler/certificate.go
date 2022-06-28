@@ -20,6 +20,7 @@ import (
 	impl2 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render/install_app_render"
 	"github.com/go-playground/validator/v10"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type CertificateHandler struct {
@@ -129,4 +130,26 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 func (h *CertificateHandler) renderData(ctx context.Context, w http.ResponseWriter, cdkeyID int64) {
 	data := install_app_render.NewCDKEYRender([]int64{cdkeyID}, 0, install_app_render.CDKeyDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, data[cdkeyID])
+}
+
+func (h *CertificateHandler) GetByUDID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var (
+		udid   = util.URLParam(r, "udid")
+		offset = GetIntArgument(r, "offset", 0)
+		limit  = GetIntArgument(r, "limit", 10)
+	)
+
+	filter := []qm.QueryMod{
+		models.InstallAppCertificateWhere.Udid.EQ(udid),
+	}
+	ids, err := h.installAppCertificateDAO.ListIDs(ctx, offset, limit, filter, nil)
+	util.PanicIf(err)
+	count, err := h.installAppCertificateDAO.Count(ctx, filter)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
+		Data:   install_app_render.NewCertificateRender(ids, 0, install_app_render.CertificateDefaultRenderFields...).RenderSlice(ctx),
+	})
 }
