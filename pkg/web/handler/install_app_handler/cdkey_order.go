@@ -52,10 +52,11 @@ func (h *CDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http.Request) 
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	payURL, err := h.aliPayCtl.GetPayURLByInstallApp(ctx, args.Number, args.ContactWay)
+	orderID, payURL, err := h.aliPayCtl.GetPayURLByInstallApp(ctx, args.Number, args.ContactWay)
 	util.PanicIf(err)
 
 	res := map[string]interface{}{
+		"order_id": cast.ToString(orderID),
 		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)

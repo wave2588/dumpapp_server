@@ -53,7 +53,7 @@ func NewALiPayInstallAppController() *ALiPayInstallAppController {
 	}
 }
 
-func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string) (string, error) {
+func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
 	totalAmount := number * 1
 	bizExt := constant.InstallAppCDKEYOrderBizExt{
@@ -67,12 +67,12 @@ func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, 
 		BizExt: bizExt.String(),
 	})
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
 
 	p := alipay.TradePagePay{}
 	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLByInstallApp
-	p.ReturnURL = fmt.Sprintf("https://www.dumpapp.com?order_id=%d", id)
+	p.ReturnURL = fmt.Sprintf("https://www.dumpapp.com/installbuy?order_id=%d", id)
 	p.Subject = "Dumpapp"
 	p.OutTradeNo = fmt.Sprintf("%d", id)
 	p.TotalAmount = fmt.Sprintf("%d", totalAmount)
@@ -83,9 +83,9 @@ func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, 
 	p.TimeoutExpress = "15m"
 	url, err := c.client.TradePagePay(p)
 	if err != nil {
-		return "", err
+		return 0, "", err
 	}
-	return url.String(), nil
+	return id, url.String(), nil
 }
 
 func (c *ALiPayInstallAppController) AliPayCallbackOrder(ctx context.Context, orderID int64) error {
