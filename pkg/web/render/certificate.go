@@ -129,7 +129,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			ExpireAt:        meta.CreatedAt.AddDate(1, 0, 0).Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
 			P12Password:     bizExt.NewP12Password,
-			P12:             meta.P12FileData,
+			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,
 		}
 	}
