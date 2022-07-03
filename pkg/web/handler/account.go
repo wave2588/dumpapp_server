@@ -288,8 +288,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 type loginQueryArgs struct {
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
+	Account  string `json:"account"`
 	Password string `json:"password"`
 }
 
@@ -310,13 +309,7 @@ func (h *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	args := &loginQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	var account *models.Account
-	if args.Email != "" {
-		account = GetAccountByEmail(ctx, args.Email)
-	}
-	if args.Phone != "" {
-		account = GetAccountByPhone(ctx, args.Phone)
-	}
+	account := GetAccountByAccount(ctx, args.Account)
 	if account == nil {
 		panic(errors.ErrNotFoundMember)
 	}

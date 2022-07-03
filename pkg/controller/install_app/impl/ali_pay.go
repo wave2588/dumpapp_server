@@ -55,7 +55,7 @@ func NewALiPayInstallAppController() *ALiPayInstallAppController {
 
 func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
-	totalAmount := number * 1
+	totalAmount := number * 30
 	bizExt := constant.InstallAppCDKEYOrderBizExt{
 		ContactWay: contactWay,
 	}

@@ -766,6 +766,7 @@ func (o AccountSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 var mySQLAccountUniqueColumns = []string{
 	"id",
 	"email",
+	"phone",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

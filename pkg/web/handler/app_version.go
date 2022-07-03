@@ -30,6 +30,8 @@ type result struct {
 	IsNeedUpdate  bool   `json:"is_need_update"`  /// 是否需要更新
 	IsForceUpdate bool   `json:"is_force_update"` /// 是否需要强制更新
 	DownloadURL   string `json:"download_url"`    /// 下载地址
+	Title         string `json:"title"`
+	Describe      string `json:"describe"`
 }
 
 func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +58,8 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 		IsNeedUpdate:  false,
 		IsForceUpdate: lastDumpappVersion.IsForceUpdate,
 		DownloadURL:   "https://www.baidu.com",
+		Title:         "请升级最新版本",
+		Describe:      "版本过低，请尽快升级到最新版本。",
 	}
 
 	if constrain.Check(v) {

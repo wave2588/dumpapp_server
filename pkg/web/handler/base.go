@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -95,6 +96,14 @@ func GetAccountByEmail(ctx context.Context, email string) *models.Account {
 		panic(errors.ErrNotFoundMember)
 	}
 	return account
+}
+
+func GetAccountByAccount(ctx context.Context, account string) *models.Account {
+	/// 说明是邮箱登录
+	if strings.Contains(account, "@") {
+		return GetAccountByEmail(ctx, account)
+	}
+	return GetAccountByPhone(ctx, account)
 }
 
 func GetAccountByPhone(ctx context.Context, phone string) *models.Account {
