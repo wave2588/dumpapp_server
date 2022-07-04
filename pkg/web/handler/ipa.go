@@ -154,8 +154,9 @@ func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
 }
 
 type allVersion struct {
-	ID      int64  `json:"id,string"`
-	Version string `json:"version"`
+	ID          int64  `json:"id,string"`
+	TrackID     int64  `json:"trackId,string"`
+	VersionName string `json:"versionName"`
 }
 
 func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
@@ -169,10 +170,12 @@ func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(json.Unmarshal(body, &result))
 
 	data := make([]*allVersion, 0)
-	for _, m := range result {
+	for i := range result {
+		d := result[len(result)-i-1]
 		data = append(data, &allVersion{
-			ID:      cast.ToInt64(m["appId"]),
-			Version: cast.ToString(m["bundleVersion"]),
+			ID:          cast.ToInt64(d["appId"]),
+			TrackID:     cast.ToInt64(d["appId"]),
+			VersionName: cast.ToString(d["bundleVersion"]),
 		})
 	}
 
