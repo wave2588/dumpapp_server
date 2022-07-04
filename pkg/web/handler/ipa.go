@@ -153,15 +153,30 @@ func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
 }
 
+type allVersion struct {
+	ID      int64  `json:"id,string"`
+	Version string `json:"version"`
+}
+
 func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
-	country := cast.ToString(util.URLParam(r, "country"))
-	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+	//country := cast.ToString(util.URLParam(r, "country"))
+	//endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+	endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
 	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{})
 	util.PanicIf(err)
-	var result interface{}
+	var result []map[string]interface{}
 	util.PanicIf(json.Unmarshal(body, &result))
-	util.RenderJSON(w, result)
+
+	data := make([]*allVersion, 0)
+	for _, m := range result {
+		data = append(data, &allVersion{
+			ID:      cast.ToInt64(m["appId"]),
+			Version: cast.ToString(m["bundleVersion"]),
+		})
+	}
+
+	util.RenderJSON(w, data)
 }
 
 type getRankingArgs struct {
@@ -191,7 +206,7 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 
 	/// 如果没有传 start_at 和 end_at，则返回过去一天排行榜
 	if args.StartAt == 0 {
-		args.StartAt = time.Now().AddDate(0, 0, -1).Unix()
+		args.StartAt = time.Now().AddDate(0, 0, -2).Unix()
 	}
 	if args.EndAt == 0 {
 		args.EndAt = time.Now().Unix()
