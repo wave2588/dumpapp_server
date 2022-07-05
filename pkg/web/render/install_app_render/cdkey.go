@@ -22,6 +22,8 @@ type CDKEY struct {
 	UpdatedAt int64 `json:"updated_at"`
 
 	Certificate *Certificate `json:"certificate,omitempty" render:"method=RenderCertificate"`
+
+	Order *CDKeyOrder `json:"order" render:"method=RenderOrder"`
 }
 
 type CDKEYRender struct {
@@ -57,6 +59,7 @@ func DeviceIncludes(fields []string) DeviceOption {
 var CDKeyDefaultRenderFields = []DeviceOption{
 	DeviceIncludes([]string{
 		"Certificate",
+		"Order",
 	}),
 }
 
@@ -131,5 +134,20 @@ func (f *CDKEYRender) RenderCertificate(ctx context.Context) {
 
 	for _, cdkey := range f.cKeyMap {
 		cdkey.Certificate = cerMap[cdkey.Meta.CertificateID]
+	}
+}
+
+func (f *CDKEYRender) RenderOrder(ctx context.Context) {
+	orderIDs := make([]int64, 0)
+	for _, cdkey := range f.cKeyMap {
+		if cdkey.Meta.OrderID != 0 {
+			orderIDs = append(orderIDs, cdkey.Meta.OrderID)
+		}
+	}
+	orderIDs = util2.RemoveDuplicates(orderIDs)
+
+	orderMap := NewCDKeyOrderRender(orderIDs, 0, CDKeyOrderDefaultRenderFields...).RenderMap(ctx)
+	for _, cdkey := range f.cKeyMap {
+		cdkey.Order = orderMap[cdkey.Meta.OrderID]
 	}
 }

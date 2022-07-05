@@ -3,6 +3,7 @@ package web
 import (
 	"dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web/handler"
+	"dumpapp_server/pkg/web/handler/install_app_handler"
 	"github.com/go-chi/chi"
 )
 
@@ -54,6 +55,13 @@ func NewRouterAdmin() chi.Router {
 	// admin device
 	adminDeviceHandler := handler.NewAdminDeviceHandler()
 	r.With(middleware.OAuthAdmin).Delete("/device/unbind", adminDeviceHandler.Unbind)
+	// endregion
+
+	// admin cdkey handler
+	cdkeyHandler := install_app_handler.NewAdminCDKeyHandler()
+	r.With(middleware.OAuthAdmin).Post("/cdkey", cdkeyHandler.Post)
+	r.With(middleware.OAuthAdmin).Get("/cdkeys", cdkeyHandler.GetList)
+	r.With(middleware.OAuthAdmin).Delete("/cdkey/{cdkey_id}", cdkeyHandler.Delete)
 	// endregion
 
 	return r

@@ -71,7 +71,7 @@ func (d *CertificateBizExt) String() string {
 /// install_app
 type InstallAppCDKEYOrderBizExt struct {
 	ContactWay string `json:"contact_way"`
-	IsTest     bool   `json:"is_test"` /// 是否是测试生成的订单
+	IsTest     bool   `json:"is_test"` /// 是否是测试或者后台添加生成的订单
 }
 
 func (d *InstallAppCDKEYOrderBizExt) String() string {
