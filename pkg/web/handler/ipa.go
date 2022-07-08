@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -31,6 +32,7 @@ type IpaHandler struct {
 	ipaVersionDAO              dao.IpaVersionDAO
 	searchRecordV2DAO          dao.SearchRecordV2DAO
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
+	ipaRankingDAO              dao.IpaRankingDAO
 
 	memberDownloadCtl controller.MemberDownloadController
 	alterWebCtl       controller2.AlterWebController
@@ -45,6 +47,7 @@ func NewIpaHandler() *IpaHandler {
 		ipaVersionDAO:              impl.DefaultIpaVersionDAO,
 		searchRecordV2DAO:          impl.DefaultSearchRecordV2DAO,
 		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
+		ipaRankingDAO:              impl.DefaultIpaRankingDAO,
 
 		memberDownloadCtl: impl2.DefaultMemberDownloadController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
@@ -195,11 +198,6 @@ func (args *getRankingArgs) Validate() error {
 	return nil
 }
 
-type searchRanking struct {
-	IpaID int64  `json:"ipa_id,string"`
-	Name  string `json:"name"`
-}
-
 func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -215,22 +213,46 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 		args.EndAt = time.Now().Unix()
 	}
 
+	redisData, err := h.ipaRankingDAO.GetIpaRankingData(ctx)
+	util.PanicIf(err)
+
+	var data []interface{}
+	if redisData == nil || len(redisData.Data) == 0 {
+		data, err = h.getIpaRankingData(ctx, args.StartAt, args.EndAt)
+		util.PanicIf(err)
+		/// 存入 redis
+		util.PanicIf(h.ipaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{Data: data}))
+	} else {
+		data = redisData.Data
+	}
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: nil,
+		Data:   data,
+	})
+}
+
+func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64) ([]interface{}, error) {
+
 	filter := make([]qm.QueryMod, 0)
-	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(args.StartAt)))
-	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(args.EndAt)))
+	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(startAt)))
+	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(endAt)))
 
 	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 20, filter)
-	util.PanicIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	ipaIDs := make([]int64, 0)
 	for _, datum := range data {
 		ipaIDs = append(ipaIDs, datum.IpaID)
 	}
 	appleDataMap, err := h.appleCtl.BatchGetAppInfoByAppIDs(ctx, ipaIDs)
-	util.PanicIf(err)
+	if err != nil {
+		return nil, err
+	}
 
 	result := make([]interface{}, 0)
-	fmt.Println(ipaIDs)
 	for _, ipaID := range ipaIDs {
 		appleData, ok := appleDataMap[ipaID]
 		if !ok {
@@ -238,9 +260,5 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 		}
 		result = append(result, appleData)
 	}
-
-	util.RenderJSON(w, util.ListOutput{
-		Paging: nil,
-		Data:   result,
-	})
+	return result, nil
 }
