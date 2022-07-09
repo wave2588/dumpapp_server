@@ -153,7 +153,6 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 
 type registerQueryArgs struct {
 	Email        string `json:"email" validate:"required"`
-	EmailCaptcha string `json:"email_captcha" validate:"required"`
 	Phone        string `json:"phone" validate:"required"`
 	PhoneCaptcha string `json:"phone_captcha" validate:"required"`
 	Password     string `json:"password" validate:"required"`
@@ -184,13 +183,6 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	/// 检测手机号
 	if !constant.CheckPhoneValid(args.Phone) {
 		panic(errors.ErrPhoneRefusedRegister)
-	}
-
-	captcha, err := h.captchaDAO.GetEmailCaptcha(ctx, args.Email)
-	util.PanicIf(err)
-
-	if args.EmailCaptcha != captcha {
-		panic(errors.ErrCaptchaIncorrectByEmail)
 	}
 
 	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
