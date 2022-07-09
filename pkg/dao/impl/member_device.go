@@ -174,16 +174,16 @@ func (d *MemberDeviceDAO) Count(ctx context.Context, filters []qm.QueryMod) (int
 	return models.MemberDevices(qs...).Count(ctx, exec)
 }
 
-// GetByUdid retrieves a single record by uniq key udid from db.
-func (d *MemberDeviceDAO) GetByUdid(ctx context.Context, udid string) (*models.MemberDevice, error) {
+// GetByMemberIDUdid retrieves a single record by uniq key memberID, udid from db.
+func (d *MemberDeviceDAO) GetByMemberIDUdid(ctx context.Context, memberID int64, udid string) (*models.MemberDevice, error) {
 	memberDeviceObj := &models.MemberDevice{}
 
 	sel := "*"
 	query := fmt.Sprintf(
-		"select %s from `member_device` where `udid`=?", sel,
+		"select %s from `member_device` where `member_id`=? AND `udid`=?", sel,
 	)
 
-	q := queries.Raw(query, udid)
+	q := queries.Raw(query, memberID, udid)
 
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
@@ -196,7 +196,7 @@ func (d *MemberDeviceDAO) GetByUdid(ctx context.Context, udid string) (*models.M
 	err := q.Bind(ctx, exec, memberDeviceObj)
 	if err != nil {
 		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_device, query=%s, args=udid :%v", query, udid)
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_device, query=%s, args=memberID:%v udid :%v", query, memberID, udid)
 		}
 		return nil, pkgErr.Wrap(err, "dao: unable to select from member_device")
 	}
@@ -204,8 +204,14 @@ func (d *MemberDeviceDAO) GetByUdid(ctx context.Context, udid string) (*models.M
 	return memberDeviceObj, nil
 }
 
-// BatchGetByUdid retrieves multiple records by uniq key udid from db.
-func (d *MemberDeviceDAO) BatchGetByUdid(ctx context.Context, udids []string) (map[string]*models.MemberDevice, error) {
+// GetMemberDeviceSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
+func (d *MemberDeviceDAO) GetMemberDeviceSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDevice, error) {
+	var o []*models.MemberDevice
+
+	query := "select `member_device`.* from `member_device` where `member_id`=?"
+
+	q := queries.Raw(query, memberID)
+
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -213,15 +219,13 @@ func (d *MemberDeviceDAO) BatchGetByUdid(ctx context.Context, udids []string) (m
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	datas, err := models.MemberDevices(models.MemberDeviceWhere.Udid.IN(udids)).All(ctx, exec)
+
+	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, pkgErr.WithStack(err)
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_device, query=%s, args=memberID :%v", query, memberID)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_device")
 	}
-
-	result := make(map[string]*models.MemberDevice)
-	for _, c := range datas {
-		result[c.Udid] = c
-	}
-
-	return result, nil
+	return o, nil
 }

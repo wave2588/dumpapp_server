@@ -1,6 +1,9 @@
 package install_app_handler
 
 import (
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -10,10 +13,8 @@ import (
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
 	"dumpapp_server/pkg/web/render/install_app_render"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
-	"net/http"
 )
 
 type AdminCDKeyHandler struct {

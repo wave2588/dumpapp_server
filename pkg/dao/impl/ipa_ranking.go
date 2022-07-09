@@ -2,11 +2,12 @@ package impl
 
 import (
 	"context"
+	"encoding/json"
+	"time"
+
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/dao"
-	"encoding/json"
 	"github.com/go-redis/redis/v8"
-	"time"
 )
 
 type IpaRankingDAO struct {

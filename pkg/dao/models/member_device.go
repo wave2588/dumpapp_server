@@ -664,7 +664,6 @@ func (o MemberDeviceSlice) UpdateAll(ctx context.Context, exec boil.ContextExecu
 
 var mySQLMemberDeviceUniqueColumns = []string{
 	"id",
-	"udid",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

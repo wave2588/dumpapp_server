@@ -5,7 +5,6 @@ import (
 
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/errors"
 )
 
 type AdminDeviceWebController struct {
@@ -27,27 +26,27 @@ func NewAdminDeviceWebController() *AdminDeviceWebController {
 }
 
 func (c *AdminDeviceWebController) Unbind(ctx context.Context, email, udid string) error {
-	accountMap, err := c.accountDAO.BatchGetByEmail(ctx, []string{email})
-	if err != nil {
-		return err
-	}
-	_, ok := accountMap[email]
-	if !ok {
-		return errors.ErrNotFoundMember
-	}
-
-	deviceMap, err := c.memberDeviceDAO.BatchGetByUdid(ctx, []string{udid})
-	if err != nil {
-		return err
-	}
-	device, ok := deviceMap[udid]
-	if !ok {
-		return errors.ErrDeviceNotFound
-	}
-
-	if err = c.memberDeviceDAO.Delete(ctx, device.ID); err != nil {
-		return err
-	}
+	//accountMap, err := c.accountDAO.BatchGetByEmail(ctx, []string{email})
+	//if err != nil {
+	//	return err
+	//}
+	//_, ok := accountMap[email]
+	//if !ok {
+	//	return errors.ErrNotFoundMember
+	//}
+	//
+	//deviceMap, err := c.memberDeviceDAO.BatchGetByUdid(ctx, []string{udid})
+	//if err != nil {
+	//	return err
+	//}
+	//device, ok := deviceMap[udid]
+	//if !ok {
+	//	return errors.ErrDeviceNotFound
+	//}
+	//
+	//if err = c.memberDeviceDAO.Delete(ctx, device.ID); err != nil {
+	//	return err
+	//}
 
 	return nil
 }

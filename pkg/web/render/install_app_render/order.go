@@ -2,6 +2,8 @@ package install_app_render
 
 import (
 	"context"
+	"encoding/json"
+
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -9,7 +11,6 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
-	"encoding/json"
 )
 
 type CDKeyOrder struct {

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"dumpapp_server/pkg/common/constant"
-	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -22,7 +21,6 @@ import (
 	impl3 "dumpapp_server/pkg/web/controller/impl"
 	xj "github.com/basgys/goxml2json"
 	"github.com/go-playground/validator/v10"
-	pkgErr "github.com/pkg/errors"
 	"github.com/skip2/go-qrcode"
 	"github.com/spf13/cast"
 )
@@ -169,10 +167,9 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	md, err := h.memberDeivceDAO.GetByUdid(ctx, memberDevice.Udid)
-	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-		util.PanicIf(err)
-	}
+	/// 查看此账号是否绑定过 udid
+	md, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, memberID, memberDevice.Udid)
+	util.PanicIf(err)
 
 	impl3.NewAlterWebController().SendDeviceLog(ctx, "3. 用户绑定设备成功", memberID, map[string]string{
 		"code": code,
@@ -220,10 +217,10 @@ func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
 	args := &postUDIDArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	deviceMap, err := h.memberDeivceDAO.BatchGetByUdid(ctx, []string{args.UDID})
+	device, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
 	util.PanicIf(err)
 
-	if _, ok := deviceMap[args.UDID]; ok {
+	if device != nil {
 		panic(errors.UnproccessableError("此 udid 已绑定其他账号，如有疑问请联系客服。"))
 	}
 

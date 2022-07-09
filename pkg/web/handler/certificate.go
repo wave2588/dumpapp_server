@@ -76,6 +76,10 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 
+	//if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
+	//	util.PanicIf(errors.UnproccessableError("证书系统维护中，请稍后再试。"))
+	//}
+
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
@@ -95,12 +99,10 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, payCount))
 
-	memberDevice, err := h.memberDeviceDAO.GetByUdid(ctx, args.UDID)
-	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
-		util.PanicIf(err)
-	}
+	memberDevice, err := h.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
+	util.PanicIf(err)
 	if memberDevice == nil {
-		panic(errors.ErrNotFound)
+		panic(errors.ErrDeviceNotFound)
 	}
 	if memberDevice.MemberID != loginID {
 		panic(errors.ErrCreateCertificateFailV2)

@@ -164,8 +164,8 @@ type allVersion struct {
 
 func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
-	//country := cast.ToString(util.URLParam(r, "country"))
-	//endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+	// country := cast.ToString(util.URLParam(r, "country"))
+	// endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
 	endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
 	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{})
 	util.PanicIf(err)
@@ -233,7 +233,6 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64) ([]interface{}, error) {
-
 	filter := make([]qm.QueryMod, 0)
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(startAt)))
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(endAt)))
