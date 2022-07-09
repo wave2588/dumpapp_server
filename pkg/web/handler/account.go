@@ -7,7 +7,6 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	controller2 "dumpapp_server/pkg/controller"
@@ -242,13 +241,13 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 		}))
 
 		/// 邀请一个人只送 2 个币
-		for i := 0; i < 2; i++ {
-			util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-				MemberID: inviteCode.MemberID,
-				Status:   enum.MemberPayCountStatusNormal,
-				Source:   enum.MemberPayCountSourceInvitedPresented,
-			}))
-		}
+		//for i := 0; i < 2; i++ {
+		//util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+		//	MemberID: inviteCode.MemberID,
+		//	Status:   enum.MemberPayCountStatusNormal,
+		//	Source:   enum.MemberPayCountSourceInvitedPresented,
+		//}))
+		//}
 	}
 	/// end
 

@@ -76,10 +76,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
 
-	//if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
-	//	util.PanicIf(errors.UnproccessableError("证书系统维护中，请稍后再试。"))
-	//}
-
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
@@ -90,10 +86,10 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payCount = 30
 		payType = "private"
 	case 2: // 60 售后一年，等 1 - 7 天   public
-		payCount = 60
+		payCount = 78
 		payType = "private"
 	case 3: /// 90 售后一年，立即出   public
-		payCount = 90
+		payCount = 97
 		payType = "private"
 	}
 
