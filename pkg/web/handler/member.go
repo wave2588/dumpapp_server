@@ -119,6 +119,32 @@ func (h *MemberHandler) GetSelfDevice(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, members[0])
 }
 
+func (h *MemberHandler) GetSelfDeviceV2(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var (
+		loginID = mustGetLoginID(ctx)
+		offset  = GetIntArgument(r, "offset", 0)
+		limit   = GetIntArgument(r, "limit", 10)
+	)
+
+	filter := []qm.QueryMod{
+		models.MemberDeviceWhere.MemberID.EQ(loginID),
+	}
+	ids, err := h.memberDeviceDAO.ListIDs(ctx, offset, limit, filter, nil)
+	util.PanicIf(err)
+
+	count, err := h.memberDeviceDAO.Count(ctx, filter)
+	util.PanicIf(err)
+
+	options := make([]render.DeviceOption, 0)
+	data := render.NewDeviceRender(ids, loginID, options...).RenderSlice(ctx)
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
+		Data:   data,
+	})
+}
+
 func (h *MemberHandler) GetSelfCertificate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var (

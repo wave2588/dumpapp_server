@@ -35,6 +35,7 @@ func NewRouter() chi.Router {
 	memberHandler := handler.NewMemberHandler()
 	r.With(middleware.OAuthRegister).Get("/member/self", memberHandler.GetSelf)
 	r.With(middleware.OAuthRegister).Get("/member/self/devices", memberHandler.GetSelfDevice)
+	r.With(middleware.OAuthRegister).Get("/member/self/devices_v2", memberHandler.GetSelfDeviceV2)
 	r.With(middleware.OAuthRegister).Get("/member/self/certificates", memberHandler.GetSelfCertificate)
 	// endregion
 
