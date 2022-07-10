@@ -89,6 +89,7 @@ func NewRouter() chi.Router {
 	// certificate
 	certificateHandler := handler.NewCertificateHandler()
 	r.With(middleware.OAuthRegister).Post("/certificate", certificateHandler.Post) /// 生成证书
+	r.With(middleware.OAuthRegister).Get("/certificate/price", certificateHandler.GetPrice)
 	r.With(middleware.OAuthRegister).Get("/certificate/p12", certificateHandler.DownloadP12File)
 	r.With(middleware.OAuthRegister).Get("/certificate/mobileprovision", certificateHandler.DownloadMobileprovisionFile)
 	// endregion
