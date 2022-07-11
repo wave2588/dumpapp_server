@@ -83,6 +83,39 @@ func (c *ALiPayV3Controller) GetPayURLByNumber(ctx context.Context, loginID, num
 	return id, url.String(), nil
 }
 
+func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
+	id := util2.MustGenerateID(ctx)
+	totalAmount := number
+	bizExt := &constant.MemberPayOrderBizExt{
+		Platform: enum.MemberPayOrderPlatformIOS,
+	}
+	err := c.memberPayOrderDAO.Insert(ctx, &models.MemberPayOrder{
+		ID:       id,
+		MemberID: loginID,
+		Status:   enum.MemberPayOrderStatusPending,
+		Amount:   cast.ToFloat64(totalAmount),
+		BizExt:   bizExt.String(),
+	})
+	if err != nil {
+		return 0, "", err
+	}
+
+	p := alipay.TradeAppPay{}
+	p.OutTradeNo = fmt.Sprintf("%d", id)
+	p.TotalAmount = fmt.Sprintf("%d", totalAmount)
+	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLV3
+	p.Subject = "Dumpapp"
+	p.ProductCode = "QUICK_MSECURITY_PAY"
+	p.TimeoutExpress = "15m"
+
+	url, err := c.client.TradeAppPay(p)
+	if err != nil {
+		return 0, "", err
+	}
+
+	return id, url, nil
+}
+
 func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) error {
 	p := alipay.TradeQuery{}
 	p.OutTradeNo = fmt.Sprintf("%d", orderID)
@@ -99,7 +132,3 @@ func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) 
 
 	return nil
 }
-
-//func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
-//
-//}

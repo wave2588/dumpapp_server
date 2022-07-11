@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"dumpapp_server/pkg/common/constant"
 	"fmt"
+	"github.com/spf13/cast"
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
@@ -45,10 +47,21 @@ func (h *MemberPayOrderHandler) GetPayOrderURL(w http.ResponseWriter, r *http.Re
 
 	loginID := mustGetLoginID(ctx)
 
-	_, payURL, err := h.aliPayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
+	var (
+		orderID int64
+		payURL  string
+		err     error
+	)
+	platform := ctx.Value(constant.CtxKeyAppPlatform).(string)
+	if platform == "ios" {
+		orderID, payURL, err = h.aliPayCtl.GetPhonePayURLByNumber(ctx, loginID, args.Number)
+	} else {
+		orderID, payURL, err = h.aliPayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
+	}
 	util.PanicIf(err)
 
 	res := map[string]interface{}{
+		"order_id": cast.ToString(orderID),
 		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)
