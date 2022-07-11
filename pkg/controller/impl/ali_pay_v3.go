@@ -55,6 +55,7 @@ func (c *ALiPayV3Controller) GetPayURLByNumber(ctx context.Context, loginID, num
 		MemberID: loginID,
 		Status:   enum.MemberPayOrderStatusPending,
 		Amount:   cast.ToFloat64(totalAmount),
+		BizExt:   "{}",
 	})
 	if err != nil {
 		return 0, "", err
@@ -94,3 +95,7 @@ func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) 
 
 	return nil
 }
+
+//func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
+//
+//}

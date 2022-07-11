@@ -28,6 +28,7 @@ type MemberPayOrder struct {
 	MemberID  int64                     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status    enum.MemberPayOrderStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Amount    float64                   `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
+	BizExt    string                    `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	CreatedAt time.Time                 `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                 `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
@@ -40,6 +41,7 @@ var MemberPayOrderColumns = struct {
 	MemberID  string
 	Status    string
 	Amount    string
+	BizExt    string
 	CreatedAt string
 	UpdatedAt string
 }{
@@ -47,6 +49,7 @@ var MemberPayOrderColumns = struct {
 	MemberID:  "member_id",
 	Status:    "status",
 	Amount:    "amount",
+	BizExt:    "biz_ext",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
@@ -58,6 +61,7 @@ var MemberPayOrderWhere = struct {
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberPayOrderStatus
 	Amount    whereHelperfloat64
+	BizExt    whereHelperstring
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -65,6 +69,7 @@ var MemberPayOrderWhere = struct {
 	MemberID:  whereHelperint64{field: "`member_pay_order`.`member_id`"},
 	Status:    whereHelperenum_MemberPayOrderStatus{field: "`member_pay_order`.`status`"},
 	Amount:    whereHelperfloat64{field: "`member_pay_order`.`amount`"},
+	BizExt:    whereHelperstring{field: "`member_pay_order`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_pay_order`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_pay_order`.`updated_at`"},
 }
@@ -86,8 +91,8 @@ func (*memberPayOrderR) NewStruct() *memberPayOrderR {
 type memberPayOrderL struct{}
 
 var (
-	memberPayOrderAllColumns            = []string{"id", "member_id", "status", "amount", "created_at", "updated_at"}
-	memberPayOrderColumnsWithoutDefault = []string{"member_id", "status", "amount"}
+	memberPayOrderAllColumns            = []string{"id", "member_id", "status", "amount", "biz_ext", "created_at", "updated_at"}
+	memberPayOrderColumnsWithoutDefault = []string{"member_id", "status", "amount", "biz_ext"}
 	memberPayOrderColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberPayOrderPrimaryKeyColumns     = []string{"id"}
 )
