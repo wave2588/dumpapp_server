@@ -79,14 +79,3 @@ func (d *InstallAppCDKEYOrderBizExt) String() string {
 	util.PanicIf(err)
 	return string(data)
 }
-
-/// member_pay_order
-type MemberPayOrderBizExt struct {
-	Platform enum.MemberPayOrderPlatform `json:"platform"`
-}
-
-func (d *MemberPayOrderBizExt) String() string {
-	data, err := json.Marshal(d)
-	util.PanicIf(err)
-	return string(data)
-}

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,13 +25,13 @@ import (
 
 // MemberPayOrder is an object representing the database table.
 type MemberPayOrder struct {
-	ID        int64                     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	MemberID  int64                     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
-	Status    enum.MemberPayOrderStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Amount    float64                   `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
-	BizExt    string                    `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
-	CreatedAt time.Time                 `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time                 `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64                         `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	MemberID  int64                         `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
+	Status    enum.MemberPayOrderStatus     `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Amount    float64                       `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
+	BizExt    datatype.MemberPayOrderBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	CreatedAt time.Time                     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time                     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *memberPayOrderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L memberPayOrderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -56,12 +57,33 @@ var MemberPayOrderColumns = struct {
 
 // Generated where
 
+type whereHelperdatatype_MemberPayOrderBizExt struct{ field string }
+
+func (w whereHelperdatatype_MemberPayOrderBizExt) EQ(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_MemberPayOrderBizExt) NEQ(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_MemberPayOrderBizExt) LT(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_MemberPayOrderBizExt) LTE(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_MemberPayOrderBizExt) GT(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_MemberPayOrderBizExt) GTE(x datatype.MemberPayOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var MemberPayOrderWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
 	Status    whereHelperenum_MemberPayOrderStatus
 	Amount    whereHelperfloat64
-	BizExt    whereHelperstring
+	BizExt    whereHelperdatatype_MemberPayOrderBizExt
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -69,7 +91,7 @@ var MemberPayOrderWhere = struct {
 	MemberID:  whereHelperint64{field: "`member_pay_order`.`member_id`"},
 	Status:    whereHelperenum_MemberPayOrderStatus{field: "`member_pay_order`.`status`"},
 	Amount:    whereHelperfloat64{field: "`member_pay_order`.`amount`"},
-	BizExt:    whereHelperstring{field: "`member_pay_order`.`biz_ext`"},
+	BizExt:    whereHelperdatatype_MemberPayOrderBizExt{field: "`member_pay_order`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_pay_order`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_pay_order`.`updated_at`"},
 }

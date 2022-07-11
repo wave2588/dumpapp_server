@@ -174,58 +174,6 @@ func (d *MemberInviteCodeDAO) Count(ctx context.Context, filters []qm.QueryMod) 
 	return models.MemberInviteCodes(qs...).Count(ctx, exec)
 }
 
-// GetByMemberID retrieves a single record by uniq key memberID from db.
-func (d *MemberInviteCodeDAO) GetByMemberID(ctx context.Context, memberID int64) (*models.MemberInviteCode, error) {
-	memberInviteCodeObj := &models.MemberInviteCode{}
-
-	sel := "*"
-	query := fmt.Sprintf(
-		"select %s from `member_invite_code` where `member_id`=?", sel,
-	)
-
-	q := queries.Raw(query, memberID)
-
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-
-	err := q.Bind(ctx, exec, memberInviteCodeObj)
-	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_invite_code, query=%s, args=memberID :%v", query, memberID)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from member_invite_code")
-	}
-
-	return memberInviteCodeObj, nil
-}
-
-// BatchGetByMemberID retrieves multiple records by uniq key memberID from db.
-func (d *MemberInviteCodeDAO) BatchGetByMemberID(ctx context.Context, memberIDs []int64) (map[int64]*models.MemberInviteCode, error) {
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-	datas, err := models.MemberInviteCodes(models.MemberInviteCodeWhere.MemberID.IN(memberIDs)).All(ctx, exec)
-	if err != nil {
-		return nil, pkgErr.WithStack(err)
-	}
-
-	result := make(map[int64]*models.MemberInviteCode)
-	for _, c := range datas {
-		result[c.MemberID] = c
-	}
-
-	return result, nil
-}
-
 // GetByCode retrieves a single record by uniq key code from db.
 func (d *MemberInviteCodeDAO) GetByCode(ctx context.Context, code string) (*models.MemberInviteCode, error) {
 	memberInviteCodeObj := &models.MemberInviteCode{}
@@ -273,6 +221,58 @@ func (d *MemberInviteCodeDAO) BatchGetByCode(ctx context.Context, codes []string
 	result := make(map[string]*models.MemberInviteCode)
 	for _, c := range datas {
 		result[c.Code] = c
+	}
+
+	return result, nil
+}
+
+// GetByMemberID retrieves a single record by uniq key memberID from db.
+func (d *MemberInviteCodeDAO) GetByMemberID(ctx context.Context, memberID int64) (*models.MemberInviteCode, error) {
+	memberInviteCodeObj := &models.MemberInviteCode{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `member_invite_code` where `member_id`=?", sel,
+	)
+
+	q := queries.Raw(query, memberID)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, memberInviteCodeObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_invite_code, query=%s, args=memberID :%v", query, memberID)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_invite_code")
+	}
+
+	return memberInviteCodeObj, nil
+}
+
+// BatchGetByMemberID retrieves multiple records by uniq key memberID from db.
+func (d *MemberInviteCodeDAO) BatchGetByMemberID(ctx context.Context, memberIDs []int64) (map[int64]*models.MemberInviteCode, error) {
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+	datas, err := models.MemberInviteCodes(models.MemberInviteCodeWhere.MemberID.IN(memberIDs)).All(ctx, exec)
+	if err != nil {
+		return nil, pkgErr.WithStack(err)
+	}
+
+	result := make(map[int64]*models.MemberInviteCode)
+	for _, c := range datas {
+		result[c.MemberID] = c
 	}
 
 	return result, nil

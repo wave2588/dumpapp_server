@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
@@ -51,15 +51,14 @@ func NewALiPayV3Controller() *ALiPayV3Controller {
 func (c *ALiPayV3Controller) GetPayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
 	totalAmount := number
-	bizExt := &constant.MemberPayOrderBizExt{
-		Platform: enum.MemberPayOrderPlatformWeb,
-	}
 	err := c.memberPayOrderDAO.Insert(ctx, &models.MemberPayOrder{
 		ID:       id,
 		MemberID: loginID,
 		Status:   enum.MemberPayOrderStatusPending,
 		Amount:   cast.ToFloat64(totalAmount),
-		BizExt:   bizExt.String(),
+		BizExt: datatype.MemberPayOrderBizExt{
+			Platform: enum.MemberPayOrderPlatformWeb,
+		},
 	})
 	if err != nil {
 		return 0, "", err
@@ -86,15 +85,14 @@ func (c *ALiPayV3Controller) GetPayURLByNumber(ctx context.Context, loginID, num
 func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID, number int64) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
 	totalAmount := number
-	bizExt := &constant.MemberPayOrderBizExt{
-		Platform: enum.MemberPayOrderPlatformIOS,
-	}
 	err := c.memberPayOrderDAO.Insert(ctx, &models.MemberPayOrder{
 		ID:       id,
 		MemberID: loginID,
 		Status:   enum.MemberPayOrderStatusPending,
 		Amount:   cast.ToFloat64(totalAmount),
-		BizExt:   bizExt.String(),
+		BizExt: datatype.MemberPayOrderBizExt{
+			Platform: enum.MemberPayOrderPlatformIOS,
+		},
 	})
 	if err != nil {
 		return 0, "", err
