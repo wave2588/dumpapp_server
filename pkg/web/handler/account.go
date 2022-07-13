@@ -324,7 +324,7 @@ func (h *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 type sendResetPasswordCaptchaQueryArgs struct {
-	Phone string `json:"phone" validate:"required"`
+	Email string `json:"email" validate:"required"`
 }
 
 func (p *sendResetPasswordCaptchaQueryArgs) Validate() error {
@@ -341,29 +341,30 @@ func (h *AccountHandler) SendResetPasswordCaptcha(w http.ResponseWriter, r *http
 	args := &sendResetPasswordCaptchaQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	/// 检测手机号
-	if !constant.CheckPhoneValid(args.Phone) {
-		panic(errors.ErrPhoneRefusedRegister)
+	/// 检测邮箱
+	if !constant.CheckEmailValid(args.Email) {
+		panic(errors.ErrEmailRefusedRegister)
 	}
 
-	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
-	account := accountMap[args.Phone]
-	if account != nil {
-		panic(errors.ErrAccountRegisteredByPhone)
+	account := accountMap[args.Email]
+	if account == nil {
+		panic(errors.ErrNotFoundMember)
 		return
 	}
 
 	newCaptcha := util3.MustGenerateCaptcha(ctx)
-	util.PanicIf(h.captchaDAO.SetResetPassowordCaptcha(ctx, args.Phone, newCaptcha))
-	util.PanicIf(h.tencentCtl.SendResetPassowrdCaptcha(ctx, newCaptcha, args.Phone))
+	util.PanicIf(h.emailCtl.SendRegisterEmail(ctx, "验证码来了~", fmt.Sprintf("DumpApp - 您正在修改账号密码，验证码为：%s，15 分钟有效，为保障帐户安全，请勿向任何人提供此验证码。\n", newCaptcha), args.Email))
+	util.PanicIf(h.captchaDAO.SetResetPassowordCaptcha(ctx, args.Email, newCaptcha))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
 
 type resetPasswordQueryArgs struct {
-	Phone    string `json:"phone" validate:"required"`
+	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
+	Captcha  string `json:"captcha" validate:"required"`
 }
 
 func (p *resetPasswordQueryArgs) Validate() error {
@@ -383,18 +384,27 @@ func (h *AccountHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	args := &resetPasswordQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	/// 检测手机号
-	if !constant.CheckPhoneValid(args.Phone) {
-		panic(errors.ErrPhoneRefusedRegister)
+	/// 检测邮箱
+	if !constant.CheckEmailValid(args.Email) {
+		panic(errors.ErrEmailRefusedRegister)
 	}
 
-	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
-	account := accountMap[args.Phone]
-	if account != nil {
-		panic(errors.ErrAccountRegisteredByPhone)
+	account := accountMap[args.Email]
+	if account == nil {
+		panic(errors.ErrNotFoundMember)
 		return
 	}
+
+	captcha, err := h.captchaDAO.GetResetPassowordCaptcha(ctx, args.Email)
+	util.PanicIf(err)
+
+	if args.Captcha != captcha {
+		panic(errors.UnproccessableError("验证码错误"))
+	}
+
+	_ = h.captchaDAO.RemoveResetPassowordCaptcha(ctx, args.Email)
 
 	account.Password = args.Password
 	util.PanicIf(h.accountDAO.Update(ctx, account))

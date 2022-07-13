@@ -81,17 +81,17 @@ func (d *CaptchaDAO) RemovePhoneCaptcha(ctx context.Context, phone string) error
 }
 
 /// 重置密码
-func (d *CaptchaDAO) generateResetPasswordCaptchaKey(phone string) string {
-	return fmt.Sprintf("dump:reset_password:captcha:%s", phone)
+func (d *CaptchaDAO) generateResetPasswordCaptchaKey(email string) string {
+	return fmt.Sprintf("dump:reset_password:captcha:%s", email)
 }
 
-func (d *CaptchaDAO) SetResetPassowordCaptcha(ctx context.Context, phone, captcha string) error {
-	key := d.generateResetPasswordCaptchaKey(phone)
+func (d *CaptchaDAO) SetResetPassowordCaptcha(ctx context.Context, email, captcha string) error {
+	key := d.generateResetPasswordCaptchaKey(email)
 	return d.redis.Set(ctx, key, captcha, 15*time.Minute).Err()
 }
 
-func (d *CaptchaDAO) GetResetPassowordCaptcha(ctx context.Context, phone string) (string, error) {
-	key := d.generateResetPasswordCaptchaKey(phone)
+func (d *CaptchaDAO) GetResetPassowordCaptcha(ctx context.Context, email string) (string, error) {
+	key := d.generateResetPasswordCaptchaKey(email)
 	res, err := d.redis.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return "", nil
@@ -101,8 +101,8 @@ func (d *CaptchaDAO) GetResetPassowordCaptcha(ctx context.Context, phone string)
 	return res, nil
 }
 
-func (d *CaptchaDAO) RemoveResetPassowordCaptcha(ctx context.Context, phone string) error {
-	key := d.generatePhoneCaptchaKey(phone)
+func (d *CaptchaDAO) RemoveResetPassowordCaptcha(ctx context.Context, email string) error {
+	key := d.generatePhoneCaptchaKey(email)
 	_, err := d.redis.Del(ctx, key).Result()
 	return err
 }

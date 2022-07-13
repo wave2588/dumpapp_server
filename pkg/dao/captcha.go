@@ -14,7 +14,7 @@ type CaptchaDAO interface {
 	RemovePhoneCaptcha(ctx context.Context, phone string) error
 
 	/// 重置密码
-	SetResetPassowordCaptcha(ctx context.Context, phone, captcha string) error
-	GetResetPassowordCaptcha(ctx context.Context, phone string) (string, error)
-	RemoveResetPassowordCaptcha(ctx context.Context, phone string) error
+	SetResetPassowordCaptcha(ctx context.Context, email, captcha string) error
+	GetResetPassowordCaptcha(ctx context.Context, email string) (string, error)
+	RemoveResetPassowordCaptcha(ctx context.Context, email string) error
 }
