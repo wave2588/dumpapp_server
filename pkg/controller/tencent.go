@@ -15,4 +15,5 @@ type TencentController interface {
 	ListFile(ctx context.Context, marker *string, limit int) (*cos.BucketGetResult, error)
 
 	SendPhoneRegisterCaptcha(ctx context.Context, captcha, phone string) error
+	SendResetPassowrdCaptcha(ctx context.Context, captcha, phone string) error
 }

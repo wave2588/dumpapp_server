@@ -131,3 +131,31 @@ func (c *TencentController) SendPhoneRegisterCaptcha(ctx context.Context, captch
 	}
 	return nil
 }
+
+func (c *TencentController) SendResetPassowrdCaptcha(ctx context.Context, captcha, phone string) error {
+	client, err := sms.NewClient(c.credential, regions.Beijing, profile.NewClientProfile())
+	if err != nil {
+		return err
+	}
+	/// 发送短信实例
+	request := sms.NewSendSmsRequest()
+	// 短信签名内容，使用 UTF-8 编码，必须填写已审核通过的签名，例如：腾讯云，签名信息可登录 [短信控制台](https://console.cloud.tencent.com/smsv2) 查看。
+	// <dx-alert infotype="notice" title="注意">国内短信为必填参数。</dx-alert>
+	request.SignName = util.StringPtr(config.DumpConfig.AppConfig.TencentSMSSignName)
+	/// 短信应用ID: 短信SdkAppId在 [短信控制台] 添加应用后生成的实际SdkAppId，示例如1400006666
+	request.SmsSdkAppId = util.StringPtr(config.DumpConfig.AppConfig.TencentSMSAppSDKID)
+	/// 模板 ID: 必须填写已审核通过的模板 ID。模板ID可登录 [短信控制台] 查看
+	request.TemplateId = util.StringPtr("1473966")
+	/// 模板参数: 若无模板参数，则设置为空
+	request.TemplateParamSet = common.StringPtrs([]string{captcha, "15"})
+	request.PhoneNumberSet = common.StringPtrs([]string{fmt.Sprintf("+86%s", phone)})
+	_, err = client.SendSms(request)
+	if _, ok := err.(*errors2.TencentCloudSDKError); ok {
+		fmt.Printf("An API error has returned: %s", err)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}

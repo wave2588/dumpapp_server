@@ -29,6 +29,8 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/register", accountHandler.Register)
 	r.With(middleware.OAuthGuest).Post("/login", accountHandler.Login)
 	r.With(middleware.OAuthGuest).Post("/logout", accountHandler.Logout)
+	r.With(middleware.OAuthGuest).Post("/reset/password/captcha", accountHandler.SendResetPasswordCaptcha)
+	r.With(middleware.OAuthGuest).Post("/reset/password", accountHandler.ResetPassword)
 	// endregion
 
 	// member

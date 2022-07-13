@@ -75,6 +75,33 @@ func (d *CaptchaDAO) GetPhoneCaptcha(ctx context.Context, phone string) (string,
 }
 
 func (d *CaptchaDAO) RemovePhoneCaptcha(ctx context.Context, phone string) error {
+	key := d.generateResetPasswordCaptchaKey(phone)
+	_, err := d.redis.Del(ctx, key).Result()
+	return err
+}
+
+/// 重置密码
+func (d *CaptchaDAO) generateResetPasswordCaptchaKey(phone string) string {
+	return fmt.Sprintf("dump:reset_password:captcha:%s", phone)
+}
+
+func (d *CaptchaDAO) SetResetPassowordCaptcha(ctx context.Context, phone, captcha string) error {
+	key := d.generateResetPasswordCaptchaKey(phone)
+	return d.redis.Set(ctx, key, captcha, 15*time.Minute).Err()
+}
+
+func (d *CaptchaDAO) GetResetPassowordCaptcha(ctx context.Context, phone string) (string, error) {
+	key := d.generateResetPasswordCaptchaKey(phone)
+	res, err := d.redis.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", nil
+	} else if err != nil {
+		return "", err
+	}
+	return res, nil
+}
+
+func (d *CaptchaDAO) RemoveResetPassowordCaptcha(ctx context.Context, phone string) error {
 	key := d.generatePhoneCaptchaKey(phone)
 	_, err := d.redis.Del(ctx, key).Result()
 	return err

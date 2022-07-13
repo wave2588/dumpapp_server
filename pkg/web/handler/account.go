@@ -322,3 +322,82 @@ func (h *AccountHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	util.ClearCookie(w, "session")
 	util.RenderJSON(w, "ok")
 }
+
+type sendResetPasswordCaptchaQueryArgs struct {
+	Phone string `json:"phone" validate:"required"`
+}
+
+func (p *sendResetPasswordCaptchaQueryArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AccountHandler) SendResetPasswordCaptcha(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := &sendResetPasswordCaptchaQueryArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 检测手机号
+	if !constant.CheckPhoneValid(args.Phone) {
+		panic(errors.ErrPhoneRefusedRegister)
+	}
+
+	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	util.PanicIf(err)
+	account := accountMap[args.Phone]
+	if account != nil {
+		panic(errors.ErrAccountRegisteredByPhone)
+		return
+	}
+
+	newCaptcha := util3.MustGenerateCaptcha(ctx)
+	util.PanicIf(h.captchaDAO.SetResetPassowordCaptcha(ctx, args.Phone, newCaptcha))
+	util.PanicIf(h.tencentCtl.SendResetPassowrdCaptcha(ctx, newCaptcha, args.Phone))
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
+
+type resetPasswordQueryArgs struct {
+	Phone    string `json:"phone" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (p *resetPasswordQueryArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if len(p.Password) < 8 {
+		panic(errors.UnproccessableError("密码长度必须大于 8 位"))
+	}
+	return nil
+}
+
+func (h *AccountHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := &resetPasswordQueryArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 检测手机号
+	if !constant.CheckPhoneValid(args.Phone) {
+		panic(errors.ErrPhoneRefusedRegister)
+	}
+
+	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	util.PanicIf(err)
+	account := accountMap[args.Phone]
+	if account != nil {
+		panic(errors.ErrAccountRegisteredByPhone)
+		return
+	}
+
+	account.Password = args.Password
+	util.PanicIf(h.accountDAO.Update(ctx, account))
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}

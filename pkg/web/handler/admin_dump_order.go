@@ -111,7 +111,6 @@ func (p *putAdminDumpOrderArgs) Validate() error {
 }
 
 func (h *AdminDumpOrderHandler) PutDumpOrderList(w http.ResponseWriter, r *http.Request) {
-
 	ctx := r.Context()
 
 	dumpOrderID := cast.ToInt64(util.URLParam(r, "dump_order_id"))
