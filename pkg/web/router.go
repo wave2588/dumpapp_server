@@ -72,6 +72,7 @@ func NewRouter() chi.Router {
 	// dump order
 	dumpOrderHandler := handler.NewDumpOrderHandler()
 	r.With(middleware.OAuthRegister).Post("/ipa/dump_order", dumpOrderHandler.Post)
+	r.With(middleware.OAuthGuest).Get("/ipa/dump_order/list", dumpOrderHandler.GetList)
 	// endregion
 
 	// device

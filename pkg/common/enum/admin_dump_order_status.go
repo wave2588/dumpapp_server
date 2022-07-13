@@ -6,6 +6,7 @@ type AdminDumpOrderStatus int
 
 const (
 	AdminDumpOrderStatusProgressing AdminDumpOrderStatus = iota + 1 /// 处理中
-	AdminDumpOrderStatusProgressed                                  /// 未处理
+	AdminDumpOrderStatusProgressed                                  /// 处理中
 	AdminDumpOrderStatusDeleted                                     /// 已删除
+	AdminDumpOrderStatusUnprocessed                                 /// 未处理
 )

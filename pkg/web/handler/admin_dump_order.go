@@ -12,7 +12,6 @@ import (
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
 	"dumpapp_server/pkg/web/render"
@@ -41,11 +40,12 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 		limit   = GetIntArgument(r, "limit", 10)
 	)
 
-	ids, err := h.adminDumpOrderDAO.ListIDs(ctx, offset, limit, []qm.QueryMod{
-		models.AdminDumpOrderWhere.Status.EQ(enum.AdminDumpOrderStatusProgressing),
-	}, []string{"created_at desc"})
+	filter := []qm.QueryMod{
+		qm.Where("(status=?) or (status=?)", enum.AdminDumpOrderStatusUnprocessed, enum.AdminDumpOrderStatusProgressing),
+	}
+	ids, err := h.adminDumpOrderDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
-	totalCount, err := h.adminDumpOrderDAO.Count(ctx, nil)
+	totalCount, err := h.adminDumpOrderDAO.Count(ctx, filter)
 	util.PanicIf(err)
 	dumpOrderMap, err := h.adminDumpOrderDAO.BatchGet(ctx, ids)
 	util.PanicIf(err)
@@ -76,6 +76,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 			otherDemanderMembers = append(otherDemanderMembers, memberMap[otherDemanderMemberID])
 		}
 		res := &DumpOrderResult{
+			ID:                  orderID,
 			DemanderMember:      memberMap[do.DemanderID],
 			OtherDemanderMember: otherDemanderMembers,
 			OperatorMember:      memberMap[do.OperatorID],
@@ -96,7 +97,44 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 	})
 }
 
+type putAdminDumpOrderArgs struct {
+	Status enum.AdminDumpOrderStatus `json:"status" validate:"required"`
+}
+
+func (p *putAdminDumpOrderArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		fmt.Println()
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminDumpOrderHandler) PutDumpOrderList(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	dumpOrderID := cast.ToInt64(util.URLParam(r, "dump_order_id"))
+
+	args := &putAdminDumpOrderArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	orderMap, err := h.adminDumpOrderDAO.BatchGet(ctx, []int64{dumpOrderID})
+	util.PanicIf(err)
+
+	order, ok := orderMap[dumpOrderID]
+	if !ok {
+		util.RenderJSON(w, DefaultSuccessBody(ctx))
+		return
+	}
+
+	order.Status = args.Status
+	util.PanicIf(h.adminDumpOrderDAO.Update(ctx, order))
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
+
 type DumpOrderResult struct {
+	ID                  int64            `json:"id,string"`
 	DemanderMember      *render.Member   `json:"demander_member"`
 	OtherDemanderMember []*render.Member `json:"other_demander_member"`
 	OperatorMember      *render.Member   `json:"operator_member"`

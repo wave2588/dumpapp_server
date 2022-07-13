@@ -53,7 +53,7 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 			IpaID:      ipaID,
 			IpaVersion: ipaVersion,
 			IpaBizExt:  string(data),
-			Status:     enum.AdminDumpOrderStatusProgressing,
+			Status:     enum.AdminDumpOrderStatusUnprocessed,
 		})
 	}
 	var bizExt constant.AdminDumpOrderBizExt
@@ -67,7 +67,9 @@ func (c *AdminDumpOrderController) Upsert(ctx context.Context, demanderID, ipaID
 	if err != nil {
 		return err
 	}
-	order.Status = enum.AdminDumpOrderStatusProgressing
+	if order.Status != enum.AdminDumpOrderStatusProgressing {
+		order.Status = enum.AdminDumpOrderStatusUnprocessed
+	}
 	order.IpaBizExt = string(bizExtData)
 	return c.adminDumpOrderDAO.Update(ctx, order)
 }

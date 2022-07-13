@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _AdminDumpOrderStatusName = "progressingprogresseddeleted"
+const _AdminDumpOrderStatusName = "progressingprogresseddeletedunprocessed"
 
-var _AdminDumpOrderStatusIndex = [...]uint8{0, 11, 21, 28}
+var _AdminDumpOrderStatusIndex = [...]uint8{0, 11, 21, 28, 39}
 
-const _AdminDumpOrderStatusLowerName = "progressingprogresseddeleted"
+const _AdminDumpOrderStatusLowerName = "progressingprogresseddeletedunprocessed"
 
 func (i AdminDumpOrderStatus) String() string {
 	i -= 1
@@ -30,9 +30,10 @@ func _AdminDumpOrderStatusNoOp() {
 	_ = x[AdminDumpOrderStatusProgressing-(1)]
 	_ = x[AdminDumpOrderStatusProgressed-(2)]
 	_ = x[AdminDumpOrderStatusDeleted-(3)]
+	_ = x[AdminDumpOrderStatusUnprocessed-(4)]
 }
 
-var _AdminDumpOrderStatusValues = []AdminDumpOrderStatus{AdminDumpOrderStatusProgressing, AdminDumpOrderStatusProgressed, AdminDumpOrderStatusDeleted}
+var _AdminDumpOrderStatusValues = []AdminDumpOrderStatus{AdminDumpOrderStatusProgressing, AdminDumpOrderStatusProgressed, AdminDumpOrderStatusDeleted, AdminDumpOrderStatusUnprocessed}
 
 var _AdminDumpOrderStatusNameToValueMap = map[string]AdminDumpOrderStatus{
 	_AdminDumpOrderStatusName[0:11]:       AdminDumpOrderStatusProgressing,
@@ -41,12 +42,15 @@ var _AdminDumpOrderStatusNameToValueMap = map[string]AdminDumpOrderStatus{
 	_AdminDumpOrderStatusLowerName[11:21]: AdminDumpOrderStatusProgressed,
 	_AdminDumpOrderStatusName[21:28]:      AdminDumpOrderStatusDeleted,
 	_AdminDumpOrderStatusLowerName[21:28]: AdminDumpOrderStatusDeleted,
+	_AdminDumpOrderStatusName[28:39]:      AdminDumpOrderStatusUnprocessed,
+	_AdminDumpOrderStatusLowerName[28:39]: AdminDumpOrderStatusUnprocessed,
 }
 
 var _AdminDumpOrderStatusNames = []string{
 	_AdminDumpOrderStatusName[0:11],
 	_AdminDumpOrderStatusName[11:21],
 	_AdminDumpOrderStatusName[21:28],
+	_AdminDumpOrderStatusName[28:39],
 }
 
 // AdminDumpOrderStatusString retrieves an enum value from the enum constants string name.
@@ -55,8 +59,8 @@ func AdminDumpOrderStatusString(s string) (AdminDumpOrderStatus, error) {
 	if val, ok := _AdminDumpOrderStatusNameToValueMap[s]; ok {
 		return val, nil
 	}
-	s = strings.ToLower(s)
-	if val, ok := _AdminDumpOrderStatusNameToValueMap[s]; ok {
+
+	if val, ok := _AdminDumpOrderStatusNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to AdminDumpOrderStatus values", s)
