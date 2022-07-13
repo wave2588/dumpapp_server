@@ -102,7 +102,7 @@ func (d *CaptchaDAO) GetResetPassowordCaptcha(ctx context.Context, email string)
 }
 
 func (d *CaptchaDAO) RemoveResetPassowordCaptcha(ctx context.Context, email string) error {
-	key := d.generatePhoneCaptchaKey(email)
+	key := d.generateResetPasswordCaptchaKey(email)
 	_, err := d.redis.Del(ctx, key).Result()
 	return err
 }
