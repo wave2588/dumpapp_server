@@ -2,30 +2,27 @@ package datatype
 
 import (
 	"database/sql/driver"
+	"dumpapp_server/pkg/common/util"
 	"encoding/json"
 	"fmt"
-
-	"dumpapp_server/pkg/common/enum"
-	"dumpapp_server/pkg/common/util"
 )
 
-type MemberPayOrderBizExt struct {
-	Platform enum.MemberPayOrderPlatform `json:"platform"`
+type MemberDeviceBizExt struct {
 }
 
-func (i MemberPayOrderBizExt) String() string {
+func (i MemberDeviceBizExt) String() string {
 	data, err := json.Marshal(i)
 	util.PanicIf(err)
 	return string(data)
 }
 
 /// 写数据会走到这里
-func (i MemberPayOrderBizExt) Value() (driver.Value, error) {
+func (i MemberDeviceBizExt) Value() (driver.Value, error) {
 	return i.String(), nil
 }
 
 /// 读数据会走到这里
-func (i *MemberPayOrderBizExt) Scan(value interface{}) error {
+func (i *MemberDeviceBizExt) Scan(value interface{}) error {
 	if value == nil {
 		return nil
 	}
@@ -39,9 +36,9 @@ func (i *MemberPayOrderBizExt) Scan(value interface{}) error {
 	case fmt.Stringer:
 		str = v.String()
 	default:
-		return fmt.Errorf("invalid value of MemberPayOrderBizExt: %[1]T(%[1]v)", value)
+		return fmt.Errorf("invalid value of MemberDeviceBizExt: %[1]T(%[1]v)", value)
 	}
-	var data MemberPayOrderBizExt
+	var data MemberDeviceBizExt
 	err := json.Unmarshal([]byte(str), &data)
 	if err != nil {
 		return err

@@ -217,13 +217,6 @@ func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
 	args := &postUDIDArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	device, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
-	util.PanicIf(err)
-
-	if device != nil {
-		panic(errors.UnproccessableError("此 udid 已绑定其他账号，如有疑问请联系客服。"))
-	}
-
 	id := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberDeivceDAO.Insert(ctx, &models.MemberDevice{
 		ID:       id,
