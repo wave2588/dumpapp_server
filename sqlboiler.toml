@@ -236,3 +236,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_device
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["member_device"]
+
+  [types.replace]
+    type = "datatype.MemberDeviceBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

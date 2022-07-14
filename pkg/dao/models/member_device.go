@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,14 +24,15 @@ import (
 
 // MemberDevice is an object representing the database table.
 type MemberDevice struct {
-	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	MemberID  int64     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
-	Imei      string    `boil:"imei" json:"imei" toml:"imei" yaml:"imei"`
-	Product   string    `boil:"product" json:"product" toml:"product" yaml:"product"`
-	Udid      string    `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
-	Version   string    `boil:"version" json:"version" toml:"version" yaml:"version"`
-	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64                       `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	MemberID  int64                       `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
+	Imei      string                      `boil:"imei" json:"imei" toml:"imei" yaml:"imei"`
+	Product   string                      `boil:"product" json:"product" toml:"product" yaml:"product"`
+	Udid      string                      `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
+	Version   string                      `boil:"version" json:"version" toml:"version" yaml:"version"`
+	BizExt    datatype.MemberDeviceBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	CreatedAt time.Time                   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time                   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *memberDeviceR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L memberDeviceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,6 +45,7 @@ var MemberDeviceColumns = struct {
 	Product   string
 	Udid      string
 	Version   string
+	BizExt    string
 	CreatedAt string
 	UpdatedAt string
 }{
@@ -52,11 +55,33 @@ var MemberDeviceColumns = struct {
 	Product:   "product",
 	Udid:      "udid",
 	Version:   "version",
+	BizExt:    "biz_ext",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
 }
 
 // Generated where
+
+type whereHelperdatatype_MemberDeviceBizExt struct{ field string }
+
+func (w whereHelperdatatype_MemberDeviceBizExt) EQ(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_MemberDeviceBizExt) NEQ(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_MemberDeviceBizExt) LT(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_MemberDeviceBizExt) LTE(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_MemberDeviceBizExt) GT(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_MemberDeviceBizExt) GTE(x datatype.MemberDeviceBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var MemberDeviceWhere = struct {
 	ID        whereHelperint64
@@ -65,6 +90,7 @@ var MemberDeviceWhere = struct {
 	Product   whereHelperstring
 	Udid      whereHelperstring
 	Version   whereHelperstring
+	BizExt    whereHelperdatatype_MemberDeviceBizExt
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -74,6 +100,7 @@ var MemberDeviceWhere = struct {
 	Product:   whereHelperstring{field: "`member_device`.`product`"},
 	Udid:      whereHelperstring{field: "`member_device`.`udid`"},
 	Version:   whereHelperstring{field: "`member_device`.`version`"},
+	BizExt:    whereHelperdatatype_MemberDeviceBizExt{field: "`member_device`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`member_device`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`member_device`.`updated_at`"},
 }
@@ -95,8 +122,8 @@ func (*memberDeviceR) NewStruct() *memberDeviceR {
 type memberDeviceL struct{}
 
 var (
-	memberDeviceAllColumns            = []string{"id", "member_id", "imei", "product", "udid", "version", "created_at", "updated_at"}
-	memberDeviceColumnsWithoutDefault = []string{"member_id", "imei", "product", "udid", "version"}
+	memberDeviceAllColumns            = []string{"id", "member_id", "imei", "product", "udid", "version", "biz_ext", "created_at", "updated_at"}
+	memberDeviceColumnsWithoutDefault = []string{"member_id", "imei", "product", "udid", "version", "biz_ext"}
 	memberDeviceColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberDevicePrimaryKeyColumns     = []string{"id"}
 )

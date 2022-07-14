@@ -2,12 +2,14 @@ package datatype
 
 import (
 	"database/sql/driver"
-	"dumpapp_server/pkg/common/util"
 	"encoding/json"
 	"fmt"
+
+	"dumpapp_server/pkg/common/util"
 )
 
 type MemberDeviceBizExt struct {
+	Note string `json:"note"` /// 备注
 }
 
 func (i MemberDeviceBizExt) String() string {

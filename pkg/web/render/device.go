@@ -15,6 +15,7 @@ type Device struct {
 	UDID        string `json:"udid"`
 	Product     string `json:"product"`
 	ProductName string `json:"product_name"`
+	Note        string `json:"note"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 
@@ -109,6 +110,7 @@ func (f *DeviceRender) fetch(ctx context.Context) {
 			UDID:        device.Udid,
 			Product:     device.Product,
 			ProductName: constant.ConvertProductMap[device.Product],
+			Note:        device.BizExt.Note,
 			CreatedAt:   device.CreatedAt.Unix(),
 			UpdatedAt:   device.UpdatedAt.Unix(),
 		}

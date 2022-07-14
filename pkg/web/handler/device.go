@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"dumpapp_server/pkg/common/datatype"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -199,6 +200,7 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 
 type postUDIDArgs struct {
 	UDID string `json:"udid" validate:"required"`
+	Note string `json:"note"`
 }
 
 func (p *postUDIDArgs) Validate() error {
@@ -222,7 +224,74 @@ func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
 		ID:       id,
 		MemberID: loginID,
 		Udid:     args.UDID,
+		BizExt: datatype.MemberDeviceBizExt{
+			Note: args.Note,
+		},
 	}))
 
-	util.RenderJSON(w, "ok")
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
+
+type putUDIDArgs struct {
+	UDID string `json:"udid" validate:"required"`
+	Note string `json:"note" validate:"required"`
+}
+
+func (p *putUDIDArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *DeviceHandler) PutUDID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	args := &putUDIDArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	deviceID := cast.ToInt64(util.URLParam(r, "device_id"))
+	deviceMap, err := h.memberDeivceDAO.BatchGet(ctx, []int64{deviceID})
+	util.PanicIf(err)
+
+	device, ok := deviceMap[deviceID]
+	if !ok {
+		util.PanicIf(errors.ErrDeviceNotFound)
+	}
+
+	if device.MemberID != loginID {
+		util.PanicIf(errors.ErrMemberAccessDenied)
+	}
+
+	device.Udid = args.UDID
+	device.BizExt.Note = args.Note
+	util.PanicIf(h.memberDeivceDAO.Update(ctx, device))
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
+
+func (h *DeviceHandler) DeleteUDID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	deviceID := cast.ToInt64(util.URLParam(r, "device_id"))
+	deviceMap, err := h.memberDeivceDAO.BatchGet(ctx, []int64{deviceID})
+	util.PanicIf(err)
+
+	device, ok := deviceMap[deviceID]
+	if !ok {
+		util.PanicIf(errors.ErrDeviceNotFound)
+	}
+
+	if device.MemberID != loginID {
+		util.PanicIf(errors.ErrMemberAccessDenied)
+	}
+
+	util.PanicIf(h.memberDeivceDAO.Delete(ctx, deviceID))
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
