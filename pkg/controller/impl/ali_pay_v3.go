@@ -100,7 +100,7 @@ func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID
 
 	p := alipay.TradeAppPay{}
 	p.OutTradeNo = fmt.Sprintf("%d", id)
-	p.TotalAmount = fmt.Sprintf("%d", totalAmount)
+	p.TotalAmount = fmt.Sprintf("%d.00", totalAmount)
 	p.NotifyURL = config.DumpConfig.AppConfig.ALiPayNotifyURLV3
 	p.Subject = "Dumpapp"
 	p.ProductCode = "QUICK_MSECURITY_PAY"
