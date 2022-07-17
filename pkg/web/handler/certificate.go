@@ -176,7 +176,7 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 			Description: "价格 78 售后 -（充值活动，冲60得78币 ）-（理论 1 年，售后半年，掉了无限补）",
 		},
 		{
-			ID:          1,
+			ID:          3,
 			Price:       98,
 			Description: "价格 97 售后 -（充值活动，冲70得97币 ）-（理论 1 年，售后1年，掉了无限补）",
 		},
