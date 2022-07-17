@@ -87,6 +87,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/device/bind/{code}", deviceHandler.Bind)
 	// 手动绑定 udid
 	r.With(middleware.OAuthRegister).Post("/device/udid", deviceHandler.PostUDID)
+	r.With(middleware.OAuthRegister).Post("/device", deviceHandler.PostUDID)
 	r.With(middleware.OAuthRegister).Put("/device/{device_id}", deviceHandler.PutUDID)
 	r.With(middleware.OAuthRegister).Delete("/device/{device_id}", deviceHandler.DeleteUDID)
 	// endregion

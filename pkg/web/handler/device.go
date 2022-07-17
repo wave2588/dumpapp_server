@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"dumpapp_server/pkg/common/datatype"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"strings"
 
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -211,6 +211,9 @@ func (p *postUDIDArgs) Validate() error {
 	if p.UDID == "" {
 		return errors.UnproccessableError("UDID 不能为空")
 	}
+	if util2.StringCount(p.UDID) != 25 && util2.StringCount(p.UDID) != 40 {
+		return errors.UnproccessableError("UDID 格式不正确")
+	}
 	return nil
 }
 
@@ -221,6 +224,19 @@ func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
 
 	args := &postUDIDArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	data, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
+	util.PanicIf(err)
+
+	if data != nil {
+		data.Udid = args.UDID
+		data.BizExt = datatype.MemberDeviceBizExt{
+			Note: args.Note,
+		}
+		util.PanicIf(h.memberDeivceDAO.Update(ctx, data))
+		util.RenderJSON(w, DefaultSuccessBody(ctx))
+		return
+	}
 
 	id := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberDeivceDAO.Insert(ctx, &models.MemberDevice{

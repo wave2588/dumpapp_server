@@ -160,6 +160,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 type certificatePrice struct {
 	ID          int    `json:"id"`
 	Price       int    `json:"price"`
+	Title       string `json:"title"`
 	Description string `json:"description"`
 }
 
@@ -168,16 +169,19 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 		{
 			ID:          1,
 			Price:       30,
+			Title:       "普通版",
 			Description: "价格 30 售后 -（理论 1 年，无质保） - 已开放无限制购买",
 		},
 		{
 			ID:          2,
 			Price:       78,
+			Title:       "稳定版",
 			Description: "价格 78 售后 -（充值活动，冲60得78币 ）-（理论 1 年，售后半年，掉了无限补）",
 		},
 		{
 			ID:          3,
 			Price:       98,
+			Title:       "豪华版",
 			Description: "价格 97 售后 -（充值活动，冲70得97币 ）-（理论 1 年，售后1年，掉了无限补）",
 		},
 	}
