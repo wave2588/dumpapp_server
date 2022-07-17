@@ -208,6 +208,9 @@ func (p *postUDIDArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
+	if p.UDID == "" {
+		return errors.UnproccessableError("UDID 不能为空")
+	}
 	return nil
 }
 
