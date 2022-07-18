@@ -9,6 +9,7 @@ import (
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
 )
@@ -65,4 +66,20 @@ func (h *MemberPayOrderHandler) GetPayOrderURL(w http.ResponseWriter, r *http.Re
 		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)
+}
+
+func (h *MemberPayOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var (
+		loginID = mustGetLoginID(ctx)
+		orderID = cast.ToInt64(util.URLParam(r, "order_id"))
+	)
+
+	orderMap := render.NewMemberPayOrderRender([]int64{orderID}, loginID, render.MemberPayOrderDefaultRenderFields...).RenderMap(ctx)
+	order, ok := orderMap[orderID]
+	if !ok {
+		util.PanicIf(errors.ErrMemberPayOrderNotFound)
+	}
+	util.RenderJSON(w, order)
 }
