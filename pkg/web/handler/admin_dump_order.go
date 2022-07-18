@@ -37,7 +37,7 @@ type DumpOrderResult struct {
 	DemanderMember      *render.Member            `json:"demander_member"`
 	OtherDemanderMember []*render.Member          `json:"other_demander_member"`
 	OperatorMember      *render.Member            `json:"operator_member"`
-	Statue              enum.AdminDumpOrderStatus `json:"statue"`
+	Status              enum.AdminDumpOrderStatus `json:"status"`
 	IpaID               int64                     `json:"ipa_id,string"`
 	IpaVersion          string                    `json:"ipa_version"`
 	IpaName             string                    `json:"ipa_name"`
@@ -96,7 +96,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 			DemanderMember:      memberMap[do.DemanderID],
 			OtherDemanderMember: otherDemanderMembers,
 			OperatorMember:      memberMap[do.OperatorID],
-			Statue:              do.Status,
+			Status:              do.Status,
 			IpaID:               do.IpaID,
 			IpaVersion:          do.IpaVersion,
 			IpaName:             bizExt.IpaName,
