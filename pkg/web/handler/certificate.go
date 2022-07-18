@@ -33,7 +33,7 @@ import (
 type CertificateHandler struct {
 	alterWebCtl             controller2.AlterWebController
 	certificateWebCtl       controller2.CertificateWebController
-	memberDownloadNumberCtl controller.MemberDownloadController
+	memberDownloadNumberCtl controller.MemberPayCountController
 	certificateV1Controller controller.CertificateController
 	certificateV2Controller controller.CertificateController
 
@@ -46,7 +46,7 @@ func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
 		alterWebCtl:             impl5.DefaultAlterWebController,
 		certificateWebCtl:       impl5.DefaultCertificateWebController,
-		memberDownloadNumberCtl: impl.DefaultMemberDownloadController,
+		memberDownloadNumberCtl: impl.DefaultMemberPayCountController,
 		certificateV1Controller: impl.DefaultCertificateV1Controller,
 		certificateV2Controller: impl.DefaultCertificateV2Controller,
 
@@ -145,7 +145,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}))
 
 	/// 扣除消费的 D 币
-	util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountUseCertificate))
+	util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)

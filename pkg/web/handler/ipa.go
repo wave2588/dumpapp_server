@@ -34,7 +34,7 @@ type IpaHandler struct {
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	ipaRankingDAO              dao.IpaRankingDAO
 
-	memberDownloadCtl controller.MemberDownloadController
+	memberDownloadCtl controller.MemberPayCountController
 	alterWebCtl       controller2.AlterWebController
 	appleCtl          controller.AppleController
 
@@ -49,7 +49,7 @@ func NewIpaHandler() *IpaHandler {
 		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 		ipaRankingDAO:              impl.DefaultIpaRankingDAO,
 
-		memberDownloadCtl: impl2.DefaultMemberDownloadController,
+		memberDownloadCtl: impl2.DefaultMemberPayCountController,
 		alterWebCtl:       impl3.DefaultAlterWebController,
 		appleCtl:          impl2.DefaultAppleController,
 

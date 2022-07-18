@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _MemberPayCountUseName = "ipacertificate"
+const _MemberPayCountUseName = "ipacertificateadmin_delete"
 
-var _MemberPayCountUseIndex = [...]uint8{0, 3, 14}
+var _MemberPayCountUseIndex = [...]uint8{0, 3, 14, 26}
 
-const _MemberPayCountUseLowerName = "ipacertificate"
+const _MemberPayCountUseLowerName = "ipacertificateadmin_delete"
 
 func (i MemberPayCountUse) String() string {
 	i -= 1
@@ -29,20 +29,24 @@ func _MemberPayCountUseNoOp() {
 	var x [1]struct{}
 	_ = x[MemberPayCountUseIpa-(1)]
 	_ = x[MemberPayCountUseCertificate-(2)]
+	_ = x[MemberPayCountUseAdminDelete-(3)]
 }
 
-var _MemberPayCountUseValues = []MemberPayCountUse{MemberPayCountUseIpa, MemberPayCountUseCertificate}
+var _MemberPayCountUseValues = []MemberPayCountUse{MemberPayCountUseIpa, MemberPayCountUseCertificate, MemberPayCountUseAdminDelete}
 
 var _MemberPayCountUseNameToValueMap = map[string]MemberPayCountUse{
-	_MemberPayCountUseName[0:3]:       MemberPayCountUseIpa,
-	_MemberPayCountUseLowerName[0:3]:  MemberPayCountUseIpa,
-	_MemberPayCountUseName[3:14]:      MemberPayCountUseCertificate,
-	_MemberPayCountUseLowerName[3:14]: MemberPayCountUseCertificate,
+	_MemberPayCountUseName[0:3]:        MemberPayCountUseIpa,
+	_MemberPayCountUseLowerName[0:3]:   MemberPayCountUseIpa,
+	_MemberPayCountUseName[3:14]:       MemberPayCountUseCertificate,
+	_MemberPayCountUseLowerName[3:14]:  MemberPayCountUseCertificate,
+	_MemberPayCountUseName[14:26]:      MemberPayCountUseAdminDelete,
+	_MemberPayCountUseLowerName[14:26]: MemberPayCountUseAdminDelete,
 }
 
 var _MemberPayCountUseNames = []string{
 	_MemberPayCountUseName[0:3],
 	_MemberPayCountUseName[3:14],
+	_MemberPayCountUseName[14:26],
 }
 
 // MemberPayCountUseString retrieves an enum value from the enum constants string name.
@@ -51,8 +55,8 @@ func MemberPayCountUseString(s string) (MemberPayCountUse, error) {
 	if val, ok := _MemberPayCountUseNameToValueMap[s]; ok {
 		return val, nil
 	}
-	s = strings.ToLower(s)
-	if val, ok := _MemberPayCountUseNameToValueMap[s]; ok {
+
+	if val, ok := _MemberPayCountUseNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to MemberPayCountUse values", s)

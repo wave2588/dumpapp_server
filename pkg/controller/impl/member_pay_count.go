@@ -12,23 +12,37 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type MemberDownloadController struct {
+type MemberPayCountController struct {
 	memberPayCountDAO dao.MemberPayCountDAO
 }
 
-var DefaultMemberDownloadController *MemberDownloadController
+var DefaultMemberPayCountController *MemberPayCountController
 
 func init() {
-	DefaultMemberDownloadController = NewMemberDownloadController()
+	DefaultMemberPayCountController = NewMemberPayCountController()
 }
 
-func NewMemberDownloadController() *MemberDownloadController {
-	return &MemberDownloadController{
+func NewMemberPayCountController() *MemberPayCountController {
+	return &MemberPayCountController{
 		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
 	}
 }
 
-func (c *MemberDownloadController) CheckPayCount(ctx context.Context, loginID, limit int64) error {
+func (c *MemberPayCountController) AddCount(ctx context.Context, memberID, count int64, source enum.MemberPayCountSource) error {
+	for i := 0; i < int(count); i++ {
+		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
+			MemberID: memberID,
+			Status:   enum.MemberPayCountStatusNormal,
+			Source:   source,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *MemberPayCountController) CheckPayCount(ctx context.Context, loginID, limit int64) error {
 	filter := []qm.QueryMod{
 		models.MemberPayCountWhere.MemberID.EQ(loginID),
 		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
@@ -43,7 +57,7 @@ func (c *MemberDownloadController) CheckPayCount(ctx context.Context, loginID, l
 	return nil
 }
 
-func (c *MemberDownloadController) DeductPayCount(ctx context.Context, loginID, limit int64, use enum.MemberPayCountUse) error {
+func (c *MemberPayCountController) DeductPayCount(ctx context.Context, loginID, limit int64, status enum.MemberPayCountStatus, use enum.MemberPayCountUse) error {
 	filter := []qm.QueryMod{
 		models.MemberPayCountWhere.MemberID.EQ(loginID),
 		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
@@ -60,7 +74,7 @@ func (c *MemberDownloadController) DeductPayCount(ctx context.Context, loginID, 
 		return err
 	}
 	for _, count := range res {
-		count.Status = enum.MemberPayCountStatusUsed
+		count.Status = status
 		count.Use = null.StringFrom(use.String())
 		err = c.memberPayCountDAO.Update(ctx, count)
 		if err != nil {

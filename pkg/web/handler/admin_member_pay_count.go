@@ -1,33 +1,30 @@
 package handler
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
-	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
 	"github.com/go-playground/validator/v10"
-	"github.com/spf13/cast"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AdminMemberPayCountHandler struct {
 	accountDAO        dao.AccountDAO
-	memberPayCountDAO dao.MemberPayCountDAO
+	memberPayCountCtl controller.MemberPayCountController
 }
 
 func NewAdminMemberPayCountHandler() *AdminMemberPayCountHandler {
 	return &AdminMemberPayCountHandler{
 		accountDAO:        impl.DefaultAccountDAO,
-		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
+		memberPayCountCtl: impl2.DefaultMemberPayCountController,
 	}
 }
 
@@ -57,13 +54,7 @@ func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Re
 	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
 	util.PanicIf(err)
 
-	for i := 0; i < cast.ToInt(args.Number); i++ {
-		util.PanicIf(h.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: account.ID,
-			Status:   enum.MemberPayCountStatusNormal,
-			Source:   enum.MemberPayCountSourceAdminPresented,
-		}))
-	}
+	util.PanicIf(h.memberPayCountCtl.AddCount(ctx, account.ID, args.Number, enum.MemberPayCountSourceAdminPresented))
 }
 
 type deleteDownloadNumber struct {
@@ -92,29 +83,7 @@ func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http
 	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
 	util.PanicIf(err)
 
-	filter := []qm.QueryMod{
-		models.MemberPayCountWhere.MemberID.EQ(account.ID),
-		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
-	}
+	util.PanicIf(h.memberPayCountCtl.CheckPayCount(ctx, account.ID, args.Number))
 
-	ids, err := h.memberPayCountDAO.ListIDs(ctx, 0, int(args.Number), filter, nil)
-	util.PanicIf(err)
-	pcMap, err := h.memberPayCountDAO.BatchGet(ctx, ids)
-	util.PanicIf(err)
-
-	if int(args.Number) != len(ids) {
-		util.PanicIf(errors.UnproccessableError("没有足够的次数可以扣除"))
-		return
-	}
-
-	/// 事物
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-	for _, count := range pcMap {
-		count.Status = enum.MemberPayCountStatusAdminDelete
-		util.PanicIf(h.memberPayCountDAO.Update(ctx, count))
-	}
-	clients.MustCommit(ctx, txn)
-	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, account.ID, args.Number, enum.MemberPayCountStatusAdminDelete, enum.MemberPayCountUseAdminDelete))
 }

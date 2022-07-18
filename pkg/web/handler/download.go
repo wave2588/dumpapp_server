@@ -33,7 +33,7 @@ type DownloadHandler struct {
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	cribberDAO                 dao.CribberDAO
 
-	memberDownloadNumberCtl controller.MemberDownloadController
+	memberDownloadNumberCtl controller.MemberPayCountController
 	tencentCtl              controller.TencentController
 }
 
@@ -45,7 +45,7 @@ func NewDownloadHandler() *DownloadHandler {
 		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 		cribberDAO:                 impl.DefaultCribberDAO,
 
-		memberDownloadNumberCtl: impl2.DefaultMemberDownloadController,
+		memberDownloadNumberCtl: impl2.DefaultMemberPayCountController,
 		tencentCtl:              impl2.DefaultTencentController,
 	}
 }
@@ -171,7 +171,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		defer clients.MustClearMySQLTransaction(ctx, txn)
 		ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 		/// 消费 9 个积分
-		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountUseIpa))
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseIpa))
 		/// 添加下载记录
 		util.PanicIf(h.memberDownloadIpaRecordDAO.Insert(ctx, &models.MemberDownloadIpaRecord{
 			MemberID: loginID,
