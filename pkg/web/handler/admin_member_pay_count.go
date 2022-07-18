@@ -51,8 +51,14 @@ func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Re
 	args := &addDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
+
+	account, ok := accountMap[args.Email]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundMember)
+		return
+	}
 
 	util.PanicIf(h.memberPayCountCtl.AddCount(ctx, account.ID, args.Number, enum.MemberPayCountSourceAdminPresented))
 }
@@ -80,8 +86,14 @@ func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http
 	args := &deleteDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
+
+	account, ok := accountMap[args.Email]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundMember)
+		return
+	}
 
 	util.PanicIf(h.memberPayCountCtl.CheckPayCount(ctx, account.ID, args.Number))
 
