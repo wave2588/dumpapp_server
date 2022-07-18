@@ -32,6 +32,22 @@ func NewAdminDumpOrderHandler() *AdminDumpOrderHandler {
 	}
 }
 
+type DumpOrderResult struct {
+	ID                  int64                     `json:"id,string"`
+	DemanderMember      *render.Member            `json:"demander_member"`
+	OtherDemanderMember []*render.Member          `json:"other_demander_member"`
+	OperatorMember      *render.Member            `json:"operator_member"`
+	Statue              enum.AdminDumpOrderStatus `json:"statue"`
+	IpaID               int64                     `json:"ipa_id,string"`
+	IpaVersion          string                    `json:"ipa_version"`
+	IpaName             string                    `json:"ipa_name"`
+	IpaBundleID         string                    `json:"ipa_bundle_id"`
+	IpaAppStoreLink     string                    `json:"ipa_app_store_link"`
+	IsOld               bool                      `json:"is_old"`
+	CreatedAt           int64                     `json:"created_at"`
+	UpdatedAt           int64                     `json:"updated_at"`
+}
+
 func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var (
@@ -80,6 +96,7 @@ func (h *AdminDumpOrderHandler) GetDumpOrderList(w http.ResponseWriter, r *http.
 			DemanderMember:      memberMap[do.DemanderID],
 			OtherDemanderMember: otherDemanderMembers,
 			OperatorMember:      memberMap[do.OperatorID],
+			Statue:              do.Status,
 			IpaID:               do.IpaID,
 			IpaVersion:          do.IpaVersion,
 			IpaName:             bizExt.IpaName,
@@ -130,21 +147,6 @@ func (h *AdminDumpOrderHandler) PutDumpOrderList(w http.ResponseWriter, r *http.
 	order.Status = args.Status
 	util.PanicIf(h.adminDumpOrderDAO.Update(ctx, order))
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
-}
-
-type DumpOrderResult struct {
-	ID                  int64            `json:"id,string"`
-	DemanderMember      *render.Member   `json:"demander_member"`
-	OtherDemanderMember []*render.Member `json:"other_demander_member"`
-	OperatorMember      *render.Member   `json:"operator_member"`
-	IpaID               int64            `json:"ipa_id,string"`
-	IpaVersion          string           `json:"ipa_version"`
-	IpaName             string           `json:"ipa_name"`
-	IpaBundleID         string           `json:"ipa_bundle_id"`
-	IpaAppStoreLink     string           `json:"ipa_app_store_link"`
-	IsOld               bool             `json:"is_old"`
-	CreatedAt           int64            `json:"created_at"`
-	UpdatedAt           int64            `json:"updated_at"`
 }
 
 type deleteAdminDumpOrderArgs struct {
