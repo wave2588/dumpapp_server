@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/datatype"
+	util2 "dumpapp_server/pkg/util"
 	"fmt"
 	"net/http"
 
@@ -20,14 +22,16 @@ import (
 )
 
 type AdminMemberPayCountHandler struct {
-	accountDAO        dao.AccountDAO
-	memberPayCountDAO dao.MemberPayCountDAO
+	accountDAO                dao.AccountDAO
+	memberPayCountDAO         dao.MemberPayCountDAO
+	memberPayExpenseRecordDAO dao.MemberPayExpenseRecordDAO
 }
 
 func NewAdminMemberPayCountHandler() *AdminMemberPayCountHandler {
 	return &AdminMemberPayCountHandler{
-		accountDAO:        impl.DefaultAccountDAO,
-		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
+		accountDAO:                impl.DefaultAccountDAO,
+		memberPayCountDAO:         impl.DefaultMemberPayCountDAO,
+		memberPayExpenseRecordDAO: impl.DefaultMemberPayExpenseRecordDAO,
 	}
 }
 
@@ -64,6 +68,16 @@ func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Re
 			Source:   enum.MemberPayCountSourceAdminPresented,
 		}))
 	}
+
+	/// 写入充值记录
+	util.PanicIf(h.memberPayExpenseRecordDAO.Insert(ctx, &models.MemberPayExpenseRecord{
+		MemberID: account.ID,
+		Status:   enum.MemberPayExpenseRecordStatusAdd,
+		Count:    args.Number,
+		BizExt: datatype.MemberPayExpenseRecordBizExt{
+			CountSource: enum.MemberPayCountSourceAdminPresented,
+		},
+	}))
 }
 
 type deleteDownloadNumber struct {
@@ -115,6 +129,16 @@ func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http
 		count.Status = enum.MemberPayCountStatusAdminDelete
 		util.PanicIf(h.memberPayCountDAO.Update(ctx, count))
 	}
+
+	util.PanicIf(h.memberPayExpenseRecordDAO.Insert(ctx, &models.MemberPayExpenseRecord{
+		MemberID: account.ID,
+		Status:   enum.MemberPayExpenseRecordStatusReduce,
+		Count:    args.Number,
+		BizExt: datatype.MemberPayExpenseRecordBizExt{
+			AdminMemberID: util2.Int64Ptr(loginID),
+		},
+	}))
+
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
 }

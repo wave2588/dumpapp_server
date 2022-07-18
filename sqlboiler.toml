@@ -249,3 +249,28 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# member_pay_expense_record table
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["member_pay_expense_record"]
+
+  [types.replace]
+    type = "datatype.MemberPayExpenseRecordBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_pay_expense_record"]
+
+  [types.replace]
+    type = "enum.MemberPayExpenseRecordStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']

@@ -104,8 +104,8 @@ func main() {
 				payForFreeCount += 1
 			case enum.MemberPayCountSourceAdminPresented:
 				rebateCount += 1
-			case enum.MemberPayCountSourceInvitedPresented:
-				invitedCount += 1
+			//case enum.MemberPayCountSourceInvitedPresented:
+			//	invitedCount += 1
 			case enum.MemberPayCountSourceRebate:
 				adminPresentedCount += 1
 			}

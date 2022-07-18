@@ -2,10 +2,9 @@ package impl
 
 import (
 	"context"
-	"math"
-
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -13,16 +12,19 @@ import (
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
+	util2 "dumpapp_server/pkg/util"
 	"github.com/spf13/cast"
+	"math"
 )
 
 type MemberPayOrderWebController struct {
-	alipayCtl             controller.ALiPayV3Controller
-	accountDAO            dao.AccountDAO
-	memberPayOrderDAO     dao.MemberPayOrderDAO
-	memberPayCountDAO     dao.MemberPayCountDAO
-	memberInviteDAO       dao.MemberInviteDAO
-	memberRebateRecordDAO dao.MemberRebateRecordDAO
+	alipayCtl                 controller.ALiPayV3Controller
+	accountDAO                dao.AccountDAO
+	memberPayOrderDAO         dao.MemberPayOrderDAO
+	memberPayCountDAO         dao.MemberPayCountDAO
+	memberInviteDAO           dao.MemberInviteDAO
+	memberRebateRecordDAO     dao.MemberRebateRecordDAO
+	memberPayExpenseRecordDAO dao.MemberPayExpenseRecordDAO
 }
 
 var DefaultMemberPayOrderWebController *MemberPayOrderWebController
@@ -33,12 +35,13 @@ func init() {
 
 func NewMemberPayOrderWebController() *MemberPayOrderWebController {
 	return &MemberPayOrderWebController{
-		alipayCtl:             impl.DefaultALiPayV3Controller,
-		accountDAO:            impl2.DefaultAccountDAO,
-		memberPayOrderDAO:     impl2.DefaultMemberPayOrderDAO,
-		memberPayCountDAO:     impl2.DefaultMemberPayCountDAO,
-		memberInviteDAO:       impl2.DefaultMemberInviteDAO,
-		memberRebateRecordDAO: impl2.DefaultMemberRebateRecordDAO,
+		alipayCtl:                 impl.DefaultALiPayV3Controller,
+		accountDAO:                impl2.DefaultAccountDAO,
+		memberPayOrderDAO:         impl2.DefaultMemberPayOrderDAO,
+		memberPayCountDAO:         impl2.DefaultMemberPayCountDAO,
+		memberInviteDAO:           impl2.DefaultMemberInviteDAO,
+		memberRebateRecordDAO:     impl2.DefaultMemberRebateRecordDAO,
+		memberPayExpenseRecordDAO: impl2.DefaultMemberPayExpenseRecordDAO,
 	}
 }
 
@@ -49,6 +52,8 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	if err != nil {
 		return err
 	}
+
+	memberID := order.MemberID
 
 	/// 支付成功的订单即可忽略
 	if order.Status == enum.MemberPayOrderStatusPaid {
@@ -66,7 +71,7 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	number := cast.ToInt(order.Amount)
 	for i := 0; i < number; i++ {
 		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: order.MemberID,
+			MemberID: memberID,
 			Status:   enum.MemberPayCountStatusNormal,
 			Source:   enum.MemberPayCountSourceNormal,
 		})
@@ -86,13 +91,18 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	}
 	for i := 0; i < freeNumber; i++ {
 		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: order.MemberID,
+			MemberID: memberID,
 			Status:   enum.MemberPayCountStatusNormal,
 			Source:   enum.MemberPayCountSourcePayForFree,
 		})
 		if err != nil {
 			return err
 		}
+	}
+
+	err = c.payRecord(ctx, order, freeNumber)
+	if err != nil {
+		return err
 	}
 
 	clients.MustCommit(ctx, txn)
@@ -137,6 +147,10 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 
 	/// 写入返还次数
 	count := cast.ToInt(math.Ceil(order.Amount * ratio))
+	if count == 0 {
+		return nil
+	}
+
 	for i := 0; i < count; i++ {
 		_ = c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
 			MemberID: inviterID,
@@ -145,9 +159,56 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 		})
 	}
 
+	/// 写入充值记录
+	err = c.memberPayExpenseRecordDAO.Insert(ctx, &models.MemberPayExpenseRecord{
+		MemberID: inviterID,
+		Status:   enum.MemberPayExpenseRecordStatusAdd,
+		Count:    cast.ToInt64(count),
+		BizExt: datatype.MemberPayExpenseRecordBizExt{
+			CountSource: enum.MemberPayCountSourceRebate,
+			OrderID:     util2.Int64Ptr(order.ID),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
 	return c.memberRebateRecordDAO.Insert(ctx, &models.MemberRebateRecord{
 		OrderID:          order.ID,
 		ReceiverMemberID: inviterID,
 		Count:            count,
 	})
+}
+
+func (c *MemberPayOrderWebController) payRecord(ctx context.Context, order *models.MemberPayOrder, freeNumber int) error {
+	/// 支付的写入记录
+	err := c.memberPayExpenseRecordDAO.Insert(ctx, &models.MemberPayExpenseRecord{
+		MemberID: order.MemberID,
+		Status:   enum.MemberPayExpenseRecordStatusAdd,
+		Count:    cast.ToInt64(order.Amount),
+		BizExt: datatype.MemberPayExpenseRecordBizExt{
+			CountSource: enum.MemberPayCountSourceNormal,
+			OrderID:     util2.Int64Ptr(order.ID),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	/// 多充多送的写入记录
+	if freeNumber != 0 {
+		err = c.memberPayExpenseRecordDAO.Insert(ctx, &models.MemberPayExpenseRecord{
+			MemberID: order.MemberID,
+			Status:   enum.MemberPayExpenseRecordStatusAdd,
+			Count:    cast.ToInt64(freeNumber),
+			BizExt: datatype.MemberPayExpenseRecordBizExt{
+				CountSource: enum.MemberPayCountSourcePayForFree,
+				OrderID:     util2.Int64Ptr(order.ID),
+			},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
