@@ -153,8 +153,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 发送消费成功通知
 	h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
 
-	memberMap := render.NewMemberRender([]int64{loginID}, loginID, render.MemberIncludes([]string{"Devices", "PayCount"})).RenderMap(ctx)
-	util.RenderJSON(w, memberMap[loginID])
+	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+	util.RenderJSON(w, cerMap[cerID])
 }
 
 type certificatePrice struct {
@@ -170,19 +170,19 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 			ID:          1,
 			Price:       30,
 			Title:       "普通版",
-			Description: "价格 30 售后 -（理论 1 年，无质保） - 已开放无限制购买",
+			Description: "理论 1 年，无质保。",
 		},
 		{
 			ID:          2,
 			Price:       78,
 			Title:       "稳定版",
-			Description: "价格 78 售后 -（充值活动，冲60得78币 ）-（理论 1 年，售后半年，掉了无限补）",
+			Description: "理论 1 年，售后半年，掉了无限补。",
 		},
 		{
 			ID:          3,
-			Price:       98,
+			Price:       97,
 			Title:       "豪华版",
-			Description: "价格 97 售后 -（充值活动，冲70得97币 ）-（理论 1 年，售后1年，掉了无限补）",
+			Description: "理论 1 年，售后 1 年，掉了无限补。",
 		},
 	}
 	util.RenderJSON(w, util.ListOutput{

@@ -30,13 +30,21 @@ type Member struct {
 	/// 用户绑定的设备信息
 	Devices []*Device `json:"devices,omitempty" render:"method=RenderDevices"`
 
+	/// 分享信息
 	ShareInfo *ShareInfo `json:"share_info"`
+
+	/// 充值活动
+	PayCampaign *PayCampaign `json:"pay_campaign"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdatedAt int64 `json:"updated_at"`
 
 	/// Admin 相关
 	Admin *Admin `json:"admin,omitempty" render:"method=RenderAdmin"`
+}
+
+type PayCampaign struct {
+	Description string `json:"description"`
 }
 
 type MemberRender struct {
@@ -139,6 +147,9 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			Phone:     util.StringPtr(account.Phone),
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
+			PayCampaign: &PayCampaign{
+				Description: "充值 27 送 9，充值 45 送 18，充值 63 送 27。",
+			},
 		}
 	}
 	f.memberMap = res
