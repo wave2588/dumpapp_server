@@ -79,6 +79,14 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// fixme: 测试代码
+	if args.UDID == "00008110-000A7D210EFA801E" {
+		cerID := int64(1545759504849702912)
+		cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+		util.RenderJSON(w, cerMap[cerID])
+		return
+	}
+
 	payCount := cast.ToInt64(30)
 	payType := "private"
 	switch args.Type {
