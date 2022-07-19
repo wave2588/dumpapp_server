@@ -18,6 +18,7 @@ import (
 
 type MemberPayOrderWebController struct {
 	alipayCtl             controller.ALiPayV3Controller
+	memberPayCountCtl     controller.MemberPayCountController
 	accountDAO            dao.AccountDAO
 	memberPayOrderDAO     dao.MemberPayOrderDAO
 	memberPayCountDAO     dao.MemberPayCountDAO
@@ -34,6 +35,7 @@ func init() {
 func NewMemberPayOrderWebController() *MemberPayOrderWebController {
 	return &MemberPayOrderWebController{
 		alipayCtl:             impl.DefaultALiPayV3Controller,
+		memberPayCountCtl:     impl.DefaultMemberPayCountController,
 		accountDAO:            impl2.DefaultAccountDAO,
 		memberPayOrderDAO:     impl2.DefaultMemberPayOrderDAO,
 		memberPayCountDAO:     impl2.DefaultMemberPayCountDAO,
@@ -63,20 +65,11 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	order.Status = enum.MemberPayOrderStatusPaid
 	util.PanicIf(c.memberPayOrderDAO.Update(ctx, order))
 
-	number := cast.ToInt(order.Amount)
-	for i := 0; i < number; i++ {
-		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: order.MemberID,
-			Status:   enum.MemberPayCountStatusNormal,
-			Source:   enum.MemberPayCountSourceNormal,
-		})
-		if err != nil {
-			return err
-		}
-	}
+	number := cast.ToInt64(order.Amount)
+	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, number, enum.MemberPayCountSourceNormal))
 
 	/// 多买多送，买 27 送 9，买 45 送 18，买 63 送 27。
-	freeNumber := 0
+	freeNumber := int64(0)
 	if number >= 27 && number < 45 {
 		freeNumber = 9
 	} else if number >= 45 && number < 63 {
@@ -84,16 +77,7 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	} else if number >= 63 {
 		freeNumber = 27
 	}
-	for i := 0; i < freeNumber; i++ {
-		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: order.MemberID,
-			Status:   enum.MemberPayCountStatusNormal,
-			Source:   enum.MemberPayCountSourcePayForFree,
-		})
-		if err != nil {
-			return err
-		}
-	}
+	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
@@ -137,12 +121,10 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 
 	/// 写入返还次数
 	count := cast.ToInt(math.Ceil(order.Amount * ratio))
-	for i := 0; i < count; i++ {
-		_ = c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
-			MemberID: inviterID,
-			Status:   enum.MemberPayCountStatusNormal,
-			Source:   enum.MemberPayCountSourceRebate,
-		})
+
+	err = c.memberPayCountCtl.AddCount(ctx, order.MemberID, int64(count), enum.MemberPayCountSourceRebate)
+	if err != nil {
+		return err
 	}
 
 	return c.memberRebateRecordDAO.Insert(ctx, &models.MemberRebateRecord{
