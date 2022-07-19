@@ -230,8 +230,10 @@ func (h *DeviceHandler) PostUDID(w http.ResponseWriter, r *http.Request) {
 
 	if data != nil {
 		data.Udid = args.UDID
-		data.BizExt = datatype.MemberDeviceBizExt{
-			Note: args.Note,
+		if args.Note != "" {
+			data.BizExt = datatype.MemberDeviceBizExt{
+				Note: args.Note,
+			}
 		}
 		util.PanicIf(h.memberDeivceDAO.Update(ctx, data))
 		util.RenderJSON(w, DefaultSuccessBody(ctx))
