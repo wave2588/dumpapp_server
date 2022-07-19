@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -60,7 +61,10 @@ func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	util.PanicIf(h.memberPayCountCtl.AddCount(ctx, account.ID, args.Number, enum.MemberPayCountSourceAdminPresented))
+	util.PanicIf(h.memberPayCountCtl.AddCount(ctx, account.ID, args.Number, enum.MemberPayCountSourceAdminPresented, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   0,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeNone,
+	}))
 }
 
 type deleteDownloadNumber struct {
@@ -97,5 +101,8 @@ func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http
 
 	util.PanicIf(h.memberPayCountCtl.CheckPayCount(ctx, account.ID, args.Number))
 
-	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, account.ID, args.Number, enum.MemberPayCountStatusAdminDelete, enum.MemberPayCountUseAdminDelete))
+	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, account.ID, args.Number, enum.MemberPayCountStatusAdminDelete, enum.MemberPayCountUseAdminDelete, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   0,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeNone,
+	}))
 }

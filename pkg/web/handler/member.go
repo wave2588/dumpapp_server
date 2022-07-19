@@ -19,18 +19,20 @@ import (
 )
 
 type MemberHandler struct {
-	accountDAO      dao2.AccountDAO
-	statisticsDAO   dao2.StatisticsDAO
-	memberDeviceDAO dao2.MemberDeviceDAO
-	certificateDAO  dao2.CertificateV2DAO
+	accountDAO              dao2.AccountDAO
+	statisticsDAO           dao2.StatisticsDAO
+	memberDeviceDAO         dao2.MemberDeviceDAO
+	certificateDAO          dao2.CertificateV2DAO
+	memberPayCountRecordDAO dao2.MemberPayCountRecordDAO
 }
 
 func NewMemberHandler() *MemberHandler {
 	return &MemberHandler{
-		accountDAO:      impl4.DefaultAccountDAO,
-		statisticsDAO:   impl4.DefaultStatisticsDAO,
-		memberDeviceDAO: impl4.DefaultMemberDeviceDAO,
-		certificateDAO:  impl4.DefaultCertificateV2DAO,
+		accountDAO:              impl4.DefaultAccountDAO,
+		statisticsDAO:           impl4.DefaultStatisticsDAO,
+		memberDeviceDAO:         impl4.DefaultMemberDeviceDAO,
+		certificateDAO:          impl4.DefaultCertificateV2DAO,
+		memberPayCountRecordDAO: impl4.DefaultMemberPayCountRecordDAO,
 	}
 }
 
@@ -175,5 +177,27 @@ func (h *MemberHandler) GetSelfCertificate(w http.ResponseWriter, r *http.Reques
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
 		Data:   data,
+	})
+}
+
+func (h *MemberHandler) GetSelfCoinRecords(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	var (
+		loginID = mustGetLoginID(ctx)
+		offset  = GetIntArgument(r, "offset", 0)
+		limit   = GetIntArgument(r, "limit", 10)
+	)
+
+	filters := []qm.QueryMod{
+		models.MemberPayCountRecordWhere.MemberID.EQ(loginID),
+	}
+	ids, err := h.memberPayCountRecordDAO.ListIDs(ctx, offset, limit, filters, nil)
+	util.PanicIf(err)
+	totalCount, err := h.memberPayCountRecordDAO.Count(ctx, filters)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
+		Data:   render.NewMemberPayCountRecordRender(ids, loginID, render.MemberPayCountRecordDefaultRenderFields...).RenderSlice(ctx),
 	})
 }

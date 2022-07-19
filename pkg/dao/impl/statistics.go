@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"dumpapp_server/pkg/common/clients"
+	"dumpapp_server/pkg/common/constant"
 	"github.com/go-redis/redis/v8"
 	"github.com/spf13/cast"
 )
@@ -35,6 +36,7 @@ func (d *StatisticsDAO) AddStatistics(ctx context.Context, memberID int64) error
 	key := d.generateStatisticsKey(time.Now())
 	cmd := d.redis.ZIncrBy(ctx, key, 1, cast.ToString(memberID))
 	_, err := cmd.Result()
+	_, _ = d.redis.Expire(ctx, key, constant.ThreeDayTTL).Result()
 	return err
 }
 

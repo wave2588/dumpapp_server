@@ -8,6 +8,7 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -170,10 +171,15 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 		defer clients.MustClearMySQLTransaction(ctx, txn)
 		ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-		/// 消费 9 个积分
-		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseIpa))
 		/// 添加下载记录
+		recordID := util2.MustGenerateID(ctx)
+		/// 消费 9 个积分
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseIpa, datatype.MemberPayCountRecordBizExt{
+			ObjectID:   recordID,
+			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeDownloadIpaRecord,
+		}))
 		util.PanicIf(h.memberDownloadIpaRecordDAO.Insert(ctx, &models.MemberDownloadIpaRecord{
+			ID:       recordID,
 			MemberID: loginID,
 			Status:   "used",
 			IpaID:    null.Int64From(ipaID),

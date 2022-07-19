@@ -39,6 +39,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/self/devices", memberHandler.GetSelfDevice)
 	r.With(middleware.OAuthRegister).Get("/member/self/devices_v2", memberHandler.GetSelfDeviceV2)
 	r.With(middleware.OAuthRegister).Get("/member/self/certificates", memberHandler.GetSelfCertificate)
+	r.With(middleware.OAuthRegister).Get("/member/self/coin/records", memberHandler.GetSelfCoinRecords)
 	// endregion
 
 	// member download record

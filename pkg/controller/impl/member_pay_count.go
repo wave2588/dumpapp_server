@@ -3,6 +3,7 @@ package impl
 import (
 	"context"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -13,7 +14,8 @@ import (
 )
 
 type MemberPayCountController struct {
-	memberPayCountDAO dao.MemberPayCountDAO
+	memberPayCountDAO       dao.MemberPayCountDAO
+	memberPayCountRecordDAO dao.MemberPayCountRecordDAO
 }
 
 var DefaultMemberPayCountController *MemberPayCountController
@@ -24,11 +26,16 @@ func init() {
 
 func NewMemberPayCountController() *MemberPayCountController {
 	return &MemberPayCountController{
-		memberPayCountDAO: impl.DefaultMemberPayCountDAO,
+		memberPayCountDAO:       impl.DefaultMemberPayCountDAO,
+		memberPayCountRecordDAO: impl.DefaultMemberPayCountRecordDAO,
 	}
 }
 
-func (c *MemberPayCountController) AddCount(ctx context.Context, memberID, count int64, source enum.MemberPayCountSource) error {
+func (c *MemberPayCountController) AddCount(ctx context.Context, memberID, count int64, source enum.MemberPayCountSource, recordBizExt datatype.MemberPayCountRecordBizExt) error {
+	if count == 0 {
+		return nil
+	}
+
 	for i := 0; i < int(count); i++ {
 		err := c.memberPayCountDAO.Insert(ctx, &models.MemberPayCount{
 			MemberID: memberID,
@@ -39,7 +46,13 @@ func (c *MemberPayCountController) AddCount(ctx context.Context, memberID, count
 			return err
 		}
 	}
-	return nil
+
+	return c.memberPayCountRecordDAO.Insert(ctx, &models.MemberPayCountRecord{
+		MemberID: memberID,
+		Type:     enum.ConvertMemberPayCountSourceToRecordType(source),
+		Count:    count,
+		BizExt:   recordBizExt,
+	})
 }
 
 func (c *MemberPayCountController) CheckPayCount(ctx context.Context, loginID, limit int64) error {
@@ -57,7 +70,11 @@ func (c *MemberPayCountController) CheckPayCount(ctx context.Context, loginID, l
 	return nil
 }
 
-func (c *MemberPayCountController) DeductPayCount(ctx context.Context, loginID, limit int64, status enum.MemberPayCountStatus, use enum.MemberPayCountUse) error {
+func (c *MemberPayCountController) DeductPayCount(ctx context.Context, loginID, limit int64, status enum.MemberPayCountStatus, use enum.MemberPayCountUse, recordBizExt datatype.MemberPayCountRecordBizExt) error {
+	if limit == 0 {
+		return nil
+	}
+
 	filter := []qm.QueryMod{
 		models.MemberPayCountWhere.MemberID.EQ(loginID),
 		models.MemberPayCountWhere.Status.EQ(enum.MemberPayCountStatusNormal),
@@ -81,5 +98,11 @@ func (c *MemberPayCountController) DeductPayCount(ctx context.Context, loginID, 
 			return err
 		}
 	}
-	return nil
+
+	return c.memberPayCountRecordDAO.Insert(ctx, &models.MemberPayCountRecord{
+		MemberID: loginID,
+		Type:     enum.ConvertMemberPayCountUseToRecordType(use),
+		Count:    limit,
+		BizExt:   recordBizExt,
+	})
 }

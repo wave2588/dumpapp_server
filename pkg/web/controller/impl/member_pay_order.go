@@ -6,6 +6,7 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -66,7 +67,10 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	util.PanicIf(c.memberPayOrderDAO.Update(ctx, order))
 
 	number := cast.ToInt64(order.Amount)
-	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, number, enum.MemberPayCountSourceNormal))
+	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, number, enum.MemberPayCountSourceNormal, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   orderID,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
+	}))
 
 	/// 多买多送，买 27 送 9，买 45 送 18，买 63 送 27。
 	freeNumber := int64(0)
@@ -77,7 +81,10 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	} else if number >= 63 {
 		freeNumber = 27
 	}
-	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree))
+	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   orderID,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
+	}))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
@@ -122,7 +129,10 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 	/// 写入返还次数
 	count := cast.ToInt(math.Ceil(order.Amount * ratio))
 
-	err = c.memberPayCountCtl.AddCount(ctx, order.MemberID, int64(count), enum.MemberPayCountSourceRebate)
+	err = c.memberPayCountCtl.AddCount(ctx, order.MemberID, int64(count), enum.MemberPayCountSourceRebate, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   order.ID,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
+	})
 	if err != nil {
 		return err
 	}
