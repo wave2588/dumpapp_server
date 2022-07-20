@@ -120,10 +120,10 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 		return nil
 	}
 
-	/// 正常是返还 30%，如果是大 V 则返还 60%
-	ratio := 0.2
+	/// 正常是返还 10%，如果是大 V 则返还 20%
+	ratio := 0.1
 	if account.Role == enum.AccountRoleInfluential {
-		ratio = 0.4
+		ratio = 0.2
 	}
 
 	/// 写入返还次数
