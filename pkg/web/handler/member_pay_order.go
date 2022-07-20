@@ -55,16 +55,15 @@ func (h *MemberPayOrderHandler) GetPayOrderURL(w http.ResponseWriter, r *http.Re
 	)
 	platform := ctx.Value(constant.CtxKeyAppPlatform).(string)
 	if platform == "ios" {
-		orderID, payURL, err = h.aliPayCtl.GetPhonePayURLByNumber(ctx, loginID, args.Number)
+		orderID, payURL, err = h.aliPayCtl.GetPhoneWapPayURLByNumber(ctx, loginID, args.Number)
 	} else {
 		orderID, payURL, err = h.aliPayCtl.GetPayURLByNumber(ctx, loginID, args.Number)
 	}
 	util.PanicIf(err)
 
 	res := map[string]interface{}{
-		"order_id":        cast.ToString(orderID),
-		"open_url":        payURL,
-		"is_open_browser": false, /// 主要是给 App 使用
+		"order_id": cast.ToString(orderID),
+		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)
 }
