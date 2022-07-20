@@ -6,6 +6,7 @@ import (
 	"dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	errors2 "dumpapp_server/pkg/errors"
 	pkgErr "github.com/pkg/errors"
 )
 
@@ -41,11 +42,15 @@ func (c *MemberIDEncryptionController) GetMemberIDByCode(ctx context.Context, co
 		return 0, err
 	}
 	if e == nil {
-		return 0, errors.ErrNotFound
+		return 0, errors2.ErrNotFoundMember
 	}
-	_, err = c.accountDAO.Get(ctx, e.MemberID)
+	accountMap, err := c.accountDAO.BatchGet(ctx, []int64{e.MemberID})
 	if err != nil {
 		return 0, err
 	}
-	return e.MemberID, nil
+	account, ok := accountMap[e.MemberID]
+	if !ok {
+		return 0, errors2.ErrNotFoundMember
+	}
+	return account.ID, nil
 }

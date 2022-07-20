@@ -31,6 +31,7 @@ func main() {
 	r.Mount("/api/", web.DefaultRouter)
 	r.Mount("/api/v3/", web.DefaultRouterV3)
 	r.Mount("/api/install_app/", web.DefaultRouterInstallApp)
+	r.Mount("/api/open/", web.DefaultRouterOpenAPI)
 
 	util.PanicIf(http.ListenAndServe(":1995", r))
 }

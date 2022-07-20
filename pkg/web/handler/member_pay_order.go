@@ -62,9 +62,8 @@ func (h *MemberPayOrderHandler) GetPayOrderURL(w http.ResponseWriter, r *http.Re
 	util.PanicIf(err)
 
 	res := map[string]interface{}{
-		"order_id":        cast.ToString(orderID),
-		"open_url":        payURL,
-		"is_open_browser": true, /// 主要是给 App 使用
+		"order_id": cast.ToString(orderID),
+		"open_url": payURL,
 	}
 	util.RenderJSON(w, res)
 }
