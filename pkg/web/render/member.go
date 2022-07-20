@@ -101,7 +101,7 @@ var MemberDefaultRenderFields = []MemberOption{
 }
 
 var MemberSelfRenderFields = []MemberOption{
-	MemberIncludes(append(defaultFields, []string{"Token"}...)),
+	MemberIncludes(append(DefaultFields, []string{"Token"}...)),
 }
 
 func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRender {

@@ -90,11 +90,26 @@ func run() {
 	uv, _ := impl.DefaultStatisticsDAO.GetUserView(ctx, startAt)
 	pv, _ := impl.DefaultStatisticsDAO.GetPageView(ctx, startAt)
 
+	filters = []qm.QueryMod{
+		models.InstallAppCdkeyOrderWhere.CreatedAt.GT(startAt),
+	}
+	cdKeyOrderIDs, err := impl.DefaultInstallAppCdkeyOrderDAO.ListIDs(ctx, 0, 1000, filters, nil)
+	util.PanicIf(err)
+	cdKeyOrderMap, err := impl.DefaultInstallAppCdkeyOrderDAO.BatchGet(ctx, cdKeyOrderIDs)
+	util.PanicIf(err)
+	cdKeyOrderAmount := 0
+	for _, order := range cdKeyOrderMap {
+		if order.Amount != 0 {
+			cdKeyOrderAmount += cast.ToInt(order.Amount)
+		}
+	}
+
 	contentStr := fmt.Sprintf("<font color=\"info\">每日总结\n截止昨日此时数据统计如下：</font>\n>")
 	newMemberStr := fmt.Sprintf("新注册用户：<font color=\"comment\">%d</font> 人\n其中邀请注册用户：<font color=\"comment\">%d</font> 人\n", len(memberIDs), len(inviterMemberIDs))
 	paidMemberStr := fmt.Sprintf("新用户付费率：：<font color=\"comment\">%.2f%%</font>\n", cast.ToFloat64(len(paidMemberIDs))/cast.ToFloat64(len(memberIDs))*100)
-	orderCountStr := fmt.Sprintf("总订单：<font color=\"comment\">%d</font>\n", orderCount)
-	amountStr := fmt.Sprintf("总收入：<font color=\"comment\">%v</font>\n", amount)
+	orderCountStr := fmt.Sprintf("订单数：<font color=\"comment\">%d</font>\n", orderCount)
+	amountStr := fmt.Sprintf("订单收入：<font color=\"comment\">%v</font>\n", amount)
+	cdKeyAmountStr := fmt.Sprintf("App 兑换码收入：<font color=\"comment\">%v</font>\n", cdKeyOrderAmount)
 	downloadedStr := fmt.Sprintf("使用次数：<font color=\"comment\">%d</font>\n", downloadedCount)
 	downloadedMemberStr := fmt.Sprintf("下载人数：<font color=\"comment\">%d</font>\n", len(downloadedMember))
 	uvStr := fmt.Sprintf("uv: <font color=\"comment\">%d</font>\n", uv)
@@ -104,7 +119,7 @@ func run() {
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": contentStr +
-				newMemberStr + paidMemberStr + orderCountStr + amountStr + downloadedStr + downloadedMemberStr + uvStr + pvStr + timeStr,
+				newMemberStr + paidMemberStr + downloadedStr + downloadedMemberStr + orderCountStr + amountStr + cdKeyAmountStr + uvStr + pvStr + timeStr,
 		},
 	}
 	util2.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{"@all"})
