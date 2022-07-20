@@ -1,13 +1,13 @@
 package open_api_handler
 
 import (
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/controller"
-	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -20,16 +20,16 @@ import (
 )
 
 type OpenCertificateHandler struct {
-	memberDeviceDAO dao.MemberDeviceDAO
-	certificateDAO  dao.CertificateV2DAO
-	certificateCtl  controller.CertificateController
+	memberDeviceDAO   dao.MemberDeviceDAO
+	certificateDAO    dao.CertificateV2DAO
+	certificateWebCtl controller2.CertificateWebController
 }
 
 func NewOpenCertificateHandler() *OpenCertificateHandler {
 	return &OpenCertificateHandler{
-		memberDeviceDAO: impl.DefaultMemberDeviceDAO,
-		certificateDAO:  impl.DefaultCertificateV2DAO,
-		certificateCtl:  impl2.DefaultCertificateV2Controller,
+		memberDeviceDAO:   impl.DefaultMemberDeviceDAO,
+		certificateDAO:    impl.DefaultCertificateV2DAO,
+		certificateWebCtl: impl3.DefaultCertificateWebController,
 	}
 }
 
@@ -72,7 +72,16 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 		}))
 	}
 
-	/// todo
+	/// 购买证书
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, 30, "")
+	util.PanicIf(err)
+
+	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+	cer, ok := cerMap[cerID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundCertificate)
+	}
+	util.RenderJSON(w, cer)
 }
 
 type getCertificateArgs struct {

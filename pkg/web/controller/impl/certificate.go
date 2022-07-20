@@ -2,6 +2,17 @@ package impl
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/clients"
+	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
+	"dumpapp_server/pkg/common/enum"
+	"dumpapp_server/pkg/controller"
+	impl2 "dumpapp_server/pkg/controller/impl"
+	"dumpapp_server/pkg/dao"
+	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/errors"
+	controller2 "dumpapp_server/pkg/web/controller"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -11,7 +22,13 @@ import (
 	util2 "dumpapp_server/pkg/util"
 )
 
-type CertificateWebController struct{}
+type CertificateWebController struct {
+	memberDeviceDAO   dao.MemberDeviceDAO
+	certificateDAO    dao.CertificateV2DAO
+	memberPayCountCtl controller.MemberPayCountController
+	certificateCtl    controller.CertificateController
+	alterWebCtl       controller2.AlterWebController
+}
 
 var DefaultCertificateWebController *CertificateWebController
 
@@ -20,7 +37,86 @@ func init() {
 }
 
 func NewCertificateWebController() *CertificateWebController {
-	return &CertificateWebController{}
+	return &CertificateWebController{
+		memberDeviceDAO:   impl.DefaultMemberDeviceDAO,
+		certificateDAO:    impl.DefaultCertificateV2DAO,
+		memberPayCountCtl: impl2.DefaultMemberPayCountController,
+		certificateCtl:    impl2.DefaultCertificateV2Controller,
+		alterWebCtl:       NewAlterWebController(),
+	}
+}
+
+func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid string, payCount int64, payType string) (int64, error) {
+
+	/// fixme: 测试代码
+	if udid == "00008110-000A7D210EFA801E" {
+		return int64(1545759504849702912), nil
+	}
+
+	util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
+
+	memberDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, udid)
+	util.PanicIf(err)
+	if memberDevice == nil {
+		return 0, errors.ErrDeviceNotFound
+	}
+	if memberDevice.MemberID != loginID {
+		return 0, errors.ErrCreateCertificateFailV2
+	}
+
+	/// 请求整数接口
+	response := c.certificateCtl.CreateCer(ctx, udid, "1")
+	if response.ErrorMessage != nil {
+		/// 创建失败推送
+		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, *response.ErrorMessage)
+		util.PanicIf(errors.ErrCreateCertificateFail)
+	}
+	if response.BizExt == nil {
+		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, "response biz_ext is nil")
+		util.PanicIf(errors.ErrCreateCertificateFail)
+	}
+
+	p12FileData := response.P12Data
+	mpFileData := response.MobileProvisionData
+	/// p12 文件修改内容
+	modifiedP12FileData, err := c.GetModifiedCertificateData(ctx, p12FileData, response.BizExt.OriginalP12Password, response.BizExt.NewP12Password)
+	util.PanicIf(err)
+
+	/// 计算证书 md5
+	p12FileMd5 := util2.StringMd5(p12FileData)
+	mpFileMd5 := util2.StringMd5(mpFileData)
+
+	/// 事物
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	cerID := util2.MustGenerateID(ctx)
+	util.PanicIf(c.certificateDAO.Insert(ctx, &models.CertificateV2{
+		ID:                         cerID,
+		DeviceID:                   memberDevice.ID,
+		P12FileData:                p12FileData,
+		P12FileDataMD5:             p12FileMd5,
+		ModifiedP12FileDate:        modifiedP12FileData,
+		MobileProvisionFileData:    mpFileData,
+		MobileProvisionFileDataMD5: mpFileMd5,
+		Source:                     response.Source,
+		BizExt:                     response.BizExt.String(),
+	}))
+
+	/// 扣除消费的 D 币
+	util.PanicIf(c.memberPayCountCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   cerID,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
+	}))
+
+	clients.MustCommit(ctx, txn)
+	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
+
+	/// 发送消费成功通知
+	c.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
+
+	return cerID, nil
 }
 
 func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Context, p12Data, originalPassword, newPassword string) (string, error) {

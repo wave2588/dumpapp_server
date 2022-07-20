@@ -1,28 +1,21 @@
 package handler
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"strconv"
 
-	"dumpapp_server/pkg/common/clients"
-	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/datatype"
-	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	http2 "dumpapp_server/pkg/http"
 	impl3 "dumpapp_server/pkg/http/impl"
 	"dumpapp_server/pkg/middleware"
-	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl5 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
@@ -80,14 +73,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	/// fixme: 测试代码
-	if args.UDID == "00008110-000A7D210EFA801E" {
-		cerID := int64(1545759504849702912)
-		cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-		util.RenderJSON(w, cerMap[cerID])
-		return
-	}
-
 	payCount := cast.ToInt64(30)
 	payType := "private"
 	switch args.Type {
@@ -102,68 +87,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payType = "private"
 	}
 
-	util.PanicIf(h.memberDownloadNumberCtl.CheckPayCount(ctx, loginID, payCount))
-
-	memberDevice, err := h.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, payCount, payType)
 	util.PanicIf(err)
-	if memberDevice == nil {
-		panic(errors.ErrDeviceNotFound)
-	}
-	if memberDevice.MemberID != loginID {
-		panic(errors.ErrCreateCertificateFailV2)
-	}
-
-	/// 请求整数接口
-	response := h.certificateV2Controller.CreateCer(ctx, args.UDID, payType)
-	if response.ErrorMessage != nil {
-		/// 创建失败推送
-		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, *response.ErrorMessage)
-		util.PanicIf(errors.ErrCreateCertificateFail)
-	}
-	if response.BizExt == nil {
-		h.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, "response biz_ext is nil")
-		util.PanicIf(errors.ErrCreateCertificateFail)
-	}
-
-	p12FileData := response.P12Data
-	mpFileData := response.MobileProvisionData
-	/// p12 文件修改内容
-	modifiedP12FileData, err := h.certificateWebCtl.GetModifiedCertificateData(ctx, p12FileData, response.BizExt.OriginalP12Password, response.BizExt.NewP12Password)
-	util.PanicIf(err)
-
-	/// 计算证书 md5
-	p12FileMd5 := util2.StringMd5(p12FileData)
-	mpFileMd5 := util2.StringMd5(mpFileData)
-
-	/// 事物
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-
-	cerID := util2.MustGenerateID(ctx)
-	util.PanicIf(h.certificateDAO.Insert(ctx, &models.CertificateV2{
-		ID:                         cerID,
-		DeviceID:                   memberDevice.ID,
-		P12FileData:                p12FileData,
-		P12FileDataMD5:             p12FileMd5,
-		ModifiedP12FileDate:        modifiedP12FileData,
-		MobileProvisionFileData:    mpFileData,
-		MobileProvisionFileDataMD5: mpFileMd5,
-		Source:                     response.Source,
-		BizExt:                     response.BizExt.String(),
-	}))
-
-	/// 扣除消费的 D 币
-	util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
-		ObjectID:   cerID,
-		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
-	}))
-
-	clients.MustCommit(ctx, txn)
-	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
-
-	/// 发送消费成功通知
-	h.alterWebCtl.SendCreateCertificateSuccessMsg(ctx, loginID, memberDevice.ID, cerID)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, cerMap[cerID])
