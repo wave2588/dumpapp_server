@@ -252,19 +252,11 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	util.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
 		MemberID: accountID,
-		Code:     util3.MustGenerateCode(ctx, 10),
+		Code:     util3.MustGenerateCode(ctx, 32),
 	}))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
-
-	/// 必须使用手机号注册, 才能送一次下载次数
-	//if args.Phone != "" {
-	//	util.PanicIf(h.memberDownloadNumberDAO.Insert(ctx, &models.MemberDownloadNumber{
-	//		MemberID: accountID,
-	//		Status:   enum.MemberDownloadNumberStatusNormal,
-	//	}))
-	//}
 
 	members := render.NewMemberRender([]int64{accountID}, accountID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
 

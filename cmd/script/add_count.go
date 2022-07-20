@@ -28,6 +28,6 @@ func main() {
 
 	util2.PanicIf(impl.DefaultMemberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
 		MemberID: id,
-		Code:     util.MustGenerateCode(ctx, 10),
+		Code:     util.MustGenerateCode(ctx, 32),
 	}))
 }

@@ -1,8 +1,6 @@
 package open_api_handler
 
 import (
-	controller2 "dumpapp_server/pkg/web/controller"
-	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 
@@ -13,6 +11,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/handler"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"

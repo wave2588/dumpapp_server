@@ -2,24 +2,24 @@ package impl
 
 import (
 	"context"
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
+	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
-	controller2 "dumpapp_server/pkg/web/controller"
-	"encoding/base64"
-	"fmt"
-	"io/ioutil"
-	"os"
-
-	"dumpapp_server/pkg/common/util"
 	util2 "dumpapp_server/pkg/util"
+	controller2 "dumpapp_server/pkg/web/controller"
 )
 
 type CertificateWebController struct {
@@ -47,7 +47,6 @@ func NewCertificateWebController() *CertificateWebController {
 }
 
 func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid string, payCount int64, payType string) (int64, error) {
-
 	/// fixme: 测试代码
 	if udid == "00008110-000A7D210EFA801E" {
 		return int64(1545759504849702912), nil

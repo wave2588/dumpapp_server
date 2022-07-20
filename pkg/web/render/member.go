@@ -30,6 +30,8 @@ type Member struct {
 	/// 用户绑定的设备信息
 	Devices []*Device `json:"devices,omitempty" render:"method=RenderDevices"`
 
+	Token *string `json:"token,omitempty" render:"method=RenderToken"`
+
 	/// 分享信息
 	ShareInfo *ShareInfo `json:"share_info"`
 
@@ -54,11 +56,12 @@ type MemberRender struct {
 
 	memberMap map[int64]*Member
 
-	accountDAO          dao.AccountDAO
-	memberPayCountDAO   dao.MemberPayCountDAO
-	memberInviteCodeDAO dao.MemberInviteCodeDAO
-	memberDeviceDAO     dao.MemberDeviceDAO
-	certificateService  http.CertificateServer
+	accountDAO            dao.AccountDAO
+	memberPayCountDAO     dao.MemberPayCountDAO
+	memberInviteCodeDAO   dao.MemberInviteCodeDAO
+	memberDeviceDAO       dao.MemberDeviceDAO
+	memberIDEncryptionDAO dao.MemberIDEncryptionDAO
+	certificateService    http.CertificateServer
 }
 
 type MemberOption func(*MemberRender)
@@ -79,6 +82,11 @@ func MemberIncludes(fields []string) MemberOption {
 	}
 }
 
+var DefaultFields = []string{
+	"PayCount",
+	"InviteURL",
+}
+
 var MemberAdminRenderFields = []MemberOption{
 	MemberIncludes([]string{
 		"Admin",
@@ -92,16 +100,21 @@ var MemberDefaultRenderFields = []MemberOption{
 	}),
 }
 
+var MemberSelfRenderFields = []MemberOption{
+	MemberIncludes(append(defaultFields, []string{"Token"}...)),
+}
+
 func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRender {
 	f := &MemberRender{
 		ids:     ids,
 		loginID: loginID,
 
-		accountDAO:          impl.DefaultAccountDAO,
-		memberPayCountDAO:   impl.DefaultMemberPayCountDAO,
-		memberInviteCodeDAO: impl.DefaultMemberInviteCodeDAO,
-		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
-		certificateService:  impl2.DefaultCertificateServer,
+		accountDAO:            impl.DefaultAccountDAO,
+		memberPayCountDAO:     impl.DefaultMemberPayCountDAO,
+		memberInviteCodeDAO:   impl.DefaultMemberInviteCodeDAO,
+		memberDeviceDAO:       impl.DefaultMemberDeviceDAO,
+		memberIDEncryptionDAO: impl.DefaultMemberIDEncryptionDAO,
+		certificateService:    impl2.DefaultCertificateServer,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -238,5 +251,17 @@ func (f *MemberRender) RenderAdmin(ctx context.Context) {
 	adminMap := NewAdminRender(f.ids, f.loginID).RenderMap(ctx)
 	for _, member := range f.memberMap {
 		member.Admin = adminMap[member.ID]
+	}
+}
+
+func (f *MemberRender) RenderToken(ctx context.Context) {
+	data, err := f.memberIDEncryptionDAO.BatchGetByMemberID(ctx, f.ids)
+	util.PanicIf(err)
+	for _, member := range f.memberMap {
+		d, ok := data[member.meta.ID]
+		if !ok {
+			continue
+		}
+		member.Token = util.StringPtr(d.Code)
 	}
 }

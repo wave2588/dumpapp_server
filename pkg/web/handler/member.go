@@ -65,7 +65,7 @@ func (h *MemberHandler) GetSelf(w http.ResponseWriter, r *http.Request) {
 
 	account := GetAccountByLoginID(ctx, loginID)
 
-	members := render.NewMemberRender([]int64{account.ID}, loginID, render.MemberDefaultRenderFields...).RenderSlice(ctx)
+	members := render.NewMemberRender([]int64{account.ID}, loginID, render.MemberSelfRenderFields...).RenderSlice(ctx)
 
 	ticket, err := util2.GenerateRegisterTicket(account.ID)
 	util.PanicIf(err)
