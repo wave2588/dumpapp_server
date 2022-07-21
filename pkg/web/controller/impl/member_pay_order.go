@@ -129,7 +129,7 @@ func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *m
 	/// 写入返还次数
 	count := cast.ToInt(math.Ceil(order.Amount * ratio))
 
-	err = c.memberPayCountCtl.AddCount(ctx, order.MemberID, int64(count), enum.MemberPayCountSourceRebate, datatype.MemberPayCountRecordBizExt{
+	err = c.memberPayCountCtl.AddCount(ctx, inviterID, int64(count), enum.MemberPayCountSourceRebate, datatype.MemberPayCountRecordBizExt{
 		ObjectID:   order.ID,
 		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
 	})
