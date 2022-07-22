@@ -161,7 +161,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: "充值 27 送 9，充值 45 送 18，充值 63 送 27。",
+				Description: "最新充值活动近期上线，敬请期待。",
 			},
 		}
 	}
