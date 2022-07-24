@@ -57,7 +57,7 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 	result := &result{
 		IsNeedUpdate:  false,
 		IsForceUpdate: lastDumpappVersion.IsForceUpdate,
-		DownloadURL:   "https://www.baidu.com",
+		DownloadURL:   "https://www.dumpapp.com/app",
 		Title:         "请升级最新版本",
 		Describe:      "版本过低，请尽快升级到最新版本。",
 	}
