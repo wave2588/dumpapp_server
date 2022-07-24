@@ -403,3 +403,50 @@ func (h *AccountHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
+
+type resetEmailQueryArgs struct {
+	Email string `json:"email" validate:"required"`
+}
+
+func (p *resetEmailQueryArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AccountHandler) ResetEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx)
+
+	args := &resetEmailQueryArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 检测邮箱
+	if !constant.CheckEmailValid(args.Email) {
+		panic(errors.ErrEmailRefusedRegister)
+	}
+
+	/// 判断邮箱是否存在
+	emailAccountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
+	util.PanicIf(err)
+	_, ok := emailAccountMap[args.Email]
+	if ok {
+		util.PanicIf(errors.ErrAccountRegisteredByEmail)
+	}
+
+	/// 获取原本账号信息，并且修改密码
+	accountMap, err := h.accountDAO.BatchGet(ctx, []int64{loginID})
+	util.PanicIf(err)
+	account, ok := accountMap[loginID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundMember)
+	}
+
+	account.Email = args.Email
+	util.PanicIf(h.accountDAO.Update(ctx, account))
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
