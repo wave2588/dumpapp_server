@@ -17,24 +17,24 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type IpaDAO struct {
+type AppTimeLockDAO struct {
 	mysqlPool *sql.DB
 }
 
-var DefaultIpaDAO *IpaDAO
+var DefaultAppTimeLockDAO *AppTimeLockDAO
 
 func init() {
-	DefaultIpaDAO = NewIpaDAO()
+	DefaultAppTimeLockDAO = NewAppTimeLockDAO()
 }
 
-func NewIpaDAO() *IpaDAO {
-	d := &IpaDAO{
+func NewAppTimeLockDAO() *AppTimeLockDAO {
+	d := &AppTimeLockDAO{
 		mysqlPool: clients.MySQLConnectionsPool,
 	}
 	return d
 }
 
-func (d *IpaDAO) Insert(ctx context.Context, data *models.Ipa) error {
+func (d *AppTimeLockDAO) Insert(ctx context.Context, data *models.AppTimeLock) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -52,7 +52,7 @@ func (d *IpaDAO) Insert(ctx context.Context, data *models.Ipa) error {
 	return nil
 }
 
-func (d *IpaDAO) Update(ctx context.Context, data *models.Ipa) error {
+func (d *AppTimeLockDAO) Update(ctx context.Context, data *models.AppTimeLock) error {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -64,9 +64,9 @@ func (d *IpaDAO) Update(ctx context.Context, data *models.Ipa) error {
 	return pkgErr.WithStack(err)
 }
 
-func (d *IpaDAO) Delete(ctx context.Context, id int64) error {
+func (d *AppTimeLockDAO) Delete(ctx context.Context, id int64) error {
 	qs := []qm.QueryMod{
-		models.IpaWhere.ID.EQ(id),
+		models.AppTimeLockWhere.ID.EQ(id),
 	}
 
 	var exec boil.ContextExecutor
@@ -76,27 +76,27 @@ func (d *IpaDAO) Delete(ctx context.Context, id int64) error {
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	_, err := models.Ipas(qs...).DeleteAll(ctx, exec)
+	_, err := models.AppTimeLocks(qs...).DeleteAll(ctx, exec)
 	if err != nil {
 		return pkgErr.WithStack(err)
 	}
 	return nil
 }
 
-func (d *IpaDAO) Get(ctx context.Context, id int64) (*models.Ipa, error) {
+func (d *AppTimeLockDAO) Get(ctx context.Context, id int64) (*models.AppTimeLock, error) {
 	result, err := d.BatchGet(ctx, []int64{id})
 	if err != nil {
 		return nil, err
 	}
 	if v, ok := result[id]; !ok {
-		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=ipa, id=%d", id)
+		return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=app_time_lock, id=%d", id)
 	} else {
 		return v, nil
 	}
 }
 
 // BatchGet retrieves multiple records by primary key from db.
-func (d *IpaDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.Ipa, error) {
+func (d *AppTimeLockDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.AppTimeLock, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -104,12 +104,12 @@ func (d *IpaDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.I
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-	datas, err := models.Ipas(models.IpaWhere.ID.IN(ids)).All(ctx, exec)
+	datas, err := models.AppTimeLocks(models.AppTimeLockWhere.ID.IN(ids)).All(ctx, exec)
 	if err != nil {
 		return nil, pkgErr.WithStack(err)
 	}
 
-	result := make(map[int64]*models.Ipa)
+	result := make(map[int64]*models.AppTimeLock)
 	for _, c := range datas {
 		result[c.ID] = c
 	}
@@ -118,11 +118,11 @@ func (d *IpaDAO) BatchGet(ctx context.Context, ids []int64) (map[int64]*models.I
 }
 
 // 后台和脚本使用：倒序列出所有
-func (d *IpaDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
+func (d *AppTimeLockDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error) {
 	if offset < 0 || limit <= 0 || limit > 10000 {
 		return nil, pkgErr.Errorf("invalid offset or limit")
 	}
-	qs := []qm.QueryMod{qm.Select(models.IpaColumns.ID)}
+	qs := []qm.QueryMod{qm.Select(models.AppTimeLockColumns.ID)}
 	qs = append(qs, filters...)
 
 	if len(orderBys) > 0 {
@@ -146,9 +146,9 @@ func (d *IpaDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.Qu
 		exec = txn.(*sql.Tx)
 	}
 
-	datas, err := models.Ipas(qs...).All(ctx, exec)
+	datas, err := models.AppTimeLocks(qs...).All(ctx, exec)
 	if err != nil {
-		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=ipa offset=%d limit=%d filters=%v", offset, limit, filters))
+		return nil, pkgErr.Wrap(err, fmt.Sprintf("table=app_time_lock offset=%d limit=%d filters=%v", offset, limit, filters))
 	}
 
 	result := make([]int64, 0)
@@ -158,8 +158,8 @@ func (d *IpaDAO) ListIDs(ctx context.Context, offset, limit int, filters []qm.Qu
 	return result, nil
 }
 
-func (d *IpaDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
-	qs := []qm.QueryMod{qm.Select(models.IpaColumns.ID)}
+func (d *AppTimeLockDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error) {
+	qs := []qm.QueryMod{qm.Select(models.AppTimeLockColumns.ID)}
 	qs = append(qs, filters...)
 
 	var exec boil.ContextExecutor
@@ -170,5 +170,5 @@ func (d *IpaDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, error
 		exec = txn.(*sql.Tx)
 	}
 
-	return models.Ipas(qs...).Count(ctx, exec)
+	return models.AppTimeLocks(qs...).Count(ctx, exec)
 }

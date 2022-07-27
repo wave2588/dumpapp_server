@@ -649,7 +649,6 @@ func (o IpaSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols
 
 var mySQLIpaUniqueColumns = []string{
 	"id",
-	"name",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

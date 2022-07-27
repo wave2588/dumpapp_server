@@ -138,6 +138,15 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/app_version", appVersionHandler.CheckAppVersion)
 	// endregion
 
+	// app_time_lock 时间锁
+	appTimeLockHandler := handler.NewAppTimeLockHandler()
+	r.With(middleware.OAuthRegister).Post("/time_lock", appTimeLockHandler.Post)
+	r.With(middleware.OAuthGuest).Get("/time_lock/{id}", appTimeLockHandler.Get) /// 因为此接口要注入到其他 app 中，不需要登录态。
+	r.With(middleware.OAuthRegister).Put("/time_lock/{id}", appTimeLockHandler.Put)
+	r.With(middleware.OAuthRegister).Delete("/time_lock/{id}", appTimeLockHandler.Delete)
+	r.With(middleware.OAuthRegister).Get("/time_lock/list", appTimeLockHandler.GetList)
+	// endregion
+
 	return r
 }
 

@@ -274,3 +274,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# app_time_lock table
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["app_time_lock"]
+
+  [types.replace]
+    type = "datatype.AppTimeLockBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

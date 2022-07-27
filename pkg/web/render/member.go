@@ -18,10 +18,11 @@ import (
 type Member struct {
 	meta *models.Account
 
-	ID     int64   `json:"id,string"`
-	Email  string  `json:"email"`
-	Status string  `json:"status"`
-	Phone  *string `json:"phone,omitempty"`
+	ID     int64  `json:"id,string"`
+	Email  string `json:"email"`
+	Status string `json:"status"`
+
+	Phone *string `json:"phone,omitempty" render:"method=RenderPhone"`
 
 	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
 
@@ -101,7 +102,7 @@ var MemberDefaultRenderFields = []MemberOption{
 }
 
 var MemberSelfRenderFields = []MemberOption{
-	MemberIncludes(append(DefaultFields, []string{"Token"}...)),
+	MemberIncludes(append(DefaultFields, []string{"Token", "Phone"}...)),
 }
 
 func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRender {
@@ -157,7 +158,6 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			ID:        account.ID,
 			Email:     account.Email,
 			Status:    "normal",
-			Phone:     util.StringPtr(account.Phone),
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
@@ -168,6 +168,12 @@ func (f *MemberRender) fetch(ctx context.Context) {
 	f.memberMap = res
 
 	f.RenderShareInfo(ctx)
+}
+
+func (f *MemberRender) RenderPhone(ctx context.Context) {
+	for _, member := range f.memberMap {
+		member.Phone = util.StringPtr(member.meta.Phone)
+	}
 }
 
 func (f *MemberRender) RenderPayCount(ctx context.Context) {

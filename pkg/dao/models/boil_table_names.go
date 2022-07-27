@@ -6,6 +6,7 @@ package models
 var TableNames = struct {
 	Account                 string
 	AdminDumpOrder          string
+	AppTimeLock             string
 	CertificateV2           string
 	DailyFreeRecord         string
 	DumpappVersion          string
@@ -29,6 +30,7 @@ var TableNames = struct {
 }{
 	Account:                 "account",
 	AdminDumpOrder:          "admin_dump_order",
+	AppTimeLock:             "app_time_lock",
 	CertificateV2:           "certificate_v2",
 	DailyFreeRecord:         "daily_free_record",
 	DumpappVersion:          "dumpapp_version",
