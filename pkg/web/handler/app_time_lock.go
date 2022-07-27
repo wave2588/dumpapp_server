@@ -103,6 +103,12 @@ func (h *AppTimeLockHandler) Put(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
 	}
+
+	/// 只能自己删除
+	if timeLock.MemberID != loginID {
+		util.PanicIf(errors.ErrMemberAccessDenied)
+	}
+
 	timeLock.StartAt = time.Unix(args.StartAt, 0)
 	timeLock.EndAt = time.Unix(args.EndAt, 0)
 	timeLock.BizExt.Description = args.Description
