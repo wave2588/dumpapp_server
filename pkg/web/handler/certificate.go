@@ -80,7 +80,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payCount = 30
 		payType = "private"
 	case 2: // 60 售后一年，等 1 - 7 天   public
-		payCount = 78
+		payCount = 68
 		payType = "private"
 	case 3: /// 90 售后一年，立即出   public
 		payCount = 97
@@ -111,7 +111,7 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 		},
 		{
 			ID:          2,
-			Price:       78,
+			Price:       68,
 			Title:       "稳定版",
 			Description: "理论 1 年，售后半年，掉了无限补。",
 		},
