@@ -104,7 +104,7 @@ func (h *AppTimeLockHandler) Put(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(errors.ErrNotFound)
 	}
 
-	/// 只能自己删除
+	/// 只能自己修改
 	if timeLock.MemberID != loginID {
 		util.PanicIf(errors.ErrMemberAccessDenied)
 	}
