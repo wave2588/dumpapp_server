@@ -1,9 +1,12 @@
 package install_app_handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller/install_app"
 	"dumpapp_server/pkg/controller/install_app/impl"
@@ -18,14 +21,16 @@ import (
 )
 
 type CDKEYOrderHandler struct {
-	aliPayCtl          install_app.ALiPayInstallAppController
-	installAppCDKEYDAO dao2.InstallAppCdkeyDAO
+	aliPayCtl               install_app.ALiPayInstallAppController
+	installAppCDKEYDAO      dao2.InstallAppCdkeyDAO
+	installAppCDKEYOrderDAO dao2.InstallAppCdkeyOrderDAO
 }
 
 func NewCDKEYOrderHandler() *CDKEYOrderHandler {
 	return &CDKEYOrderHandler{
-		aliPayCtl:          impl.DefaultALiPayInstallAppController,
-		installAppCDKEYDAO: impl2.DefaultInstallAppCdkeyDAO,
+		aliPayCtl:               impl.DefaultALiPayInstallAppController,
+		installAppCDKEYDAO:      impl2.DefaultInstallAppCdkeyDAO,
+		installAppCDKEYOrderDAO: impl2.DefaultInstallAppCdkeyOrderDAO,
 	}
 }
 
@@ -81,5 +86,65 @@ func (h *CDKEYOrderHandler) GetOrderInfo(w http.ResponseWriter, r *http.Request)
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
 		Data:   install_app_render.NewCDKEYRender(ids, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
+	})
+}
+
+type getOrderByContactWatResp struct {
+	ContactWat string                      `json:"contact_wat"`
+	CDKeys     []*install_app_render.CDKEY `json:"cd_keys"`
+}
+
+func (h *CDKEYOrderHandler) GetOrderByContactWay(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	contactWay := util.URLParam(r, "contact_way")
+
+	var orderID int64
+
+	offset := 0
+	limit := 100
+	hasNext := true
+	filter := []qm.QueryMod{
+		models.InstallAppCdkeyOrderWhere.Status.EQ(enum.MemberPayOrderStatusPaid),
+	}
+	for hasNext {
+		if orderID != 0 {
+			break
+		}
+
+		ids, err := h.installAppCDKEYOrderDAO.ListIDs(ctx, offset, limit, filter, nil)
+		util.PanicIf(err)
+
+		offset += len(ids)
+		hasNext = len(ids) == limit
+
+		orderMap, err := h.installAppCDKEYOrderDAO.BatchGet(ctx, ids)
+		util.PanicIf(err)
+
+		for _, order := range orderMap {
+			var bizExt constant.InstallAppCDKEYOrderBizExt
+			util.PanicIf(json.Unmarshal([]byte(order.BizExt), &bizExt))
+			if bizExt.ContactWay == contactWay {
+				orderID = order.ID
+				break
+			}
+		}
+	}
+
+	if orderID == 0 {
+		util.PanicIf(errors.UnproccessableError("未找到订单"))
+	}
+	resp, err := h.installAppCDKEYDAO.BatchGetByOrderIDs(ctx, []int64{orderID})
+	util.PanicIf(err)
+
+	cdkeyIDs := make([]int64, 0)
+	for _, appCdkeys := range resp {
+		for _, cdkey := range appCdkeys {
+			cdkeyIDs = append(cdkeyIDs, cdkey.ID)
+		}
+	}
+	util.RenderJSON(w, &getOrderByContactWatResp{
+		ContactWat: contactWay,
+		CDKeys:     install_app_render.NewCDKEYRender(cdkeyIDs, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
 	})
 }

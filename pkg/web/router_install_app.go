@@ -13,6 +13,7 @@ func NewRouterInstallApp() chi.Router {
 	orderHandler := install_app_handler.NewCDKEYOrderHandler()
 	r.With(middleware.OAuthGuest).Get("/order", orderHandler.GetOrderURL)
 	r.With(middleware.OAuthGuest).Get("/order/{order_id}", orderHandler.GetOrderInfo)
+	r.With(middleware.OAuthGuest).Get("/order/contact_way/{contact_way}", orderHandler.GetOrderByContactWay)
 
 	/// cdkey
 	cdkeyHandler := install_app_handler.NewCDKEYHandler()
