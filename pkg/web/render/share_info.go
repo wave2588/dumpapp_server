@@ -11,7 +11,7 @@ type ShareInfo struct {
 
 func MustRenderShareInfo() *ShareInfo {
 	return &ShareInfo{
-		Content:        "App 多开、分身、去广告、签名推广.....只有你想不到，没有我们做不到，更多好玩 App 功能尽在 DumpStore，快来加入吧！https://www.dumpapp.com",
+		Content:        "App 多开、分身、去广告、签名推广.....只有你想不到，没有我们做不到，更多好玩 App 功能尽在 DumpApp，快来加入吧！https://www.dumpapp.com/app",
 		QQGroupURL:     "https://jq.qq.com/?_wv=1027&k=ItOGYFPG",
 		QQGroupNum:     763789550,
 		TelegramURL:    "https://t.me/+VGGU8RYVqDo1NTg1",
