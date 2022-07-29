@@ -24,5 +24,5 @@ type InstallAppCdkeyDAO interface {
 	GetByOutID(ctx context.Context, outID string) (*models.InstallAppCdkey, error)
 	// BatchGetByOutID retrieves multiple records by uniq key outID from db.
 	BatchGetByOutID(ctx context.Context, outIDs []string) (map[string]*models.InstallAppCdkey, error)
-	BatchGetByOrderIDs(ctx context.Context, orderIDs []int64) (map[int64][]*models.InstallAppCdkey, error)
+	BatchGetByCertificateIDs(ctx context.Context, certificateIDs []int64) (map[int64][]*models.InstallAppCdkey, error)
 }

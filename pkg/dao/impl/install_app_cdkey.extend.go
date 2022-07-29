@@ -7,9 +7,9 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-func (d *InstallAppCdkeyDAO) BatchGetByOrderIDs(ctx context.Context, orderIDs []int64) (map[int64][]*models.InstallAppCdkey, error) {
+func (d *InstallAppCdkeyDAO) BatchGetByCertificateIDs(ctx context.Context, certificateIDs []int64) (map[int64][]*models.InstallAppCdkey, error) {
 	qs := []qm.QueryMod{
-		models.InstallAppCdkeyWhere.OrderID.IN(orderIDs),
+		models.InstallAppCdkeyWhere.CertificateID.IN(certificateIDs),
 	}
 
 	data, err := models.InstallAppCdkeys(qs...).All(ctx, d.mysqlPool)
@@ -19,7 +19,7 @@ func (d *InstallAppCdkeyDAO) BatchGetByOrderIDs(ctx context.Context, orderIDs []
 
 	res := make(map[int64][]*models.InstallAppCdkey)
 	for _, datum := range data {
-		res[datum.OrderID] = append(res[datum.OrderID], datum)
+		res[datum.CertificateID] = append(res[datum.CertificateID], datum)
 	}
 	return res, nil
 }
