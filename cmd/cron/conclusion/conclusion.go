@@ -99,7 +99,7 @@ func run() {
 	util.PanicIf(err)
 	cdKeyOrderAmount := 0
 	for _, order := range cdKeyOrderMap {
-		if order.Amount != 0 {
+		if order.Status == enum.MemberPayOrderStatusPaid {
 			cdKeyOrderAmount += cast.ToInt(order.Amount)
 		}
 	}
