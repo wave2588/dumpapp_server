@@ -54,7 +54,7 @@ func (c *CertificateV1Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		"token":            config.DumpConfig.AppConfig.CerServerToken,
 		"udid":             UDID,
 		"udid_region_pool": regionPool,
-	})
+	}, 0)
 	if err != nil {
 		res.ErrorMessage = util2.StringPtr("请求 v1 接口失败")
 		return res
@@ -106,7 +106,7 @@ func (c *CertificateV1Controller) CheckCerIsActive(ctx context.Context, certific
 	}, map[string]string{
 		"p12_file_data": cer.P12FileData,
 		"p12_password":  "1",
-	})
+	}, 0)
 	if err != nil {
 		return false, err
 	}

@@ -167,7 +167,7 @@ func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	// country := cast.ToString(util.URLParam(r, "country"))
 	// endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
 	endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
-	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{})
+	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{}, 0)
 	util.PanicIf(err)
 	var result []map[string]interface{}
 	util.PanicIf(json.Unmarshal(body, &result))

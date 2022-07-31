@@ -29,7 +29,7 @@ func (h *CertificateServer) CreateCer(ctx context.Context, udid, regionPool stri
 		"token":            config.DumpConfig.AppConfig.CerServerToken,
 		"udid":             udid,
 		"udid_region_pool": regionPool,
-	})
+	}, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (h *CertificateServer) CheckP12File(ctx context.Context, p12FileData, p12Pa
 	}, map[string]string{
 		"p12_file_data": p12FileData,
 		"p12_password":  p12Password,
-	})
+	}, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (h *CertificateServer) CheckCerByUDIDBatchNo(ctx context.Context, udidBatch
 	}, map[string]string{
 		"token":      config.DumpConfig.AppConfig.CerServerToken,
 		"udid_batch": udidBatchNo,
-	})
+	}, 0)
 	if err != nil {
 		return nil, err
 	}

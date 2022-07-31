@@ -147,6 +147,14 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/time_lock/list", appTimeLockHandler.GetList)
 	// endregion
 
+	// app_source 软件源
+	appSourceHandler := handler.NewAppSourceHandler()
+	r.With(middleware.OAuthRegister).Post("/app_source", appSourceHandler.Post)
+	r.With(middleware.OAuthRegister).Get("/member/self/app_source", appSourceHandler.GetSelfList)
+	r.With(middleware.OAuthRegister).Get("/app_source/{id}", appSourceHandler.Get)
+	r.With(middleware.OAuthRegister).Delete("/app_source/{id}", appSourceHandler.Delete)
+	// endregion
+
 	return r
 }
 

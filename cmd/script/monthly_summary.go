@@ -63,7 +63,21 @@ func main() {
 		memberIDs = append(memberIDs, ids...)
 	}
 
+	filter := []qm.QueryMod{
+		models.InstallAppCdkeyOrderWhere.CreatedAt.GTE(startAt),
+		models.InstallAppCdkeyOrderWhere.Status.EQ(enum.MemberPayOrderStatusPaid),
+	}
+	installAppIDs, err := impl.DefaultInstallAppCdkeyOrderDAO.ListIDs(ctx, 0, 9999, filter, nil)
+	util.PanicIf(err)
+	installAppOrderMap, err := impl.DefaultInstallAppCdkeyOrderDAO.BatchGet(ctx, installAppIDs)
+	var installAppAmount float64
+	for _, order := range installAppOrderMap {
+		installAppAmount += order.Amount
+	}
+
 	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
 	fmt.Println(fmt.Sprintf("%d 支付成功的订单-->: %d", month, len(resIDs)))
-	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, amount))
+	fmt.Println(fmt.Sprintf("%d 主站收入-->: %.2f", month, amount))
+	fmt.Println(fmt.Sprintf("%d app 兑换码收入-->: %.2f", month, installAppAmount))
+	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, amount+installAppAmount))
 }

@@ -60,6 +60,9 @@ var (
 
 	/// member pay order 错误
 	ErrMemberPayOrderNotFound = NewDefaultAPIError(404, 1000001, "ErrMemberPayOrderNotFound", "订单未找到")
+
+	/// member app_source 错误
+	ErrAppSourceDisabled = NewDefaultAPIError(401, 1100001, "ErrAppSourceDisabled", "源地址不可用")
 )
 
 func UnproccessableError(msg string) *APIError {

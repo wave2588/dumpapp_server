@@ -3,19 +3,23 @@ package util
 import (
 	"io"
 	"io/ioutil"
-	http2 "net/http"
+	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
-func HttpRequest(method, endpoint string, header, values map[string]string) ([]byte, error) {
+func HttpRequest(method, endpoint string, header, values map[string]string, timeout time.Duration) ([]byte, error) {
 	data := url.Values{}
 	for key, value := range values {
 		data.Set(key, value)
 	}
-	client := &http2.Client{}
-	r, err := http2.NewRequest(method, endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
+	client := &http.Client{}
+	if timeout != 0 {
+		client.Timeout = timeout
+	}
+	r, err := http.NewRequest(method, endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +36,8 @@ func HttpRequest(method, endpoint string, header, values map[string]string) ([]b
 }
 
 func HttpRequestV2(method, endpoint string, header map[string]string, body io.Reader) ([]byte, error) {
-	client := &http2.Client{}
-	r, err := http2.NewRequest(method, endpoint, body)
+	client := &http.Client{}
+	r, err := http.NewRequest(method, endpoint, body)
 	if err != nil {
 		return nil, err
 	}
