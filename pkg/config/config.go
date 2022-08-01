@@ -42,13 +42,14 @@ var config = appConfig{
 
 	SentryDSN: os.Getenv("SENTRY_DSN"),
 
-	TencentCOSAppID:        os.Getenv("TENCENT_COS_APP_ID"),
-	TencentCosBucketName:   os.Getenv("TENCENT_COS_BUCKET_NAME"),
-	TencentCosBucketRegion: os.Getenv("TENCENT_COS_BUCKET_REGION"),
-	TencentCosSecretID:     os.Getenv("TENCENT_COS_SECRET_ID"),
-	TencentCosSecretKey:    os.Getenv("TENCENT_COS_SECRET_KEY"),
-	TencentCosIpaHost:      os.Getenv("TENCENT_COS_IPA_HOST"),
-	TencentCosSignIpaHost:  os.Getenv("TENCENT_COS_SIGN_IPA_HOST"),
+	TencentCOSAppID:             os.Getenv("TENCENT_COS_APP_ID"),
+	TencentCosBucketName:        os.Getenv("TENCENT_COS_BUCKET_NAME"),
+	TencentCosBucketRegion:      os.Getenv("TENCENT_COS_BUCKET_REGION"),
+	TencentCosSecretID:          os.Getenv("TENCENT_COS_SECRET_ID"),
+	TencentCosSecretKey:         os.Getenv("TENCENT_COS_SECRET_KEY"),
+	TencentCosIpaHost:           os.Getenv("TENCENT_COS_IPA_HOST"),
+	TencentCosSignIpaHost:       os.Getenv("TENCENT_COS_SIGN_IPA_HOST"),
+	TencentCosSignIpaBucketName: os.Getenv("TENCENT_COS_SIGN_IPA_BUCKET_NAME"),
 
 	TencentSMSAppSDKID:   os.Getenv("TENCENT_SMS_APP_SKD_ID"),
 	TencentSMSTemplateID: os.Getenv("TENCENT_SMS_TEMPLATE_ID"),
@@ -92,13 +93,14 @@ type appConfig struct {
 
 	SentryDSN string
 
-	TencentCOSAppID        string
-	TencentCosBucketName   string
-	TencentCosBucketRegion string
-	TencentCosSecretID     string
-	TencentCosSecretKey    string
-	TencentCosIpaHost      string
-	TencentCosSignIpaHost  string
+	TencentCOSAppID             string
+	TencentCosBucketName        string
+	TencentCosBucketRegion      string
+	TencentCosSecretID          string
+	TencentCosSecretKey         string
+	TencentCosIpaHost           string
+	TencentCosSignIpaHost       string
+	TencentCosSignIpaBucketName string
 
 	TencentSMSAppSDKID   string
 	TencentSMSTemplateID string

@@ -114,7 +114,8 @@ func NewRouter() chi.Router {
 
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
-	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get)
+	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get) ///todo： 这个应该写到管理后台的 handler 里，暂时先写到这里。
+	r.With(middleware.OAuthRegister).Get("/cos/sign_ipa", tencentCosHandler.GetSignIpa)
 	// endregion
 
 	// regis daily_free
@@ -153,6 +154,14 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/self/app_source", appSourceHandler.GetSelfList)
 	r.With(middleware.OAuthRegister).Get("/app_source/{id}", appSourceHandler.Get)
 	r.With(middleware.OAuthRegister).Delete("/app_source/{id}", appSourceHandler.Delete)
+	// endregion
+
+	// member sign ipa
+	memberSignIpaHandler := handler.NewMemberSignIpaHandler()
+	r.With(middleware.OAuthRegister).Post("/sign_ipa", memberSignIpaHandler.Post)
+	r.With(middleware.OAuthRegister).Get("/member/self/sign_ipa", memberSignIpaHandler.GetSelfSignIpaList)
+	r.With(middleware.OAuthRegister).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
+	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 
 	return r

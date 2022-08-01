@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"dumpapp_server/pkg/common/util"
@@ -99,9 +100,25 @@ func (c *TencentController) GetToFile(ctx context.Context, name, path string) er
 	return err
 }
 
-func (c *TencentController) PutSignIpaByFile(ctx context.Context, name, path string) error {
-	_, err := c.signIpaClient.Object.PutFromFile(ctx, name, path, nil)
+func (c *TencentController) PutMemberSignIpa(ctx context.Context, name string, data string) error {
+	reader := strings.NewReader(data)
+	_, err := c.signIpaClient.Object.Put(ctx, name, reader, nil)
 	return err
+}
+
+func (c *TencentController) GetMemberSignIpa(ctx context.Context, ipaToken string) (string, error) {
+	return fmt.Sprintf("%s/%s", config.DumpConfig.AppConfig.TencentCosSignIpaHost, ipaToken), nil
+}
+
+func (c *TencentController) DeleteMemberSignIpa(ctx context.Context, tokenPath string) error {
+	response, err := c.signIpaClient.Object.Delete(ctx, tokenPath)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode >= 300 {
+		return errors.UnproccessableError(fmt.Sprintf("服务器删除文件错误. 错误码: %s", response.Status))
+	}
+	return nil
 }
 
 func (c *TencentController) SendPhoneRegisterCaptcha(ctx context.Context, captcha, phone string) error {

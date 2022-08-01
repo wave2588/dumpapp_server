@@ -174,58 +174,6 @@ func (d *MemberIDEncryptionDAO) Count(ctx context.Context, filters []qm.QueryMod
 	return models.MemberIDEncryptions(qs...).Count(ctx, exec)
 }
 
-// GetByMemberID retrieves a single record by uniq key memberID from db.
-func (d *MemberIDEncryptionDAO) GetByMemberID(ctx context.Context, memberID int64) (*models.MemberIDEncryption, error) {
-	memberIDEncryptionObj := &models.MemberIDEncryption{}
-
-	sel := "*"
-	query := fmt.Sprintf(
-		"select %s from `member_id_encryption` where `member_id`=?", sel,
-	)
-
-	q := queries.Raw(query, memberID)
-
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-
-	err := q.Bind(ctx, exec, memberIDEncryptionObj)
-	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_id_encryption, query=%s, args=memberID :%v", query, memberID)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from member_id_encryption")
-	}
-
-	return memberIDEncryptionObj, nil
-}
-
-// BatchGetByMemberID retrieves multiple records by uniq key memberID from db.
-func (d *MemberIDEncryptionDAO) BatchGetByMemberID(ctx context.Context, memberIDs []int64) (map[int64]*models.MemberIDEncryption, error) {
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-	datas, err := models.MemberIDEncryptions(models.MemberIDEncryptionWhere.MemberID.IN(memberIDs)).All(ctx, exec)
-	if err != nil {
-		return nil, pkgErr.WithStack(err)
-	}
-
-	result := make(map[int64]*models.MemberIDEncryption)
-	for _, c := range datas {
-		result[c.MemberID] = c
-	}
-
-	return result, nil
-}
-
 // GetByCode retrieves a single record by uniq key code from db.
 func (d *MemberIDEncryptionDAO) GetByCode(ctx context.Context, code string) (*models.MemberIDEncryption, error) {
 	memberIDEncryptionObj := &models.MemberIDEncryption{}
@@ -273,6 +221,58 @@ func (d *MemberIDEncryptionDAO) BatchGetByCode(ctx context.Context, codes []stri
 	result := make(map[string]*models.MemberIDEncryption)
 	for _, c := range datas {
 		result[c.Code] = c
+	}
+
+	return result, nil
+}
+
+// GetByMemberID retrieves a single record by uniq key memberID from db.
+func (d *MemberIDEncryptionDAO) GetByMemberID(ctx context.Context, memberID int64) (*models.MemberIDEncryption, error) {
+	memberIDEncryptionObj := &models.MemberIDEncryption{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `member_id_encryption` where `member_id`=?", sel,
+	)
+
+	q := queries.Raw(query, memberID)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, memberIDEncryptionObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_id_encryption, query=%s, args=memberID :%v", query, memberID)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_id_encryption")
+	}
+
+	return memberIDEncryptionObj, nil
+}
+
+// BatchGetByMemberID retrieves multiple records by uniq key memberID from db.
+func (d *MemberIDEncryptionDAO) BatchGetByMemberID(ctx context.Context, memberIDs []int64) (map[int64]*models.MemberIDEncryption, error) {
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+	datas, err := models.MemberIDEncryptions(models.MemberIDEncryptionWhere.MemberID.IN(memberIDs)).All(ctx, exec)
+	if err != nil {
+		return nil, pkgErr.WithStack(err)
+	}
+
+	result := make(map[int64]*models.MemberIDEncryption)
+	for _, c := range datas {
+		result[c.MemberID] = c
 	}
 
 	return result, nil

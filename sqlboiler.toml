@@ -300,3 +300,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# member_sign_ipa table
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["member_sign_ipa"]
+
+  [types.replace]
+    type = "datatype.MemberSignIpaBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
