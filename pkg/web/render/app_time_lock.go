@@ -2,13 +2,12 @@ package render
 
 import (
 	"context"
-	"time"
-
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"time"
 )
 
 type AppTimeLock struct {
@@ -23,7 +22,8 @@ type AppTimeLock struct {
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
 
-	Member *Member `json:"member" render:"method=RenderMember"`
+	/// 是否过期
+	IsValid bool `json:"is_valid"` /// true 有效 false 无效
 }
 
 type AppTimeLockRender struct {
@@ -55,9 +55,7 @@ func AppTimeLockIncludes(fields []string) AppTimeLockOption {
 }
 
 var AppTimeLockDefaultRenderFields = []AppTimeLockOption{
-	AppTimeLockIncludes([]string{
-		"Member",
-	}),
+	AppTimeLockIncludes([]string{}),
 }
 
 func NewAppTimeLockRender(ids []int64, loginID int64, opts ...AppTimeLockOption) *AppTimeLockRender {
@@ -101,6 +99,7 @@ func (f *AppTimeLockRender) fetch(ctx context.Context) {
 	metaMap, err := f.appTimeLockDAO.BatchGet(ctx, f.ids)
 	util.PanicIf(err)
 
+	now := time.Now().Unix()
 	result := make(map[int64]*AppTimeLock)
 	for _, id := range f.ids {
 		meta, ok := metaMap[id]
@@ -117,33 +116,11 @@ func (f *AppTimeLockRender) fetch(ctx context.Context) {
 			EndAt:       meta.EndAt.Unix(),
 			CreatedAt:   meta.CreatedAt.Unix(),
 			UpdatedAt:   meta.UpdatedAt.Unix(),
+			IsValid:     meta.StartAt.Unix() < now && now < meta.EndAt.Unix(),
 		}
-		if meta.IsStop {
-			data.IsStop = meta.IsStop
-		} else {
-			/// 判断是否还在有效时间内
-			now := time.Now().Unix()
-			if meta.StartAt.Unix() < now && now < meta.EndAt.Unix() {
-				data.IsStop = true
-			} else {
-				data.IsStop = false
-			}
-		}
+
 		result[id] = data
 	}
 
 	f.appTimeLockMap = result
-}
-
-func (f *AppTimeLockRender) RenderMember(ctx context.Context) {
-	memberIDs := make([]int64, 0)
-	for _, lock := range f.appTimeLockMap {
-		memberIDs = append(memberIDs, lock.meta.MemberID)
-	}
-	memberIDs = util2.RemoveDuplicates(memberIDs)
-
-	memberMap := NewMemberRender(memberIDs, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
-	for _, lock := range f.appTimeLockMap {
-		lock.Member = memberMap[lock.meta.MemberID]
-	}
 }
