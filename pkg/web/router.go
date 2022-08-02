@@ -164,6 +164,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 
+	// we_com
+	weComHandler := handler.NewWeComHandler()
+	r.With(middleware.OAuthRegister).Post("/wecom", weComHandler.Post)
+	// endregion
+
 	return r
 }
 

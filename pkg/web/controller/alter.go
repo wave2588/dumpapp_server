@@ -3,6 +3,8 @@ package controller
 import "context"
 
 type AlterWebController interface {
+	/// 推送自定义信息
+	SendCustomMsg(ctx context.Context, content string)
 	/// 砸壳订单推送
 	SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, bundleID, ipaName, version string)
 	/// feedback 推送
