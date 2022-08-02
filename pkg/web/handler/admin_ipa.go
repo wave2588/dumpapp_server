@@ -324,6 +324,14 @@ func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64, ip
 	return nil
 }
 
+func (h *AdminIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := mustGetLoginID(ctx)
+	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
+	data := render.NewIpaRender([]int64{ipaID}, loginID, []enum.IpaType{enum.IpaTypeNormal, enum.IpaTypeCrack}, render.IpaAdminRenderFields...).RenderMap(ctx)
+	util.RenderJSON(w, data[ipaID])
+}
+
 type deleteIpaArgs struct {
 	IpaID                 string       `json:"ipa_id" validate:"required"`
 	IpaType               enum.IpaType `json:"ipa_type" validate:"required"`

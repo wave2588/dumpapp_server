@@ -31,6 +31,7 @@ func NewRouterAdmin() chi.Router {
 	adminIpaHandler := handler.NewAdminIpaHandler()
 	r.With(middleware.OAuthAdmin).Get("/ipa", adminIpaHandler.List)
 	r.With(middleware.OAuthAdmin).Post("/ipa", adminIpaHandler.Post)
+	r.With(middleware.OAuthAdmin).Get("/ipa/{ipa_id}", adminIpaHandler.Get)
 	r.With(middleware.OAuthAdmin).Delete("/ipa", adminIpaHandler.DeleteIpa)
 	r.With(middleware.OAuthAdmin).Delete("/batch_ipa", adminIpaHandler.BatchDeleteIpa)
 	// endregion
@@ -63,6 +64,13 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdmin).Post("/cdkey", cdkeyHandler.Post)
 	r.With(middleware.OAuthAdmin).Get("/cdkeys", cdkeyHandler.GetList)
 	r.With(middleware.OAuthAdmin).Delete("/cdkey/{cdkey_id}", cdkeyHandler.Delete)
+	// endregion
+
+	// ipa_black handler
+	ipaBlackHandler := handler.NewAdminIpaBlackHandler()
+	r.With(middleware.OAuthAdmin).Post("/ipa_black", ipaBlackHandler.Post)
+	r.With(middleware.OAuthAdmin).Get("/ipa_black/list", ipaBlackHandler.GetList)
+	r.With(middleware.OAuthAdmin).Delete("/ipa_black/{ipa_black_id}", ipaBlackHandler.Delete)
 	// endregion
 
 	return r

@@ -28,6 +28,9 @@ type Ipa struct {
 	Counter *Counter `json:"counter,omitempty" render:"method=RenderCounter"`
 
 	Versions []*Version `json:"versions,omitempty" render:"method=RenderVersions"`
+
+	/// 是否在黑名单中
+	BlackInfo BlackInfo `json:"black_info" render:"method=RenderBlack"`
 }
 
 type Version struct {
@@ -45,6 +48,16 @@ type Counter struct {
 	LastDownloadTime int64 `json:"last_download_time"`
 }
 
+type BlackInfo struct {
+	IsBlack bool               `json:"is_black"`
+	Reasons []*BlackInfoReason `json:"reasons"`
+}
+
+type BlackInfoReason struct {
+	ID     int64  `json:"id,string"`
+	Reason string `json:"reason"`
+}
+
 type IpaRender struct {
 	ids               []int64
 	loginID           int64
@@ -55,6 +68,7 @@ type IpaRender struct {
 
 	ipaDAO                     dao.IpaDAO
 	ipaVersionDAO              dao.IpaVersionDAO
+	ipaBlackDAO                dao.IpaBlackDAO
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 
 	tencentCtl controller.TencentController
@@ -84,12 +98,14 @@ var IpaAdminRenderFields = []IpaOption{
 	IpaIncludes([]string{
 		"Versions",
 		"Counter",
+		"BlackInfo",
 	}),
 }
 
 var IpaDefaultRenderFields = []IpaOption{
 	IpaIncludes([]string{
 		"Versions",
+		"BlackInfo",
 	}),
 }
 
@@ -106,6 +122,7 @@ func NewIpaRender(ids []int64, loginID int64, ipaTypes []enum.IpaType, opts ...I
 
 		ipaDAO:                     impl.DefaultIpaDAO,
 		ipaVersionDAO:              impl.DefaultIpaVersionDAO,
+		ipaBlackDAO:                impl.DefaultIpaBlackDAO,
 		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
 
 		tencentCtl: impl2.DefaultTencentController,
@@ -209,6 +226,26 @@ func (f *IpaRender) RenderCounter(ctx context.Context) {
 				DownloadCount:    count,
 				LastDownloadTime: updatedAt,
 			}
+		}
+	}
+}
+
+func (f *IpaRender) RenderBlack(ctx context.Context) {
+	blackMap, err := f.ipaBlackDAO.BatchGetByIpaIDs(ctx, f.ids)
+	util.PanicIf(err)
+
+	for _, ipa := range f.IpaMap {
+		blacks := blackMap[ipa.meta.ID]
+		reasons := make([]*BlackInfoReason, 0)
+		for _, black := range blacks {
+			reasons = append(reasons, &BlackInfoReason{
+				ID:     black.ID,
+				Reason: black.BizExt.Reason,
+			})
+		}
+		ipa.BlackInfo = BlackInfo{
+			IsBlack: len(reasons) != 0,
+			Reasons: reasons,
 		}
 	}
 }

@@ -313,3 +313,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# ipa_black table
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["ipa_black"]
+
+  [types.replace]
+    type = "datatype.IpaBlackBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

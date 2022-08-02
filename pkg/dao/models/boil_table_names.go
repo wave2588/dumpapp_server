@@ -16,6 +16,7 @@ var TableNames = struct {
 	InstallAppCdkeyOrder    string
 	InstallAppCertificate   string
 	Ipa                     string
+	IpaBlack                string
 	IpaSign                 string
 	IpaVersion              string
 	MemberAppSource         string
@@ -43,6 +44,7 @@ var TableNames = struct {
 	InstallAppCdkeyOrder:    "install_app_cdkey_order",
 	InstallAppCertificate:   "install_app_certificate",
 	Ipa:                     "ipa",
+	IpaBlack:                "ipa_black",
 	IpaSign:                 "ipa_sign",
 	IpaVersion:              "ipa_version",
 	MemberAppSource:         "member_app_source",
