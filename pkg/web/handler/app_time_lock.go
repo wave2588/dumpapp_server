@@ -50,6 +50,15 @@ func (h *AppTimeLockHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	loginID := mustGetLoginID(ctx)
 
+	count, err := h.appTimeLockDAO.Count(ctx, []qm.QueryMod{
+		models.AppTimeLockWhere.MemberID.EQ(loginID),
+		models.AppTimeLockWhere.IsDelete.EQ(true),
+	})
+	util.PanicIf(err)
+	if count > 5 {
+		util.PanicIf(errors.UnproccessableError("时间锁最多只能创建 5 个"))
+	}
+
 	args := &postAppTimeLockArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 

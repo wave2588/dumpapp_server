@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"fmt"
 
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
@@ -65,7 +66,7 @@ func (c *MemberPayCountController) CheckPayCount(ctx context.Context, loginID, l
 		return err
 	}
 	if len(ids) < int(limit) {
-		return errors2.ErrNotPayCount
+		return errors2.ErrNotPayCountFunc(fmt.Sprintf("D 币余额不足 %d 个，请充值 D 币。", limit))
 	}
 	return nil
 }
@@ -84,7 +85,7 @@ func (c *MemberPayCountController) DeductPayCount(ctx context.Context, loginID, 
 		return err
 	}
 	if len(ids) < int(limit) {
-		return errors2.ErrNotPayCount
+		return errors2.ErrNotPayCountFunc(fmt.Sprintf("D 币余额不足 %d 个，请充值 D 币。", limit))
 	}
 	res, err := c.memberPayCountDAO.BatchGet(ctx, ids)
 	if err != nil {
