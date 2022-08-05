@@ -52,7 +52,7 @@ func (h *AppTimeLockHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	count, err := h.appTimeLockDAO.Count(ctx, []qm.QueryMod{
 		models.AppTimeLockWhere.MemberID.EQ(loginID),
-		models.AppTimeLockWhere.IsDelete.EQ(true),
+		models.AppTimeLockWhere.IsDelete.EQ(false),
 	})
 	util.PanicIf(err)
 	if count > 5 {
