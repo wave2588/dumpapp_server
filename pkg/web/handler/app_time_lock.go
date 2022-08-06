@@ -55,7 +55,7 @@ func (h *AppTimeLockHandler) Post(w http.ResponseWriter, r *http.Request) {
 		models.AppTimeLockWhere.IsDelete.EQ(false),
 	})
 	util.PanicIf(err)
-	if count > 5 {
+	if count >= 5 {
 		util.PanicIf(errors.UnproccessableError("时间锁最多只能创建 5 个"))
 	}
 
