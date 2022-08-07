@@ -54,7 +54,7 @@ func (c *CertificateV2Controller) CreateCer(ctx context.Context, UDID, regionPoo
 	requestBodyMap := map[string]interface{}{
 		"token": config.DumpConfig.AppConfig.CerServerTokenV2,
 		"udid":  UDID,
-		"type":  1,
+		"type":  2,
 	}
 	requestBody, _ := json.Marshal(requestBodyMap)
 	body, err := util.HttpRequestV2("POST", endpoint, map[string]string{
