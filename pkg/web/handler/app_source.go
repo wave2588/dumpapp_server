@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -53,6 +55,14 @@ func (h *AppSourceHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postAppSourceArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// dumpapp 的源地址就不用重复添加了
+	if defaultAppSource := h.getDefaultAppSource(ctx, loginID); defaultAppSource != nil {
+		if args.URL == defaultAppSource.AppSource.URL {
+			util.RenderJSON(w, defaultAppSource)
+			return
+		}
+	}
+
 	id, err := h.appSourceCtl.Insert(ctx, loginID, args.URL)
 	util.PanicIf(err)
 
@@ -71,7 +81,8 @@ func (h *AppSourceHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	memberAppSource, ok := memberAppSourceMap[memberAppSourceID]
 	if !ok {
-		util.PanicIf(errors.ErrNotFound)
+		util.RenderJSON(w, h.getDefaultAppSource(ctx, loginID))
+		return
 	}
 	if memberAppSource.MemberID != loginID {
 		util.PanicIf(errors.ErrMemberAccessDenied)
@@ -94,13 +105,41 @@ func (h *AppSourceHandler) GetSelfList(w http.ResponseWriter, r *http.Request) {
 	}
 	ids, err := h.memberAppSourceDAO.ListIDs(ctx, offset, limit, filter, []string{"id desc"})
 	util.PanicIf(err)
+
 	totalCount, err := h.memberAppSourceDAO.Count(ctx, filter)
 	util.PanicIf(err)
 
+	resultData := make([]*render.MemberAppSource, 0)
+	data := render.NewMemberAppSourceRender(ids, loginID, render.MemberAppSourceDefaultRenderFields...).RenderSlice(ctx)
+
+	/// 第一页强插 dumpapp
+	if offset == 0 {
+		if d := h.getDefaultAppSource(ctx, loginID); d != nil {
+			resultData = append(resultData, d)
+		}
+	}
+	resultData = append(resultData, data...)
+
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
-		Data:   render.NewMemberAppSourceRender(ids, loginID, render.MemberAppSourceDefaultRenderFields...).RenderSlice(ctx),
+		Data:   resultData,
 	})
+}
+
+func (h *AppSourceHandler) getDefaultAppSource(ctx context.Context, loginID int64) *render.MemberAppSource {
+	defaultID := int64(1)
+	appSourceMap := render.NewAppSourceRender([]int64{defaultID}, loginID, render.AppSourceDefaultRenderFields...).RenderMap(ctx)
+	appSource, ok := appSourceMap[defaultID]
+	if !ok {
+		return nil
+	}
+	return &render.MemberAppSource{
+		ID:            1,
+		AppSource:     appSource,
+		AppSourceMeta: appSource.AppSourceInfo,
+		CreatedAt:     time.Now().Unix(),
+		UpdatedAt:     time.Now().Unix(),
+	}
 }
 
 func (h *AppSourceHandler) Delete(w http.ResponseWriter, r *http.Request) {
