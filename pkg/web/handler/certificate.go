@@ -87,6 +87,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payType = "private"
 	}
 
+	/// 发送用户开始购买证书日志
+	h.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, args.UDID)
+
 	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, payCount, payType)
 	util.PanicIf(err)
 

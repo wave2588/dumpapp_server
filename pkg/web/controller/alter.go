@@ -14,6 +14,7 @@ type AlterWebController interface {
 	/// 安装 app 创建证书失败推送
 	SendInstallAppCreateCertificateFailMsg(ctx context.Context, cdkey, udid string, errorMessage string)
 	/// 证书创建成功
+	SendBeganCreateCertificateMsg(ctx context.Context, loginID int64, udid string)
 	SendCreateCertificateSuccessMsg(ctx context.Context, loginID, deviceID, cerID int64)
 
 	///  注册用户监控

@@ -159,6 +159,24 @@ func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, l
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
 
+func (c *AlterWebController) SendBeganCreateCertificateMsg(ctx context.Context, loginID int64, udid string) {
+	account, err := c.accountDAO.Get(ctx, loginID)
+	if err != nil {
+		return
+	}
+	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", udid)
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"comment\">用户开始购买证书</font>\n>" +
+				udidStr + emailStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+}
+
 func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context, loginID, deviceID, cerID int64) {
 	account, err := c.accountDAO.Get(ctx, loginID)
 	if err != nil {
