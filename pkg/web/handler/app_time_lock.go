@@ -179,13 +179,18 @@ func (h *AppTimeLockHandler) GetList(w http.ResponseWriter, r *http.Request) {
 		models.AppTimeLockWhere.MemberID.EQ(loginID),
 		models.AppTimeLockWhere.IsDelete.EQ(false),
 	}
+	resultIDs := make([]int64, 0)
+	resultIDs = append(resultIDs, 1) /// 1 是默认源
 	ids, err := h.appTimeLockDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
+	resultIDs = append(resultIDs, ids...)
+	resultIDs = util2.RemoveDuplicates(resultIDs)
+
 	totalCount, err := h.appTimeLockDAO.Count(ctx, filter)
 	util.PanicIf(err)
 
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
-		Data:   render.NewAppTimeLockRender(ids, loginID, render.AppTimeLockDefaultRenderFields...).RenderSlice(ctx),
+		Data:   render.NewAppTimeLockRender(resultIDs, loginID, render.AppTimeLockDefaultRenderFields...).RenderSlice(ctx),
 	})
 }
