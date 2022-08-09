@@ -56,7 +56,7 @@ func (h *AppTimeLockHandler) Post(w http.ResponseWriter, r *http.Request) {
 	})
 	util.PanicIf(err)
 	if count >= 5 {
-		util.PanicIf(errors.UnproccessableError("时间锁最多只能创建 5 个"))
+		util.PanicIf(errors.UnproccessableError("时间锁当前仅开放最多创建 5 个"))
 	}
 
 	args := &postAppTimeLockArgs{}
