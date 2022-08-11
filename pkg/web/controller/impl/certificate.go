@@ -79,7 +79,10 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	mpFileData := response.MobileProvisionData
 	/// p12 文件修改内容
 	modifiedP12FileData, err := c.GetModifiedCertificateData(ctx, p12FileData, response.BizExt.OriginalP12Password, response.BizExt.NewP12Password)
-	util.PanicIf(err)
+	if err != nil {
+		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, fmt.Sprintf("修改证书文件出错, err: %s", err.Error()))
+	}
+	//util.PanicIf(err)
 
 	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)
