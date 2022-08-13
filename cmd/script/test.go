@@ -4,7 +4,6 @@ import (
 	"context"
 	"dumpapp_server/pkg/common/util"
 	impl2 "dumpapp_server/pkg/controller/impl"
-	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"fmt"
@@ -16,25 +15,13 @@ import (
 func main() {
 
 	ctx := context.Background()
-
-	util.PanicIf(impl.DefaultIpaRankingDAO.RemoveIpaRankingData(ctx))
-
-	now := time.Now()
-	data, err := getIpaRankingData(ctx, now.AddDate(0, 0, -1).Unix(), now.Unix())
+	data, err := getIpaRankingData(ctx, time.Now().AddDate(0, 0, -2).Unix(), time.Now().Unix())
 	util.PanicIf(err)
 
-	util.PanicIf(impl.DefaultIpaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{
-		Data: data,
-	}))
-
-	res, err := impl.DefaultIpaRankingDAO.GetIpaRankingData(ctx)
-	util.PanicIf(err)
-
-	fmt.Println(len(res.Data))
+	fmt.Println(111, data)
 }
 
 func getIpaRankingData(ctx context.Context, startAt, endAt int64) ([]interface{}, error) {
-
 	filter := make([]qm.QueryMod, 0)
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(startAt)))
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(endAt)))
@@ -53,13 +40,14 @@ func getIpaRankingData(ctx context.Context, startAt, endAt int64) ([]interface{}
 		return nil, err
 	}
 
+	fmt.Println(appleDataMap)
 	result := make([]interface{}, 0)
-	for _, ipaID := range ipaIDs {
-		appleData, ok := appleDataMap[ipaID]
-		if !ok {
-			continue
-		}
-		result = append(result, appleData)
-	}
+	//for _, ipaID := range ipaIDs {
+	//	appleData, ok := appleDataMap[ipaID]
+	//	if !ok {
+	//		continue
+	//	}
+	//	result = append(result, appleData)
+	//}
 	return result, nil
 }
