@@ -58,8 +58,8 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 		IsNeedUpdate:  false,
 		IsForceUpdate: lastDumpappVersion.IsForceUpdate,
 		DownloadURL:   "https://www.dumpapp.com/app",
-		Title:         "请升级最新版本",
-		Describe:      "新版本新增时间锁，软件源，修复部分 BUG。",
+		Title:         "1.0.4 版本更新",
+		Describe:      "1. 增加一键注入广告弹框功能  2. 修复BUG，优化速度。",
 	}
 
 	if constrain.Check(v) {
