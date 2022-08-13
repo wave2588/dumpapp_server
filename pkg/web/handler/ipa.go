@@ -213,18 +213,18 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 		args.EndAt = time.Now().Unix()
 	}
 
-	redisData, err := h.ipaRankingDAO.GetIpaRankingData(ctx)
-	util.PanicIf(err)
+	//redisData, err := h.ipaRankingDAO.GetIpaRankingData(ctx)
+	//util.PanicIf(err)
 
 	var data []interface{}
-	if redisData == nil || len(redisData.Data) == 0 {
-		data, err = h.getIpaRankingData(ctx, args.StartAt, args.EndAt)
-		util.PanicIf(err)
-		/// 存入 redis
-		util.PanicIf(h.ipaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{Data: data}))
-	} else {
-		data = redisData.Data
-	}
+	//if redisData == nil || len(redisData.Data) == 0 {
+	data, err := h.getIpaRankingData(ctx, args.StartAt, args.EndAt)
+	util.PanicIf(err)
+	/// 存入 redis
+	//util.PanicIf(h.ipaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{Data: data}))
+	//} else {
+	//	data = redisData.Data
+	//}
 
 	util.RenderJSON(w, util.ListOutput{
 		Paging: nil,
