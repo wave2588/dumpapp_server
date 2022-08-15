@@ -92,7 +92,7 @@ func (h *TencentCosHandler) GetSignIpa(w http.ResponseWriter, r *http.Request) {
 					Effect: "allow",
 					Resource: []string{
 						// 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
-						"qcs::cos:" + region + ":uid/" + appid + ":" + bucket + "/a.jpg",
+						"qcs::cos:" + region + ":uid/" + appid + ":" + bucket + "/*",
 					},
 				},
 			},
