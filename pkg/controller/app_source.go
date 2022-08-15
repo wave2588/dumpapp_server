@@ -22,14 +22,14 @@ type AppSourceInfo struct {
 }
 
 type AppSourceAppInfo struct {
-	Name               string `json:"name"`
-	Version            string `json:"version"`
-	VersionDate        string `json:"versionDate"`
-	VersionDescription string `json:"versionDescription"`
-	Lock               string `json:"lock"`
-	DownloadURL        string `json:"downloadURL"`
-	IsLanZouCloud      string `json:"isLanZouCloud"`
-	IconURL            string `json:"iconURL"`
-	TintColor          string `json:"tintColor"`
-	Size               string `json:"size"`
+	Name               string      `json:"name"`
+	Version            string      `json:"version"`
+	VersionDate        string      `json:"versionDate"`
+	VersionDescription string      `json:"versionDescription"`
+	Lock               interface{} `json:"lock"`
+	DownloadURL        string      `json:"downloadURL"`
+	IsLanZouCloud      string      `json:"isLanZouCloud"`
+	IconURL            string      `json:"iconURL"`
+	TintColor          string      `json:"tintColor"`
+	Size               string      `json:"size"`
 }
