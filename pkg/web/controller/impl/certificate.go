@@ -63,6 +63,9 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		return 0, errors.ErrCreateCertificateFailV2
 	}
 
+	/// 发送用户开始购买证书日志
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+
 	/// 请求整数接口
 	response := c.certificateCtl.CreateCer(ctx, udid, "1")
 	if response.ErrorMessage != nil {
@@ -82,7 +85,7 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	if err != nil {
 		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, fmt.Sprintf("修改证书文件出错, err: %s", err.Error()))
 	}
-	//util.PanicIf(err)
+	// util.PanicIf(err)
 
 	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)

@@ -8,13 +8,9 @@ import (
 
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/controller"
-	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
-	http2 "dumpapp_server/pkg/http"
-	impl3 "dumpapp_server/pkg/http/impl"
 	"dumpapp_server/pkg/middleware"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl5 "dumpapp_server/pkg/web/controller/impl"
@@ -25,28 +21,16 @@ import (
 )
 
 type CertificateHandler struct {
-	alterWebCtl             controller2.AlterWebController
-	certificateWebCtl       controller2.CertificateWebController
-	memberDownloadNumberCtl controller.MemberPayCountController
-	certificateV1Controller controller.CertificateController
-	certificateV2Controller controller.CertificateController
+	certificateWebCtl controller2.CertificateWebController
 
-	certificateServer http2.CertificateServer
-	memberDeviceDAO   dao.MemberDeviceDAO
-	certificateDAO    dao.CertificateV2DAO
+	certificateDAO dao.CertificateV2DAO
 }
 
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
-		alterWebCtl:             impl5.DefaultAlterWebController,
-		certificateWebCtl:       impl5.DefaultCertificateWebController,
-		memberDownloadNumberCtl: impl.DefaultMemberPayCountController,
-		certificateV1Controller: impl.DefaultCertificateV1Controller,
-		certificateV2Controller: impl.DefaultCertificateV2Controller,
+		certificateWebCtl: impl5.DefaultCertificateWebController,
 
-		certificateServer: impl3.DefaultCertificateServer,
-		memberDeviceDAO:   impl2.DefaultMemberDeviceDAO,
-		certificateDAO:    impl2.DefaultCertificateV2DAO,
+		certificateDAO: impl2.DefaultCertificateV2DAO,
 	}
 }
 
@@ -86,9 +70,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payCount = 97
 		payType = "private"
 	}
-
-	/// 发送用户开始购买证书日志
-	h.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, args.UDID)
 
 	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, payCount, payType)
 	util.PanicIf(err)

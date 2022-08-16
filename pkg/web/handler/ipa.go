@@ -2,6 +2,10 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -16,13 +20,10 @@ import (
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
-	"encoding/json"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"net/http"
 )
 
 type IpaHandler struct {
@@ -197,11 +198,11 @@ func (args *getRankingArgs) Validate() error {
 }
 
 func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
-	//ctx := r.Context()
+	// ctx := r.Context()
 
-	//args := getRankingArgs{}
-	//util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
-	//util.PanicIf(args.Validate())
+	// args := getRankingArgs{}
+	// util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	// util.PanicIf(args.Validate())
 
 	/// 如果没有传 start_at 和 end_at，则返回过去一天排行榜
 	//if args.StartAt == 0 {
