@@ -1,6 +1,7 @@
 package util
 
 import (
+	"crypto/tls"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +16,10 @@ func HttpRequest(method, endpoint string, header, values map[string]string, time
 	for key, value := range values {
 		data.Set(key, value)
 	}
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	if timeout != 0 {
 		client.Timeout = timeout
 	}
