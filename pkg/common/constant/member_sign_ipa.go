@@ -35,13 +35,13 @@ const MemberSignIpaPlistConfig = `<?xml version="1.0" encoding="UTF-8"?>
 			<key>metadata</key>
 			<dict>
 				<key>bundle-identifier</key>
-				<string>com.dumpapp.install.1</string>
+				<string>%s</string>
 				<key>bundle-version</key>
 				<string>1.0</string>
 				<key>kind</key>
 				<string>software</string>
 				<key>title</key>
-				<string>IPA应用程序 1</string>
+				<string>%s</string>
 			</dict>
 		</dict>
 	</array>

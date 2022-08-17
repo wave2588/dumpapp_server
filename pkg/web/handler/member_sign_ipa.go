@@ -60,7 +60,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(err)
 
 	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
-	util.PanicIf(impl.DefaultTencentController.PutMemberSignIpa(ctx, plistToken, fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL)))
+	util.PanicIf(impl.DefaultTencentController.PutMemberSignIpa(ctx, plistToken, fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName)))
 
 	signIpaID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
