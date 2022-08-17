@@ -130,7 +130,7 @@ func (f *MemberSignIpaRender) fetch(ctx context.Context) {
 
 func (f *MemberSignIpaRender) RenderDownloadURL(ctx context.Context) {
 	for _, ipa := range f.memberSignIpaMap {
-		ipa.DownloadURL = fmt.Sprintf("https://www.dumpapp.com/test?id=%d", ipa.Meta.ID)
+		ipa.DownloadURL = fmt.Sprintf("https://www.dumpapp.com/installipa?id=%d", ipa.Meta.ID)
 	}
 }
 
