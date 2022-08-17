@@ -9,6 +9,8 @@ import (
 )
 
 type MemberSignIpaBizExt struct {
+	IpaName         string `json:"ipa_name"`
+	IpaBundleID     string `json:"ipa_bundle_id"`
 	IpaVersion      string `json:"ipa_version"`
 	CertificateName string `json:"certificate_name"`
 }

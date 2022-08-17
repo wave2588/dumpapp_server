@@ -21,6 +21,7 @@ type MemberSignIpa struct {
 	IpaBundleID     string `json:"ipa_bundle_id"`
 	IpaVersion      string `json:"ipa_version"`
 	CertificateName string `json:"certificate_name"`
+	IsDelete        bool   `json:"is_delete"`
 
 	DownloadURL string `json:"download_url" render:"method=RenderDownloadURL"`
 	PlistURL    string `json:"plist_url" render:"method=RenderPlistURL"`
@@ -116,10 +117,11 @@ func (f *MemberSignIpaRender) fetch(ctx context.Context) {
 		result[id] = &MemberSignIpa{
 			Meta:            meta,
 			ID:              meta.ID,
-			IpaName:         meta.IpaName,
-			IpaBundleID:     meta.IpaBundleID,
+			IpaName:         meta.BizExt.IpaName,
+			IpaBundleID:     meta.BizExt.IpaBundleID,
 			IpaVersion:      meta.BizExt.IpaVersion,
 			CertificateName: meta.BizExt.CertificateName,
+			IsDelete:        meta.IsDelete,
 			CreatedAt:       meta.CreatedAt.Unix(),
 			UpdateAt:        meta.UpdatedAt.Unix(),
 		}

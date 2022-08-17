@@ -26,8 +26,7 @@ import (
 type MemberSignIpa struct {
 	ID                int64                        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID          int64                        `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
-	IpaName           string                       `boil:"ipa_name" json:"ipa_name" toml:"ipa_name" yaml:"ipa_name"`
-	IpaBundleID       string                       `boil:"ipa_bundle_id" json:"ipa_bundle_id" toml:"ipa_bundle_id" yaml:"ipa_bundle_id"`
+	IsDelete          bool                         `boil:"is_delete" json:"is_delete" toml:"is_delete" yaml:"is_delete"`
 	IpaFileToken      string                       `boil:"ipa_file_token" json:"ipa_file_token" toml:"ipa_file_token" yaml:"ipa_file_token"`
 	IpaPlistFileToken string                       `boil:"ipa_plist_file_token" json:"ipa_plist_file_token" toml:"ipa_plist_file_token" yaml:"ipa_plist_file_token"`
 	BizExt            datatype.MemberSignIpaBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
@@ -41,8 +40,7 @@ type MemberSignIpa struct {
 var MemberSignIpaColumns = struct {
 	ID                string
 	MemberID          string
-	IpaName           string
-	IpaBundleID       string
+	IsDelete          string
 	IpaFileToken      string
 	IpaPlistFileToken string
 	BizExt            string
@@ -51,8 +49,7 @@ var MemberSignIpaColumns = struct {
 }{
 	ID:                "id",
 	MemberID:          "member_id",
-	IpaName:           "ipa_name",
-	IpaBundleID:       "ipa_bundle_id",
+	IsDelete:          "is_delete",
 	IpaFileToken:      "ipa_file_token",
 	IpaPlistFileToken: "ipa_plist_file_token",
 	BizExt:            "biz_ext",
@@ -86,8 +83,7 @@ func (w whereHelperdatatype_MemberSignIpaBizExt) GTE(x datatype.MemberSignIpaBiz
 var MemberSignIpaWhere = struct {
 	ID                whereHelperint64
 	MemberID          whereHelperint64
-	IpaName           whereHelperstring
-	IpaBundleID       whereHelperstring
+	IsDelete          whereHelperbool
 	IpaFileToken      whereHelperstring
 	IpaPlistFileToken whereHelperstring
 	BizExt            whereHelperdatatype_MemberSignIpaBizExt
@@ -96,8 +92,7 @@ var MemberSignIpaWhere = struct {
 }{
 	ID:                whereHelperint64{field: "`member_sign_ipa`.`id`"},
 	MemberID:          whereHelperint64{field: "`member_sign_ipa`.`member_id`"},
-	IpaName:           whereHelperstring{field: "`member_sign_ipa`.`ipa_name`"},
-	IpaBundleID:       whereHelperstring{field: "`member_sign_ipa`.`ipa_bundle_id`"},
+	IsDelete:          whereHelperbool{field: "`member_sign_ipa`.`is_delete`"},
 	IpaFileToken:      whereHelperstring{field: "`member_sign_ipa`.`ipa_file_token`"},
 	IpaPlistFileToken: whereHelperstring{field: "`member_sign_ipa`.`ipa_plist_file_token`"},
 	BizExt:            whereHelperdatatype_MemberSignIpaBizExt{field: "`member_sign_ipa`.`biz_ext`"},
@@ -122,8 +117,8 @@ func (*memberSignIpaR) NewStruct() *memberSignIpaR {
 type memberSignIpaL struct{}
 
 var (
-	memberSignIpaAllColumns            = []string{"id", "member_id", "ipa_name", "ipa_bundle_id", "ipa_file_token", "ipa_plist_file_token", "biz_ext", "created_at", "updated_at"}
-	memberSignIpaColumnsWithoutDefault = []string{"member_id", "ipa_name", "ipa_bundle_id", "ipa_file_token", "ipa_plist_file_token", "biz_ext"}
+	memberSignIpaAllColumns            = []string{"id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext", "created_at", "updated_at"}
+	memberSignIpaColumnsWithoutDefault = []string{"member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext"}
 	memberSignIpaColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberSignIpaPrimaryKeyColumns     = []string{"id"}
 )

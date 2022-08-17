@@ -66,11 +66,11 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
 		ID:                signIpaID,
 		MemberID:          loginID,
-		IpaName:           args.IpaName,
-		IpaBundleID:       args.IpaBundleID,
 		IpaFileToken:      args.IpaFileToken,
 		IpaPlistFileToken: plistToken,
 		BizExt: datatype.MemberSignIpaBizExt{
+			IpaName:         args.IpaName,
+			IpaBundleID:     args.IpaBundleID,
 			IpaVersion:      args.IpaVersion,
 			CertificateName: args.CertificateName,
 		},
