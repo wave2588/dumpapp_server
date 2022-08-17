@@ -66,6 +66,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
 		ID:                signIpaID,
 		MemberID:          loginID,
+		IsDelete:          false,
 		IpaFileToken:      args.IpaFileToken,
 		IpaPlistFileToken: plistToken,
 		BizExt: datatype.MemberSignIpaBizExt{
@@ -91,6 +92,7 @@ func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http
 
 	filter := []qm.QueryMod{
 		models.MemberSignIpaWhere.MemberID.EQ(loginID),
+		models.MemberSignIpaWhere.IsDelete.EQ(false),
 	}
 	ids, err := h.memberSignDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
