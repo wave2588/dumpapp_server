@@ -134,8 +134,12 @@ func (h *MemberSignIpaHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(errors.ErrMemberAccessDenied)
 	}
 
-	/// 删除记录
-	util.PanicIf(h.memberSignDAO.Delete(ctx, id))
+	meta := data.Meta
+	meta.IsDelete = true
+
+	/// 标记删除记录
+	util.PanicIf(h.memberSignDAO.Update(ctx, meta))
+
 	/// 删除 cos 记录
 	_ = h.tencentCtl.DeleteMemberSignIpa(ctx, data.Meta.IpaPlistFileToken)
 	_ = h.tencentCtl.DeleteMemberSignIpa(ctx, data.Meta.IpaFileToken)
