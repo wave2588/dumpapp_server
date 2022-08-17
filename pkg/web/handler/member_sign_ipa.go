@@ -37,6 +37,7 @@ type postSignIpaArgs struct {
 	IpaBundleID     string `json:"ipa_bundle_id" validate:"required"`
 	IpaFileToken    string `json:"ipa_file_token" validate:"required"`
 	IpaVersion      string `json:"ipa_version" validate:"required"`
+	IpaSize         int64  `json:"ipa_size" validate:"required"`
 	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
 }
 
@@ -73,6 +74,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			IpaName:         args.IpaName,
 			IpaBundleID:     args.IpaBundleID,
 			IpaVersion:      args.IpaVersion,
+			IpaSize:         args.IpaSize,
 			CertificateName: args.CertificateName,
 		},
 	}))
