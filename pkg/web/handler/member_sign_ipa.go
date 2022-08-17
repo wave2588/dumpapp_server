@@ -33,9 +33,11 @@ func NewMemberSignIpaHandler() *MemberSignIpaHandler {
 }
 
 type postSignIpaArgs struct {
-	IpaName      string `json:"ipa_name" validate:"required"`
-	IpaBundleID  string `json:"ipa_bundle_id" validate:"required"`
-	IpaFileToken string `json:"ipa_file_token" validate:"required"`
+	IpaName         string `json:"ipa_name" validate:"required"`
+	IpaBundleID     string `json:"ipa_bundle_id" validate:"required"`
+	IpaFileToken    string `json:"ipa_file_token" validate:"required"`
+	IpaVersion      string `json:"ipa_version" validate:"required"`
+	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
 }
 
 func (args *postSignIpaArgs) Validate() error {
@@ -68,7 +70,10 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		IpaBundleID:       args.IpaBundleID,
 		IpaFileToken:      args.IpaFileToken,
 		IpaPlistFileToken: plistToken,
-		BizExt:            datatype.MemberSignIpaBizExt{},
+		BizExt: datatype.MemberSignIpaBizExt{
+			IpaVersion:      args.IpaVersion,
+			CertificateName: args.CertificateName,
+		},
 	}))
 
 	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
@@ -101,18 +106,14 @@ func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http
 
 func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	var (
-		ctx     = r.Context()
-		loginID = mustGetLoginID(ctx)
-		id      = cast.ToInt64(util.URLParam(r, "id"))
+		ctx = r.Context()
+		id  = cast.ToInt64(util.URLParam(r, "id"))
 	)
 
-	dataMap := render.NewMemberSignIpaRender([]int64{id}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
+	dataMap := render.NewMemberSignIpaRender([]int64{id}, 0, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
 	data, ok := dataMap[id]
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
-	}
-	if data.Meta.MemberID != loginID {
-		util.PanicIf(errors.ErrMemberAccessDenied)
 	}
 	util.RenderJSON(w, data)
 }

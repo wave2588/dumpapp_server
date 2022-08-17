@@ -160,7 +160,7 @@ func NewRouter() chi.Router {
 	memberSignIpaHandler := handler.NewMemberSignIpaHandler()
 	r.With(middleware.OAuthRegister).Post("/sign_ipa", memberSignIpaHandler.Post)
 	r.With(middleware.OAuthRegister).Get("/member/self/sign_ipa", memberSignIpaHandler.GetSelfSignIpaList)
-	r.With(middleware.OAuthRegister).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
+	r.With(middleware.OAuthGuest).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
 	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 

@@ -8,7 +8,10 @@ import (
 	"dumpapp_server/pkg/common/util"
 )
 
-type MemberSignIpaBizExt struct{}
+type MemberSignIpaBizExt struct {
+	IpaVersion      string `json:"ipa_version"`
+	CertificateName string `json:"certificate_name"`
+}
 
 func (i MemberSignIpaBizExt) String() string {
 	data, err := json.Marshal(i)

@@ -2,6 +2,7 @@ package render
 
 import (
 	"context"
+	"fmt"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -15,11 +16,14 @@ import (
 type MemberSignIpa struct {
 	Meta *models.MemberSignIpa `json:"-"`
 
-	ID          int64  `json:"id,string"`
-	IpaName     string `json:"ipa_name"`
-	IpaBundleID string `json:"ipa_bundle_id"`
+	ID              int64  `json:"id,string"`
+	IpaName         string `json:"ipa_name"`
+	IpaBundleID     string `json:"ipa_bundle_id"`
+	IpaVersion      string `json:"ipa_version"`
+	CertificateName string `json:"certificate_name"`
 
 	DownloadURL string `json:"download_url" render:"method=RenderDownloadURL"`
+	PlistURL    string `json:"plist_url" render:"method=RenderPlistURL"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdateAt  int64 `json:"update_at"`
@@ -57,6 +61,7 @@ func MemberSignIpaIncludes(fields []string) MemberSignIpaOption {
 var MemberSignIpaDefaultRenderFields = []MemberSignIpaOption{
 	MemberSignIpaIncludes([]string{
 		"DownloadURL",
+		"PlistURL",
 	}),
 }
 
@@ -109,12 +114,14 @@ func (f *MemberSignIpaRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[id] = &MemberSignIpa{
-			Meta:        meta,
-			ID:          meta.ID,
-			IpaName:     meta.IpaName,
-			IpaBundleID: meta.IpaBundleID,
-			CreatedAt:   meta.CreatedAt.Unix(),
-			UpdateAt:    meta.UpdatedAt.Unix(),
+			Meta:            meta,
+			ID:              meta.ID,
+			IpaName:         meta.IpaName,
+			IpaBundleID:     meta.IpaBundleID,
+			IpaVersion:      meta.BizExt.IpaVersion,
+			CertificateName: meta.BizExt.CertificateName,
+			CreatedAt:       meta.CreatedAt.Unix(),
+			UpdateAt:        meta.UpdatedAt.Unix(),
 		}
 	}
 
@@ -123,8 +130,14 @@ func (f *MemberSignIpaRender) fetch(ctx context.Context) {
 
 func (f *MemberSignIpaRender) RenderDownloadURL(ctx context.Context) {
 	for _, ipa := range f.memberSignIpaMap {
+		ipa.DownloadURL = fmt.Sprintf("https://www.dumpapp.com/test?id=%d", ipa.Meta.ID)
+	}
+}
+
+func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
+	for _, ipa := range f.memberSignIpaMap {
 		url, err := f.tencentCtl.GetMemberSignIpa(ctx, ipa.Meta.IpaPlistFileToken)
 		util.PanicIf(err)
-		ipa.DownloadURL = url
+		ipa.PlistURL = url
 	}
 }
