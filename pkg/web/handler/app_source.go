@@ -32,6 +32,11 @@ func NewAppSourceHandler() *AppSourceHandler {
 	}
 }
 
+var DefaultAppSourceIDs = []int64{
+	1,
+	1553749259214393344,
+}
+
 type postAppSourceArgs struct {
 	URL string `json:"url" validate:"required"`
 }
@@ -55,9 +60,9 @@ func (h *AppSourceHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postAppSourceArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	/// dumpapp 的源地址就不用重复添加了
-	if defaultAppSource := h.getDefaultAppSources(ctx, loginID); defaultAppSource != nil {
-		for _, source := range defaultAppSource {
+	/// 如果是默认的源地址则不用添加了
+	if defaultAppSources := h.getDefaultAppSources(ctx, loginID); defaultAppSources != nil {
+		for _, source := range defaultAppSources {
 			if args.URL == source.AppSource.URL {
 				util.RenderJSON(w, source)
 				return
@@ -137,11 +142,7 @@ func (h *AppSourceHandler) GetSelfList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AppSourceHandler) getDefaultAppSources(ctx context.Context, loginID int64) []*render.MemberAppSource {
-	defaultIDs := []int64{
-		1,
-		1553749259214393344,
-	}
-	appSources := render.NewAppSourceRender(defaultIDs, loginID, render.AppSourceDefaultRenderFields...).RenderSlice(ctx)
+	appSources := render.NewAppSourceRender(DefaultAppSourceIDs, loginID, render.AppSourceDefaultRenderFields...).RenderSlice(ctx)
 	res := make([]*render.MemberAppSource, 0)
 	for _, source := range appSources {
 		res = append(res, &render.MemberAppSource{
@@ -168,6 +169,7 @@ func (h *AppSourceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		/// 没找到默认删除成功
 		util.RenderJSON(w, DefaultSuccessBody(ctx))
+		return
 	}
 	if memberAppSource.MemberID != loginID {
 		util.PanicIf(errors.ErrMemberAccessDenied)
