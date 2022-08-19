@@ -56,10 +56,12 @@ func (h *AppSourceHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(util.JSONArgs(r, args))
 
 	/// dumpapp 的源地址就不用重复添加了
-	if defaultAppSource := h.getDefaultAppSource(ctx, loginID); defaultAppSource != nil {
-		if args.URL == defaultAppSource.AppSource.URL {
-			util.RenderJSON(w, defaultAppSource)
-			return
+	if defaultAppSource := h.getDefaultAppSources(ctx, loginID); defaultAppSource != nil {
+		for _, source := range defaultAppSource {
+			if args.URL == source.AppSource.URL {
+				util.RenderJSON(w, source)
+				return
+			}
 		}
 	}
 
@@ -81,7 +83,15 @@ func (h *AppSourceHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	memberAppSource, ok := memberAppSourceMap[memberAppSourceID]
 	if !ok {
-		util.RenderJSON(w, h.getDefaultAppSource(ctx, loginID))
+		/// dumpapp 的源地址就直接返回了
+		if defaultAppSource := h.getDefaultAppSources(ctx, loginID); defaultAppSource != nil {
+			for _, source := range defaultAppSource {
+				if memberAppSource.AppSourceID == source.ID {
+					util.RenderJSON(w, source)
+					return
+				}
+			}
+		}
 		return
 	}
 	if memberAppSource.MemberID != loginID {
@@ -114,8 +124,8 @@ func (h *AppSourceHandler) GetSelfList(w http.ResponseWriter, r *http.Request) {
 
 	/// 第一页强插 dumpapp
 	if offset == 0 {
-		if d := h.getDefaultAppSource(ctx, loginID); d != nil {
-			resultData = append(resultData, d)
+		if d := h.getDefaultAppSources(ctx, loginID); d != nil {
+			resultData = append(resultData, d...)
 		}
 	}
 	resultData = append(resultData, data...)
@@ -126,20 +136,23 @@ func (h *AppSourceHandler) GetSelfList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *AppSourceHandler) getDefaultAppSource(ctx context.Context, loginID int64) *render.MemberAppSource {
-	defaultID := int64(1)
-	appSourceMap := render.NewAppSourceRender([]int64{defaultID}, loginID, render.AppSourceDefaultRenderFields...).RenderMap(ctx)
-	appSource, ok := appSourceMap[defaultID]
-	if !ok {
-		return nil
+func (h *AppSourceHandler) getDefaultAppSources(ctx context.Context, loginID int64) []*render.MemberAppSource {
+	defaultIDs := []int64{
+		1,
+		1553749259214393344,
 	}
-	return &render.MemberAppSource{
-		ID:            1,
-		AppSource:     appSource,
-		AppSourceMeta: appSource.AppSourceInfo,
-		CreatedAt:     time.Now().Unix(),
-		UpdatedAt:     time.Now().Unix(),
+	appSources := render.NewAppSourceRender(defaultIDs, loginID, render.AppSourceDefaultRenderFields...).RenderSlice(ctx)
+	res := make([]*render.MemberAppSource, 0)
+	for _, source := range appSources {
+		res = append(res, &render.MemberAppSource{
+			ID:            source.ID,
+			AppSource:     source,
+			AppSourceMeta: source.AppSourceInfo,
+			CreatedAt:     time.Now().Unix(),
+			UpdatedAt:     time.Now().Unix(),
+		})
 	}
+	return res
 }
 
 func (h *AppSourceHandler) Delete(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +166,8 @@ func (h *AppSourceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	memberAppSource, ok := memberAppSourceMap[memberAppSourceID]
 	if !ok {
-		util.PanicIf(errors.ErrNotFound)
+		/// 没找到默认删除成功
+		util.RenderJSON(w, DefaultSuccessBody(ctx))
 	}
 	if memberAppSource.MemberID != loginID {
 		util.PanicIf(errors.ErrMemberAccessDenied)

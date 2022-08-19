@@ -12,7 +12,7 @@ import (
 )
 
 type MemberAppSource struct {
-	meta *models.MemberAppSource `json:"-"`
+	Meta *models.MemberAppSource `json:"-"`
 
 	ID int64 `json:"id,string"`
 
@@ -105,7 +105,7 @@ func (f *MemberAppSourceRender) fetch(ctx context.Context) {
 			continue
 		}
 		result[id] = &MemberAppSource{
-			meta:      meta,
+			Meta:      meta,
 			ID:        meta.ID,
 			CreatedAt: meta.CreatedAt.Unix(),
 			UpdatedAt: meta.UpdatedAt.Unix(),
@@ -117,12 +117,12 @@ func (f *MemberAppSourceRender) fetch(ctx context.Context) {
 func (f *MemberAppSourceRender) RenderAppSource(ctx context.Context) {
 	appSourceIDs := make([]int64, 0)
 	for _, source := range f.memberAppSourceMap {
-		appSourceIDs = append(appSourceIDs, source.meta.AppSourceID)
+		appSourceIDs = append(appSourceIDs, source.Meta.AppSourceID)
 	}
 	appSourceIDs = util2.RemoveDuplicates(appSourceIDs)
 	appSourceMap := NewAppSourceRender(appSourceIDs, f.loginID, AppSourceDefaultRenderFields...).RenderMap(ctx)
 	for _, source := range f.memberAppSourceMap {
-		source.AppSource = appSourceMap[source.meta.AppSourceID]
-		source.AppSourceMeta = appSourceMap[source.meta.AppSourceID].AppSourceInfo
+		source.AppSource = appSourceMap[source.Meta.AppSourceID]
+		source.AppSourceMeta = appSourceMap[source.Meta.AppSourceID].AppSourceInfo
 	}
 }
