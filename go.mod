@@ -4,16 +4,16 @@ go 1.15
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
-	github.com/aws/aws-sdk-go-v2 v1.16.11 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.17.1 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.12.14 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.5 // indirect
+	github.com/aws/aws-sdk-go v1.44.80
+	github.com/aws/aws-sdk-go-v2 v1.16.11
+	github.com/aws/aws-sdk-go-v2/config v1.17.1
+	github.com/aws/aws-sdk-go-v2/credentials v1.12.14
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.5
 	github.com/basgys/goxml2json v1.1.0
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/daixiang0/gci v0.2.9 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/structs v1.1.0
 	github.com/friendsofgo/errors v0.9.2
@@ -43,15 +43,12 @@ require (
 	github.com/volatiletech/sqlboiler/v4 v4.5.0
 	github.com/volatiletech/strmangle v0.0.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
-	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	mvdan.cc/gofumpt v0.1.0 // indirect
 )

@@ -91,7 +91,7 @@ func (h *AppSourceHandler) Get(w http.ResponseWriter, r *http.Request) {
 		/// dumpapp 的源地址就直接返回了
 		if defaultAppSource := h.getDefaultAppSources(ctx, loginID); defaultAppSource != nil {
 			for _, source := range defaultAppSource {
-				if memberAppSource.AppSourceID == source.ID {
+				if memberAppSourceID == source.ID {
 					util.RenderJSON(w, source)
 					return
 				}
@@ -127,7 +127,7 @@ func (h *AppSourceHandler) GetSelfList(w http.ResponseWriter, r *http.Request) {
 	resultData := make([]*render.MemberAppSource, 0)
 	data := render.NewMemberAppSourceRender(ids, loginID, render.MemberAppSourceDefaultRenderFields...).RenderSlice(ctx)
 
-	/// 第一页强插 dumpapp
+	/// 第一页强插默认源
 	if offset == 0 {
 		if d := h.getDefaultAppSources(ctx, loginID); d != nil {
 			resultData = append(resultData, d...)
