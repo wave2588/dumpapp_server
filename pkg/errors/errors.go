@@ -63,6 +63,9 @@ var (
 
 	/// member app_source 错误
 	ErrAppSourceDisabled = NewDefaultAPIError(401, 1100001, "ErrAppSourceDisabled", "源地址不可用")
+
+	/// member_sign_ipa 相关错误
+	ErrNotMemberSignIpaDownloadCount = NewDefaultAPIError(401, 1200001, "ErrNotMemberSignIpaDownloadCount", "下载次数不足，请充值。")
 )
 
 func UnproccessableError(msg string) *APIError {

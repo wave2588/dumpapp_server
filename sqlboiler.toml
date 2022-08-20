@@ -326,3 +326,29 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# member_sign_ipa_download_count
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["member_sign_ipa_download_count"]
+
+  [types.replace]
+    type = "enum.MemberSignIpaDownloadCountStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# member_sign_ipa_download_count_record
+[[types]]
+  [types.match]
+    name = "type"
+    type = "string"
+    tables = ["member_sign_ipa_download_count_record"]
+
+  [types.replace]
+    type = "enum.MemberSignIpaDownloadCountRecordType"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
