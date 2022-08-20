@@ -2,20 +2,23 @@ package impl
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/util"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"io/ioutil"
+	"io"
 	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 	"time"
+
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
+	"dumpapp_server/pkg/controller"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type LingshulianController struct {
+	Session *session.Session
+	Svc     *s3.S3
 }
 
 var DefaultLingshulianController *LingshulianController
@@ -25,76 +28,71 @@ func init() {
 }
 
 func NewLingshulianController() *LingshulianController {
-	//secretId：8080919c91fbd53df5404ab3645f5d17
-	//secretKey：b91d939a5c59ce7b1b205adf892af4fb1c3ba8c6e5155980538878df37cd96e6
-
-	return &LingshulianController{}
-}
-
-func (c *LingshulianController) PutMemberSignIpa(ctx context.Context, name string, data string) error {
-	//reader := strings.NewReader(data)
-	//_, err := c.signIpaClient.Object.Put(ctx, name, reader, nil)
-	//return err
-	return nil
-}
-
-func (c *LingshulianController) GetMemberSignIpa(ctx context.Context, ipaToken string) (string, error) {
-	cfg, err := config.LoadDefaultConfig(
-		ctx,
-		config.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(
-				"8080919c91fbd53df5404ab3645f5d17",
-				"b91d939a5c59ce7b1b205adf892af4fb1c3ba8c6e5155980538878df37cd96e6",
-				"",
-			),
+	sess, err := session.NewSession(&aws.Config{
+		Credentials: credentials.NewStaticCredentials(
+			config.DumpConfig.AppConfig.LingshulianSecretID,
+			config.DumpConfig.AppConfig.LingshulianSecretKey,
+			"",
 		),
-		config.WithRegion("us-east-1"),
-		config.WithEC2IMDSEndpoint("https://s3-us-east-1.ossfiles.com/"),
-	)
-	if err != nil {
-		return "", err
-	}
-
-	client := s3.NewFromConfig(cfg)
-
-	res, err := client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: util.StringPtr("membersignipa"),
-		Key:    util.StringPtr(ipaToken),
+		Region:   aws.String("us-east-1"),
+		Endpoint: aws.String("s3-us-east-1.ossfiles.com"),
 	})
-	if err != nil {
-		return "", err
+	util.PanicIf(err)
+	return &LingshulianController{
+		Session: sess,
+		Svc:     s3.New(sess),
 	}
-
-	fmt.Println(res.ContentType)
-
-	return "", nil
 }
 
-func (c *LingshulianController) DeleteMemberSignIpa(ctx context.Context, tokenPath string) error {
+func (c *LingshulianController) GetPutURL(ctx context.Context, bucket, key string) (*controller.GetPutURLResp, error) {
+	resp, _ := c.Svc.PutObjectRequest(&s3.PutObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	})
+	expire := 60 * time.Minute
+	url, err := resp.Presign(expire)
+	if err != nil {
+		return nil, err
+	}
+	startAt := time.Now()
+	expireAt := startAt.Add(expire)
+	return &controller.GetPutURLResp{
+		URL:      url,
+		StartAt:  startAt.Unix(),
+		ExpireAt: expireAt.Unix(),
+		Token:    key,
+	}, nil
+}
+
+func (c *LingshulianController) PutFile(ctx context.Context, url string, data io.Reader) error {
+	req, err := http.NewRequest("PUT", url, data)
+	if err != nil {
+		return err
+	}
+	_, err = http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func HttpRequest(method, endpoint string, header, values map[string]string, timeout time.Duration) ([]byte, error) {
-	data := url.Values{}
-	for key, value := range values {
-		data.Set(key, value)
-	}
-	client := &http.Client{}
-	if timeout != 0 {
-		client.Timeout = timeout
-	}
-	r, err := http.NewRequest(method, endpoint, strings.NewReader(data.Encode())) // URL-encoded payload
-	if err != nil {
-		return nil, err
-	}
-	for key, value := range header {
-		r.Header.Add(key, value)
-	}
-	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	res, err := client.Do(r)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	return ioutil.ReadAll(res.Body)
+func (c *LingshulianController) GetURL(ctx context.Context, bucket, key string) (string, error) {
+	return fmt.Sprintf("%s/%s/%s", config.DumpConfig.AppConfig.LingshulianMemberSignIpaHost, bucket, key), nil
+}
+
+func (c *LingshulianController) Put(ctx context.Context, bucket, key string, body io.ReadSeeker) error {
+	_, err := c.Svc.PutObject(&s3.PutObjectInput{
+		Bucket: util.StringPtr(bucket),
+		Key:    util.StringPtr(key),
+		Body:   body,
+	})
+	return err
+}
+
+func (c *LingshulianController) Delete(ctx context.Context, bucket, key string) error {
+	_, err := c.Svc.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: util.StringPtr(bucket),
+		Key:    util.StringPtr(key),
+	})
+	return err
 }

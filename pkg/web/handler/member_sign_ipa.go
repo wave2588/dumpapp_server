@@ -3,10 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
@@ -21,14 +23,14 @@ import (
 )
 
 type MemberSignIpaHandler struct {
-	tencentCtl    controller.TencentController
-	memberSignDAO dao.MemberSignIpaDAO
+	lingshulianCtl controller.LingshulianController
+	memberSignDAO  dao.MemberSignIpaDAO
 }
 
 func NewMemberSignIpaHandler() *MemberSignIpaHandler {
 	return &MemberSignIpaHandler{
-		tencentCtl:    impl.DefaultTencentController,
-		memberSignDAO: impl2.DefaultMemberSignIpaDAO,
+		lingshulianCtl: impl.DefaultLingshulianController,
+		memberSignDAO:  impl2.DefaultMemberSignIpaDAO,
 	}
 }
 
@@ -57,11 +59,16 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postSignIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	ipaURL, err := h.tencentCtl.GetMemberSignIpa(ctx, args.IpaFileToken)
+	/// 获取签名后的 ipa 文件地址
+	ipaURL, err := h.lingshulianCtl.GetURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, args.IpaFileToken)
 	util.PanicIf(err)
 
 	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
-	util.PanicIf(impl.DefaultTencentController.PutMemberSignIpa(ctx, plistToken, fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName)))
+	/// 获取上传凭证
+	putResp, err := h.lingshulianCtl.GetPutURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, plistToken)
+	util.PanicIf(err)
+	/// 开始上传
+	util.PanicIf(h.lingshulianCtl.PutFile(ctx, putResp.URL, strings.NewReader(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
 
 	signIpaID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
@@ -119,6 +126,9 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
 	}
+	if data.IsDelete {
+		util.PanicIf(errors.ErrNotFound)
+	}
 	util.RenderJSON(w, data)
 }
 
@@ -145,8 +155,8 @@ func (h *MemberSignIpaHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.memberSignDAO.Update(ctx, meta))
 
 	/// 删除 cos 记录
-	_ = h.tencentCtl.DeleteMemberSignIpa(ctx, data.Meta.IpaPlistFileToken)
-	_ = h.tencentCtl.DeleteMemberSignIpa(ctx, data.Meta.IpaFileToken)
+	_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, data.Meta.IpaPlistFileToken)
+	_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, data.Meta.IpaFileToken)
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }

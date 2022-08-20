@@ -118,6 +118,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/cos/sign_ipa", tencentCosHandler.GetSignIpa)
 	// endregion
 
+	// region lingshulian
+	lingshulianHandler := handler.NewLingshulianHandler()
+	r.With(middleware.OAuthRegister).Get("/lingshulian/sign_ipa", lingshulianHandler.GetSignIpaPutURL)
+	// endregion
+
 	// regis daily_free
 	dailyFreeHandler := handler.NewDailyFreeIpaHandler()
 	r.With(middleware.OAuthRegister).Post("/daily_free", dailyFreeHandler.PostIpa)

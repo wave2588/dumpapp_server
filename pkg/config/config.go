@@ -57,6 +57,11 @@ var config = appConfig{
 
 	TencentGroupKey: os.Getenv("TENCENT_GROUP_KEY"),
 
+	LingshulianSecretID:            os.Getenv("LINGSHULIAN_SECRET_ID"),
+	LingshulianSecretKey:           os.Getenv("LINGSHULIAN_SECRET_KEY"),
+	LingshulianMemberSignIpaBucket: os.Getenv("LINGSHULIAN_MEMBER_SIGN_IPA_BUCKET"),
+	LingshulianMemberSignIpaHost:   os.Getenv("LINGSHULIAN_MEMBER_SIGN_IPA_HOST"),
+
 	ALiPayDumpAppID:             os.Getenv("ALIPAY_DUMP_APP_ID"),
 	ALiPayDumpPublicKey:         os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
 	ALiPayDumpPrivateKey:        os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
@@ -107,6 +112,12 @@ type appConfig struct {
 	TencentSMSSignName   string
 
 	TencentGroupKey string
+
+	/// lingshulian
+	LingshulianSecretID            string
+	LingshulianSecretKey           string
+	LingshulianMemberSignIpaBucket string
+	LingshulianMemberSignIpaHost   string
 
 	ALiPayDumpAppID      string
 	ALiPayDumpPublicKey  string
