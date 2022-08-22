@@ -12,6 +12,7 @@ var TableNames = struct {
 	DailyFreeRecord                  string
 	DumpappVersion                   string
 	Feedback                         string
+	File                             string
 	InstallAppCdkey                  string
 	InstallAppCdkeyOrder             string
 	InstallAppCertificate            string
@@ -42,6 +43,7 @@ var TableNames = struct {
 	DailyFreeRecord:                  "daily_free_record",
 	DumpappVersion:                   "dumpapp_version",
 	Feedback:                         "feedback",
+	File:                             "file",
 	InstallAppCdkey:                  "install_app_cdkey",
 	InstallAppCdkeyOrder:             "install_app_cdkey_order",
 	InstallAppCertificate:            "install_app_certificate",

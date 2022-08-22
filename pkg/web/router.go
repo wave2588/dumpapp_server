@@ -174,6 +174,11 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Post("/wecom", weComHandler.Post)
 	// endregion
 
+	// file
+	fileHandler := handler.NewFileHandler()
+	r.With(middleware.OAuthGuest).Post("/file/plist", fileHandler.CreatePlistFile)
+	// endregion
+
 	return r
 }
 

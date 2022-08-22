@@ -59,16 +59,15 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postSignIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+
 	/// 获取签名后的 ipa 文件地址
-	ipaURL, err := h.lingshulianCtl.GetURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, args.IpaFileToken)
+	ipaURL, err := h.lingshulianCtl.GetURL(ctx, bucket, args.IpaFileToken)
 	util.PanicIf(err)
 
-	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
-	/// 获取上传凭证
-	putResp, err := h.lingshulianCtl.GetPutURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, plistToken)
-	util.PanicIf(err)
 	/// 开始上传
-	util.PanicIf(h.lingshulianCtl.PutFile(ctx, putResp.URL, strings.NewReader(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
+	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
+	util.PanicIf(h.lingshulianCtl.Put(ctx, bucket, plistToken, strings.NewReader(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
 
 	signIpaID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
