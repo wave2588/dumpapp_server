@@ -59,7 +59,8 @@ func (h *FileHandler) CreatePlistFile(w http.ResponseWriter, r *http.Request) {
 	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 
 	util.PanicIf(h.fileDAO.Insert(ctx, &models.File{
-		Token: token,
+		Token:    token,
+		IsDelete: false,
 		BizExt: datatype.FileBizExt{
 			Bucket: bucket,
 		},

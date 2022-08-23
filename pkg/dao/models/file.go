@@ -26,6 +26,7 @@ import (
 type File struct {
 	ID        int64               `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Token     string              `boil:"token" json:"token" toml:"token" yaml:"token"`
+	IsDelete  bool                `boil:"is_delete" json:"is_delete" toml:"is_delete" yaml:"is_delete"`
 	BizExt    datatype.FileBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	CreatedAt time.Time           `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time           `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -37,12 +38,14 @@ type File struct {
 var FileColumns = struct {
 	ID        string
 	Token     string
+	IsDelete  string
 	BizExt    string
 	CreatedAt string
 	UpdatedAt string
 }{
 	ID:        "id",
 	Token:     "token",
+	IsDelete:  "is_delete",
 	BizExt:    "biz_ext",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -74,12 +77,14 @@ func (w whereHelperdatatype_FileBizExt) GTE(x datatype.FileBizExt) qm.QueryMod {
 var FileWhere = struct {
 	ID        whereHelperint64
 	Token     whereHelperstring
+	IsDelete  whereHelperbool
 	BizExt    whereHelperdatatype_FileBizExt
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "`file`.`id`"},
 	Token:     whereHelperstring{field: "`file`.`token`"},
+	IsDelete:  whereHelperbool{field: "`file`.`is_delete`"},
 	BizExt:    whereHelperdatatype_FileBizExt{field: "`file`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`file`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`file`.`updated_at`"},
@@ -102,8 +107,8 @@ func (*fileR) NewStruct() *fileR {
 type fileL struct{}
 
 var (
-	fileAllColumns            = []string{"id", "token", "biz_ext", "created_at", "updated_at"}
-	fileColumnsWithoutDefault = []string{"token", "biz_ext"}
+	fileAllColumns            = []string{"id", "token", "is_delete", "biz_ext", "created_at", "updated_at"}
+	fileColumnsWithoutDefault = []string{"token", "is_delete", "biz_ext"}
 	fileColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	filePrimaryKeyColumns     = []string{"id"}
 )

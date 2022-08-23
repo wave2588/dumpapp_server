@@ -2,9 +2,14 @@ package impl
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"dumpapp_server/pkg/common/util"
@@ -62,6 +67,49 @@ func (c *LingshulianController) GetPutURL(ctx context.Context, bucket, key strin
 		ExpireAt: expireAt.Unix(),
 		Token:    key,
 	}, nil
+}
+
+func (c *LingshulianController) GetTempSecretKey(ctx context.Context) (*controller.GetTempSecretKeyResp, error) {
+	accessID := config.DumpConfig.AppConfig.LingshulianSecretID
+	accessKey := config.DumpConfig.AppConfig.LingshulianSecretKey
+	URL := "https://api.lingshulian.com/api/auth/secret"
+
+	ttl := int64(900)
+	bodyInfo := map[string]interface{}{
+		"ttl": ttl,
+		"policy": []string{
+			"full_control",
+		},
+		"bucket_name": config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket,
+	}
+	model := "POST"
+
+	urlInfo, err := url.Parse(URL)
+	util.PanicIf(err)
+
+	host := urlInfo.Host
+	urlPath := urlInfo.Path
+	bodyData, err := json.Marshal(bodyInfo)
+	util.PanicIf(err)
+	body := string(bodyData)
+
+	startAt := time.Now()
+	expiryTo := startAt.Unix() + ttl
+	signAccessSecret := fmt.Sprintf("%s-%s", accessID, accessKey)
+	signString := fmt.Sprintf("%s\n%s\n%s\n%s\n%d", model, host, urlPath, body, expiryTo)
+	sign := fmt.Sprintf("%s-%d-%s", accessID, expiryTo, c.hmac(signString, signAccessSecret))
+	return &controller.GetTempSecretKeyResp{
+		TempSecretKey: sign,
+		StartAt:       startAt.Unix(),
+		ExpireAt:      expiryTo,
+	}, nil
+}
+
+func (c *LingshulianController) hmac(key, data string) string {
+	mac := hmac.New(sha1.New, []byte(data))
+	mac.Write([]byte(key))
+	res := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	return res
 }
 
 func (c *LingshulianController) PutFile(ctx context.Context, url string, data io.Reader) error {

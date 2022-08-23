@@ -29,3 +29,10 @@ func (h *LingshulianHandler) GetSignIpaPutURL(w http.ResponseWriter, r *http.Req
 	util.PanicIf(err)
 	util.RenderJSON(w, resp)
 }
+
+func (h *LingshulianHandler) GetTempSecretKey(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	resp, err := h.lingshulianCtl.GetTempSecretKey(ctx)
+	util.PanicIf(err)
+	util.RenderJSON(w, resp)
+}

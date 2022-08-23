@@ -1,25 +1,23 @@
 package main
 
 import (
-	"crypto/md5"
-	"dumpapp_server/pkg/common/constant"
+	"bytes"
 	"dumpapp_server/pkg/common/util"
-	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 )
 
 func main() {
 
-	h := md5.New()
-	content := strings.NewReader(fmt.Sprintf(constant.DeviceMobileConfig, "222222"))
-	content.WriteTo(h)
+	content, err := ioutil.ReadFile("/Users/wave/Documents/Private/dump/dumpapp_server/cmd/script/test.ipa")
+	util.PanicIf(err)
 
 	sess, err := session.NewSession(&aws.Config{
 		Credentials: credentials.NewStaticCredentials(
@@ -39,7 +37,6 @@ func main() {
 		Bucket: aws.String("membersignipa"),
 		Key:    aws.String("1122223.test"),
 	})
-	md5s := base64.StdEncoding.EncodeToString(h.Sum(nil))
 	//resp.HTTPRequest.Header.Set("Content-MD5", md5s)
 	url, err := resp.Presign(15 * time.Minute)
 	if err != nil {
@@ -48,17 +45,18 @@ func main() {
 	}
 	fmt.Println(111, url)
 
-	req, err := http.NewRequest("PUT", url, strings.NewReader(fmt.Sprintf(constant.DeviceMobileConfig, "22221122")))
+	//req, err := http.NewRequest("PUT", url, strings.NewReader(fmt.Sprintf(constant.DeviceMobileConfig, "22221122")))
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(content))
 	if err != nil {
 		fmt.Println("error creating request", url)
 		return
 	}
-	req.Header.Set("Content-MD5", md5s)
 
 	defClient, err := http.DefaultClient.Do(req)
 	if err != nil {
 		fmt.Println("http.DefaultClient err", err)
 		return
 	}
-	fmt.Println(defClient)
+	ss, _ := json.Marshal(defClient.Body)
+	fmt.Println(string(ss))
 }

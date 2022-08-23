@@ -121,6 +121,7 @@ func NewRouter() chi.Router {
 	// region lingshulian
 	lingshulianHandler := handler.NewLingshulianHandler()
 	r.With(middleware.OAuthRegister).Get("/lingshulian/sign_ipa", lingshulianHandler.GetSignIpaPutURL)
+	r.With(middleware.OAuthRegister).Get("/lingshulian/temp_secret", lingshulianHandler.GetTempSecretKey)
 	// endregion
 
 	// regis daily_free

@@ -20,9 +20,10 @@ func main() {
 
 	orderID := util3.MustGenerateID(ctx)
 
-	count := 10
+	count := 1
 	price := 68
-	outIDs, err := getOutIDs(ctx, count, 2)
+	level := 2
+	outIDs, err := getOutIDs(ctx, count, level)
 	util.PanicIf(err)
 
 	bizExt := constant.InstallAppCDKEYOrderBizExt{
