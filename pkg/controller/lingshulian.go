@@ -23,7 +23,17 @@ type GetPutURLResp struct {
 }
 
 type GetTempSecretKeyResp struct {
-	TempSecretKey string `json:"temp_secret_key"`
-	StartAt       int64  `json:"start_at"`
-	ExpireAt      int64  `json:"expire_at"`
+	SecretID   string   `json:"secret_id"`
+	SecretKey  string   `json:"secret_key"`
+	BucketName string   `json:"bucket_name"`
+	Prefix     string   `json:"prefix"`
+	Key        string   `json:"key"`
+	Policy     []string `json:"policy"`
+	ExpireTo   int64    `json:"expire_to"`
+}
+
+type GetHeaderSignResp struct {
+	Sign string `json:"sign"`
+	Body string `json:"body"`
+	TTL  int64  `json:"ttl"`
 }

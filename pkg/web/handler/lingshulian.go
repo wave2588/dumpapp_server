@@ -36,3 +36,6 @@ func (h *LingshulianHandler) GetTempSecretKey(w http.ResponseWriter, r *http.Req
 	util.PanicIf(err)
 	util.RenderJSON(w, resp)
 }
+
+func (h *LingshulianHandler) Get(w http.ResponseWriter, r *http.Request) {
+}

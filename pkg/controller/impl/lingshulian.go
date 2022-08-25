@@ -10,11 +10,14 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
+	"dumpapp_server/pkg/errors"
+	util2 "dumpapp_server/pkg/util"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -69,10 +72,61 @@ func (c *LingshulianController) GetPutURL(ctx context.Context, bucket, key strin
 	}, nil
 }
 
+var lingshulianAuthSecretURL = "https://api.lingshulian.com/api/auth/secret"
+
+type postLingshulianAuthSecretResp struct {
+	Status  string                             `json:"status"`
+	Code    int64                              `json:"code"`
+	Message string                             `json:"message"`
+	Data    *postLingshulianAuthSecretDataResp `json:"data"`
+	Error   map[string]interface{}             `json:"error"`
+}
+
+type postLingshulianAuthSecretDataResp struct {
+	SecretID   string   `json:"secret_id"`
+	SecretKey  string   `json:"secret_key"`
+	BucketName string   `json:"bucket_name"`
+	Prefix     string   `json:"prefix"`
+	Key        string   `json:"key"`
+	Policy     []string `json:"policy"`
+	ExpireTo   int64    `json:"expire_to"`
+}
+
 func (c *LingshulianController) GetTempSecretKey(ctx context.Context) (*controller.GetTempSecretKeyResp, error) {
+	sign, err := c.GetHeaderSign(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := util2.HttpRequestV2("POST", lingshulianAuthSecretURL, map[string]string{
+		"x-lingshulian-sign": sign.Sign,
+		"Content-Type":       "application/json",
+	}, strings.NewReader(sign.Body))
+	util.PanicIf(err)
+
+	var re *postLingshulianAuthSecretResp
+	err = json.Unmarshal(resp, &re)
+	if err != nil {
+		return nil, err
+	}
+	if re == nil || re.Code != 200 || re.Data == nil {
+		return nil, errors.NewDefaultAPIError(401, 401, "ErrGetTempSecretFail", "获取秘钥失败")
+	}
+
+	return &controller.GetTempSecretKeyResp{
+		SecretID:   re.Data.SecretID,
+		SecretKey:  re.Data.SecretKey,
+		BucketName: re.Data.BucketName,
+		Prefix:     re.Data.Prefix,
+		Key:        re.Data.Key,
+		Policy:     re.Data.Policy,
+		ExpireTo:   re.Data.ExpireTo,
+	}, nil
+}
+
+func (c *LingshulianController) GetHeaderSign(ctx context.Context) (*controller.GetHeaderSignResp, error) {
 	accessID := config.DumpConfig.AppConfig.LingshulianSecretID
 	accessKey := config.DumpConfig.AppConfig.LingshulianSecretKey
-	URL := "https://api.lingshulian.com/api/auth/secret"
 
 	ttl := int64(900)
 	bodyInfo := map[string]interface{}{
@@ -84,7 +138,7 @@ func (c *LingshulianController) GetTempSecretKey(ctx context.Context) (*controll
 	}
 	model := "POST"
 
-	urlInfo, err := url.Parse(URL)
+	urlInfo, err := url.Parse(lingshulianAuthSecretURL)
 	util.PanicIf(err)
 
 	host := urlInfo.Host
@@ -98,10 +152,10 @@ func (c *LingshulianController) GetTempSecretKey(ctx context.Context) (*controll
 	signAccessSecret := fmt.Sprintf("%s-%s", accessID, accessKey)
 	signString := fmt.Sprintf("%s\n%s\n%s\n%s\n%d", model, host, urlPath, body, expiryTo)
 	sign := fmt.Sprintf("%s-%d-%s", accessID, expiryTo, c.hmac(signString, signAccessSecret))
-	return &controller.GetTempSecretKeyResp{
-		TempSecretKey: sign,
-		StartAt:       startAt.Unix(),
-		ExpireAt:      expiryTo,
+	return &controller.GetHeaderSignResp{
+		Sign: sign,
+		Body: body,
+		TTL:  ttl,
 	}, nil
 }
 
