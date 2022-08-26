@@ -8,14 +8,22 @@ import (
 
 	"dumpapp_server/pkg/common/util"
 	"github.com/bwmarrin/snowflake"
+	"github.com/google/uuid"
 	"github.com/spf13/cast"
 )
 
-var node, nodeErr = snowflake.NewNode(1)
+var (
+	node, nodeErr = snowflake.NewNode(1)
+	u             = uuid.New()
+)
 
 func MustGenerateID(ctx context.Context) int64 {
 	util.PanicIf(nodeErr)
 	return node.Generate().Int64()
+}
+
+func MustGenerateUUID() string {
+	return u.String()
 }
 
 func MustGenerateCaptcha(ctx context.Context) string {
