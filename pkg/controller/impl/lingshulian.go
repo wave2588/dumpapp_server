@@ -222,26 +222,25 @@ func (c *LingshulianController) GetCreateMultipartUploadInfo(ctx context.Context
 	}, nil
 }
 
-func (c *LingshulianController) GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumbers []int64) (*controller.GetMultipartUploadPartInfoResp, error) {
+func (c *LingshulianController) GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumber int64) (*controller.GetMultipartUploadPartInfoResp, error) {
 	expire := 60 * time.Minute
-	urlData := make([]string, len(partNumbers))
-	for idx, number := range partNumbers {
+	urlData := make([]string, partNumber)
+	for i := 0; i < int(partNumber); i++ {
 		req, _ := c.Svc.UploadPartRequest(&s3.UploadPartInput{
 			UploadId:   util.StringPtr(uploadID),
 			Bucket:     util.StringPtr(bucket),
 			Key:        util.StringPtr(key),
-			PartNumber: util2.Int64Ptr(number),
+			PartNumber: util2.Int64Ptr(int64(i + 1)),
 		})
 		URL, err := req.Presign(expire)
 		if err != nil {
 			return nil, err
 		}
-		urlData[idx] = URL
+		urlData[i] = URL
 	}
 	return &controller.GetMultipartUploadPartInfoResp{
-		URLData:     urlData,
-		ExpireTo:    time.Now().Add(expire).Unix(),
-		PartNumbers: partNumbers,
+		URLData:  urlData,
+		ExpireTo: time.Now().Add(expire).Unix(),
 	}, nil
 }
 

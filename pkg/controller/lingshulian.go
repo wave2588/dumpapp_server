@@ -16,7 +16,7 @@ type LingshulianController interface {
 
 	/// 分片上传
 	GetCreateMultipartUploadInfo(ctx context.Context, suffix string) (*GetCreateMultipartUploadInfoResp, error)
-	GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumbers []int64) (*GetMultipartUploadPartInfoResp, error)
+	GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumber int64) (*GetMultipartUploadPartInfoResp, error)
 	GetCompleteMultipartUploadInfo(ctx context.Context, uploadID, key, bucket string) (*GetCompleteMultipartUploadInfoResp, error)
 }
 
@@ -50,9 +50,8 @@ type GetCreateMultipartUploadInfoResp struct {
 }
 
 type GetMultipartUploadPartInfoResp struct {
-	PartNumbers []int64  `json:"part_numbers"`
-	URLData     []string `json:"url_data"`
-	ExpireTo    int64    `json:"expire_to"`
+	URLData  []string `json:"url_data"`
+	ExpireTo int64    `json:"expire_to"`
 }
 
 type GetCompleteMultipartUploadInfoResp struct {
