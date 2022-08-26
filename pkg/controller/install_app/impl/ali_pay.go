@@ -144,6 +144,9 @@ func (c *ALiPayInstallAppController) checkPayStatus(ctx context.Context, orderID
 	if rsp.Content.Code != alipay.CodeSuccess {
 		return errors.New(fmt.Sprintf("订单支付未成功. order_id= %d", orderID))
 	}
+	if rsp.Content.TradeStatus != alipay.TradeStatusSuccess {
+		return errors.New(fmt.Sprintf("订单支付未成功. order_id= %d", orderID))
+	}
 
 	return nil
 }
