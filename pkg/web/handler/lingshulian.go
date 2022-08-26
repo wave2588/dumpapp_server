@@ -86,10 +86,10 @@ func (h *LingshulianHandler) PostMultipartUploadInfo(w http.ResponseWriter, r *h
 }
 
 type getUploadPartInfoArgs struct {
-	UploadID   string `json:"upload_id" validate:"required"`
-	Key        string `json:"key" validate:"required"`
-	Bucket     string `json:"bucket" validate:"required"`
-	PartNumber int64  `json:"part_number" validate:"required"`
+	UploadID    string  `json:"upload_id" validate:"required"`
+	Key         string  `json:"key" validate:"required"`
+	Bucket      string  `json:"bucket" validate:"required"`
+	PartNumbers []int64 `json:"part_numbers" validate:"required"`
 }
 
 func (args *getUploadPartInfoArgs) Validate() error {
@@ -109,7 +109,7 @@ func (h *LingshulianHandler) PostMultipartUploadPartInfo(w http.ResponseWriter, 
 	args := &getUploadPartInfoArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	resp, err := h.lingshulianCtl.GetMultipartUploadPartInfo(ctx, args.UploadID, args.Key, args.Bucket, args.PartNumber)
+	resp, err := h.lingshulianCtl.GetMultipartUploadPartInfo(ctx, args.UploadID, args.Key, args.Bucket, args.PartNumbers)
 	util.PanicIf(err)
 
 	util.RenderJSON(w, resp)

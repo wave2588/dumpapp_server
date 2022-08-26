@@ -125,7 +125,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Post("/upload/upload_info", lingshulianHandler.PostUploadInfo)
 	/// 分片上传
 	r.With(middleware.OAuthRegister).Post("/multipart/start_upload", lingshulianHandler.PostMultipartUploadInfo)
-	r.With(middleware.OAuthRegister).Post("/multipart/upload_part", lingshulianHandler.PostMultipartUploadPartInfo)
+	r.With(middleware.OAuthRegister).Post("/multipart/upload_parts", lingshulianHandler.PostMultipartUploadPartInfo)
 	r.With(middleware.OAuthRegister).Post("/multipart/complete_upload", lingshulianHandler.PostCompleteMultipartUploadInfo)
 	// endregion
 
