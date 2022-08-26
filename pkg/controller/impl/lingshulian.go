@@ -198,3 +198,62 @@ func (c *LingshulianController) Delete(ctx context.Context, bucket, key string) 
 	})
 	return err
 }
+
+func (c *LingshulianController) GetCreateMultipartUploadInfo(ctx context.Context, suffix string) (*controller.GetCreateMultipartUploadInfoResp, error) {
+	id := util2.MustGenerateID(ctx)
+	key := fmt.Sprintf("%d.%s", id, suffix)
+	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+	expireTo := time.Now().Add(time.Hour)
+	output, err := c.Svc.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket:  util.StringPtr(bucket),
+		Key:     util.StringPtr(key),
+		Expires: aws.Time(expireTo),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if output.UploadId == nil {
+		return nil, errors.NewDefaultAPIError(401, 401, "ErrGetUploadIDFail", "UploadID 获取失败")
+	}
+	return &controller.GetCreateMultipartUploadInfoResp{
+		UploadID: *output.UploadId,
+		Key:      key,
+		Bucket:   bucket,
+		ExpireTo: expireTo.Unix(),
+	}, nil
+}
+
+func (c *LingshulianController) GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumber int64) (*controller.GetMultipartUploadPartInfoResp, error) {
+	expire := 60 * time.Minute
+	req, _ := c.Svc.UploadPartRequest(&s3.UploadPartInput{
+		UploadId:   util.StringPtr(uploadID),
+		Bucket:     util.StringPtr(bucket),
+		Key:        util.StringPtr(key),
+		PartNumber: util2.Int64Ptr(partNumber),
+	})
+	URL, err := req.Presign(expire)
+	if err != nil {
+		return nil, err
+	}
+	return &controller.GetMultipartUploadPartInfoResp{
+		URL:      URL,
+		ExpireTo: time.Now().Add(expire).Unix(),
+	}, nil
+}
+
+func (c *LingshulianController) GetCompleteMultipartUploadInfo(ctx context.Context, uploadID, key, bucket string) (*controller.GetCompleteMultipartUploadInfoResp, error) {
+	output, err := c.Svc.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
+		UploadId: util.StringPtr(uploadID),
+		Key:      util.StringPtr(key),
+		Bucket:   util.StringPtr(bucket),
+	})
+	if err != nil {
+		return nil, err
+	}
+	if output.Key == nil {
+		return nil, errors.NewDefaultAPIError(401, 401, "ErrGetKeyFail", "Key 获取失败")
+	}
+	return &controller.GetCompleteMultipartUploadInfoResp{
+		Key: key,
+	}, nil
+}

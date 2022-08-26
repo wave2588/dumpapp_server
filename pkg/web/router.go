@@ -122,6 +122,10 @@ func NewRouter() chi.Router {
 	lingshulianHandler := handler.NewLingshulianHandler()
 	r.With(middleware.OAuthRegister).Get("/lingshulian/sign_ipa", lingshulianHandler.GetSignIpaPutURL)
 	r.With(middleware.OAuthRegister).Get("/lingshulian/temp_secret", lingshulianHandler.GetTempSecretKey)
+	/// 分片上传
+	r.With(middleware.OAuthRegister).Post("/multipart/start_upload", lingshulianHandler.PostMultipartUploadInfo)
+	r.With(middleware.OAuthRegister).Post("/multipart/upload_part", lingshulianHandler.PostMultipartUploadPartInfo)
+	r.With(middleware.OAuthRegister).Post("/multipart/complete_upload", lingshulianHandler.PostCompleteMultipartUploadInfo)
 	// endregion
 
 	// regis daily_free
