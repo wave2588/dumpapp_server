@@ -23,10 +23,29 @@ func NewLingshulianHandler() *LingshulianHandler {
 	}
 }
 
-func (h *LingshulianHandler) GetSignIpaPutURL(w http.ResponseWriter, r *http.Request) {
+type postPutURLArgs struct {
+	Suffix string `json:"suffix" validate:"required"`
+}
+
+func (p *postPutURLArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.Suffix == "" {
+		return errors.UnproccessableError("Suffix 格式错误")
+	}
+	return nil
+}
+
+func (h *LingshulianHandler) PostUploadInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	args := &postPutURLArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
 	id := util3.MustGenerateID(ctx)
-	key := fmt.Sprintf("%d.ipa", id)
+	key := fmt.Sprintf("%d.%s", id, args.Suffix)
 	resp, err := h.lingshulianCtl.GetPutURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, key)
 	util.PanicIf(err)
 	util.RenderJSON(w, resp)

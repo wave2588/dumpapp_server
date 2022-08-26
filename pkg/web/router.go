@@ -120,8 +120,9 @@ func NewRouter() chi.Router {
 
 	// region lingshulian
 	lingshulianHandler := handler.NewLingshulianHandler()
-	r.With(middleware.OAuthRegister).Get("/lingshulian/sign_ipa", lingshulianHandler.GetSignIpaPutURL)
 	r.With(middleware.OAuthRegister).Get("/lingshulian/temp_secret", lingshulianHandler.GetTempSecretKey)
+	/// 直接上传, 小于 100M 的文件可以用此方式
+	r.With(middleware.OAuthRegister).Post("/upload/upload_info", lingshulianHandler.PostUploadInfo)
 	/// 分片上传
 	r.With(middleware.OAuthRegister).Post("/multipart/start_upload", lingshulianHandler.PostMultipartUploadInfo)
 	r.With(middleware.OAuthRegister).Post("/multipart/upload_part", lingshulianHandler.PostMultipartUploadPartInfo)

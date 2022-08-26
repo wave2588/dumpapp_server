@@ -58,17 +58,16 @@ func (c *LingshulianController) GetPutURL(ctx context.Context, bucket, key strin
 		Key:    aws.String(key),
 	})
 	expire := 60 * time.Minute
-	url, err := resp.Presign(expire)
+	URL, err := resp.Presign(expire)
 	if err != nil {
 		return nil, err
 	}
 	startAt := time.Now()
 	expireAt := startAt.Add(expire)
 	return &controller.GetPutURLResp{
-		URL:      url,
-		StartAt:  startAt.Unix(),
-		ExpireAt: expireAt.Unix(),
-		Token:    key,
+		URL:      URL,
+		ExpireTo: expireAt.Unix(),
+		Key:      key,
 	}, nil
 }
 

@@ -22,9 +22,8 @@ type LingshulianController interface {
 
 type GetPutURLResp struct {
 	URL      string `json:"url"`
-	StartAt  int64  `json:"start_at"`
-	ExpireAt int64  `json:"expire_at"`
-	Token    string `json:"token"`
+	ExpireTo int64  `json:"expire_to"`
+	Key      string `json:"key"`
 }
 
 type GetTempSecretKeyResp struct {
