@@ -58,87 +58,37 @@ func (h *LingshulianHandler) GetTempSecretKey(w http.ResponseWriter, r *http.Req
 	util.RenderJSON(w, resp)
 }
 
-type getUploadInfoArgs struct {
-	Suffix string `json:"suffix" validate:"required"`
-}
-
-func (p *getUploadInfoArgs) Validate() error {
-	err := validator.New().Struct(p)
-	if err != nil {
-		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
-	}
-	if p.Suffix == "" {
-		return errors.UnproccessableError("Suffix 格式错误")
-	}
-	return nil
-}
-
 func (h *LingshulianHandler) PostMultipartUploadInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := &getUploadInfoArgs{}
+	args := &controller.PostCreateMultipartUploadInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	resp, err := h.lingshulianCtl.GetCreateMultipartUploadInfo(ctx, args.Suffix)
+	resp, err := h.lingshulianCtl.PostCreateMultipartUploadInfo(ctx, args)
 	util.PanicIf(err)
 
 	util.RenderJSON(w, resp)
-}
-
-type getUploadPartInfoArgs struct {
-	UploadID   string `json:"upload_id" validate:"required"`
-	Key        string `json:"key" validate:"required"`
-	Bucket     string `json:"bucket" validate:"required"`
-	PartNumber int64  `json:"part_number" validate:"required"`
-}
-
-func (args *getUploadPartInfoArgs) Validate() error {
-	err := validator.New().Struct(args)
-	if err != nil {
-		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
-	}
-	if args.UploadID == "" || args.Key == "" || args.Bucket == "" || args.PartNumber <= 0 {
-		return errors.UnproccessableError("参数格式错误")
-	}
-	return nil
 }
 
 func (h *LingshulianHandler) PostMultipartUploadPartInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := &getUploadPartInfoArgs{}
+	args := &controller.PostMultipartUploadPartInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	resp, err := h.lingshulianCtl.GetMultipartUploadPartInfo(ctx, args.UploadID, args.Key, args.Bucket, args.PartNumber)
+	resp, err := h.lingshulianCtl.PostMultipartUploadPartInfo(ctx, args)
 	util.PanicIf(err)
 
 	util.RenderJSON(w, resp)
 }
 
-type getCompleteMultipartUploadInfoArgs struct {
-	UploadID string `json:"upload_id" validate:"required"`
-	Key      string `json:"key" validate:"required"`
-	Bucket   string `json:"bucket" validate:"required"`
-}
-
-func (p *getCompleteMultipartUploadInfoArgs) Validate() error {
-	err := validator.New().Struct(p)
-	if err != nil {
-		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
-	}
-	if p.UploadID == "" || p.Key == "" || p.Bucket == "" {
-		return errors.UnproccessableError("参数格式错误")
-	}
-	return nil
-}
-
 func (h *LingshulianHandler) PostCompleteMultipartUploadInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := &getCompleteMultipartUploadInfoArgs{}
+	args := &controller.PostCompleteMultipartUploadInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	resp, err := h.lingshulianCtl.GetCompleteMultipartUploadInfo(ctx, args.UploadID, args.Key, args.Bucket)
+	resp, err := h.lingshulianCtl.PostCompleteMultipartUploadInfo(ctx, args)
 	util.PanicIf(err)
 
 	util.RenderJSON(w, resp)

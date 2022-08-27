@@ -198,9 +198,9 @@ func (c *LingshulianController) Delete(ctx context.Context, bucket, key string) 
 	return err
 }
 
-func (c *LingshulianController) GetCreateMultipartUploadInfo(ctx context.Context, suffix string) (*controller.GetCreateMultipartUploadInfoResp, error) {
+func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Context, request *controller.PostCreateMultipartUploadInfoRequest) (*controller.PostCreateMultipartUploadInfoResp, error) {
 	id := util2.MustGenerateID(ctx)
-	key := fmt.Sprintf("%d.%s", id, suffix)
+	key := fmt.Sprintf("%d.%s", id, request.Suffix)
 	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 	expireTo := time.Now().Add(time.Hour)
 	output, err := c.Svc.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
@@ -214,7 +214,7 @@ func (c *LingshulianController) GetCreateMultipartUploadInfo(ctx context.Context
 	if output.UploadId == nil {
 		return nil, errors.NewDefaultAPIError(401, 401, "ErrGetUploadIDFail", "UploadID 获取失败")
 	}
-	return &controller.GetCreateMultipartUploadInfoResp{
+	return &controller.PostCreateMultipartUploadInfoResp{
 		UploadID: *output.UploadId,
 		Key:      key,
 		Bucket:   bucket,
@@ -222,14 +222,14 @@ func (c *LingshulianController) GetCreateMultipartUploadInfo(ctx context.Context
 	}, nil
 }
 
-func (c *LingshulianController) GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumber int64) (*controller.GetMultipartUploadPartInfoResp, error) {
+func (c *LingshulianController) PostMultipartUploadPartInfo(ctx context.Context, request *controller.PostMultipartUploadPartInfoRequest) (*controller.PostMultipartUploadPartInfoResp, error) {
 	expire := 60 * time.Minute
-	urlData := make([]string, partNumber)
-	for i := 0; i < int(partNumber); i++ {
+	urlData := make([]string, request.PartNumber)
+	for i := 0; i < int(request.PartNumber); i++ {
 		req, _ := c.Svc.UploadPartRequest(&s3.UploadPartInput{
-			UploadId:   util.StringPtr(uploadID),
-			Bucket:     util.StringPtr(bucket),
-			Key:        util.StringPtr(key),
+			UploadId:   util.StringPtr(request.UploadID),
+			Bucket:     util.StringPtr(request.Bucket),
+			Key:        util.StringPtr(request.Key),
 			PartNumber: util2.Int64Ptr(int64(i + 1)),
 		})
 		URL, err := req.Presign(expire)
@@ -238,17 +238,27 @@ func (c *LingshulianController) GetMultipartUploadPartInfo(ctx context.Context, 
 		}
 		urlData[i] = URL
 	}
-	return &controller.GetMultipartUploadPartInfoResp{
+	return &controller.PostMultipartUploadPartInfoResp{
 		URLData:  urlData,
 		ExpireTo: time.Now().Add(expire).Unix(),
 	}, nil
 }
 
-func (c *LingshulianController) GetCompleteMultipartUploadInfo(ctx context.Context, uploadID, key, bucket string) (*controller.GetCompleteMultipartUploadInfoResp, error) {
+func (c *LingshulianController) PostCompleteMultipartUploadInfo(ctx context.Context, request *controller.PostCompleteMultipartUploadInfoRequest) (*controller.PostCompleteMultipartUploadInfoResp, error) {
+	parts := make([]*s3.CompletedPart, 0)
+	for _, part := range request.Parts {
+		parts = append(parts, &s3.CompletedPart{
+			ETag:       util.StringPtr(part.ETag),
+			PartNumber: util2.Int64Ptr(part.PartNumber),
+		})
+	}
 	output, err := c.Svc.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
-		UploadId: util.StringPtr(uploadID),
-		Key:      util.StringPtr(key),
-		Bucket:   util.StringPtr(bucket),
+		UploadId: util.StringPtr(request.UploadID),
+		Key:      util.StringPtr(request.Key),
+		Bucket:   util.StringPtr(request.Bucket),
+		MultipartUpload: &s3.CompletedMultipartUpload{
+			Parts: parts,
+		},
 	})
 	if err != nil {
 		return nil, err
@@ -256,7 +266,7 @@ func (c *LingshulianController) GetCompleteMultipartUploadInfo(ctx context.Conte
 	if output.Key == nil {
 		return nil, errors.NewDefaultAPIError(401, 401, "ErrGetKeyFail", "Key 获取失败")
 	}
-	return &controller.GetCompleteMultipartUploadInfoResp{
-		Key: key,
+	return &controller.PostCompleteMultipartUploadInfoResp{
+		Key: request.Key,
 	}, nil
 }

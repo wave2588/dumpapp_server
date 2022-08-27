@@ -2,7 +2,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"io"
+
+	"dumpapp_server/pkg/errors"
+	"github.com/go-playground/validator/v10"
 )
 
 type LingshulianController interface {
@@ -15,9 +19,9 @@ type LingshulianController interface {
 	Delete(ctx context.Context, bucket, key string) error
 
 	/// 分片上传
-	GetCreateMultipartUploadInfo(ctx context.Context, suffix string) (*GetCreateMultipartUploadInfoResp, error)
-	GetMultipartUploadPartInfo(ctx context.Context, uploadID, key, bucket string, partNumber int64) (*GetMultipartUploadPartInfoResp, error)
-	GetCompleteMultipartUploadInfo(ctx context.Context, uploadID, key, bucket string) (*GetCompleteMultipartUploadInfoResp, error)
+	PostCreateMultipartUploadInfo(ctx context.Context, request *PostCreateMultipartUploadInfoRequest) (*PostCreateMultipartUploadInfoResp, error)
+	PostMultipartUploadPartInfo(ctx context.Context, request *PostMultipartUploadPartInfoRequest) (*PostMultipartUploadPartInfoResp, error)
+	PostCompleteMultipartUploadInfo(ctx context.Context, request *PostCompleteMultipartUploadInfoRequest) (*PostCompleteMultipartUploadInfoResp, error)
 }
 
 type GetPutURLResp struct {
@@ -42,18 +46,77 @@ type GetHeaderSignResp struct {
 	TTL  int64  `json:"ttl"`
 }
 
-type GetCreateMultipartUploadInfoResp struct {
+/// 开始上传
+type PostCreateMultipartUploadInfoRequest struct {
+	Suffix string `json:"suffix" validate:"required"`
+}
+
+func (p *PostCreateMultipartUploadInfoRequest) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.Suffix == "" {
+		return errors.UnproccessableError("Suffix 格式错误")
+	}
+	return nil
+}
+
+type PostCreateMultipartUploadInfoResp struct {
 	UploadID string `json:"upload_id"`
 	Key      string `json:"key"`
 	Bucket   string `json:"bucket"`
 	ExpireTo int64  `json:"expire_to"`
 }
 
-type GetMultipartUploadPartInfoResp struct {
+/// 上传分片
+type PostMultipartUploadPartInfoRequest struct {
+	UploadID   string `json:"upload_id" validate:"required"`
+	Key        string `json:"key" validate:"required"`
+	Bucket     string `json:"bucket" validate:"required"`
+	PartNumber int64  `json:"part_number" validate:"required"`
+}
+
+func (args *PostMultipartUploadPartInfoRequest) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if args.UploadID == "" || args.Key == "" || args.Bucket == "" || args.PartNumber <= 0 {
+		return errors.UnproccessableError("参数格式错误")
+	}
+	return nil
+}
+
+type PostMultipartUploadPartInfoResp struct {
 	URLData  []string `json:"url_data"`
 	ExpireTo int64    `json:"expire_to"`
 }
 
-type GetCompleteMultipartUploadInfoResp struct {
+/// 完成上传
+type PostCompleteMultipartUploadInfoRequest struct {
+	UploadID string                                        `json:"upload_id" validate:"required"`
+	Key      string                                        `json:"key" validate:"required"`
+	Bucket   string                                        `json:"bucket" validate:"required"`
+	Parts    []*PostCompleteMultipartUploadPartInfoRequest `json:"parts" validate:"required"`
+}
+
+type PostCompleteMultipartUploadPartInfoRequest struct {
+	PartNumber int64  `json:"part_number" validate:"required"`
+	ETag       string `json:"e_tag" validate:"required"`
+}
+
+func (p *PostCompleteMultipartUploadInfoRequest) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.UploadID == "" || p.Key == "" || p.Bucket == "" || len(p.Parts) == 0 {
+		return errors.UnproccessableError("参数格式错误")
+	}
+	return nil
+}
+
+type PostCompleteMultipartUploadInfoResp struct {
 	Key string `json:"key"`
 }
