@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
@@ -21,12 +20,14 @@ import (
 
 type FileHandler struct {
 	lingshulianCtl controller.LingshulianController
+	fileCtl        controller.FileController
 	fileDAO        dao.FileDAO
 }
 
 func NewFileHandler() *FileHandler {
 	return &FileHandler{
 		lingshulianCtl: impl.DefaultLingshulianController,
+		fileCtl:        impl.DefaultFileController,
 		fileDAO:        impl2.DefaultFileDAO,
 	}
 }
@@ -66,11 +67,9 @@ func (h *FileHandler) CreatePlistFile(w http.ResponseWriter, r *http.Request) {
 		},
 	}))
 
-	util.PanicIf(h.lingshulianCtl.Put(ctx, bucket, token, strings.NewReader(fmt.Sprintf(constant.PlistFileConfig, args.AppURL, args.AppIcon, args.AppIcon, args.AppBundleID, args.AppVersion, args.AppName))))
+	util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), token, []byte(fmt.Sprintf(constant.PlistFileConfig, args.AppURL, args.AppIcon, args.AppIcon, args.AppBundleID, args.AppVersion, args.AppName))))
 
-	url, err := h.lingshulianCtl.GetURL(ctx, bucket, token)
-	util.PanicIf(err)
 	util.RenderJSON(w, map[string]interface{}{
-		"plist_url": url,
+		"plist_url": h.fileCtl.GetPlistFileURL(ctx, token),
 	})
 }

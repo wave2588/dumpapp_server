@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
@@ -24,12 +23,14 @@ import (
 
 type MemberSignIpaHandler struct {
 	lingshulianCtl controller.LingshulianController
+	fileCtl        controller.FileController
 	memberSignDAO  dao.MemberSignIpaDAO
 }
 
 func NewMemberSignIpaHandler() *MemberSignIpaHandler {
 	return &MemberSignIpaHandler{
 		lingshulianCtl: impl.DefaultLingshulianController,
+		fileCtl:        impl.DefaultFileController,
 		memberSignDAO:  impl2.DefaultMemberSignIpaDAO,
 	}
 }
@@ -67,7 +68,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	/// 开始上传
 	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
-	util.PanicIf(h.lingshulianCtl.Put(ctx, bucket, plistToken, strings.NewReader(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
+	util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
 
 	signIpaID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{

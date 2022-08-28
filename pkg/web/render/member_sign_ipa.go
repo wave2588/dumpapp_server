@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
@@ -41,6 +40,7 @@ type MemberSignIpaRender struct {
 
 	memberSignIpaDAO dao.MemberSignIpaDAO
 	lingshulianCtl   controller.LingshulianController
+	fileCtl          controller.FileController
 }
 
 type MemberSignIpaOption func(*MemberSignIpaRender)
@@ -75,6 +75,7 @@ func NewMemberSignIpaRender(ids []int64, loginID int64, opts ...MemberSignIpaOpt
 
 		memberSignIpaDAO: impl.DefaultMemberSignIpaDAO,
 		lingshulianCtl:   impl2.DefaultLingshulianController,
+		fileCtl:          impl2.DefaultFileController,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -141,8 +142,6 @@ func (f *MemberSignIpaRender) RenderDownloadURL(ctx context.Context) {
 
 func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
 	for _, ipa := range f.memberSignIpaMap {
-		url, err := f.lingshulianCtl.GetURL(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, ipa.Meta.IpaPlistFileToken)
-		util.PanicIf(err)
-		ipa.PlistURL = url
+		ipa.PlistURL = f.fileCtl.GetPlistFileURL(ctx, ipa.Meta.IpaPlistFileToken)
 	}
 }
