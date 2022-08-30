@@ -27,7 +27,16 @@ func (c *FileController) GetPlistFolderPath(ctx context.Context) string {
 	return "/Users/wave/Downloads/plist"
 }
 
-func (c *FileController) ListPlistFolder(ctx context.Context, path string) ([]string, error) {
+func (c *FileController) GetPlistFileURL(ctx context.Context, key string) string {
+	return fmt.Sprintf("https://dumpapp.com/plist/%s", key)
+}
+
+func (c *FileController) PutFileToLocal(ctx context.Context, path, key string, data []byte) error {
+	fileName := fmt.Sprintf("%s/%s", path, key)
+	return ioutil.WriteFile(fileName, data, 0o644)
+}
+
+func (c *FileController) ListFolder(ctx context.Context, path string) ([]string, error) {
 	fileInfos, err := ioutil.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -37,13 +46,4 @@ func (c *FileController) ListPlistFolder(ctx context.Context, path string) ([]st
 		result = append(result, info.Name())
 	}
 	return result, nil
-}
-
-func (c *FileController) GetPlistFileURL(ctx context.Context, key string) string {
-	return fmt.Sprintf("https://dumpapp.com/plist/%s", key)
-}
-
-func (c *FileController) PutFileToLocal(ctx context.Context, path, key string, data []byte) error {
-	fileName := fmt.Sprintf("%s/%s", path, key)
-	return ioutil.WriteFile(fileName, data, 0o644)
 }
