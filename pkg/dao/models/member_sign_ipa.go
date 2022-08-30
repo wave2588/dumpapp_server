@@ -25,6 +25,7 @@ import (
 // MemberSignIpa is an object representing the database table.
 type MemberSignIpa struct {
 	ID                int64                        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	ExpenseID         string                       `boil:"expense_id" json:"expense_id" toml:"expense_id" yaml:"expense_id"`
 	MemberID          int64                        `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	IsDelete          bool                         `boil:"is_delete" json:"is_delete" toml:"is_delete" yaml:"is_delete"`
 	IpaFileToken      string                       `boil:"ipa_file_token" json:"ipa_file_token" toml:"ipa_file_token" yaml:"ipa_file_token"`
@@ -39,6 +40,7 @@ type MemberSignIpa struct {
 
 var MemberSignIpaColumns = struct {
 	ID                string
+	ExpenseID         string
 	MemberID          string
 	IsDelete          string
 	IpaFileToken      string
@@ -48,6 +50,7 @@ var MemberSignIpaColumns = struct {
 	UpdatedAt         string
 }{
 	ID:                "id",
+	ExpenseID:         "expense_id",
 	MemberID:          "member_id",
 	IsDelete:          "is_delete",
 	IpaFileToken:      "ipa_file_token",
@@ -82,6 +85,7 @@ func (w whereHelperdatatype_MemberSignIpaBizExt) GTE(x datatype.MemberSignIpaBiz
 
 var MemberSignIpaWhere = struct {
 	ID                whereHelperint64
+	ExpenseID         whereHelperstring
 	MemberID          whereHelperint64
 	IsDelete          whereHelperbool
 	IpaFileToken      whereHelperstring
@@ -91,6 +95,7 @@ var MemberSignIpaWhere = struct {
 	UpdatedAt         whereHelpertime_Time
 }{
 	ID:                whereHelperint64{field: "`member_sign_ipa`.`id`"},
+	ExpenseID:         whereHelperstring{field: "`member_sign_ipa`.`expense_id`"},
 	MemberID:          whereHelperint64{field: "`member_sign_ipa`.`member_id`"},
 	IsDelete:          whereHelperbool{field: "`member_sign_ipa`.`is_delete`"},
 	IpaFileToken:      whereHelperstring{field: "`member_sign_ipa`.`ipa_file_token`"},
@@ -117,8 +122,8 @@ func (*memberSignIpaR) NewStruct() *memberSignIpaR {
 type memberSignIpaL struct{}
 
 var (
-	memberSignIpaAllColumns            = []string{"id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext", "created_at", "updated_at"}
-	memberSignIpaColumnsWithoutDefault = []string{"member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext"}
+	memberSignIpaAllColumns            = []string{"id", "expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext", "created_at", "updated_at"}
+	memberSignIpaColumnsWithoutDefault = []string{"expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext"}
 	memberSignIpaColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberSignIpaPrimaryKeyColumns     = []string{"id"}
 )
@@ -686,6 +691,7 @@ func (o MemberSignIpaSlice) UpdateAll(ctx context.Context, exec boil.ContextExec
 
 var mySQLMemberSignIpaUniqueColumns = []string{
 	"id",
+	"expense_id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.

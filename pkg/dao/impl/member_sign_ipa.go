@@ -14,6 +14,7 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	pkgErr "github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -171,4 +172,56 @@ func (d *MemberSignIpaDAO) Count(ctx context.Context, filters []qm.QueryMod) (in
 	}
 
 	return models.MemberSignIpas(qs...).Count(ctx, exec)
+}
+
+// GetByExpenseID retrieves a single record by uniq key expenseID from db.
+func (d *MemberSignIpaDAO) GetByExpenseID(ctx context.Context, expenseID string) (*models.MemberSignIpa, error) {
+	memberSignIpaObj := &models.MemberSignIpa{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `member_sign_ipa` where `expense_id`=?", sel,
+	)
+
+	q := queries.Raw(query, expenseID)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, memberSignIpaObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=member_sign_ipa, query=%s, args=expenseID :%v", query, expenseID)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from member_sign_ipa")
+	}
+
+	return memberSignIpaObj, nil
+}
+
+// BatchGetByExpenseID retrieves multiple records by uniq key expenseID from db.
+func (d *MemberSignIpaDAO) BatchGetByExpenseID(ctx context.Context, expenseIDs []string) (map[string]*models.MemberSignIpa, error) {
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+	datas, err := models.MemberSignIpas(models.MemberSignIpaWhere.ExpenseID.IN(expenseIDs)).All(ctx, exec)
+	if err != nil {
+		return nil, pkgErr.WithStack(err)
+	}
+
+	result := make(map[string]*models.MemberSignIpa)
+	for _, c := range datas {
+		result[c.ExpenseID] = c
+	}
+
+	return result, nil
 }

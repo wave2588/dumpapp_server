@@ -3,6 +3,7 @@ package main
 import (
 	"dumpapp_server/cmd/cron/conclusion"
 	"dumpapp_server/cmd/cron/delete_ipa"
+	"dumpapp_server/cmd/cron/delete_plist"
 	"github.com/robfig/cron/v3"
 )
 
@@ -13,6 +14,11 @@ func main() {
 	/// 每晚 0 点删除临时 ipa
 	c.AddFunc("00 00 00 * * ?", func() {
 		delete_ipa.Run()
+	})
+
+	/// 每晚 0 点删除 plist
+	c.AddFunc("00 00 00 * * ?", func() {
+		delete_plist.Run()
 	})
 
 	/// 每晚 0 点推送总结

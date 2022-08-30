@@ -27,7 +27,16 @@ func (c *FileController) GetPlistFolderPath(ctx context.Context) string {
 	return "/Users/wave/Downloads/plist"
 }
 
-func (c *FileController) ListPlistFolder(ctx context.Context) {
+func (c *FileController) ListPlistFolder(ctx context.Context, path string) ([]string, error) {
+	fileInfos, err := ioutil.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, 0)
+	for _, info := range fileInfos {
+		result = append(result, info.Name())
+	}
+	return result, nil
 }
 
 func (c *FileController) GetPlistFileURL(ctx context.Context, key string) string {

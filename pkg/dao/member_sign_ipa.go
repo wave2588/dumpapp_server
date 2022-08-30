@@ -20,4 +20,8 @@ type MemberSignIpaDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
+	// GetByExpenseID retrieves a single record by uniq key expenseID from db.
+	GetByExpenseID(ctx context.Context, expenseID string) (*models.MemberSignIpa, error)
+	// BatchGetByExpenseID retrieves multiple records by uniq key expenseID from db.
+	BatchGetByExpenseID(ctx context.Context, expenseIDs []string) (map[string]*models.MemberSignIpa, error)
 }

@@ -36,6 +36,7 @@ func NewMemberSignIpaHandler() *MemberSignIpaHandler {
 }
 
 type postSignIpaArgs struct {
+	ExpenseID       string `json:"expense_id" validate:"required"` /// 客户端生成的消费 ID
 	IpaName         string `json:"ipa_name" validate:"required"`
 	IpaBundleID     string `json:"ipa_bundle_id" validate:"required"`
 	IpaFileToken    string `json:"ipa_file_token" validate:"required"`
@@ -60,6 +61,13 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postSignIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// 检查 ExpenseID 是否存在
+	res, err := h.memberSignDAO.BatchGetByExpenseID(ctx, []string{args.ExpenseID})
+	util.PanicIf(err)
+	if _, ok := res[args.ExpenseID]; ok {
+		util.PanicIf(errors.UnproccessableError("expense_id 已存在"))
+	}
+
 	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 
 	/// 获取签名后的 ipa 文件地址
@@ -73,6 +81,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	signIpaID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
 		ID:                signIpaID,
+		ExpenseID:         args.ExpenseID,
 		MemberID:          loginID,
 		IsDelete:          false,
 		IpaFileToken:      args.IpaFileToken,
