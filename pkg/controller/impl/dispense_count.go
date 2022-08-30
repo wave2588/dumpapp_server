@@ -29,7 +29,7 @@ func NewDispenseCountController() *DispenseCountController {
 	}
 }
 
-func (c *DispenseCountController) AddCount(ctx context.Context, memberID, count int64) error {
+func (c *DispenseCountController) AddCount(ctx context.Context, memberID, count int64, recordType enum.DispenseCountRecordType) error {
 	if count <= 0 {
 		return nil
 	}
@@ -47,7 +47,7 @@ func (c *DispenseCountController) AddCount(ctx context.Context, memberID, count 
 	/// 添加记录
 	return c.dispenseCountRecordDAO.Insert(ctx, &models.DispenseCountRecord{
 		MemberID: memberID,
-		Type:     enum.DispenseCountRecordTypePay,
+		Type:     recordType,
 		Count:    count,
 	})
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type DispenseCountController interface {
-	AddCount(ctx context.Context, memberID, count int64) error
+	AddCount(ctx context.Context, memberID, count int64, recordType enum.DispenseCountRecordType) error
 	Check(ctx context.Context, memberID, count int64) error
 	DeductCount(ctx context.Context, memberID, count int64, recordType enum.DispenseCountRecordType) error
 }

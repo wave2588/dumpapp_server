@@ -54,6 +54,7 @@ type PayCampaign struct {
 type DispenseInfo struct {
 	Count int64  `json:"count"`
 	Rule  string `json:"rule"`
+	Ratio int64  `json:"ratio"`
 }
 
 type MemberRender struct {
@@ -197,6 +198,7 @@ func (f *MemberRender) RenderDispenseInfo(ctx context.Context) {
 		member.DispenseInfo = &DispenseInfo{
 			Count: countMap[member.ID],
 			Rule:  "临时规则",
+			Ratio: 5,
 		}
 	}
 }

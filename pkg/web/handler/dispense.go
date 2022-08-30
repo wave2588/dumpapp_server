@@ -58,7 +58,7 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 扣费流程, 里边有检查 D 币是否足够
 	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, loginID, args.Count, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseDispense, datatype.MemberPayCountRecordBizExt{}))
 
-	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*5))
+	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*5, enum.DispenseCountRecordTypePay))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }

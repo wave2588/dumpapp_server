@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"dumpapp_server/pkg/config"
 )
@@ -46,4 +47,9 @@ func (c *FileController) ListFolder(ctx context.Context, path string) ([]string,
 		result = append(result, info.Name())
 	}
 	return result, nil
+}
+
+func (c *FileController) DeleteFile(ctx context.Context, path string) error {
+	_ = os.Remove(path)
+	return nil
 }

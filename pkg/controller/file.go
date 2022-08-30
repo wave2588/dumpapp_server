@@ -10,4 +10,5 @@ type FileController interface {
 	PutFileToLocal(ctx context.Context, path, key string, data []byte) error
 
 	ListFolder(ctx context.Context, path string) ([]string, error)
+	DeleteFile(ctx context.Context, path string) error
 }
