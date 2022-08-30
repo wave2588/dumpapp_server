@@ -61,11 +61,12 @@ func MemberSignIpaIncludes(fields []string) MemberSignIpaOption {
 	}
 }
 
+var DefaultMemberSignIpaFields = []string{
+	"DownloadURL",
+}
+
 var MemberSignIpaDefaultRenderFields = []MemberSignIpaOption{
-	MemberSignIpaIncludes([]string{
-		"DownloadURL",
-		"PlistURL",
-	}),
+	MemberSignIpaIncludes(DefaultMemberSignIpaFields),
 }
 
 func NewMemberSignIpaRender(ids []int64, loginID int64, opts ...MemberSignIpaOption) *MemberSignIpaRender {

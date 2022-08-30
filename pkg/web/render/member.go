@@ -24,7 +24,8 @@ type Member struct {
 
 	Phone *string `json:"phone,omitempty" render:"method=RenderPhone"`
 
-	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
+	PayCount     *int64        `json:"pay_count,omitempty" render:"method=RenderPayCount"`
+	DispenseInfo *DispenseInfo `json:"dispense_info" render:"method=RenderDispenseInfo"`
 
 	/// 邀请链接
 	InviteURL *string `json:"invite_url,omitempty" render:"method=RenderInviteURL"`
@@ -50,6 +51,11 @@ type PayCampaign struct {
 	Description string `json:"description"`
 }
 
+type DispenseInfo struct {
+	Count int64  `json:"count"`
+	Rule  string `json:"rule"`
+}
+
 type MemberRender struct {
 	ids           []int64
 	loginID       int64
@@ -62,6 +68,7 @@ type MemberRender struct {
 	memberInviteCodeDAO   dao.MemberInviteCodeDAO
 	memberDeviceDAO       dao.MemberDeviceDAO
 	memberIDEncryptionDAO dao.MemberIDEncryptionDAO
+	dispenseCountDAO      dao.DispenseCountDAO
 	certificateService    http.CertificateServer
 }
 
@@ -85,6 +92,7 @@ func MemberIncludes(fields []string) MemberOption {
 
 var DefaultFields = []string{
 	"PayCount",
+	"DispenseInfo",
 	"InviteURL",
 }
 
@@ -95,10 +103,7 @@ var MemberAdminRenderFields = []MemberOption{
 }
 
 var MemberDefaultRenderFields = []MemberOption{
-	MemberIncludes([]string{
-		"PayCount",
-		"InviteURL",
-	}),
+	MemberIncludes(DefaultFields),
 }
 
 var MemberSelfRenderFields = []MemberOption{
@@ -115,6 +120,7 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		memberInviteCodeDAO:   impl.DefaultMemberInviteCodeDAO,
 		memberDeviceDAO:       impl.DefaultMemberDeviceDAO,
 		memberIDEncryptionDAO: impl.DefaultMemberIDEncryptionDAO,
+		dispenseCountDAO:      impl.DefaultDispenseCountDAO,
 		certificateService:    impl2.DefaultCertificateServer,
 	}
 	for _, opt := range opts {
@@ -181,6 +187,17 @@ func (f *MemberRender) RenderPayCount(ctx context.Context) {
 	util.PanicIf(err)
 	for _, member := range f.memberMap {
 		member.PayCount = util2.Int64Ptr(countMap[member.ID])
+	}
+}
+
+func (f *MemberRender) RenderDispenseInfo(ctx context.Context) {
+	countMap, err := f.dispenseCountDAO.BatchGetMemberNormalCount(ctx, f.ids)
+	util.PanicIf(err)
+	for _, member := range f.memberMap {
+		member.DispenseInfo = &DispenseInfo{
+			Count: countMap[member.ID],
+			Rule:  "临时规则",
+		}
 	}
 }
 

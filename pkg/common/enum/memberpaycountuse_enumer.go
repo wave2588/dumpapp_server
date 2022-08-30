@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _MemberPayCountUseName = "ipacertificateadmin_delete"
+const _MemberPayCountUseName = "ipacertificateadmin_deletedispense"
 
-var _MemberPayCountUseIndex = [...]uint8{0, 3, 14, 26}
+var _MemberPayCountUseIndex = [...]uint8{0, 3, 14, 26, 34}
 
-const _MemberPayCountUseLowerName = "ipacertificateadmin_delete"
+const _MemberPayCountUseLowerName = "ipacertificateadmin_deletedispense"
 
 func (i MemberPayCountUse) String() string {
 	i -= 1
@@ -30,9 +30,10 @@ func _MemberPayCountUseNoOp() {
 	_ = x[MemberPayCountUseIpa-(1)]
 	_ = x[MemberPayCountUseCertificate-(2)]
 	_ = x[MemberPayCountUseAdminDelete-(3)]
+	_ = x[MemberPayCountUseDispense-(4)]
 }
 
-var _MemberPayCountUseValues = []MemberPayCountUse{MemberPayCountUseIpa, MemberPayCountUseCertificate, MemberPayCountUseAdminDelete}
+var _MemberPayCountUseValues = []MemberPayCountUse{MemberPayCountUseIpa, MemberPayCountUseCertificate, MemberPayCountUseAdminDelete, MemberPayCountUseDispense}
 
 var _MemberPayCountUseNameToValueMap = map[string]MemberPayCountUse{
 	_MemberPayCountUseName[0:3]:        MemberPayCountUseIpa,
@@ -41,12 +42,15 @@ var _MemberPayCountUseNameToValueMap = map[string]MemberPayCountUse{
 	_MemberPayCountUseLowerName[3:14]:  MemberPayCountUseCertificate,
 	_MemberPayCountUseName[14:26]:      MemberPayCountUseAdminDelete,
 	_MemberPayCountUseLowerName[14:26]: MemberPayCountUseAdminDelete,
+	_MemberPayCountUseName[26:34]:      MemberPayCountUseDispense,
+	_MemberPayCountUseLowerName[26:34]: MemberPayCountUseDispense,
 }
 
 var _MemberPayCountUseNames = []string{
 	_MemberPayCountUseName[0:3],
 	_MemberPayCountUseName[3:14],
 	_MemberPayCountUseName[14:26],
+	_MemberPayCountUseName[26:34],
 }
 
 // MemberPayCountUseString retrieves an enum value from the enum constants string name.

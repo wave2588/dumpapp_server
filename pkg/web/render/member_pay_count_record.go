@@ -147,6 +147,9 @@ func (f *MemberPayCountRecordRender) RenderDescription(ctx context.Context) {
 		case enum.MemberPayCountRecordTypeAdminDelete:
 			record.Type = "deduct"
 			record.Description = fmt.Sprintf("系统删除了 %d 个 D 币", record.meta.Count)
+		case enum.MemberPayCountRecordTypeDispense:
+			record.Type = "deduct"
+			record.Description = fmt.Sprintf("兑换下载次数消费了 %d 个 D 币", record.meta.Count)
 		}
 	}
 }

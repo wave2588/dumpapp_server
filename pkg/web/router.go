@@ -185,6 +185,13 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/file/plist", fileHandler.CreatePlistFile)
 	// endregion
 
+	// dispense
+	dispenseHandler := handler.NewDispenseHandler()
+	r.With(middleware.OAuthRegister).Post("/dispense", dispenseHandler.Post)
+	r.With(middleware.OAuthGuest).Post("/dispense/expense", dispenseHandler.Expense)
+	r.With(middleware.OAuthRegister).Get("/member/self/dispense_record", dispenseHandler.Records)
+	// endregion
+
 	return r
 }
 

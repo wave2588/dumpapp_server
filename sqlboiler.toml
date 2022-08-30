@@ -339,3 +339,29 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# dispense_count
+[[types]]
+  [types.match]
+    name = "status"
+    type = "string"
+    tables = ["dispense_count"]
+
+  [types.replace]
+    type = "enum.DispenseCountStatus"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# dispense_count_record
+[[types]]
+  [types.match]
+    name = "type"
+    type = "string"
+    tables = ["dispense_count_record"]
+
+  [types.replace]
+    type = "enum.DispenseCountRecordType"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/enum"']

@@ -22,16 +22,18 @@ import (
 )
 
 type MemberSignIpaHandler struct {
-	lingshulianCtl controller.LingshulianController
-	fileCtl        controller.FileController
-	memberSignDAO  dao.MemberSignIpaDAO
+	lingshulianCtl   controller.LingshulianController
+	fileCtl          controller.FileController
+	dispenseCountCtl controller.DispenseCountController
+	memberSignDAO    dao.MemberSignIpaDAO
 }
 
 func NewMemberSignIpaHandler() *MemberSignIpaHandler {
 	return &MemberSignIpaHandler{
-		lingshulianCtl: impl.DefaultLingshulianController,
-		fileCtl:        impl.DefaultFileController,
-		memberSignDAO:  impl2.DefaultMemberSignIpaDAO,
+		lingshulianCtl:   impl.DefaultLingshulianController,
+		fileCtl:          impl.DefaultFileController,
+		dispenseCountCtl: impl.DefaultDispenseCountController,
+		memberSignDAO:    impl2.DefaultMemberSignIpaDAO,
 	}
 }
 
@@ -124,13 +126,37 @@ func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http
 	})
 }
 
+type getMemberSignIpaArgs struct {
+	IncludeFields datatype.IncludeFields `form:"include"`
+}
+
+func (args *getMemberSignIpaArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
 func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	var (
 		ctx = r.Context()
 		id  = cast.ToInt64(util.URLParam(r, "id"))
 	)
 
-	dataMap := render.NewMemberSignIpaRender([]int64{id}, 0, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
+	args := getMemberSignIpaArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	fields := render.DefaultMemberSignIpaFields
+	fields = append(fields, convertIncludes(args.IncludeFields)...)
+	dataMap := render.NewMemberSignIpaRender(
+		[]int64{id},
+		0, []render.MemberSignIpaOption{
+			render.MemberSignIpaIncludes(fields),
+		}...,
+	).RenderMap(ctx)
+
 	data, ok := dataMap[id]
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
@@ -138,7 +164,26 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	if data.IsDelete {
 		util.PanicIf(errors.ErrNotFound)
 	}
+
+	/// 检查签名用户是否有足够的下载次数
+	if len(args.IncludeFields) != 0 {
+		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, 1))
+	}
+
 	util.RenderJSON(w, data)
+}
+
+func convertIncludes(includeFields datatype.IncludeFields) []string {
+	supportFieldMap := map[string]string{
+		"plist_url": "PlistURL",
+	}
+	includes := make([]string, 0)
+	for _, field := range includeFields {
+		if f, ok := supportFieldMap[field]; ok {
+			includes = append(includes, f)
+		}
+	}
+	return includes
 }
 
 func (h *MemberSignIpaHandler) Delete(w http.ResponseWriter, r *http.Request) {

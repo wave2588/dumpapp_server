@@ -21,6 +21,7 @@ const (
 	MemberPayCountRecordTypeBuyIpa         /// 减少: 购买 ipa
 	MemberPayCountRecordTypeBuyCertificate /// 减少: 购买证书
 	MemberPayCountRecordTypeAdminDelete    /// 减少: 管理员删除
+	MemberPayCountRecordTypeDispense       /// 减少: 兑换了下载次数
 )
 
 func ConvertMemberPayCountSourceToRecordType(source MemberPayCountSource) MemberPayCountRecordType {
@@ -43,6 +44,7 @@ func ConvertMemberPayCountUseToRecordType(use MemberPayCountUse) MemberPayCountR
 		MemberPayCountUseIpa:         MemberPayCountRecordTypeBuyIpa,
 		MemberPayCountUseCertificate: MemberPayCountRecordTypeBuyCertificate,
 		MemberPayCountUseAdminDelete: MemberPayCountRecordTypeAdminDelete,
+		MemberPayCountUseDispense:    MemberPayCountRecordTypeDispense,
 	}
 	res, ok := convertMap[use]
 	if !ok {

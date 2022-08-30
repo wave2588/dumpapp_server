@@ -75,3 +75,7 @@ func UnproccessableError(msg string) *APIError {
 func ErrNotPayCountFunc(msg string) *APIError {
 	return NewDefaultAPIError(403, 30001, "ErrNotPayCount", msg)
 }
+
+func ErrDispenseCountFunc(msg string) *APIError {
+	return NewDefaultAPIError(403, 1300001, "ErrDispenseCount", msg)
+}

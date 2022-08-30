@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _MemberPayCountRecordTypeName = "paypay_for_freeadmin_presentedinvited_presentedrebatebuy_ipabuy_certificateadmin_delete"
+const _MemberPayCountRecordTypeName = "paypay_for_freeadmin_presentedinvited_presentedrebatebuy_ipabuy_certificateadmin_deletedispense"
 
-var _MemberPayCountRecordTypeIndex = [...]uint8{0, 3, 15, 30, 47, 53, 60, 75, 87}
+var _MemberPayCountRecordTypeIndex = [...]uint8{0, 3, 15, 30, 47, 53, 60, 75, 87, 95}
 
-const _MemberPayCountRecordTypeLowerName = "paypay_for_freeadmin_presentedinvited_presentedrebatebuy_ipabuy_certificateadmin_delete"
+const _MemberPayCountRecordTypeLowerName = "paypay_for_freeadmin_presentedinvited_presentedrebatebuy_ipabuy_certificateadmin_deletedispense"
 
 func (i MemberPayCountRecordType) String() string {
 	i -= 1
@@ -35,9 +35,10 @@ func _MemberPayCountRecordTypeNoOp() {
 	_ = x[MemberPayCountRecordTypeBuyIpa-(6)]
 	_ = x[MemberPayCountRecordTypeBuyCertificate-(7)]
 	_ = x[MemberPayCountRecordTypeAdminDelete-(8)]
+	_ = x[MemberPayCountRecordTypeDispense-(9)]
 }
 
-var _MemberPayCountRecordTypeValues = []MemberPayCountRecordType{MemberPayCountRecordTypePay, MemberPayCountRecordTypePayForFree, MemberPayCountRecordTypeAdminPresented, MemberPayCountRecordTypeInvitedPresented, MemberPayCountRecordTypeRebate, MemberPayCountRecordTypeBuyIpa, MemberPayCountRecordTypeBuyCertificate, MemberPayCountRecordTypeAdminDelete}
+var _MemberPayCountRecordTypeValues = []MemberPayCountRecordType{MemberPayCountRecordTypePay, MemberPayCountRecordTypePayForFree, MemberPayCountRecordTypeAdminPresented, MemberPayCountRecordTypeInvitedPresented, MemberPayCountRecordTypeRebate, MemberPayCountRecordTypeBuyIpa, MemberPayCountRecordTypeBuyCertificate, MemberPayCountRecordTypeAdminDelete, MemberPayCountRecordTypeDispense}
 
 var _MemberPayCountRecordTypeNameToValueMap = map[string]MemberPayCountRecordType{
 	_MemberPayCountRecordTypeName[0:3]:        MemberPayCountRecordTypePay,
@@ -56,6 +57,8 @@ var _MemberPayCountRecordTypeNameToValueMap = map[string]MemberPayCountRecordTyp
 	_MemberPayCountRecordTypeLowerName[60:75]: MemberPayCountRecordTypeBuyCertificate,
 	_MemberPayCountRecordTypeName[75:87]:      MemberPayCountRecordTypeAdminDelete,
 	_MemberPayCountRecordTypeLowerName[75:87]: MemberPayCountRecordTypeAdminDelete,
+	_MemberPayCountRecordTypeName[87:95]:      MemberPayCountRecordTypeDispense,
+	_MemberPayCountRecordTypeLowerName[87:95]: MemberPayCountRecordTypeDispense,
 }
 
 var _MemberPayCountRecordTypeNames = []string{
@@ -67,6 +70,7 @@ var _MemberPayCountRecordTypeNames = []string{
 	_MemberPayCountRecordTypeName[53:60],
 	_MemberPayCountRecordTypeName[60:75],
 	_MemberPayCountRecordTypeName[75:87],
+	_MemberPayCountRecordTypeName[87:95],
 }
 
 // MemberPayCountRecordTypeString retrieves an enum value from the enum constants string name.
