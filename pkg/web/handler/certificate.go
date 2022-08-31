@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"dumpapp_server/pkg/common/constant"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -57,17 +58,17 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	payCount := cast.ToInt64(30)
+	payCount := cast.ToInt64(constant.CertificatePriceL1)
 	payType := "private"
 	switch args.Type {
 	case 1: /// 30 售后七天，理论 1 年不掉签
-		payCount = 30
+		payCount = constant.CertificatePriceL1
 		payType = "private"
 	case 2: // 60 售后一年，等 1 - 7 天   public
-		payCount = 68
+		payCount = constant.CertificatePriceL2
 		payType = "private"
 	case 3: /// 90 售后一年，立即出   public
-		payCount = 97
+		payCount = constant.CertificatePriceL3
 		payType = "private"
 	}
 
@@ -89,19 +90,19 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 	data := []*certificatePrice{
 		{
 			ID:          1,
-			Price:       30,
+			Price:       constant.CertificatePriceL1,
 			Title:       "普通版",
 			Description: "理论 1 年，无质保。",
 		},
 		{
 			ID:          2,
-			Price:       68,
+			Price:       constant.CertificatePriceL2,
 			Title:       "稳定版",
 			Description: "理论 1 年，售后半年，掉了无限补。",
 		},
 		{
 			ID:          3,
-			Price:       97,
+			Price:       constant.CertificatePriceL3,
 			Title:       "豪华版",
 			Description: "理论 1 年，售后 1 年，掉了无限补。",
 		},
