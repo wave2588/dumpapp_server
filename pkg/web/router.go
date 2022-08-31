@@ -127,6 +127,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Post("/multipart/start_upload", lingshulianHandler.PostMultipartUploadInfo)
 	r.With(middleware.OAuthRegister).Post("/multipart/upload_parts", lingshulianHandler.PostMultipartUploadPartInfo)
 	r.With(middleware.OAuthRegister).Post("/multipart/complete_upload", lingshulianHandler.PostCompleteMultipartUploadInfo)
+	r.With(middleware.OAuthRegister).Post("/multipart/abort_upload", lingshulianHandler.PostAbortMultipartUploadInfo)
 	// endregion
 
 	// regis daily_free
@@ -172,6 +173,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Post("/sign_ipa", memberSignIpaHandler.Post)
 	r.With(middleware.OAuthRegister).Get("/member/self/sign_ipa", memberSignIpaHandler.GetSelfSignIpaList)
 	r.With(middleware.OAuthGuest).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
+	r.With(middleware.OAuthGuest).Get("/sign_ipa/expense_id/{expense_id}", memberSignIpaHandler.GetByExpenseID)
 	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 

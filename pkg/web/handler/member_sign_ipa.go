@@ -66,36 +66,59 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 检查 ExpenseID 是否存在
 	res, err := h.memberSignDAO.BatchGetByExpenseID(ctx, []string{args.ExpenseID})
 	util.PanicIf(err)
-	if _, ok := res[args.ExpenseID]; ok {
-		util.PanicIf(errors.UnproccessableError("expense_id 已存在"))
+
+	var signIpaID int64
+
+	/// 如果 sign_ipa 已经存在, 则走更新操作
+	if signIpa, ok := res[args.ExpenseID]; ok {
+		signIpaID = signIpa.ID
+		/// 如果当前记录已经被删除了, 则需要重新打开此记录, 并重新生成 plist 文件
+		if signIpa.IsDelete {
+			bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+			/// 获取签名后的 ipa 文件地址
+			ipaURL, err := h.lingshulianCtl.GetURL(ctx, bucket, args.IpaFileToken)
+			util.PanicIf(err)
+			/// 开始上传
+			plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
+			util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
+			signIpa.IsDelete = false
+			signIpa.IpaFileToken = args.IpaFileToken
+			signIpa.IpaPlistFileToken = plistToken
+			signIpa.BizExt = datatype.MemberSignIpaBizExt{
+				IpaName:         args.IpaName,
+				IpaBundleID:     args.IpaBundleID,
+				IpaVersion:      args.IpaVersion,
+				IpaSize:         args.IpaSize,
+				CertificateName: args.CertificateName,
+			}
+		}
+		util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
+	} else {
+		bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+		/// 获取签名后的 ipa 文件地址
+		ipaURL, err := h.lingshulianCtl.GetURL(ctx, bucket, args.IpaFileToken)
+		util.PanicIf(err)
+		/// 开始上传
+		plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
+		util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
+
+		signIpaID = util2.MustGenerateID(ctx)
+		util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
+			ID:                signIpaID,
+			ExpenseID:         args.ExpenseID,
+			MemberID:          loginID,
+			IsDelete:          false,
+			IpaFileToken:      args.IpaFileToken,
+			IpaPlistFileToken: plistToken,
+			BizExt: datatype.MemberSignIpaBizExt{
+				IpaName:         args.IpaName,
+				IpaBundleID:     args.IpaBundleID,
+				IpaVersion:      args.IpaVersion,
+				IpaSize:         args.IpaSize,
+				CertificateName: args.CertificateName,
+			},
+		}))
 	}
-
-	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
-
-	/// 获取签名后的 ipa 文件地址
-	ipaURL, err := h.lingshulianCtl.GetURL(ctx, bucket, args.IpaFileToken)
-	util.PanicIf(err)
-
-	/// 开始上传
-	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
-	util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
-
-	signIpaID := util2.MustGenerateID(ctx)
-	util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
-		ID:                signIpaID,
-		ExpenseID:         args.ExpenseID,
-		MemberID:          loginID,
-		IsDelete:          false,
-		IpaFileToken:      args.IpaFileToken,
-		IpaPlistFileToken: plistToken,
-		BizExt: datatype.MemberSignIpaBizExt{
-			IpaName:         args.IpaName,
-			IpaBundleID:     args.IpaBundleID,
-			IpaVersion:      args.IpaVersion,
-			IpaSize:         args.IpaSize,
-			CertificateName: args.CertificateName,
-		},
-	}))
 
 	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, data[signIpaID])
@@ -114,7 +137,7 @@ func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http
 		models.MemberSignIpaWhere.MemberID.EQ(loginID),
 		models.MemberSignIpaWhere.IsDelete.EQ(false),
 	}
-	ids, err := h.memberSignDAO.ListIDs(ctx, offset, limit, filter, nil)
+	ids, err := h.memberSignDAO.ListIDs(ctx, offset, limit, filter, []string{"updated_at desc"})
 	util.PanicIf(err)
 
 	totalCount, err := h.memberSignDAO.Count(ctx, filter)
@@ -147,6 +170,51 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	args := getMemberSignIpaArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
+
+	fields := render.DefaultMemberSignIpaFields
+	fields = append(fields, convertIncludes(args.IncludeFields)...)
+	dataMap := render.NewMemberSignIpaRender(
+		[]int64{id},
+		0, []render.MemberSignIpaOption{
+			render.MemberSignIpaIncludes(fields),
+		}...,
+	).RenderMap(ctx)
+
+	data, ok := dataMap[id]
+	if !ok {
+		util.PanicIf(errors.ErrNotFound)
+	}
+	if data.IsDelete {
+		util.PanicIf(errors.ErrNotFound)
+	}
+
+	/// 检查签名用户是否有足够的下载次数
+	if len(args.IncludeFields) != 0 {
+		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, 1))
+	}
+
+	util.RenderJSON(w, data)
+}
+
+func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx       = r.Context()
+		expenseID = util.URLParam(r, "expense_id")
+	)
+
+	fmt.Println(expenseID)
+	args := getMemberSignIpaArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	/// 拿到 sign_ipa id
+	signIpaMap, err := h.memberSignDAO.BatchGetByExpenseID(ctx, []string{expenseID})
+	util.PanicIf(err)
+	signIpa, ok := signIpaMap[expenseID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFound)
+	}
+	id := signIpa.ID
 
 	fields := render.DefaultMemberSignIpaFields
 	fields = append(fields, convertIncludes(args.IncludeFields)...)

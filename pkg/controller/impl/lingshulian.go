@@ -270,3 +270,17 @@ func (c *LingshulianController) PostCompleteMultipartUploadInfo(ctx context.Cont
 		Key: request.Key,
 	}, nil
 }
+
+func (c *LingshulianController) PostAbortMultipartUploadInfo(ctx context.Context, request *controller.PostAbortMultipartUploadPartInfoRequest) (*controller.PostAbortMultipartUploadPartInfoResponse, error) {
+	output, err := c.Svc.AbortMultipartUpload(&s3.AbortMultipartUploadInput{
+		Bucket:   util.StringPtr(request.Bucket),
+		Key:      util.StringPtr(request.Key),
+		UploadId: util.StringPtr(request.UploadID),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &controller.PostAbortMultipartUploadPartInfoResponse{
+		RequestCharged: output.RequestCharged,
+	}, nil
+}

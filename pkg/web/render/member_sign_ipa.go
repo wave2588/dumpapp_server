@@ -17,6 +17,7 @@ type MemberSignIpa struct {
 	Meta *models.MemberSignIpa `json:"-"`
 
 	ID              int64  `json:"id,string"`
+	ExpenseID       string `json:"expense_id"`
 	IpaName         string `json:"ipa_name"`
 	IpaBundleID     string `json:"ipa_bundle_id"`
 	IpaVersion      string `json:"ipa_version"`
@@ -24,8 +25,8 @@ type MemberSignIpa struct {
 	CertificateName string `json:"certificate_name"`
 	IsDelete        bool   `json:"is_delete"`
 
-	DownloadURL string `json:"download_url" render:"method=RenderDownloadURL"`
-	PlistURL    string `json:"plist_url" render:"method=RenderPlistURL"`
+	DownloadURL string  `json:"download_url" render:"method=RenderDownloadURL"`
+	PlistURL    *string `json:"plist_url,omitempty" render:"method=RenderPlistURL"`
 
 	CreatedAt int64 `json:"created_at"`
 	UpdateAt  int64 `json:"update_at"`
@@ -121,6 +122,7 @@ func (f *MemberSignIpaRender) fetch(ctx context.Context) {
 		result[id] = &MemberSignIpa{
 			Meta:            meta,
 			ID:              meta.ID,
+			ExpenseID:       meta.ExpenseID,
 			IpaName:         meta.BizExt.IpaName,
 			IpaBundleID:     meta.BizExt.IpaBundleID,
 			IpaVersion:      meta.BizExt.IpaVersion,
@@ -143,6 +145,6 @@ func (f *MemberSignIpaRender) RenderDownloadURL(ctx context.Context) {
 
 func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
 	for _, ipa := range f.memberSignIpaMap {
-		ipa.PlistURL = f.fileCtl.GetPlistFileURL(ctx, ipa.Meta.IpaPlistFileToken)
+		ipa.PlistURL = util.StringPtr(f.fileCtl.GetPlistFileURL(ctx, ipa.Meta.IpaPlistFileToken))
 	}
 }

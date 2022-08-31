@@ -93,3 +93,15 @@ func (h *LingshulianHandler) PostCompleteMultipartUploadInfo(w http.ResponseWrit
 
 	util.RenderJSON(w, resp)
 }
+
+func (h *LingshulianHandler) PostAbortMultipartUploadInfo(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := &controller.PostAbortMultipartUploadPartInfoRequest{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	resp, err := h.lingshulianCtl.PostAbortMultipartUploadInfo(ctx, args)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, resp)
+}

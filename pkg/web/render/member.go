@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -198,7 +199,7 @@ func (f *MemberRender) RenderDispenseInfo(ctx context.Context) {
 		member.DispenseInfo = &DispenseInfo{
 			Count: countMap[member.ID],
 			Rule:  "临时规则",
-			Ratio: 5,
+			Ratio: constant.DispenseRatioByPayCount,
 		}
 	}
 }

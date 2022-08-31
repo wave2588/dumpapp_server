@@ -22,6 +22,7 @@ type LingshulianController interface {
 	PostCreateMultipartUploadInfo(ctx context.Context, request *PostCreateMultipartUploadInfoRequest) (*PostCreateMultipartUploadInfoResp, error)
 	PostMultipartUploadPartInfo(ctx context.Context, request *PostMultipartUploadPartInfoRequest) (*PostMultipartUploadPartInfoResp, error)
 	PostCompleteMultipartUploadInfo(ctx context.Context, request *PostCompleteMultipartUploadInfoRequest) (*PostCompleteMultipartUploadInfoResp, error)
+	PostAbortMultipartUploadInfo(ctx context.Context, request *PostAbortMultipartUploadPartInfoRequest) (*PostAbortMultipartUploadPartInfoResponse, error)
 }
 
 type GetPutURLResp struct {
@@ -119,4 +120,26 @@ func (p *PostCompleteMultipartUploadInfoRequest) Validate() error {
 
 type PostCompleteMultipartUploadInfoResp struct {
 	Key string `json:"key"`
+}
+
+/// 取消上传
+type PostAbortMultipartUploadPartInfoRequest struct {
+	UploadID string `json:"upload_id" validate:"required"`
+	Key      string `json:"key" validate:"required"`
+	Bucket   string `json:"bucket" validate:"required"`
+}
+
+func (p *PostAbortMultipartUploadPartInfoRequest) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.UploadID == "" || p.Key == "" || p.Bucket == "" {
+		return errors.UnproccessableError("参数格式错误")
+	}
+	return nil
+}
+
+type PostAbortMultipartUploadPartInfoResponse struct {
+	RequestCharged *string `json:"request_charged"`
 }
