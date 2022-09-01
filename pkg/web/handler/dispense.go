@@ -65,8 +65,8 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type expenseArgs struct {
-	ID   string `json:"id" validate:"required"`
-	Type string `json:"type" validate:"required"`
+	ID          string `json:"id" validate:"required"`
+	ExpenseType string `json:"expense_type" validate:"required"`
 }
 
 func (p *expenseArgs) Validate() error {
@@ -74,7 +74,7 @@ func (p *expenseArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
-	if p.Type != "sign_ipa" {
+	if p.ExpenseType != "sign_ipa" {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
 	return nil
