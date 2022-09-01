@@ -73,6 +73,11 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdmin).Delete("/ipa_black/{ipa_black_id}", ipaBlackHandler.Delete)
 	// endregion
 
+	// dispense handler
+	dispenseHandler := handler.NewAdminDispenseHandler()
+	r.With(middleware.OAuthAdmin).Post("/dispense", dispenseHandler.AddCount)
+	r.With(middleware.OAuthAdmin).Delete("/dispense", dispenseHandler.DeleteCount)
+
 	return r
 }
 
