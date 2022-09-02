@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -198,38 +199,38 @@ func (args *getRankingArgs) Validate() error {
 }
 
 func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
-	// ctx := r.Context()
+	ctx := r.Context()
 
-	// args := getRankingArgs{}
-	// util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
-	// util.PanicIf(args.Validate())
+	args := getRankingArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
 
 	/// 如果没有传 start_at 和 end_at，则返回过去一天排行榜
-	//if args.StartAt == 0 {
-	//	args.StartAt = time.Now().AddDate(0, 0, -2).Unix()
-	//}
-	//if args.EndAt == 0 {
-	//	args.EndAt = time.Now().Unix()
-	//}
+	if args.StartAt == 0 {
+		args.StartAt = time.Now().AddDate(0, 0, -2).Unix()
+	}
+	if args.EndAt == 0 {
+		args.EndAt = time.Now().Unix()
+	}
 
-	//redisData, err := h.ipaRankingDAO.GetIpaRankingData(ctx)
-	//util.PanicIf(err)
-	//
-	//var data []interface{}
-	//if redisData == nil || len(redisData.Data) == 0 {
-	//	data, err := h.getIpaRankingData(ctx, args.StartAt, args.EndAt)
-	//	util.PanicIf(err)
-	//	/// 存入 redis
-	//	util.PanicIf(h.ipaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{Data: data}))
-	//} else {
-	//	data = redisData.Data
-	//}
+	redisData, err := h.ipaRankingDAO.GetIpaRankingData(ctx)
+	util.PanicIf(err)
 
-	var dd []interface{}
-	util.PanicIf(json.Unmarshal([]byte(data), &dd))
+	var data []interface{}
+	if redisData == nil || len(redisData.Data) == 0 {
+		data, err := h.getIpaRankingData(ctx, args.StartAt, args.EndAt)
+		util.PanicIf(err)
+		/// 存入 redis
+		util.PanicIf(h.ipaRankingDAO.SetIpaRankingData(ctx, &dao.IpaRanking{Data: data}))
+	} else {
+		data = redisData.Data
+	}
+
+	//var dd []interface{}
+	//util.PanicIf(json.Unmarshal([]byte(data), &dd))
 	util.RenderJSON(w, util.ListOutput{
 		Paging: nil,
-		Data:   dd,
+		Data:   data,
 	})
 }
 

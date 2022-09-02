@@ -37,7 +37,7 @@ func (d *IpaRankingDAO) SetIpaRankingData(ctx context.Context, data *dao.IpaRank
 	if err != nil {
 		return err
 	}
-	return d.redis.Set(ctx, key, jsonData, 5*time.Minute).Err()
+	return d.redis.Set(ctx, key, jsonData, 6*time.Hour).Err()
 }
 
 func (d *IpaRankingDAO) GetIpaRankingData(ctx context.Context) (*dao.IpaRanking, error) {
