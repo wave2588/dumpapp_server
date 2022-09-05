@@ -60,7 +60,7 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, loginID, args.Count, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseDispense, datatype.MemberPayCountRecordBizExt{}))
 
 	/// fixme: 活动期间分发卷双倍
-	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*constant.DispenseRatioByPayCount*2, enum.DispenseCountRecordTypePay))
+	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*constant.DispenseRatioByPayCount, enum.DispenseCountRecordTypePay))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }

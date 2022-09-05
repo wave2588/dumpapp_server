@@ -32,6 +32,18 @@ func (c *FileController) GetPlistFileURL(ctx context.Context, key string) string
 	return fmt.Sprintf("https://dumpapp.com/plist/%s", key)
 }
 
+func (c *FileController) CheckPlistFileExist(ctx context.Context, key string) bool {
+	path := fmt.Sprintf("%s/%s", c.GetPlistFolderPath(ctx), key)
+	_, err := os.Stat(path)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	return false
+}
+
 func (c *FileController) PutFileToLocal(ctx context.Context, path, key string, data []byte) error {
 	fileName := fmt.Sprintf("%s/%s", path, key)
 	return ioutil.WriteFile(fileName, data, 0o644)

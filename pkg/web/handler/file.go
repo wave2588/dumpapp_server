@@ -73,3 +73,13 @@ func (h *FileHandler) CreatePlistFile(w http.ResponseWriter, r *http.Request) {
 		"plist_url": h.fileCtl.GetPlistFileURL(ctx, token),
 	})
 }
+
+func (h *FileHandler) CheckPlistFileExist(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	key := util.URLParam(r, "key")
+
+	util.RenderJSON(w, map[string]bool{
+		"is_exist": h.fileCtl.CheckPlistFileExist(ctx, key),
+	})
+}

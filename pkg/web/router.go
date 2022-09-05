@@ -185,6 +185,7 @@ func NewRouter() chi.Router {
 	// file
 	fileHandler := handler.NewFileHandler()
 	r.With(middleware.OAuthGuest).Post("/file/plist", fileHandler.CreatePlistFile)
+	r.With(middleware.OAuthGuest).Get("/file/plist/{key}/check_exist", fileHandler.CheckPlistFileExist)
 	// endregion
 
 	// dispense
