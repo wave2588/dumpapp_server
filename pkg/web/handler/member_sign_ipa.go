@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -171,29 +172,7 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	fields := render.DefaultMemberSignIpaFields
-	fields = append(fields, convertIncludes(args.IncludeFields)...)
-	dataMap := render.NewMemberSignIpaRender(
-		[]int64{id},
-		0, []render.MemberSignIpaOption{
-			render.MemberSignIpaIncludes(fields),
-		}...,
-	).RenderMap(ctx)
-
-	data, ok := dataMap[id]
-	if !ok {
-		util.PanicIf(errors.ErrNotFound)
-	}
-	if data.IsDelete {
-		util.PanicIf(errors.ErrNotFound)
-	}
-
-	/// 检查签名用户是否有足够的下载次数
-	if len(args.IncludeFields) != 0 {
-		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, 1))
-	}
-
-	util.RenderJSON(w, data)
+	util.RenderJSON(w, h.getMemberSignIpaData(ctx, id, args.IncludeFields))
 }
 
 func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Request) {
@@ -202,7 +181,6 @@ func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Req
 		expenseID = util.URLParam(r, "expense_id")
 	)
 
-	fmt.Println(expenseID)
 	args := getMemberSignIpaArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
@@ -214,18 +192,20 @@ func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Req
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
 	}
-	id := signIpa.ID
+	util.RenderJSON(w, h.getMemberSignIpaData(ctx, signIpa.ID, args.IncludeFields))
+}
 
+func (h *MemberSignIpaHandler) getMemberSignIpaData(ctx context.Context, memberSignIpaID int64, includeFields datatype.IncludeFields) *render.MemberSignIpa {
 	fields := render.DefaultMemberSignIpaFields
-	fields = append(fields, convertIncludes(args.IncludeFields)...)
+	fields = append(fields, convertIncludes(includeFields)...)
 	dataMap := render.NewMemberSignIpaRender(
-		[]int64{id},
+		[]int64{memberSignIpaID},
 		0, []render.MemberSignIpaOption{
 			render.MemberSignIpaIncludes(fields),
 		}...,
 	).RenderMap(ctx)
 
-	data, ok := dataMap[id]
+	data, ok := dataMap[memberSignIpaID]
 	if !ok {
 		util.PanicIf(errors.ErrNotFound)
 	}
@@ -234,11 +214,11 @@ func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Req
 	}
 
 	/// 检查签名用户是否有足够的下载次数
-	if len(args.IncludeFields) != 0 {
-		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, 1))
+	if len(includeFields) != 0 {
+		dCount := h.dispenseCountCtl.CalculateMemberSignIpaDispenseCount(ctx, data.Meta.BizExt.IpaSize)
+		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, dCount))
 	}
-
-	util.RenderJSON(w, data)
+	return data
 }
 
 func convertIncludes(includeFields datatype.IncludeFields) []string {

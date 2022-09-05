@@ -59,7 +59,8 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 	/// 扣费流程, 里边有检查 D 币是否足够
 	util.PanicIf(h.memberPayCountCtl.DeductPayCount(ctx, loginID, args.Count, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseDispense, datatype.MemberPayCountRecordBizExt{}))
 
-	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*constant.DispenseRatioByPayCount, enum.DispenseCountRecordTypePay))
+	/// fixme: 活动期间分发卷双倍
+	util.PanicIf(h.dispenseCountCtl.AddCount(ctx, loginID, args.Count*constant.DispenseRatioByPayCount*2, enum.DispenseCountRecordTypePay))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
@@ -94,8 +95,9 @@ func (h *DispenseHandler) Expense(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(errors.ErrNotFound)
 	}
 
-	/// fixme: 根据大小同步进行扣费 signIpa.BizExt.IpaSize / 1024 / 1024
-	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, signIpa.MemberID, 1, enum.DispenseCountRecordTypeInstallSignIpa))
+	///  根据大小同步进行扣费 signIpa.BizExt.IpaSize / 1024 / 1024
+	dCount := h.dispenseCountCtl.CalculateMemberSignIpaDispenseCount(ctx, signIpa.BizExt.IpaSize)
+	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, signIpa.MemberID, dCount, enum.DispenseCountRecordTypeInstallSignIpa))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }

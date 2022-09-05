@@ -226,8 +226,8 @@ func (h *IpaHandler) GetRanking(w http.ResponseWriter, r *http.Request) {
 		data = redisData.Data
 	}
 
-	//var dd []interface{}
-	//util.PanicIf(json.Unmarshal([]byte(data), &dd))
+	// var dd []interface{}
+	// util.PanicIf(json.Unmarshal([]byte(data), &dd))
 	util.RenderJSON(w, util.ListOutput{
 		Paging: nil,
 		Data:   data,
