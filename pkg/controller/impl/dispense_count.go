@@ -106,8 +106,8 @@ func (c *DispenseCountController) DeductCount(ctx context.Context, memberID, cou
 }
 
 func (c *DispenseCountController) CalculateMemberSignIpaDispenseCount(ctx context.Context, ipaSize int64) int64 {
-	d := ipaSize / 1024 / 1024
-	if d <= 1024 {
+	/// ipa_size 单位是 M
+	if ipaSize <= 1024 {
 		return 1
 	}
 	return 2
