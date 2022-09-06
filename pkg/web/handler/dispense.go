@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/spf13/cast"
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
@@ -92,7 +93,7 @@ func (h *DispenseHandler) Expense(w http.ResponseWriter, r *http.Request) {
 
 	signIpa, ok := signIpaMap[args.ID]
 	if !ok {
-		util.PanicIf(errors.ErrNotFound)
+		util.PanicIf(errors.NewDefaultAPIError(404, 404, "NotFound", fmt.Sprintf("记录未找到, id:%s type:%s", cast.ToString(args.ID), args.ExpenseType)))
 	}
 
 	///  根据大小同步进行扣费 signIpa.BizExt.IpaSize / 1024 / 1024
