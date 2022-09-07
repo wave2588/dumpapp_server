@@ -34,12 +34,10 @@ func run() {
 		},
 	}
 	util2.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{"@all"})
-
-	/// 获取过去三天的 file
 }
 
 func deleteFile(ctx context.Context) (int64, int64, error) {
-	localFileNameMap, err := getLocalPlistFile(ctx)
+	localFileNameMap, err := impl.DefaultFileController.GetLocalPlistFiles(ctx)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -78,38 +76,6 @@ func deleteFile(ctx context.Context) (int64, int64, error) {
 	}
 
 	return int64(len(files)), int64(len(signIpas)), nil
-}
-
-func getLocalPlistFile(ctx context.Context) (map[string]string, error) {
-
-	filterFileMap := map[string]struct{}{
-		"ipa1.plist":  {},
-		"ipa2.plist":  {},
-		"ipa3.plist":  {},
-		"ipa4.plist":  {},
-		"ipa5.plist":  {},
-		"ipa6.plist":  {},
-		"ipa7.plist":  {},
-		"ipa8.plist":  {},
-		"ipa9.plist":  {},
-		"ipa10.plist": {},
-		"logo.png":    {},
-	}
-
-	plistFolderPath := impl.DefaultFileController.GetPlistFolderPath(ctx)
-	fileNames, err := impl.DefaultFileController.ListFolder(ctx, plistFolderPath)
-	if err != nil {
-		return nil, err
-	}
-
-	resultFileNameMap := make(map[string]string, 0)
-	for _, name := range fileNames {
-		if _, ok := filterFileMap[name]; ok {
-			continue
-		}
-		resultFileNameMap[name] = fmt.Sprintf("%s/%s", plistFolderPath, name)
-	}
-	return resultFileNameMap, nil
 }
 
 func getNeedDeleteFiles(ctx context.Context) ([]*models.File, error) {

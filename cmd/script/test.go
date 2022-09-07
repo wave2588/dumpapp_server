@@ -1,8 +1,13 @@
 package main
 
-import "dumpapp_server/cmd/cron/delete_plist"
+import (
+	"context"
+	"dumpapp_server/pkg/controller/impl"
+)
 
 func main() {
 
-	delete_plist.Run()
+	ctx := context.Background()
+
+	impl.DefaultLingshulianController.
 }

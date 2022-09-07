@@ -24,4 +24,5 @@ type MemberSignIpaDAO interface {
 	GetByExpenseID(ctx context.Context, expenseID string) (*models.MemberSignIpa, error)
 	// BatchGetByExpenseID retrieves multiple records by uniq key expenseID from db.
 	BatchGetByExpenseID(ctx context.Context, expenseIDs []string) (map[string]*models.MemberSignIpa, error)
+	BatchGetByIpaPlistFileToken(ctx context.Context, plistFileTokens []string) (map[string]*models.MemberSignIpa, error)
 }

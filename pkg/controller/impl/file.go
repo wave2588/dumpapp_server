@@ -44,6 +44,37 @@ func (c *FileController) CheckPlistFileExist(ctx context.Context, key string) bo
 	return false
 }
 
+func (c *FileController) GetLocalPlistFiles(ctx context.Context) (map[string]string, error) {
+	filterFileMap := map[string]struct{}{
+		"ipa1.plist":  {},
+		"ipa2.plist":  {},
+		"ipa3.plist":  {},
+		"ipa4.plist":  {},
+		"ipa5.plist":  {},
+		"ipa6.plist":  {},
+		"ipa7.plist":  {},
+		"ipa8.plist":  {},
+		"ipa9.plist":  {},
+		"ipa10.plist": {},
+		"logo.png":    {},
+	}
+
+	plistFolderPath := c.GetPlistFolderPath(ctx)
+	fileNames, err := c.ListFolder(ctx, plistFolderPath)
+	if err != nil {
+		return nil, err
+	}
+
+	resultFileNameMap := make(map[string]string, 0)
+	for _, name := range fileNames {
+		if _, ok := filterFileMap[name]; ok {
+			continue
+		}
+		resultFileNameMap[name] = fmt.Sprintf("%s/%s", plistFolderPath, name)
+	}
+	return resultFileNameMap, nil
+}
+
 func (c *FileController) PutFileToLocal(ctx context.Context, path, key string, data []byte) error {
 	fileName := fmt.Sprintf("%s/%s", path, key)
 	return ioutil.WriteFile(fileName, data, 0o644)

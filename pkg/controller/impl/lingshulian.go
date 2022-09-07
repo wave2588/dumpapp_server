@@ -52,6 +52,9 @@ func NewLingshulianController() *LingshulianController {
 	}
 }
 
+func (c *LingshulianController) ss(ctx context.Context) {
+}
+
 func (c *LingshulianController) GetPutURL(ctx context.Context, bucket, key string) (*controller.GetPutURLResp, error) {
 	resp, _ := c.Svc.PutObjectRequest(&s3.PutObjectInput{
 		Bucket: aws.String(bucket),
