@@ -35,12 +35,12 @@ func NewDumpOrderHandler() *DumpOrderHandler {
 }
 
 type postDumpOrderArgs struct {
-	IpaID        string `json:"ipa_id" validate:"required"`
-	Name         string `json:"name" validate:"required"`
-	BundleID     string `json:"bundle_id" validate:"required"`
-	Version      string `json:"version" validate:"required"`
-	AppStoreLink string `json:"app_store_link" validate:"required"`
-	IsOld        bool   `json:"is_old"`
+	IpaID        string      `json:"ipa_id" validate:"required"`
+	Name         string      `json:"name" validate:"required"`
+	BundleID     string      `json:"bundle_id" validate:"required"`
+	Version      string      `json:"version" validate:"required"`
+	AppStoreLink string      `json:"app_store_link" validate:"required"`
+	IsOld        interface{} `json:"is_old"`
 }
 
 func (p *postDumpOrderArgs) Validate() error {
@@ -61,7 +61,7 @@ func (h *DumpOrderHandler) Post(w http.ResponseWriter, r *http.Request) {
 	ipaID := cast.ToInt64(args.IpaID)
 
 	/// 写入记录库里
-	util.PanicIf(h.adminDumpOrderCtl.Upsert(ctx, loginID, ipaID, args.Name, args.Version, args.BundleID, args.AppStoreLink, args.IsOld))
+	util.PanicIf(h.adminDumpOrderCtl.Upsert(ctx, loginID, ipaID, args.Name, args.Version, args.BundleID, args.AppStoreLink, cast.ToBool(args.IsOld)))
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
 	h.alterWebCtl.SendDumpOrderMsg(ctx, loginID, ipaID, args.BundleID, args.Name, args.Version)
