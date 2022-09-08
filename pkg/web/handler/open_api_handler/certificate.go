@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -73,7 +74,7 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 	}
 
 	/// 购买证书
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, 30, "")
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, constant.CertificatePriceL1, "")
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
