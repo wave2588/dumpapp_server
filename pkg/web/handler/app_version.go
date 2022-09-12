@@ -58,8 +58,8 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 		IsNeedUpdate:  false,
 		IsForceUpdate: lastDumpappVersion.IsForceUpdate,
 		DownloadURL:   "https://www.dumpapp.com/app",
-		Title:         "1.0.6 版本更新",
-		Describe:      "DumpApp 1.0.6 全面新版本更新，支持 iOS16 签名，支持一键生成下载链接，支持移除插件，证书分享，支持新建文件夹，自动植入越狱依赖等功能。",
+		Title:         "1.0.7 版本更新",
+		Describe:      "DumpApp 1.0.7 版本发布，增加模拟设备类型功能，修复导入证书BUG，优化性能，上传分发等功能。",
 	}
 
 	if constrain.Check(v) {
