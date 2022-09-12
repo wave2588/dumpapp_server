@@ -164,9 +164,9 @@ type allVersion struct {
 
 func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
-	// country := cast.ToString(util.URLParam(r, "country"))
-	// endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
-	endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
+	country := cast.ToString(util.URLParam(r, "country"))
+	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+	//endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
 	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{}, 0)
 	util.PanicIf(err)
 	var result []map[string]interface{}
