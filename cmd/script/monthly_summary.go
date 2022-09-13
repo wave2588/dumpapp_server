@@ -19,7 +19,7 @@ func main() {
 	bulkSize := 100
 	hasNext := true
 
-	var amount float64 = 0
+	var webAmount, appAmount float64 = 0, 0
 	month := time.Now().Month()
 
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
@@ -44,7 +44,11 @@ func main() {
 		util.PanicIf(err)
 
 		for _, order := range res {
-			amount += order.Amount
+			if order.BizExt.Platform == enum.MemberPayOrderPlatformWeb {
+				webAmount += order.Amount
+			} else {
+				appAmount += order.Amount
+			}
 		}
 	}
 
@@ -77,7 +81,7 @@ func main() {
 
 	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
 	fmt.Println(fmt.Sprintf("%d 支付成功的订单-->: %d", month, len(resIDs)))
-	fmt.Println(fmt.Sprintf("%d 主站收入-->: %.2f", month, amount))
+	fmt.Println(fmt.Sprintf("%d 主站收入-->: %.2f, web: %.2f  app: %.2f", month, webAmount+appAmount, webAmount, appAmount))
 	fmt.Println(fmt.Sprintf("%d app 兑换码收入-->: %.2f", month, installAppAmount))
-	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, amount+installAppAmount))
+	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, webAmount+appAmount+installAppAmount))
 }
