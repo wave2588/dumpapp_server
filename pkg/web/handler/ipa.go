@@ -165,24 +165,52 @@ type allVersion struct {
 func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
 	country := cast.ToString(util.URLParam(r, "country"))
-	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
+
+	/// plan A
 	//endpoint := fmt.Sprintf("https://api.cokepokes.com/v-api/app/%d", ipaID)
+	//body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{}, 0)
+	//util.PanicIf(err)
+	//
+	//fmt.Println(string(body))
+	//
+	//var result []map[string]interface{}
+	//util.PanicIf(json.Unmarshal(body, &result))
+	//
+	//data := make([]*allVersion, 0)
+	//for i := range result {
+	//	d := result[len(result)-i-1]
+	//	data = append(data, &allVersion{
+	//		ID:          cast.ToInt64(d["appId"]),
+	//		TrackID:     cast.ToInt64(d["appId"]),
+	//		VersionName: cast.ToString(d["bundleVersion"]),
+	//	})
+	//}
+
+	/// plan B
+	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
 	body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{}, 0)
 	util.PanicIf(err)
-	var result []map[string]interface{}
-	util.PanicIf(json.Unmarshal(body, &result))
 
-	data := make([]*allVersion, 0)
-	for i := range result {
-		d := result[len(result)-i-1]
-		data = append(data, &allVersion{
-			ID:          cast.ToInt64(d["appId"]),
-			TrackID:     cast.ToInt64(d["appId"]),
-			VersionName: cast.ToString(d["bundleVersion"]),
+	var respBody map[string]interface{}
+	util.PanicIf(json.Unmarshal(body, &respBody))
+
+	data := respBody["data"]
+	dataJSON, err := json.Marshal(data)
+	util.PanicIf(err)
+
+	var versions []map[string]interface{}
+	util.PanicIf(json.Unmarshal(dataJSON, &versions))
+
+	result := make([]*allVersion, 0)
+	for _, version := range versions {
+		result = append(result, &allVersion{
+			ID:          cast.ToInt64(version["trackId"]),
+			TrackID:     cast.ToInt64(version["trackId"]),
+			VersionName: cast.ToString(version["versionName"]),
 		})
 	}
 
-	util.RenderJSON(w, data)
+	util.RenderJSON(w, result)
 }
 
 type getRankingArgs struct {
