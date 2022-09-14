@@ -137,11 +137,11 @@ func (c *CertificateV2Controller) getCerByServer(ctx context.Context, id string)
 	}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server json.Unmarshal fail.  id: %s", id))
+		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server json.Unmarshal fail.  id: %s   json: %s", id, string(body)))
 		return res
 	}
 	if res.Code != 1 {
-		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server code != 1.  id: %s", id))
+		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server code != 1.  id: %s   json: %s", id, string(body)))
 		return res
 	}
 	return res

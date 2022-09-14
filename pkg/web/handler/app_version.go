@@ -57,9 +57,9 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 	result := &result{
 		IsNeedUpdate:  false,
 		IsForceUpdate: lastDumpappVersion.IsForceUpdate,
-		DownloadURL:   "https://www.dumpapp.com/app",
-		Title:         "1.0.7 版本更新",
-		Describe:      "DumpApp 1.0.7 版本发布，增加模拟设备类型功能，修复导入证书BUG，优化性能，上传分发等功能。",
+		DownloadURL:   lastDumpappVersion.BizExt.DownloadURL,
+		Title:         lastDumpappVersion.BizExt.Title,
+		Describe:      lastDumpappVersion.BizExt.Describe,
 	}
 
 	if constrain.Check(v) {

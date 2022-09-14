@@ -365,3 +365,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+# dumpapp_version
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["dumpapp_version"]
+
+  [types.replace]
+    type = "datatype.DumpappVersionBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

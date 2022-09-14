@@ -122,7 +122,11 @@ func (f *MemberAppSourceRender) RenderAppSource(ctx context.Context) {
 	appSourceIDs = util2.RemoveDuplicates(appSourceIDs)
 	appSourceMap := NewAppSourceRender(appSourceIDs, f.loginID, AppSourceDefaultRenderFields...).RenderMap(ctx)
 	for _, source := range f.memberAppSourceMap {
-		source.AppSource = appSourceMap[source.Meta.AppSourceID]
-		source.AppSourceMeta = appSourceMap[source.Meta.AppSourceID].AppSourceInfo
+		appSource, ok := appSourceMap[source.Meta.AppSourceID]
+		if !ok {
+			continue
+		}
+		source.AppSource = appSource
+		source.AppSourceMeta = appSource.AppSourceInfo
 	}
 }

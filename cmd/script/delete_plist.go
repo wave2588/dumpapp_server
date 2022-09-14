@@ -29,13 +29,26 @@ func main() {
 	util.PanicIf(err)
 
 	for key, path := range localFileNameMap {
-		_, fOk := fileMap[key]
-		_, sOK := memberSignIpaMap[key]
+		isDelete := false
+
+		file, fOk := fileMap[key]
+		if fOk && file.IsDelete {
+			isDelete = true
+		}
+
+		mSignIpa, sOK := memberSignIpaMap[key]
+		if sOK && mSignIpa.IsDelete {
+			isDelete = true
+		}
 
 		if !fOk && !sOK {
 			/// 都没找到的话, 就需要删除
+			isDelete = true
+		}
+
+		if isDelete {
 			fmt.Println("需要删除-->: ", path, key)
-			//util.PanicIf(impl.DefaultFileController.DeleteFile(ctx, path))
+			util.PanicIf(impl.DefaultFileController.DeleteFile(ctx, path))
 		}
 	}
 }

@@ -61,6 +61,7 @@ type CertificateBizExt struct {
 	OriginalP12Password string `json:"original_p12_password"` /// 原本的密码
 	NewP12Password      string `json:"new_p12_password"`      /// 新密码
 	IsReplenish         bool   `json:"is_replenish"`          /// 是否是补充证书
+	Level               int    `json:"level"`                 /// 1: 普通版   2: 高级版  3: 豪华版
 }
 
 func (d *CertificateBizExt) String() string {

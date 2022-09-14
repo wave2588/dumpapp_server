@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
@@ -23,11 +24,12 @@ import (
 
 // DumpappVersion is an object representing the database table.
 type DumpappVersion struct {
-	ID            int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Version       string    `boil:"version" json:"version" toml:"version" yaml:"version"`
-	IsForceUpdate bool      `boil:"is_force_update" json:"is_force_update" toml:"is_force_update" yaml:"is_force_update"`
-	CreatedAt     time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt     time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID            int64                         `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Version       string                        `boil:"version" json:"version" toml:"version" yaml:"version"`
+	IsForceUpdate bool                          `boil:"is_force_update" json:"is_force_update" toml:"is_force_update" yaml:"is_force_update"`
+	BizExt        datatype.DumpappVersionBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	CreatedAt     time.Time                     `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt     time.Time                     `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *dumpappVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L dumpappVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -37,28 +39,53 @@ var DumpappVersionColumns = struct {
 	ID            string
 	Version       string
 	IsForceUpdate string
+	BizExt        string
 	CreatedAt     string
 	UpdatedAt     string
 }{
 	ID:            "id",
 	Version:       "version",
 	IsForceUpdate: "is_force_update",
+	BizExt:        "biz_ext",
 	CreatedAt:     "created_at",
 	UpdatedAt:     "updated_at",
 }
 
 // Generated where
 
+type whereHelperdatatype_DumpappVersionBizExt struct{ field string }
+
+func (w whereHelperdatatype_DumpappVersionBizExt) EQ(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_DumpappVersionBizExt) NEQ(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_DumpappVersionBizExt) LT(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_DumpappVersionBizExt) LTE(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_DumpappVersionBizExt) GT(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_DumpappVersionBizExt) GTE(x datatype.DumpappVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var DumpappVersionWhere = struct {
 	ID            whereHelperint64
 	Version       whereHelperstring
 	IsForceUpdate whereHelperbool
+	BizExt        whereHelperdatatype_DumpappVersionBizExt
 	CreatedAt     whereHelpertime_Time
 	UpdatedAt     whereHelpertime_Time
 }{
 	ID:            whereHelperint64{field: "`dumpapp_version`.`id`"},
 	Version:       whereHelperstring{field: "`dumpapp_version`.`version`"},
 	IsForceUpdate: whereHelperbool{field: "`dumpapp_version`.`is_force_update`"},
+	BizExt:        whereHelperdatatype_DumpappVersionBizExt{field: "`dumpapp_version`.`biz_ext`"},
 	CreatedAt:     whereHelpertime_Time{field: "`dumpapp_version`.`created_at`"},
 	UpdatedAt:     whereHelpertime_Time{field: "`dumpapp_version`.`updated_at`"},
 }
@@ -80,8 +107,8 @@ func (*dumpappVersionR) NewStruct() *dumpappVersionR {
 type dumpappVersionL struct{}
 
 var (
-	dumpappVersionAllColumns            = []string{"id", "version", "is_force_update", "created_at", "updated_at"}
-	dumpappVersionColumnsWithoutDefault = []string{"version", "is_force_update"}
+	dumpappVersionAllColumns            = []string{"id", "version", "is_force_update", "biz_ext", "created_at", "updated_at"}
+	dumpappVersionColumnsWithoutDefault = []string{"version", "is_force_update", "biz_ext"}
 	dumpappVersionColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	dumpappVersionPrimaryKeyColumns     = []string{"id"}
 )

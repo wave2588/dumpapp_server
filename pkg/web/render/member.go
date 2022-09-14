@@ -169,7 +169,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: "最新充值活动近期上线（网站支付宝账户升级中，暂时无法支付的联系客服或群主进行充值）",
+				Description: "最新充值活动近期上线",
 			},
 		}
 	}

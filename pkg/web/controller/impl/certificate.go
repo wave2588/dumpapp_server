@@ -87,6 +87,15 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	}
 	// util.PanicIf(err)
 
+	/// 记录证书等级, 方便后期候补
+	if payCount == constant.CertificatePriceL1 {
+		response.BizExt.Level = 1
+	} else if payCount == constant.CertificatePriceL2 {
+		response.BizExt.Level = 2
+	} else if payCount == constant.CertificatePriceL3 {
+		response.BizExt.Level = 3
+	}
+
 	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)
 	mpFileMd5 := util2.StringMd5(mpFileData)
