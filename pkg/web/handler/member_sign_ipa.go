@@ -256,6 +256,10 @@ func (h *MemberSignIpaHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	/// 标记删除记录
 	util.PanicIf(h.memberSignDAO.Update(ctx, meta))
 
+	/// 删除本地文件
+	plistPath := fmt.Sprintf("%s/%s", h.fileCtl.GetPlistFolderPath(ctx), data.Meta.IpaPlistFileToken)
+	_ = h.fileCtl.DeleteFile(ctx, plistPath)
+
 	/// 删除 cos 记录
 	_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, data.Meta.IpaPlistFileToken)
 	_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket, data.Meta.IpaFileToken)

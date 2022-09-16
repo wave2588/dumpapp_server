@@ -48,7 +48,7 @@ func main() {
 
 		if isDelete {
 			fmt.Println("需要删除-->: ", path, key)
-			//util.PanicIf(impl.DefaultFileController.DeleteFile(ctx, path))
+			util.PanicIf(impl.DefaultFileController.DeleteFile(ctx, path))
 		}
 	}
 }
