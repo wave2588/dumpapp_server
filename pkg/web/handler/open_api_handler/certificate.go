@@ -113,6 +113,23 @@ func (h *OpenCertificateHandler) GetCertificate(w http.ResponseWriter, r *http.R
 	util.RenderJSON(w, cer)
 }
 
+type getCertificateListArgs struct {
+	UDID *string `form:"udid"`
+}
+
+func (p *getCertificateListArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if p.UDID != nil {
+		if !util2.CheckUDIDValid(*p.UDID) {
+			return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", p.UDID))
+		}
+	}
+	return nil
+}
+
 func (h *OpenCertificateHandler) GetCertificateList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var (
@@ -121,13 +138,25 @@ func (h *OpenCertificateHandler) GetCertificateList(w http.ResponseWriter, r *ht
 		loginID = mustGetLoginID(ctx, r)
 	)
 
+	args := getCertificateListArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
 	deviceMap, err := h.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{loginID})
 	util.PanicIf(err)
 
 	deviceIDs := make([]int64, 0)
 	for _, devices := range deviceMap {
 		for _, device := range devices {
-			deviceIDs = append(deviceIDs, device.ID)
+			if args.UDID == nil {
+				deviceIDs = append(deviceIDs, device.ID)
+				continue
+			}
+			/// 如果用户传了 udid, 则只返回 udid 对应的证书
+			if *args.UDID == device.Udid {
+				deviceIDs = append(deviceIDs, device.ID)
+				continue
+			}
 		}
 	}
 
