@@ -378,3 +378,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+#  install_app_cdkey_order
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["install_app_cdkey_order"]
+
+  [types.replace]
+    type = "datatype.InstallAppCdkeyOrderBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

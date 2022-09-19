@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao/impl"
@@ -26,15 +26,14 @@ func main() {
 	outIDs, err := getOutIDs(ctx, count, level)
 	util.PanicIf(err)
 
-	bizExt := constant.InstallAppCDKEYOrderBizExt{
-		IsAgent: true,
-	}
 	util.PanicIf(impl.DefaultInstallAppCdkeyOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
 		ID:     orderID,
 		Status: enum.MemberPayOrderStatusPaid,
 		Number: int64(count),
 		Amount: cast.ToFloat64(price * count),
-		BizExt: bizExt.String(),
+		BizExt: datatype.InstallAppCdkeyOrderBizExt{
+			IsAgent: true,
+		},
 	}))
 
 	for _, oID := range outIDs {

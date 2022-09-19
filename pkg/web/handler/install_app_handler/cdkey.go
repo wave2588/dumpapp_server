@@ -3,6 +3,7 @@ package install_app_handler
 import (
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	dao2 "dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
@@ -74,5 +75,38 @@ func (h *CDKEYHandler) GetCDKEYInfoByUDID(w http.ResponseWriter, r *http.Request
 	util.RenderJSON(w, &getOrderByContactWatResp{
 		UDID:   udid,
 		CDKeys: install_app_render.NewCDKEYRender(cdkeyIDs, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
+	})
+}
+
+type cdkeyPrice struct {
+	ID          int64  `json:"id,string"`
+	Price       int64  `json:"price"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+func (h *CDKEYHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
+	data := []*cdkeyPrice{
+		{
+			ID:          1,
+			Price:       constant.CertificatePriceL1,
+			Title:       "普通版",
+			Description: "理论 1 年，无质保。",
+		},
+		{
+			ID:          2,
+			Price:       constant.CertificatePriceL2,
+			Title:       "稳定版",
+			Description: "理论 1 年，售后半年，掉了无限补。",
+		},
+		{
+			ID:          3,
+			Price:       constant.CertificatePriceL3,
+			Title:       "豪华版",
+			Description: "理论 1 年，售后 1 年，掉了无限补。",
+		},
+	}
+	util.RenderJSON(w, util.ListOutput{
+		Data: data,
 	})
 }

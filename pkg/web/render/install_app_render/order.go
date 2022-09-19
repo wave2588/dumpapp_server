@@ -2,9 +2,7 @@ package install_app_render
 
 import (
 	"context"
-	"encoding/json"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -106,11 +104,8 @@ func (f *CDKeyOrderRender) fetch(ctx context.Context) {
 			continue
 		}
 
-		var bizExt constant.InstallAppCDKEYOrderBizExt
-		util.PanicIf(json.Unmarshal([]byte(order.BizExt), &bizExt))
-
 		source := "normal"
-		if bizExt.IsTest {
+		if order.BizExt.IsTest {
 			source = "admin"
 		}
 		result[id] = &CDKeyOrder{
@@ -120,7 +115,7 @@ func (f *CDKeyOrderRender) fetch(ctx context.Context) {
 			Number:     order.Number,
 			CreatedAt:  order.CreatedAt.Unix(),
 			UpdatedAt:  order.UpdatedAt.Unix(),
-			ContactWat: bizExt.ContactWay,
+			ContactWat: order.BizExt.ContactWay,
 			Source:     source,
 		}
 	}

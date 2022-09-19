@@ -18,6 +18,7 @@ func NewRouterInstallApp() chi.Router {
 	cdkeyHandler := install_app_handler.NewCDKEYHandler()
 	r.With(middleware.OAuthGuest).Get("/cdkey/{out_id}", cdkeyHandler.GetCDKEYInfo)
 	r.With(middleware.OAuthGuest).Get("/cdkey/udid/{udid}", cdkeyHandler.GetCDKEYInfoByUDID)
+	r.With(middleware.OAuthGuest).Get("/cdkey/price", cdkeyHandler.GetPrice)
 
 	/// certificate
 	certificateHandler := install_app_handler.NewCertificateHandler()

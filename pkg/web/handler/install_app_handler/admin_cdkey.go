@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -53,15 +53,14 @@ func (h *AdminCDKeyHandler) Post(w http.ResponseWriter, r *http.Request) {
 	cdkeyIDs := make([]int64, 0)
 	for i := 0; i < args.Number; i++ {
 		orderID := util2.MustGenerateID(ctx)
-		bizExt := constant.InstallAppCDKEYOrderBizExt{
-			IsTest: true,
-		}
 		util.PanicIf(h.cdkeyOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
 			ID:     orderID,
 			Status: enum.MemberPayOrderStatusPaid,
 			Number: 1,
 			Amount: 0,
-			BizExt: bizExt.String(),
+			BizExt: datatype.InstallAppCdkeyOrderBizExt{
+				IsTest: true,
+			},
 		}))
 
 		cdkeyID := util2.MustGenerateID(ctx)

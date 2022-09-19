@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,13 +25,13 @@ import (
 
 // InstallAppCdkeyOrder is an object representing the database table.
 type InstallAppCdkeyOrder struct {
-	ID        int64                     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Status    enum.MemberPayOrderStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Number    int64                     `boil:"number" json:"number" toml:"number" yaml:"number"`
-	Amount    float64                   `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
-	BizExt    string                    `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
-	CreatedAt time.Time                 `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time                 `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID        int64                               `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Status    enum.MemberPayOrderStatus           `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Number    int64                               `boil:"number" json:"number" toml:"number" yaml:"number"`
+	Amount    float64                             `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
+	BizExt    datatype.InstallAppCdkeyOrderBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	CreatedAt time.Time                           `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time                           `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *installAppCdkeyOrderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L installAppCdkeyOrderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -106,12 +107,33 @@ func (w whereHelperfloat64) NIN(slice []float64) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
+type whereHelperdatatype_InstallAppCdkeyOrderBizExt struct{ field string }
+
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) EQ(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) NEQ(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) LT(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) LTE(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) GT(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) GTE(x datatype.InstallAppCdkeyOrderBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var InstallAppCdkeyOrderWhere = struct {
 	ID        whereHelperint64
 	Status    whereHelperenum_MemberPayOrderStatus
 	Number    whereHelperint64
 	Amount    whereHelperfloat64
-	BizExt    whereHelperstring
+	BizExt    whereHelperdatatype_InstallAppCdkeyOrderBizExt
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
 }{
@@ -119,7 +141,7 @@ var InstallAppCdkeyOrderWhere = struct {
 	Status:    whereHelperenum_MemberPayOrderStatus{field: "`install_app_cdkey_order`.`status`"},
 	Number:    whereHelperint64{field: "`install_app_cdkey_order`.`number`"},
 	Amount:    whereHelperfloat64{field: "`install_app_cdkey_order`.`amount`"},
-	BizExt:    whereHelperstring{field: "`install_app_cdkey_order`.`biz_ext`"},
+	BizExt:    whereHelperdatatype_InstallAppCdkeyOrderBizExt{field: "`install_app_cdkey_order`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`install_app_cdkey_order`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`install_app_cdkey_order`.`updated_at`"},
 }

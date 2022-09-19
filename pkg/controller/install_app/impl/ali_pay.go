@@ -7,6 +7,7 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
@@ -56,15 +57,14 @@ func NewALiPayInstallAppController() *ALiPayInstallAppController {
 func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
 	totalAmount := number * constant.CertificatePriceL1
-	bizExt := constant.InstallAppCDKEYOrderBizExt{
-		ContactWay: contactWay,
-	}
 	err := c.installAppCDKEYOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
 		ID:     id,
 		Status: enum.MemberPayOrderStatusPending,
 		Amount: cast.ToFloat64(totalAmount),
 		Number: number,
-		BizExt: bizExt.String(),
+		BizExt: datatype.InstallAppCdkeyOrderBizExt{
+			ContactWay: contactWay,
+		},
 	})
 	if err != nil {
 		return 0, "", err
