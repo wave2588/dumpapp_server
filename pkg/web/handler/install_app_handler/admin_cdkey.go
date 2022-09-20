@@ -7,6 +7,7 @@ import (
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
+	impl2 "dumpapp_server/pkg/controller/install_app/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -30,7 +31,9 @@ func NewAdminCDKeyHandler() *AdminCDKeyHandler {
 }
 
 type postCDKeyArgs struct {
-	Number int `json:"number" validate:"required"`
+	Number   int `json:"number" validate:"required"`
+	CerLevel int `json:"cer_level" validate:"required"`
+	Price    int `json:"price" validate:"required"`
 }
 
 func (p *postCDKeyArgs) Validate() error {
@@ -41,6 +44,9 @@ func (p *postCDKeyArgs) Validate() error {
 	if p.Number <= 0 {
 		return errors.UnproccessableError("number > 0")
 	}
+	if p.CerLevel > 3 || p.CerLevel < 1 {
+		return errors.UnproccessableError(fmt.Sprintf("检查 cer_level 是否符合要求: %d", p.CerLevel))
+	}
 	return nil
 }
 
@@ -50,28 +56,29 @@ func (h *AdminCDKeyHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCDKeyArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	cdkeyIDs := make([]int64, 0)
-	for i := 0; i < args.Number; i++ {
-		orderID := util2.MustGenerateID(ctx)
-		util.PanicIf(h.cdkeyOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
-			ID:     orderID,
-			Status: enum.MemberPayOrderStatusPaid,
-			Number: 1,
-			Amount: 0,
-			BizExt: datatype.InstallAppCdkeyOrderBizExt{
-				IsTest: true,
-			},
-		}))
+	outIDs, err := impl2.DefaultALiPayInstallAppController.GetOutIDs(ctx, args.Number, args.CerLevel)
+	util.PanicIf(err)
 
+	orderID := util2.MustGenerateID(ctx)
+	util.PanicIf(h.cdkeyOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
+		ID:     orderID,
+		Status: enum.MemberPayOrderStatusPaid,
+		Number: cast.ToInt64(args.Number),
+		Amount: cast.ToFloat64(args.Price),
+		BizExt: datatype.InstallAppCdkeyOrderBizExt{
+			CerLevel: args.CerLevel,
+		},
+	}))
+
+	cdkeyIDs := make([]int64, 0)
+	for _, outID := range outIDs {
 		cdkeyID := util2.MustGenerateID(ctx)
-		outID := util2.MustGenerateAppCDKEY()
 		util.PanicIf(h.cdkeyDAO.Insert(ctx, &models.InstallAppCdkey{
 			ID:      cdkeyID,
 			OutID:   outID,
 			Status:  enum.InstallAppCDKeyStatusNormal,
 			OrderID: orderID,
 		}))
-
 		cdkeyIDs = append(cdkeyIDs, cdkeyID)
 	}
 
