@@ -3,12 +3,12 @@ package open_api_handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-playground/form"
 	"net/http"
 	"net/url"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller/impl"
+	"github.com/go-playground/form"
 )
 
 func mustGetLoginID(ctx context.Context, r *http.Request) int64 {

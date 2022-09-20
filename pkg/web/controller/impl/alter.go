@@ -52,14 +52,14 @@ func (c *AlterWebController) SendMsg(ctx context.Context, memberID int64, name, 
 	//SendWeiXinBot(ctx, keyID, data, receivers)
 }
 
-func (c *AlterWebController) SendCustomMsg(ctx context.Context, content string) {
+func (c *AlterWebController) SendCustomMsg(ctx context.Context, token, content string) {
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": content,
 		},
 	}
-	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
+	util.SendWeiXinBot(ctx, token, data, []string{})
 
 	data = map[string]interface{}{
 		"msgtype": "text",
@@ -68,7 +68,7 @@ func (c *AlterWebController) SendCustomMsg(ctx context.Context, content string) 
 			"mentioned_list": []string{"@all"},
 		},
 	}
-	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
+	util.SendWeiXinBot(ctx, token, data, []string{})
 }
 
 func (c *AlterWebController) SendDumpOrderMsg(ctx context.Context, loginID, ipaID int64, bundleID, ipaName, version string) {

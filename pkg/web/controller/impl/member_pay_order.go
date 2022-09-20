@@ -72,20 +72,17 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
 	}))
 
-	/// 多买多送，买 27 送 9，买 45 送 18，买 63 送 27。
-	//enum.MemberPayCountSourcePayForFree
-	//freeNumber := int64(0)
-	//if number >= 27 && number < 45 {
-	//	freeNumber = 9
-	//} else if number >= 45 && number < 63 {
-	//	freeNumber = 18
-	//} else if number >= 63 {
-	//	freeNumber = 27
-	//}
-	//util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
-	//	ObjectID:   orderID,
-	//	ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
-	//}))
+	/// 多买多送，冲 500 送 30, 冲 1000 送 60
+	freeNumber := int64(0)
+	if number >= 500 && number < 1000 {
+		freeNumber = 30
+	} else if number >= 1000 {
+		freeNumber = 60
+	}
+	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
+		ObjectID:   orderID,
+		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
+	}))
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)

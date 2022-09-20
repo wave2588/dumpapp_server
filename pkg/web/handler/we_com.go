@@ -34,7 +34,7 @@ func (h *WeComHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postNotificationArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	impl.DefaultAlterWebController.SendCustomMsg(ctx, args.Content)
+	impl.DefaultAlterWebController.SendCustomMsg(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", args.Content)
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
