@@ -25,9 +25,12 @@ type Member struct {
 
 	Phone *string `json:"phone,omitempty" render:"method=RenderPhone"`
 
-	PayCount     *int64        `json:"pay_count,omitempty" render:"method=RenderPayCount"`
-	DispenseInfo *DispenseInfo `json:"dispense_info" render:"method=RenderDispenseInfo"`
-	IpaInfo      *IpaInfo      `json:"ipa_info" render:"method=RenderIpaInfo"`
+	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
+
+	/// 所有价格明细
+	DispenseInfo    *DispenseInfo    `json:"dispense_info" render:"method=RenderDispenseInfo"`       /// 分发卷价格
+	IpaInfo         *IpaInfo         `json:"ipa_info" render:"method=RenderIpaInfo"`                 /// ipa 包价格
+	CertificateInfo *CertificateInfo `json:"certificate_info" render:"method=RenderCertificateInfo"` /// 证书价格
 
 	/// 邀请链接
 	InviteURL *string `json:"invite_url,omitempty" render:"method=RenderInviteURL"`
@@ -61,6 +64,10 @@ type DispenseInfo struct {
 
 type IpaInfo struct {
 	Price int64 `json:"price"`
+}
+
+type CertificateInfo struct {
+	Prices []*constant.CertificatePriceInfo `json:"prices"`
 }
 
 type MemberRender struct {
@@ -101,6 +108,8 @@ var DefaultFields = []string{
 	"PayCount",
 	"DispenseInfo",
 	"InviteURL",
+	"IpaInfo",
+	"CertificateInfo",
 }
 
 var MemberAdminRenderFields = []MemberOption{
@@ -213,6 +222,14 @@ func (f *MemberRender) RenderIpaInfo(ctx context.Context) {
 	for _, member := range f.memberMap {
 		member.IpaInfo = &IpaInfo{
 			Price: constant.IpaPrice,
+		}
+	}
+}
+
+func (f *MemberRender) RenderCertificateInfo(ctx context.Context) {
+	for _, member := range f.memberMap {
+		member.CertificateInfo = &CertificateInfo{
+			Prices: constant.GetCertificatePrices(),
 		}
 	}
 }

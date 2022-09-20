@@ -78,35 +78,8 @@ func (h *CDKEYHandler) GetCDKEYInfoByUDID(w http.ResponseWriter, r *http.Request
 	})
 }
 
-type cdkeyPrice struct {
-	ID          int64  `json:"id,string"`
-	Price       int64  `json:"price"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
-
 func (h *CDKEYHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
-	data := []*cdkeyPrice{
-		{
-			ID:          constant.InstallAppCDKeyPriceIDL1,
-			Price:       constant.CertificatePriceL1,
-			Title:       "普通版",
-			Description: "理论 1 年，无质保。",
-		},
-		{
-			ID:          constant.InstallAppCDKeyPriceIDL2,
-			Price:       constant.CertificatePriceL2,
-			Title:       "稳定版",
-			Description: "理论 1 年，售后半年，掉了无限补。",
-		},
-		{
-			ID:          constant.InstallAppCDKeyPriceIDL3,
-			Price:       constant.CertificatePriceL3,
-			Title:       "豪华版",
-			Description: "理论 1 年，售后 1 年，掉了无限补。",
-		},
-	}
 	util.RenderJSON(w, util.ListOutput{
-		Data: data,
+		Data: constant.GetCertificatePrices(),
 	})
 }

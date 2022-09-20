@@ -79,36 +79,9 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, cerMap[cerID])
 }
 
-type certificatePrice struct {
-	ID          int    `json:"id"`
-	Price       int64  `json:"price"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-}
-
 func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
-	data := []*certificatePrice{
-		{
-			ID:          1,
-			Price:       constant.CertificatePriceL1,
-			Title:       "普通版",
-			Description: "理论 1 年，无质保。",
-		},
-		{
-			ID:          2,
-			Price:       constant.CertificatePriceL2,
-			Title:       "稳定版",
-			Description: "理论 1 年，售后半年，掉了无限补。",
-		},
-		{
-			ID:          3,
-			Price:       constant.CertificatePriceL3,
-			Title:       "豪华版",
-			Description: "理论 1 年，售后 1 年，掉了无限补。",
-		},
-	}
 	util.RenderJSON(w, util.ListOutput{
-		Data: data,
+		Data: constant.GetCertificatePrices(),
 	})
 }
 
