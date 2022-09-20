@@ -174,7 +174,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		/// 添加下载记录
 		recordID := util2.MustGenerateID(ctx)
 		/// 消费 9 个积分
-		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, 9, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseIpa, datatype.MemberPayCountRecordBizExt{
+		util.PanicIf(h.memberDownloadNumberCtl.DeductPayCount(ctx, loginID, constant.IpaPrice, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseIpa, datatype.MemberPayCountRecordBizExt{
 			ObjectID:   recordID,
 			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeDownloadIpaRecord,
 		}))

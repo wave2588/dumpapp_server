@@ -27,6 +27,7 @@ type Member struct {
 
 	PayCount     *int64        `json:"pay_count,omitempty" render:"method=RenderPayCount"`
 	DispenseInfo *DispenseInfo `json:"dispense_info" render:"method=RenderDispenseInfo"`
+	IpaInfo      *IpaInfo      `json:"ipa_info" render:"method=RenderIpaInfo"`
 
 	/// 邀请链接
 	InviteURL *string `json:"invite_url,omitempty" render:"method=RenderInviteURL"`
@@ -56,6 +57,10 @@ type DispenseInfo struct {
 	Count int64  `json:"count"`
 	Rule  string `json:"rule"`
 	Ratio int64  `json:"ratio"`
+}
+
+type IpaInfo struct {
+	Price int64 `json:"price"`
 }
 
 type MemberRender struct {
@@ -200,6 +205,14 @@ func (f *MemberRender) RenderDispenseInfo(ctx context.Context) {
 			Count: countMap[member.ID],
 			Rule:  "09.05 - 10.05  活动期间， 1D 币 可兑换 10 分发劵，活动结束后恢复原价， 1D 币兑换 5 分发劵。\n\n（分发劵用于针对签名后的 APP生成下载链接，当前 1G 以下 APP上传分发后安装每次消耗 1 分发劵，1G 以上每次消耗 2 分发劵）",
 			Ratio: constant.DispenseRatioByPayCount,
+		}
+	}
+}
+
+func (f *MemberRender) RenderIpaInfo(ctx context.Context) {
+	for _, member := range f.memberMap {
+		member.IpaInfo = &IpaInfo{
+			Price: constant.IpaPrice,
 		}
 	}
 }

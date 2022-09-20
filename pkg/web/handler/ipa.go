@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -114,7 +115,7 @@ func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	/// 说明用户没有下载过，并且需要检查 D 币个数是否足够
 	if len(memberDownloadRecords) == 0 {
 		/// 判断是否有 D 币
-		util.PanicIf(h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9))
+		util.PanicIf(h.memberDownloadCtl.CheckPayCount(ctx, loginID, constant.IpaPrice))
 	}
 
 	/// 如果有下载次数, 并且库里没有这个 ipa 则去发送邮件
@@ -149,7 +150,7 @@ func (h *IpaHandler) GetLatestVersion(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(args.Validate())
 
 	/// 判断是否有下载次数
-	err := h.memberDownloadCtl.CheckPayCount(ctx, loginID, 9)
+	err := h.memberDownloadCtl.CheckPayCount(ctx, loginID, constant.IpaPrice)
 	util.PanicIf(err)
 
 	/// 库内没有找到对应的砸壳信息，需要发送推送给负责人进行砸壳。
