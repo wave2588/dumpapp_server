@@ -146,21 +146,21 @@ func (h *OpenCertificateHandler) GetCertificateList(w http.ResponseWriter, r *ht
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	deviceMap, err := h.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{loginID})
-	util.PanicIf(err)
-
 	deviceIDs := make([]int64, 0)
-	for _, devices := range deviceMap {
+	/// 如果没有给 udid, 则返回全量数据
+	if args.UDID == nil {
+		deviceMap, err := h.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{loginID})
+		util.PanicIf(err)
+		for _, devices := range deviceMap {
+			for _, device := range devices {
+				deviceIDs = append(deviceIDs, device.ID)
+			}
+		}
+	} else {
+		devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, loginID, []string{*args.UDID})
+		util.PanicIf(err)
 		for _, device := range devices {
-			if args.UDID == nil {
-				deviceIDs = append(deviceIDs, device.ID)
-				continue
-			}
-			/// 如果用户传了 udid, 则只返回 udid 对应的证书
-			if *args.UDID == device.Udid {
-				deviceIDs = append(deviceIDs, device.ID)
-				continue
-			}
+			deviceIDs = append(deviceIDs, device.ID)
 		}
 	}
 

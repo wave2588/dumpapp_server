@@ -26,4 +26,5 @@ type MemberDeviceDAO interface {
 	GetMemberDeviceSliceByMemberID(ctx context.Context, memberID int64) ([]*models.MemberDevice, error)
 	BatchGetByMemberIDs(ctx context.Context, memberIDs []int64) (map[int64][]*models.MemberDevice, error)
 	GetByMemberIDUdidSafe(ctx context.Context, memberID int64, udid string) (*models.MemberDevice, error)
+	GetByMemberIDAndUDIDs(ctx context.Context, memberID int64, UDIDs []string) ([]*models.MemberDevice, error)
 }

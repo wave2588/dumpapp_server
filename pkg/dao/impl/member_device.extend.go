@@ -31,3 +31,11 @@ func (d *MemberDeviceDAO) GetByMemberIDUdidSafe(ctx context.Context, memberID in
 	}
 	return device, nil
 }
+
+func (d *MemberDeviceDAO) GetByMemberIDAndUDIDs(ctx context.Context, memberID int64, UDIDs []string) ([]*models.MemberDevice, error) {
+	qs := []qm.QueryMod{
+		models.MemberDeviceWhere.MemberID.EQ(memberID),
+		models.MemberDeviceWhere.Udid.IN(UDIDs),
+	}
+	return models.MemberDevices(qs...).All(ctx, d.mysqlPool)
+}
