@@ -17,6 +17,7 @@ import (
 	"dumpapp_server/pkg/web/handler"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
@@ -86,7 +87,7 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 }
 
 type getCertificateArgs struct {
-	CertificateID int64 `json:"certificate_id,string" validate:"required"`
+	CertificateID string `form:"certificate_id" validate:"required"`
 }
 
 func (p *getCertificateArgs) Validate() error {
@@ -100,13 +101,16 @@ func (p *getCertificateArgs) Validate() error {
 func (h *OpenCertificateHandler) GetCertificate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	args := &getCertificateArgs{}
-	util.PanicIf(util.JSONArgs(r, args))
+	args := getCertificateArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	certificateID := cast.ToInt64(args.CertificateID)
 
 	loginID := mustGetLoginID(ctx, r)
 
-	cerMap := render.NewCertificateRender([]int64{args.CertificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-	cer, ok := cerMap[args.CertificateID]
+	cerMap := render.NewCertificateRender([]int64{certificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+	cer, ok := cerMap[certificateID]
 	if !ok {
 		util.PanicIf(errors.ErrNotFoundCertificate)
 	}

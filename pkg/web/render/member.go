@@ -169,7 +169,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: "充值 500 送 30，冲 1000 送 60。",
+				Description: "充 500 送 30，充 1000 送 60。",
 			},
 		}
 	}
