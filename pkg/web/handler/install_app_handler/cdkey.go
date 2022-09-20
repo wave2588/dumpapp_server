@@ -88,19 +88,19 @@ type cdkeyPrice struct {
 func (h *CDKEYHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 	data := []*cdkeyPrice{
 		{
-			ID:          1,
+			ID:          constant.InstallAppCDKeyPriceIDL1,
 			Price:       constant.CertificatePriceL1,
 			Title:       "普通版",
 			Description: "理论 1 年，无质保。",
 		},
 		{
-			ID:          2,
+			ID:          constant.InstallAppCDKeyPriceIDL2,
 			Price:       constant.CertificatePriceL2,
 			Title:       "稳定版",
 			Description: "理论 1 年，售后半年，掉了无限补。",
 		},
 		{
-			ID:          3,
+			ID:          constant.InstallAppCDKeyPriceIDL3,
 			Price:       constant.CertificatePriceL3,
 			Title:       "豪华版",
 			Description: "理论 1 年，售后 1 年，掉了无限补。",

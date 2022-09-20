@@ -30,8 +30,9 @@ func NewCDKEYOrderHandler() *CDKEYOrderHandler {
 }
 
 type getCDKEYOrderArgs struct {
-	Number     int64  `form:"number" validate:"required"`
-	ContactWay string `form:"contact_way" validate:"required"`
+	Number       int64   `form:"number" validate:"required"`
+	ContactWay   string  `form:"contact_way" validate:"required"`
+	CDKEYPriceID *string `form:"cdkey_price_id"`
 }
 
 func (args *getCDKEYOrderArgs) Validate() error {
@@ -52,7 +53,7 @@ func (h *CDKEYOrderHandler) GetOrderURL(w http.ResponseWriter, r *http.Request) 
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	orderID, payURL, err := h.aliPayCtl.GetPayURLByInstallApp(ctx, args.Number, args.ContactWay)
+	orderID, payURL, err := h.aliPayCtl.GetPayURLByInstallApp(ctx, args.Number, args.ContactWay, args.CDKEYPriceID)
 	util.PanicIf(err)
 
 	res := map[string]interface{}{

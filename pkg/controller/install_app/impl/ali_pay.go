@@ -54,9 +54,17 @@ func NewALiPayInstallAppController() *ALiPayInstallAppController {
 	}
 }
 
-func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string) (int64, string, error) {
+func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, number int64, contactWay string, cdkeyPriceID *string) (int64, string, error) {
 	id := util2.MustGenerateID(ctx)
-	totalAmount := number * constant.CertificatePriceL1
+
+	cerLevel := 1
+	cerPriceLevel := constant.CertificatePriceL1
+	if cdkeyPriceID != nil {
+		cerLevel = cast.ToInt(*cdkeyPriceID)
+		cerPriceLevel = constant.GetInstallAppCerPrice(cast.ToInt64(*cdkeyPriceID))
+	}
+
+	totalAmount := number * cerPriceLevel
 	err := c.installAppCDKEYOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
 		ID:     id,
 		Status: enum.MemberPayOrderStatusPending,
@@ -64,6 +72,7 @@ func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, 
 		Number: number,
 		BizExt: datatype.InstallAppCdkeyOrderBizExt{
 			ContactWay: contactWay,
+			CerLevel:   cerLevel,
 		},
 	})
 	if err != nil {
@@ -102,7 +111,7 @@ func (c *ALiPayInstallAppController) AliPayCallbackOrder(ctx context.Context, or
 	}
 
 	number := int(order.Number)
-	outIDs, err := c.getOutIDs(ctx, number)
+	outIDs, err := c.GetOutIDs(ctx, number, order.BizExt.CerLevel)
 	if err != nil {
 		return err
 	}
@@ -151,11 +160,13 @@ func (c *ALiPayInstallAppController) checkPayStatus(ctx context.Context, orderID
 	return nil
 }
 
-func (c *ALiPayInstallAppController) getOutIDs(ctx context.Context, number int) ([]string, error) {
+func (c *ALiPayInstallAppController) GetOutIDs(ctx context.Context, number, cerLevel int) ([]string, error) {
+	suffix := constant.GetInstallAppCDKeySuffix(cerLevel)
 	outIDs := make([]string, 0)
 	/// 生成 number * 10 的数量，以防重复
 	for i := 0; i < number*10; i++ {
-		outIDs = append(outIDs, util2.MustGenerateAppCDKEY())
+		outID := fmt.Sprintf("%s%s", util2.MustGenerateAppCDKEY(), suffix)
+		outIDs = append(outIDs, outID)
 	}
 	outIDs = strmangle.RemoveDuplicates(outIDs)
 

@@ -81,7 +81,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 type certificatePrice struct {
 	ID          int    `json:"id"`
-	Price       int    `json:"price"`
+	Price       int64  `json:"price"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 }
