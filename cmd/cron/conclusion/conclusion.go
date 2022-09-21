@@ -104,6 +104,12 @@ func run() {
 		}
 	}
 
+	filters = []qm.QueryMod{
+		models.CertificateV2Where.CreatedAt.GTE(startAt),
+	}
+	cerCount, err := impl.DefaultCertificateV2DAO.Count(ctx, filters)
+	util.PanicIf(err)
+
 	contentStr := fmt.Sprintf("<font color=\"info\">每日总结\n截止昨日此时数据统计如下：</font>\n>")
 	newMemberStr := fmt.Sprintf("新注册用户：<font color=\"comment\">%d</font> 人\n其中邀请注册用户：<font color=\"comment\">%d</font> 人\n", len(memberIDs), len(inviterMemberIDs))
 	paidMemberStr := fmt.Sprintf("新用户付费率：：<font color=\"comment\">%.2f%%</font>\n", cast.ToFloat64(len(paidMemberIDs))/cast.ToFloat64(len(memberIDs))*100)
@@ -112,6 +118,7 @@ func run() {
 	cdKeyAmountStr := fmt.Sprintf("App 兑换码收入：<font color=\"comment\">%v</font>\n", cdKeyOrderAmount)
 	downloadedStr := fmt.Sprintf("使用次数：<font color=\"comment\">%d</font>\n", downloadedCount)
 	downloadedMemberStr := fmt.Sprintf("下载人数：<font color=\"comment\">%d</font>\n", len(downloadedMember))
+	cerCountStr := fmt.Sprintf("证书：<font color=\"comment\">%d</font>\n", cerCount)
 	uvStr := fmt.Sprintf("uv: <font color=\"comment\">%d</font>\n", uv)
 	pvStr := fmt.Sprintf("pv: <font color=\"comment\">%d</font>\n", pv)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", now.Format("2006-01-02 15:04:05"))
@@ -119,7 +126,7 @@ func run() {
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": contentStr +
-				newMemberStr + paidMemberStr + downloadedStr + downloadedMemberStr + orderCountStr + amountStr + cdKeyAmountStr + uvStr + pvStr + timeStr,
+				newMemberStr + paidMemberStr + downloadedStr + downloadedMemberStr + cerCountStr + orderCountStr + amountStr + cdKeyAmountStr + uvStr + pvStr + timeStr,
 		},
 	}
 	util2.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{"@all"})
