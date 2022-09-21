@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"dumpapp_server/pkg/common/constant"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -134,10 +135,12 @@ func (h *LingshulianHandler) PostAbortMultipartUploadInfo(w http.ResponseWriter,
 }
 
 func (h *LingshulianHandler) sendMsg(ctx context.Context, title string, loginID int64, requestBody interface{}) {
+	appVersion, _ := ctx.Value(constant.CtxKeyAppVersion).(string)
 	jsonData, _ := json.Marshal(requestBody)
 	titleString := fmt.Sprintf("<font color=\"warning\">%s</font>\n>", title)
 	loginString := fmt.Sprintf("用户 ID：<font color=\"comment\">%d</font>\n", loginID)
 	jsonString := fmt.Sprintf("request body：<font color=\"comment\">%s</font>\n", string(jsonData))
+	appVersionString := fmt.Sprintf("版本：<font color=\"comment\">%s</font>\n", appVersion)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
-	h.alterWebCtl.SendCustomMsg(ctx, "16a2bd1b-a03a-4a46-bbec-f218cbcfe17d", titleString+loginString+jsonString+timeStr)
+	h.alterWebCtl.SendCustomMsg(ctx, "16a2bd1b-a03a-4a46-bbec-f218cbcfe17d", titleString+loginString+jsonString+appVersionString+timeStr)
 }
