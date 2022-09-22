@@ -40,6 +40,9 @@ func (args *getCDKEYOrderArgs) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
+	if len(args.ContactWay) == 0 || args.ContactWay == "" {
+		return errors.UnproccessableError("contact 不能为空")
+	}
 	if args.Number <= 0 {
 		return errors.UnproccessableError("number > 0")
 	}

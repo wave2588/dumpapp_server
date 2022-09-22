@@ -9,17 +9,17 @@ func NewCheckHealthHandler() *CheckHealthHandler {
 }
 
 func (h *CheckHealthHandler) Get(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hi"))
+	w.Write([]byte("hi get"))
 }
 
 func (h *CheckHealthHandler) Post(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hi"))
+	w.Write([]byte("hi post"))
 }
 
 func (h *CheckHealthHandler) Put(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hi"))
+	w.Write([]byte("hi put"))
 }
 
 func (h *CheckHealthHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hi"))
+	w.Write([]byte("hi delete"))
 }

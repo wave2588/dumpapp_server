@@ -31,9 +31,10 @@ func NewAdminCDKeyHandler() *AdminCDKeyHandler {
 }
 
 type postCDKeyArgs struct {
-	Number   int `json:"number" validate:"required"`
-	CerLevel int `json:"cer_level" validate:"required"`
-	Price    int `json:"price" validate:"required"`
+	Number   int    `json:"number" validate:"required"`
+	CerLevel int    `json:"cer_level" validate:"required"`
+	Price    int    `json:"price" validate:"required"`
+	Contact  string `json:"contact" validate:"required"`
 }
 
 func (p *postCDKeyArgs) Validate() error {
@@ -46,6 +47,9 @@ func (p *postCDKeyArgs) Validate() error {
 	}
 	if p.CerLevel > 3 || p.CerLevel < 1 {
 		return errors.UnproccessableError(fmt.Sprintf("检查 cer_level 是否符合要求: %d", p.CerLevel))
+	}
+	if len(p.Contact) == 0 || p.Contact == "" {
+		return errors.UnproccessableError("contact 不能为空")
 	}
 	return nil
 }
@@ -61,10 +65,11 @@ func (h *AdminCDKeyHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	orderID := util2.MustGenerateID(ctx)
 	util.PanicIf(h.cdkeyOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
-		ID:     orderID,
-		Status: enum.MemberPayOrderStatusPaid,
-		Number: cast.ToInt64(args.Number),
-		Amount: cast.ToFloat64(args.Price),
+		ID:      orderID,
+		Contact: args.Contact,
+		Status:  enum.MemberPayOrderStatusPaid,
+		Number:  cast.ToInt64(args.Number),
+		Amount:  cast.ToFloat64(args.Price),
 		BizExt: datatype.InstallAppCdkeyOrderBizExt{
 			CerLevel: args.CerLevel,
 		},

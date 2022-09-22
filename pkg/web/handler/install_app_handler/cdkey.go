@@ -12,14 +12,16 @@ import (
 )
 
 type CDKEYHandler struct {
-	installAppCDKEYDAO    dao2.InstallAppCdkeyDAO
-	installAppCDKEYCerDAO dao2.InstallAppCertificateDAO
+	installAppCDKEYDAO     dao2.InstallAppCdkeyDAO
+	installAppCDKEYCerDAO  dao2.InstallAppCertificateDAO
+	installAppCKEYOrderDAO dao2.InstallAppCdkeyOrderDAO
 }
 
 func NewCDKEYHandler() *CDKEYHandler {
 	return &CDKEYHandler{
-		installAppCDKEYDAO:    impl2.DefaultInstallAppCdkeyDAO,
-		installAppCDKEYCerDAO: impl2.DefaultInstallAppCertificateDAO,
+		installAppCDKEYDAO:     impl2.DefaultInstallAppCdkeyDAO,
+		installAppCDKEYCerDAO:  impl2.DefaultInstallAppCertificateDAO,
+		installAppCKEYOrderDAO: impl2.DefaultInstallAppCdkeyOrderDAO,
 	}
 }
 
@@ -75,6 +77,42 @@ func (h *CDKEYHandler) GetCDKEYInfoByUDID(w http.ResponseWriter, r *http.Request
 	util.RenderJSON(w, &getOrderByContactWatResp{
 		UDID:   udid,
 		CDKeys: install_app_render.NewCDKEYRender(cdkeyIDs, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
+	})
+}
+
+type getOrderByContactResp struct {
+	Contact string                      `json:"contact"`
+	CDKeys  []*install_app_render.CDKEY `json:"cd_keys"`
+}
+
+func (h *CDKEYHandler) GetCDKEYInfoByContactWay(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	contact := util.URLParam(r, "contact")
+
+	orderMap, err := h.installAppCKEYOrderDAO.BatchGetByContact(ctx, []string{contact})
+	util.PanicIf(err)
+
+	orderIDs := make([]int64, 0)
+	for _, orders := range orderMap {
+		for _, order := range orders {
+			orderIDs = append(orderIDs, order.ID)
+		}
+	}
+
+	cdkeys, err := h.installAppCDKEYDAO.BatchGetByOrderIDs(ctx, orderIDs)
+	util.PanicIf(err)
+
+	cdkeyIDs := make([]int64, 0)
+	for _, appCdkeys := range cdkeys {
+		for _, cdkey := range appCdkeys {
+			cdkeyIDs = append(cdkeyIDs, cdkey.ID)
+		}
+	}
+
+	util.RenderJSON(w, &getOrderByContactResp{
+		Contact: contact,
+		CDKeys:  install_app_render.NewCDKEYRender(cdkeyIDs, 0, install_app_render.CDKeyDefaultRenderFields...).RenderSlice(ctx),
 	})
 }
 

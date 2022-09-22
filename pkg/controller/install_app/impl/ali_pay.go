@@ -66,10 +66,11 @@ func (c *ALiPayInstallAppController) GetPayURLByInstallApp(ctx context.Context, 
 
 	totalAmount := number * cerPriceLevel
 	err := c.installAppCDKEYOrderDAO.Insert(ctx, &models.InstallAppCdkeyOrder{
-		ID:     id,
-		Status: enum.MemberPayOrderStatusPending,
-		Amount: cast.ToFloat64(totalAmount),
-		Number: number,
+		ID:      id,
+		Contact: contactWay,
+		Status:  enum.MemberPayOrderStatusPending,
+		Amount:  cast.ToFloat64(totalAmount),
+		Number:  number,
 		BizExt: datatype.InstallAppCdkeyOrderBizExt{
 			ContactWay: contactWay,
 			CerLevel:   cerLevel,

@@ -11,10 +11,10 @@ func NewRouter() chi.Router {
 
 	/// check health
 	checkHealthHandler := handler.NewCheckHealthHandler()
-	r.With(middleware.OAuthGuest).Post("/check_health", checkHealthHandler.Get)
+	r.With(middleware.OAuthGuest).Post("/check_health", checkHealthHandler.Post)
 	r.With(middleware.OAuthGuest).Get("/check_health", checkHealthHandler.Get)
-	r.With(middleware.OAuthGuest).Put("/check_health", checkHealthHandler.Get)
-	r.With(middleware.OAuthGuest).Delete("/check_health", checkHealthHandler.Get)
+	r.With(middleware.OAuthGuest).Put("/check_health", checkHealthHandler.Put)
+	r.With(middleware.OAuthGuest).Delete("/check_health", checkHealthHandler.Delete)
 	/// endregion
 
 	/// region config

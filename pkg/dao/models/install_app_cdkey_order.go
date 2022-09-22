@@ -26,6 +26,7 @@ import (
 // InstallAppCdkeyOrder is an object representing the database table.
 type InstallAppCdkeyOrder struct {
 	ID        int64                               `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Contact   string                              `boil:"contact" json:"contact" toml:"contact" yaml:"contact"`
 	Status    enum.MemberPayOrderStatus           `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Number    int64                               `boil:"number" json:"number" toml:"number" yaml:"number"`
 	Amount    float64                             `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
@@ -39,6 +40,7 @@ type InstallAppCdkeyOrder struct {
 
 var InstallAppCdkeyOrderColumns = struct {
 	ID        string
+	Contact   string
 	Status    string
 	Number    string
 	Amount    string
@@ -47,6 +49,7 @@ var InstallAppCdkeyOrderColumns = struct {
 	UpdatedAt string
 }{
 	ID:        "id",
+	Contact:   "contact",
 	Status:    "status",
 	Number:    "number",
 	Amount:    "amount",
@@ -130,6 +133,7 @@ func (w whereHelperdatatype_InstallAppCdkeyOrderBizExt) GTE(x datatype.InstallAp
 
 var InstallAppCdkeyOrderWhere = struct {
 	ID        whereHelperint64
+	Contact   whereHelperstring
 	Status    whereHelperenum_MemberPayOrderStatus
 	Number    whereHelperint64
 	Amount    whereHelperfloat64
@@ -138,6 +142,7 @@ var InstallAppCdkeyOrderWhere = struct {
 	UpdatedAt whereHelpertime_Time
 }{
 	ID:        whereHelperint64{field: "`install_app_cdkey_order`.`id`"},
+	Contact:   whereHelperstring{field: "`install_app_cdkey_order`.`contact`"},
 	Status:    whereHelperenum_MemberPayOrderStatus{field: "`install_app_cdkey_order`.`status`"},
 	Number:    whereHelperint64{field: "`install_app_cdkey_order`.`number`"},
 	Amount:    whereHelperfloat64{field: "`install_app_cdkey_order`.`amount`"},
@@ -163,8 +168,8 @@ func (*installAppCdkeyOrderR) NewStruct() *installAppCdkeyOrderR {
 type installAppCdkeyOrderL struct{}
 
 var (
-	installAppCdkeyOrderAllColumns            = []string{"id", "status", "number", "amount", "biz_ext", "created_at", "updated_at"}
-	installAppCdkeyOrderColumnsWithoutDefault = []string{"status", "number", "amount", "biz_ext"}
+	installAppCdkeyOrderAllColumns            = []string{"id", "contact", "status", "number", "amount", "biz_ext", "created_at", "updated_at"}
+	installAppCdkeyOrderColumnsWithoutDefault = []string{"contact", "status", "number", "amount", "biz_ext"}
 	installAppCdkeyOrderColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	installAppCdkeyOrderPrimaryKeyColumns     = []string{"id"}
 )
