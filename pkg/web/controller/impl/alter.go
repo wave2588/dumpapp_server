@@ -195,12 +195,13 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
 	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	sourceStr := fmt.Sprintf("Source：<font color=\"comment\">%s</font>\n", cer.Source.String())
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"info\">证书购买成功</font>\n>" +
-				cerIDStr + deviceIDStr + udidStr + emailStr + timeStr,
+				cerIDStr + deviceIDStr + udidStr + sourceStr + emailStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})

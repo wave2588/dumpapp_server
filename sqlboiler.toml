@@ -391,3 +391,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# admin_config
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["admin_config_info"]
+
+  [types.replace]
+    type = "datatype.AdminConfigInfoBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

@@ -44,6 +44,7 @@ type CertificateRender struct {
 	certificateDAO   dao.CertificateV2DAO
 	certificateV1Ctl controller.CertificateController
 	certificateV2Ctl controller.CertificateController
+	certificateV3Ctl controller.CertificateController
 }
 
 type CertificateOption func(*CertificateRender)
@@ -79,6 +80,7 @@ func NewCertificateRender(ids []int64, loginID int64, opts ...CertificateOption)
 		certificateDAO:   impl.DefaultCertificateV2DAO,
 		certificateV1Ctl: impl3.DefaultCertificateV1Controller,
 		certificateV2Ctl: impl3.DefaultCertificateV2Controller,
+		certificateV3Ctl: impl3.DefaultCertificateV3Controller,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -151,6 +153,12 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 					isActiveMap[cer.ID] = response
 				case enum.CertificateSourceV2:
 					response, err := f.certificateV2Ctl.CheckCerIsActive(ctx, cer.ID)
+					if err != nil {
+						return err
+					}
+					isActiveMap[cer.ID] = response
+				case enum.CertificateSourceV3:
+					response, err := f.certificateV3Ctl.CheckCerIsActive(ctx, cer.ID)
 					if err != nil {
 						return err
 					}

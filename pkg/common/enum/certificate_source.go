@@ -7,4 +7,5 @@ type CertificateSource int
 const (
 	CertificateSourceV1 CertificateSource = iota + 1
 	CertificateSourceV2
+	CertificateSourceV3
 )

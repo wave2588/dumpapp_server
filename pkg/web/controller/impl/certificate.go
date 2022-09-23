@@ -23,11 +23,13 @@ import (
 )
 
 type CertificateWebController struct {
-	memberDeviceDAO   dao.MemberDeviceDAO
-	certificateDAO    dao.CertificateV2DAO
-	memberPayCountCtl controller.MemberPayCountController
-	certificateCtl    controller.CertificateController
-	alterWebCtl       controller2.AlterWebController
+	adminConfigInfoDAO dao.AdminConfigInfoDAO
+	memberDeviceDAO    dao.MemberDeviceDAO
+	certificateDAO     dao.CertificateV2DAO
+	memberPayCountCtl  controller.MemberPayCountController
+	certificateV2Ctl   controller.CertificateController
+	certificateV3Ctl   controller.CertificateController
+	alterWebCtl        controller2.AlterWebController
 }
 
 var DefaultCertificateWebController *CertificateWebController
@@ -38,20 +40,17 @@ func init() {
 
 func NewCertificateWebController() *CertificateWebController {
 	return &CertificateWebController{
-		memberDeviceDAO:   impl.DefaultMemberDeviceDAO,
-		certificateDAO:    impl.DefaultCertificateV2DAO,
-		memberPayCountCtl: impl2.DefaultMemberPayCountController,
-		certificateCtl:    impl2.DefaultCertificateV2Controller,
-		alterWebCtl:       NewAlterWebController(),
+		adminConfigInfoDAO: impl.DefaultAdminConfigInfoDAO,
+		memberDeviceDAO:    impl.DefaultMemberDeviceDAO,
+		certificateDAO:     impl.DefaultCertificateV2DAO,
+		memberPayCountCtl:  impl2.DefaultMemberPayCountController,
+		certificateV2Ctl:   impl2.DefaultCertificateV2Controller,
+		certificateV3Ctl:   impl2.DefaultCertificateV3Controller,
+		alterWebCtl:        NewAlterWebController(),
 	}
 }
 
 func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid string, payCount int64, payType string) (int64, error) {
-	/// fixme: 测试代码
-	if udid == "00008110-000A7D210EFA801E" {
-		return int64(1545759504849702912), nil
-	}
-
 	util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
 
 	memberDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, udid)
@@ -67,7 +66,22 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
 
 	/// 请求整数接口
-	response := c.certificateCtl.CreateCer(ctx, udid, "1")
+	config, err := c.adminConfigInfoDAO.GetConfig(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	/// 这里做个分流, 后台可配置随意切换任何平台
+	var response *controller.CertificateResponse
+	switch config.BizExt.CerSource {
+	case enum.CertificateSourceV2:
+		response = c.certificateV2Ctl.CreateCer(ctx, udid, "1")
+	case enum.CertificateSourceV3:
+		response = c.certificateV3Ctl.CreateCer(ctx, udid, "1")
+	default:
+		return 0, errors.UnproccessableError("请联系管理员检查配置信息是否正确")
+	}
+
 	if response.ErrorMessage != nil {
 		/// 创建失败推送
 		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, *response.ErrorMessage)

@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _CertificateSourceName = "v1v2"
+const _CertificateSourceName = "v1v2v3"
 
-var _CertificateSourceIndex = [...]uint8{0, 2, 4}
+var _CertificateSourceIndex = [...]uint8{0, 2, 4, 6}
 
-const _CertificateSourceLowerName = "v1v2"
+const _CertificateSourceLowerName = "v1v2v3"
 
 func (i CertificateSource) String() string {
 	i -= 1
@@ -29,20 +29,24 @@ func _CertificateSourceNoOp() {
 	var x [1]struct{}
 	_ = x[CertificateSourceV1-(1)]
 	_ = x[CertificateSourceV2-(2)]
+	_ = x[CertificateSourceV3-(3)]
 }
 
-var _CertificateSourceValues = []CertificateSource{CertificateSourceV1, CertificateSourceV2}
+var _CertificateSourceValues = []CertificateSource{CertificateSourceV1, CertificateSourceV2, CertificateSourceV3}
 
 var _CertificateSourceNameToValueMap = map[string]CertificateSource{
 	_CertificateSourceName[0:2]:      CertificateSourceV1,
 	_CertificateSourceLowerName[0:2]: CertificateSourceV1,
 	_CertificateSourceName[2:4]:      CertificateSourceV2,
 	_CertificateSourceLowerName[2:4]: CertificateSourceV2,
+	_CertificateSourceName[4:6]:      CertificateSourceV3,
+	_CertificateSourceLowerName[4:6]: CertificateSourceV3,
 }
 
 var _CertificateSourceNames = []string{
 	_CertificateSourceName[0:2],
 	_CertificateSourceName[2:4],
+	_CertificateSourceName[4:6],
 }
 
 // CertificateSourceString retrieves an enum value from the enum constants string name.

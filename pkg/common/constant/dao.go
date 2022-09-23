@@ -57,6 +57,9 @@ type CertificateBizExt struct {
 	/// v2 扩展字段
 	V2DeviceID string `json:"v2_device_id,omitempty"`
 
+	/// v3 扩展字段
+	V3DeviceID string `json:"v3_device_id,omitempty"`
+
 	/// 公共字段
 	OriginalP12Password string `json:"original_p12_password"` /// 原本的密码
 	NewP12Password      string `json:"new_p12_password"`      /// 新密码
