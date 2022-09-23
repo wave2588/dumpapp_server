@@ -71,7 +71,7 @@ func (c *CertificateV3Controller) CreateCer(ctx context.Context, UDID, regionPoo
 	var response *cerResponse
 	err = json.Unmarshal([]byte(body), &response)
 	if err != nil {
-		res.ErrorMessage = util2.StringPtr("v3 response body json.unmarshal fail")
+		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v3 response body json.unmarshal fail. json: %s", string(body)))
 		return res
 	}
 
