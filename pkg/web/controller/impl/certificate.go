@@ -182,9 +182,9 @@ func (c *CertificateWebController) GetModifiedCertificateData(ctx context.Contex
 		return "", err
 	}
 
-	util.PanicIf(os.Remove(originFilePath))
-	util.PanicIf(os.Remove(pemFilePath))
-	util.PanicIf(os.Remove(resultFilePath))
+	_ = os.Remove(originFilePath)
+	_ = os.Remove(pemFilePath)
+	_ = os.Remove(resultFilePath)
 
 	return base64.StdEncoding.EncodeToString(resultData), nil
 }
