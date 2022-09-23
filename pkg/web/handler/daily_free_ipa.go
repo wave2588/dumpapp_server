@@ -19,16 +19,16 @@ import (
 )
 
 type DailyFreeIpaHandler struct {
-	dailyFreeDAO dao.DailyFreeRecordDAO
-	configDAO    dao.AdminConfigDAO
-	emailCtl     controller.EmailController
+	dailyFreeDAO   dao.DailyFreeRecordDAO
+	adminConfigDAO dao.AdminConfigInfoDAO
+	emailCtl       controller.EmailController
 }
 
 func NewDailyFreeIpaHandler() *DailyFreeIpaHandler {
 	return &DailyFreeIpaHandler{
-		dailyFreeDAO: impl.DefaultDailyFreeRecordDAO,
-		configDAO:    impl.DefaultAdminConfigDAO,
-		emailCtl:     impl2.DefaultEmailController,
+		dailyFreeDAO:   impl.DefaultDailyFreeRecordDAO,
+		adminConfigDAO: impl.DefaultAdminConfigInfoDAO,
+		emailCtl:       impl2.DefaultEmailController,
 	}
 }
 
@@ -52,8 +52,9 @@ func (h *DailyFreeIpaHandler) PostIpa(w http.ResponseWriter, r *http.Request) {
 	args := &postDailyFreeIpa{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	dailyFreeCount, err := h.configDAO.GetDailyFreeCount(ctx)
+	config, err := h.adminConfigDAO.GetConfig(ctx)
 	util.PanicIf(err)
+	dailyFreeCount := config.BizExt.DailyFreeCount
 
 	now := time.Now()
 	ids, err := h.dailyFreeDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{

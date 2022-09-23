@@ -4,19 +4,13 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/dao"
-	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/web/render"
 )
 
-type ConfigHandler struct {
-	configDAO dao.AdminConfigDAO
-}
+type ConfigHandler struct{}
 
 func NewConfigHandler() *ConfigHandler {
-	return &ConfigHandler{
-		configDAO: impl.DefaultAdminConfigDAO,
-	}
+	return &ConfigHandler{}
 }
 
 func (h *ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {

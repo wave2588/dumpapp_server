@@ -9,8 +9,9 @@ import (
 )
 
 type Config struct {
-	AdminBusy      bool  `json:"admin_busy"`
-	DailyFreeCount int64 `json:"daily_free_count"`
+	AdminBusy      bool   `json:"admin_busy"`
+	DailyFreeCount int64  `json:"daily_free_count"`
+	CerSource      string `json:"cer_source"`
 }
 
 type ConfigRender struct {
@@ -19,14 +20,14 @@ type ConfigRender struct {
 
 	config *Config
 
-	configDAO dao.AdminConfigDAO
+	adminConfigDAO dao.AdminConfigInfoDAO
 }
 
 func NewConfigRender(loginID int64) *ConfigRender {
 	f := &ConfigRender{
 		loginID: loginID,
 
-		configDAO: impl.DefaultAdminConfigDAO,
+		adminConfigDAO: impl.DefaultAdminConfigInfoDAO,
 	}
 	return f
 }
@@ -37,13 +38,12 @@ func (f *ConfigRender) Render(ctx context.Context) *Config {
 }
 
 func (f *ConfigRender) fetch(ctx context.Context) {
-	busy, err := f.configDAO.GetAdminBusy(ctx)
-	util.PanicIf(err)
-	dailyFreeCount, err := f.configDAO.GetDailyFreeCount(ctx)
+	config, err := f.adminConfigDAO.GetConfig(ctx)
 	util.PanicIf(err)
 
 	f.config = &Config{
-		AdminBusy:      busy,
-		DailyFreeCount: dailyFreeCount,
+		AdminBusy:      config.BizExt.AdminBusy,
+		DailyFreeCount: config.BizExt.DailyFreeCount,
+		CerSource:      config.BizExt.CerSource.String(),
 	}
 }

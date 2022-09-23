@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -14,18 +15,19 @@ import (
 )
 
 type AdminConfigHandler struct {
-	configDAO dao.AdminConfigDAO
+	adminConfigDAO dao.AdminConfigInfoDAO
 }
 
 func NewAdminConfigHandler() *AdminConfigHandler {
 	return &AdminConfigHandler{
-		configDAO: impl.DefaultAdminConfigDAO,
+		adminConfigDAO: impl.DefaultAdminConfigInfoDAO,
 	}
 }
 
 type postConfigArgs struct {
-	AdminBusy      *bool  `json:"admin_busy"`
-	DailyFreeCount *int64 `json:"daily_free_count"`
+	AdminBusy      *bool                   `json:"admin_busy"`
+	DailyFreeCount *int64                  `json:"daily_free_count"`
+	CerSource      *enum.CertificateSource `json:"cer_source"`
 }
 
 func (p *postConfigArgs) Validate() error {
@@ -43,12 +45,20 @@ func (h *AdminConfigHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postConfigArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	config, err := h.adminConfigDAO.GetConfig(ctx)
+	util.PanicIf(err)
+
 	if args.AdminBusy != nil {
-		util.PanicIf(h.configDAO.SetAdminBusy(ctx, *args.AdminBusy))
+		config.BizExt.AdminBusy = *args.AdminBusy
 	}
 	if args.DailyFreeCount != nil {
-		util.PanicIf(h.configDAO.SetDailyFreeCount(ctx, *args.DailyFreeCount))
+		config.BizExt.DailyFreeCount = *args.DailyFreeCount
 	}
+	if args.CerSource != nil {
+		config.BizExt.CerSource = *args.CerSource
+	}
+
+	util.PanicIf(h.adminConfigDAO.Update(ctx, config))
 
 	util.RenderJSON(w, render.NewConfigRender(loginID).Render(ctx))
 }
