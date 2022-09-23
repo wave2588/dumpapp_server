@@ -252,7 +252,7 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	util.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
 		MemberID: accountID,
-		Code:     util3.MustGenerateCode(ctx, 32),
+		Code:     util3.MustGenerateUUID(),
 	}))
 
 	clients.MustCommit(ctx, txn)

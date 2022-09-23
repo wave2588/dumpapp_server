@@ -12,10 +12,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-var (
-	node, nodeErr = snowflake.NewNode(1)
-	u             = uuid.New()
-)
+var node, nodeErr = snowflake.NewNode(1)
 
 func MustGenerateID(ctx context.Context) int64 {
 	util.PanicIf(nodeErr)
@@ -23,6 +20,7 @@ func MustGenerateID(ctx context.Context) int64 {
 }
 
 func MustGenerateUUID() string {
+	u := uuid.New()
 	return u.String()
 }
 
