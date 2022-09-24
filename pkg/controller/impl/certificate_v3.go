@@ -93,7 +93,7 @@ func (c *CertificateV3Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		BizExt: &constant.CertificateBizExt{
 			V3DeviceID:          response.Data.ID,
 			OriginalP12Password: "1",
-			NewP12Password:      "123",
+			NewP12Password:      "1",
 		},
 	}
 }

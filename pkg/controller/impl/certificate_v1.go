@@ -79,7 +79,7 @@ func (c *CertificateV1Controller) CreateCer(ctx context.Context, UDID, regionPoo
 			V1UDIDBatchNo:       result.Data.UdidBatchNo,
 			V1CerAppleID:        result.Data.CerAppleid,
 			OriginalP12Password: "1",
-			NewP12Password:      "123",
+			NewP12Password:      "1",
 		},
 	}
 }

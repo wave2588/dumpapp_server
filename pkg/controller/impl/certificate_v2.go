@@ -99,7 +99,7 @@ func (c *CertificateV2Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		BizExt: &constant.CertificateBizExt{
 			V2DeviceID:          responseData.ID,
 			OriginalP12Password: cerData.Data.Password,
-			NewP12Password:      "123",
+			NewP12Password:      "1",
 		},
 	}
 }
