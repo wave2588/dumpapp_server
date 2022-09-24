@@ -56,7 +56,7 @@ func (h *AdminAccountHandler) AddAccount(w http.ResponseWriter, r *http.Request)
 
 	util2.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
 		MemberID: id,
-		Code:     util.MustGenerateCode(ctx, 32),
+		Code:     util.MustGenerateUUID(),
 	}))
 
 	util2.RenderJSON(w, "ok")
