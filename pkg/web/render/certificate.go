@@ -124,7 +124,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		}
 		var bizExt constant.CertificateBizExt
 		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
-		result[meta.ID] = &Certificate{
+		cer := &Certificate{
 			Meta:            meta,
 			ID:              meta.ID,
 			CreatedAt:       meta.CreatedAt.Unix(),
@@ -134,6 +134,14 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,
 		}
+
+		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
+		if cer.Mobileprovision == "" {
+			cer.P12 = meta.P12FileData
+			cer.P12Password = bizExt.OriginalP12Password
+		}
+
+		result[meta.ID] = cer
 	}
 	f.certificateMap = result
 }

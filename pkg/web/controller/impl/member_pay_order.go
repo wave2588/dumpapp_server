@@ -14,6 +14,7 @@ import (
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
+	errors2 "dumpapp_server/pkg/errors"
 	"github.com/spf13/cast"
 )
 
@@ -58,6 +59,17 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		return nil
 	}
 
+	memberID := order.MemberID
+	accountMap, err := c.accountDAO.BatchGet(ctx, []int64{memberID})
+	if err != nil {
+		return err
+	}
+	account, ok := accountMap[memberID]
+	if !ok {
+		return errors2.ErrNotFoundMember
+	}
+	accountRole := account.Role
+
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
@@ -76,8 +88,14 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	freeNumber := int64(0)
 	if number >= 500 && number < 1000 {
 		freeNumber = 30
+		if accountRole == enum.AccountRoleAgent {
+			freeNumber = 72
+		}
 	} else if number >= 1000 {
 		freeNumber = 60
+		if accountRole == enum.AccountRoleAgent {
+			freeNumber = 100
+		}
 	}
 	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
 		ObjectID:   orderID,

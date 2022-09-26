@@ -7,4 +7,5 @@ type AccountRole int
 const (
 	AccountRoleNone        AccountRole = iota + 1 ///没有角色
 	AccountRoleInfluential                        /// 大V
+	AccountRoleAgent                              /// 代理商
 )

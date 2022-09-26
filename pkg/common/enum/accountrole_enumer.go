@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-const _AccountRoleName = "noneinfluential"
+const _AccountRoleName = "noneinfluentialagent"
 
-var _AccountRoleIndex = [...]uint8{0, 4, 15}
+var _AccountRoleIndex = [...]uint8{0, 4, 15, 20}
 
-const _AccountRoleLowerName = "noneinfluential"
+const _AccountRoleLowerName = "noneinfluentialagent"
 
 func (i AccountRole) String() string {
 	i -= 1
@@ -29,20 +29,24 @@ func _AccountRoleNoOp() {
 	var x [1]struct{}
 	_ = x[AccountRoleNone-(1)]
 	_ = x[AccountRoleInfluential-(2)]
+	_ = x[AccountRoleAgent-(3)]
 }
 
-var _AccountRoleValues = []AccountRole{AccountRoleNone, AccountRoleInfluential}
+var _AccountRoleValues = []AccountRole{AccountRoleNone, AccountRoleInfluential, AccountRoleAgent}
 
 var _AccountRoleNameToValueMap = map[string]AccountRole{
-	_AccountRoleName[0:4]:       AccountRoleNone,
-	_AccountRoleLowerName[0:4]:  AccountRoleNone,
-	_AccountRoleName[4:15]:      AccountRoleInfluential,
-	_AccountRoleLowerName[4:15]: AccountRoleInfluential,
+	_AccountRoleName[0:4]:        AccountRoleNone,
+	_AccountRoleLowerName[0:4]:   AccountRoleNone,
+	_AccountRoleName[4:15]:       AccountRoleInfluential,
+	_AccountRoleLowerName[4:15]:  AccountRoleInfluential,
+	_AccountRoleName[15:20]:      AccountRoleAgent,
+	_AccountRoleLowerName[15:20]: AccountRoleAgent,
 }
 
 var _AccountRoleNames = []string{
 	_AccountRoleName[0:4],
 	_AccountRoleName[4:15],
+	_AccountRoleName[15:20],
 }
 
 // AccountRoleString retrieves an enum value from the enum constants string name.
@@ -51,8 +55,8 @@ func AccountRoleString(s string) (AccountRole, error) {
 	if val, ok := _AccountRoleNameToValueMap[s]; ok {
 		return val, nil
 	}
-	s = strings.ToLower(s)
-	if val, ok := _AccountRoleNameToValueMap[s]; ok {
+
+	if val, ok := _AccountRoleNameToValueMap[strings.ToLower(s)]; ok {
 		return val, nil
 	}
 	return 0, fmt.Errorf("%s does not belong to AccountRole values", s)
