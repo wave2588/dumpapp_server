@@ -201,6 +201,13 @@ func (c *LingshulianController) Delete(ctx context.Context, bucket, key string) 
 	return err
 }
 
+func (c *LingshulianController) List(ctx context.Context, bucket string) (*s3.ListObjectsV2Output, error) {
+	return c.Svc.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket:  util.StringPtr(bucket),
+		MaxKeys: util2.Int64Ptr(1000),
+	})
+}
+
 func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Context, request *controller.PostCreateMultipartUploadInfoRequest) (*controller.PostCreateMultipartUploadInfoResp, error) {
 	id := util2.MustGenerateID(ctx)
 	key := fmt.Sprintf("%d.%s", id, request.Suffix)
