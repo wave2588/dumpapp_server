@@ -27,6 +27,7 @@ type DispenseCountRecord struct {
 	ID        int64                        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID  int64                        `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Type      enum.DispenseCountRecordType `boil:"type" json:"type" toml:"type" yaml:"type"`
+	ObjectID  int64                        `boil:"object_id" json:"object_id" toml:"object_id" yaml:"object_id"`
 	Count     int64                        `boil:"count" json:"count" toml:"count" yaml:"count"`
 	CreatedAt time.Time                    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
@@ -39,6 +40,7 @@ var DispenseCountRecordColumns = struct {
 	ID        string
 	MemberID  string
 	Type      string
+	ObjectID  string
 	Count     string
 	CreatedAt string
 	UpdatedAt string
@@ -46,6 +48,7 @@ var DispenseCountRecordColumns = struct {
 	ID:        "id",
 	MemberID:  "member_id",
 	Type:      "type",
+	ObjectID:  "object_id",
 	Count:     "count",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -78,6 +81,7 @@ var DispenseCountRecordWhere = struct {
 	ID        whereHelperint64
 	MemberID  whereHelperint64
 	Type      whereHelperenum_DispenseCountRecordType
+	ObjectID  whereHelperint64
 	Count     whereHelperint64
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
@@ -85,6 +89,7 @@ var DispenseCountRecordWhere = struct {
 	ID:        whereHelperint64{field: "`dispense_count_record`.`id`"},
 	MemberID:  whereHelperint64{field: "`dispense_count_record`.`member_id`"},
 	Type:      whereHelperenum_DispenseCountRecordType{field: "`dispense_count_record`.`type`"},
+	ObjectID:  whereHelperint64{field: "`dispense_count_record`.`object_id`"},
 	Count:     whereHelperint64{field: "`dispense_count_record`.`count`"},
 	CreatedAt: whereHelpertime_Time{field: "`dispense_count_record`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`dispense_count_record`.`updated_at`"},
@@ -107,9 +112,9 @@ func (*dispenseCountRecordR) NewStruct() *dispenseCountRecordR {
 type dispenseCountRecordL struct{}
 
 var (
-	dispenseCountRecordAllColumns            = []string{"id", "member_id", "type", "count", "created_at", "updated_at"}
+	dispenseCountRecordAllColumns            = []string{"id", "member_id", "type", "object_id", "count", "created_at", "updated_at"}
 	dispenseCountRecordColumnsWithoutDefault = []string{"member_id", "type", "count"}
-	dispenseCountRecordColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	dispenseCountRecordColumnsWithDefault    = []string{"id", "object_id", "created_at", "updated_at"}
 	dispenseCountRecordPrimaryKeyColumns     = []string{"id"}
 )
 

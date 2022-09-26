@@ -67,7 +67,7 @@ func (c *DispenseCountController) Check(ctx context.Context, memberID, count int
 	return nil
 }
 
-func (c *DispenseCountController) DeductCount(ctx context.Context, memberID, count int64, recordType enum.DispenseCountRecordType) error {
+func (c *DispenseCountController) DeductCount(ctx context.Context, memberID, count int64, objectID int64, recordType enum.DispenseCountRecordType) error {
 	if count <= 0 {
 		return nil
 	}
@@ -101,6 +101,7 @@ func (c *DispenseCountController) DeductCount(ctx context.Context, memberID, cou
 	return c.dispenseCountRecordDAO.Insert(ctx, &models.DispenseCountRecord{
 		MemberID: memberID,
 		Type:     recordType,
+		ObjectID: objectID,
 		Count:    count,
 	})
 }

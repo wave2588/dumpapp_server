@@ -98,7 +98,7 @@ func (h *DispenseHandler) Expense(w http.ResponseWriter, r *http.Request) {
 
 	///  根据大小同步进行扣费 signIpa.BizExt.IpaSize / 1024 / 1024
 	dCount := h.dispenseCountCtl.CalculateMemberSignIpaDispenseCount(ctx, signIpa.BizExt.IpaSize)
-	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, signIpa.MemberID, dCount, enum.DispenseCountRecordTypeInstallSignIpa))
+	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, signIpa.MemberID, dCount, signIpa.ID, enum.DispenseCountRecordTypeInstallSignIpa))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
