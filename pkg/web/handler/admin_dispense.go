@@ -86,7 +86,7 @@ func (h *AdminDispenseHandler) DeleteCount(w http.ResponseWriter, r *http.Reques
 		util.PanicIf(errors.ErrNotFoundMember)
 		return
 	}
-	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, account.ID, args.Number, enum.DispenseCountRecordTypeAdminDeleted))
+	util.PanicIf(h.dispenseCountCtl.DeductCount(ctx, account.ID, args.Number, 0, enum.DispenseCountRecordTypeAdminDeleted))
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
