@@ -164,6 +164,13 @@ func (h *MemberSignIpaHandler) Put(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(errors.ErrNotFound)
 	}
 
+	if signIpa.IsDelete {
+		util.PanicIf(errors.UnproccessableError("已删除的 ipa 无法修改"))
+	}
+	if signIpa.MemberID != loginID {
+		util.PanicIf(errors.ErrMemberAccessDenied)
+	}
+
 	signIpa.BizExt.DispenseCount = args.DispenseCount
 	util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
 
@@ -263,6 +270,11 @@ func (h *MemberSignIpaHandler) getMemberSignIpaData(ctx context.Context, memberS
 	if len(includeFields) != 0 {
 		dCount := h.dispenseCountCtl.CalculateMemberSignIpaDispenseCount(ctx, data.Meta.BizExt.IpaSize)
 		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, dCount))
+
+		/// 如果分发次数已经 > 用户设置分发次数, 则不允许再分发
+		if !data.Dispense.IsValid {
+			util.PanicIf(errors.UnproccessableError("分发次数已达到上限"))
+		}
 	}
 	return data
 }

@@ -187,14 +187,10 @@ func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
 			continue
 		}
 		usedCount := cast.ToInt64(len(res[ipa.ID]))
-		isValid := false
-		if usedCount < dispenseCount {
-			isValid = true
-		}
 		ipa.Dispense = &Dispense{
 			Count:     dispenseCount,
 			UsedCount: cast.ToInt64(usedCount),
-			IsValid:   isValid,
+			IsValid:   usedCount < dispenseCount,
 		}
 	}
 }
