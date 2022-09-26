@@ -14,7 +14,7 @@ type MemberSignIpaBizExt struct {
 	IpaVersion      string `json:"ipa_version"`
 	IpaSize         int64  `json:"ipa_size"`
 	CertificateName string `json:"certificate_name"`
-	DispenseCount   int    `json:"dispense_count"`
+	DispenseCount   int64  `json:"dispense_count"`
 }
 
 func (i MemberSignIpaBizExt) String() string {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -11,6 +12,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"github.com/spf13/cast"
 )
 
 type MemberSignIpa struct {
@@ -28,8 +30,17 @@ type MemberSignIpa struct {
 	DownloadURL string  `json:"download_url" render:"method=RenderDownloadURL"`
 	PlistURL    *string `json:"plist_url,omitempty" render:"method=RenderPlistURL"`
 
+	/// 分发相关的控制
+	Dispense *Dispense `json:"dispense" render:"method=RenderDispense"`
+
 	CreatedAt int64 `json:"created_at"`
 	UpdateAt  int64 `json:"update_at"`
+}
+
+type Dispense struct {
+	Count     int64 `json:"count"`      /// 用户设置的可分发次数
+	UsedCount int64 `json:"used_count"` /// 使用过的分发次数
+	IsValid   bool  `json:"is_valid"`   /// 是否还能使用
 }
 
 type MemberSignIpaRender struct {
@@ -39,9 +50,10 @@ type MemberSignIpaRender struct {
 
 	memberSignIpaMap map[int64]*MemberSignIpa
 
-	memberSignIpaDAO dao.MemberSignIpaDAO
-	lingshulianCtl   controller.LingshulianController
-	fileCtl          controller.FileController
+	memberSignIpaDAO       dao.MemberSignIpaDAO
+	dispenseCountRecordDAO dao.DispenseCountRecordDAO
+	lingshulianCtl         controller.LingshulianController
+	fileCtl                controller.FileController
 }
 
 type MemberSignIpaOption func(*MemberSignIpaRender)
@@ -64,6 +76,7 @@ func MemberSignIpaIncludes(fields []string) MemberSignIpaOption {
 
 var DefaultMemberSignIpaFields = []string{
 	"DownloadURL",
+	"Dispense",
 }
 
 var MemberSignIpaDefaultRenderFields = []MemberSignIpaOption{
@@ -75,9 +88,10 @@ func NewMemberSignIpaRender(ids []int64, loginID int64, opts ...MemberSignIpaOpt
 		ids:     ids,
 		loginID: loginID,
 
-		memberSignIpaDAO: impl.DefaultMemberSignIpaDAO,
-		lingshulianCtl:   impl2.DefaultLingshulianController,
-		fileCtl:          impl2.DefaultFileController,
+		memberSignIpaDAO:       impl.DefaultMemberSignIpaDAO,
+		dispenseCountRecordDAO: impl.DefaultDispenseCountRecordDAO,
+		lingshulianCtl:         impl2.DefaultLingshulianController,
+		fileCtl:                impl2.DefaultFileController,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -146,5 +160,41 @@ func (f *MemberSignIpaRender) RenderDownloadURL(ctx context.Context) {
 func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
 	for _, ipa := range f.memberSignIpaMap {
 		ipa.PlistURL = util.StringPtr(f.fileCtl.GetPlistFileURL(ctx, ipa.Meta.IpaPlistFileToken))
+	}
+}
+
+func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
+	signIpaIDs := make([]int64, 0)
+	for _, ipa := range f.memberSignIpaMap {
+		if ipa.Meta.BizExt.DispenseCount == 0 {
+			continue
+		}
+		signIpaIDs = append(signIpaIDs, ipa.ID)
+	}
+
+	res, err := f.dispenseCountRecordDAO.BatchGetByObjectIDsAndRecordType(ctx, signIpaIDs, enum.DispenseCountRecordTypeInstallSignIpa)
+	util.PanicIf(err)
+
+	for _, ipa := range f.memberSignIpaMap {
+		/// 等于 0 相当于没设置, 按照不需要拦截处理
+		dispenseCount := ipa.Meta.BizExt.DispenseCount
+		if dispenseCount == 0 {
+			ipa.Dispense = &Dispense{
+				Count:     0,
+				UsedCount: 0,
+				IsValid:   true,
+			}
+			continue
+		}
+		usedCount := cast.ToInt64(len(res[ipa.ID]))
+		isValid := false
+		if usedCount < dispenseCount {
+			isValid = true
+		}
+		ipa.Dispense = &Dispense{
+			Count:     dispenseCount,
+			UsedCount: cast.ToInt64(usedCount),
+			IsValid:   isValid,
+		}
 	}
 }

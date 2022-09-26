@@ -46,7 +46,7 @@ type postSignIpaArgs struct {
 	IpaVersion      string `json:"ipa_version" validate:"required"`
 	IpaSize         int64  `json:"ipa_size" validate:"required"`
 	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
-	DispenseCount   *int   `json:"dispense_count"`
+	DispenseCount   *int64 `json:"dispense_count"`
 }
 
 func (args *postSignIpaArgs) Validate() error {
@@ -132,6 +132,43 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, data[signIpaID])
+}
+
+type putSignIpaArgs struct {
+	DispenseCount int64 `json:"dispense_count" validate:"required"`
+}
+
+func (args *putSignIpaArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *MemberSignIpaHandler) Put(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx     = r.Context()
+		id      = cast.ToInt64(util.URLParam(r, "id"))
+		loginID = mustGetLoginID(ctx)
+	)
+
+	args := &putSignIpaArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	signIpaMap, err := h.memberSignDAO.BatchGet(ctx, []int64{id})
+	util.PanicIf(err)
+
+	signIpa, ok := signIpaMap[id]
+	if !ok {
+		util.PanicIf(errors.ErrNotFound)
+	}
+
+	signIpa.BizExt.DispenseCount = args.DispenseCount
+	util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
+
+	data := render.NewMemberSignIpaRender([]int64{id}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
+	util.RenderJSON(w, data[id])
 }
 
 func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http.Request) {
