@@ -46,6 +46,7 @@ type postSignIpaArgs struct {
 	IpaVersion      string `json:"ipa_version" validate:"required"`
 	IpaSize         int64  `json:"ipa_size" validate:"required"`
 	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
+	DispenseCount   *int   `json:"dispense_count"`
 }
 
 func (args *postSignIpaArgs) Validate() error {
@@ -85,13 +86,17 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			signIpa.IsDelete = false
 			signIpa.IpaFileToken = args.IpaFileToken
 			signIpa.IpaPlistFileToken = plistToken
-			signIpa.BizExt = datatype.MemberSignIpaBizExt{
+			bizExt := datatype.MemberSignIpaBizExt{
 				IpaName:         args.IpaName,
 				IpaBundleID:     args.IpaBundleID,
 				IpaVersion:      args.IpaVersion,
 				IpaSize:         args.IpaSize,
 				CertificateName: args.CertificateName,
 			}
+			if args.DispenseCount != nil {
+				bizExt.DispenseCount = *args.DispenseCount
+			}
+			signIpa.BizExt = bizExt
 		}
 		util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
 	} else {
@@ -104,6 +109,16 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
 
 		signIpaID = util2.MustGenerateID(ctx)
+		bizExt := datatype.MemberSignIpaBizExt{
+			IpaName:         args.IpaName,
+			IpaBundleID:     args.IpaBundleID,
+			IpaVersion:      args.IpaVersion,
+			IpaSize:         args.IpaSize,
+			CertificateName: args.CertificateName,
+		}
+		if args.DispenseCount != nil {
+			bizExt.DispenseCount = *args.DispenseCount
+		}
 		util.PanicIf(h.memberSignDAO.Insert(ctx, &models.MemberSignIpa{
 			ID:                signIpaID,
 			ExpenseID:         args.ExpenseID,
@@ -111,13 +126,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			IsDelete:          false,
 			IpaFileToken:      args.IpaFileToken,
 			IpaPlistFileToken: plistToken,
-			BizExt: datatype.MemberSignIpaBizExt{
-				IpaName:         args.IpaName,
-				IpaBundleID:     args.IpaBundleID,
-				IpaVersion:      args.IpaVersion,
-				IpaSize:         args.IpaSize,
-				CertificateName: args.CertificateName,
-			},
+			BizExt:            bizExt,
 		}))
 	}
 
