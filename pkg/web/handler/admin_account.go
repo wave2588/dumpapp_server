@@ -13,7 +13,10 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/util"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 type AdminAccountHandler struct {
@@ -146,4 +149,53 @@ func (h *AdminAccountHandler) getAccountByEmail(ctx context.Context, email strin
 		return nil, errors.ErrNotFoundMember
 	}
 	return account, nil
+}
+
+type accountListArgs struct {
+	Role    enum.AccountRole `form:"role"`
+	StartAt int64            `form:"start_at"`
+	EndAt   int64            `form:"end_at"`
+}
+
+func (args *accountListArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminAccountHandler) AccountList(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx     = r.Context()
+		loginID = mustGetLoginID(ctx)
+		offset  = GetIntArgument(r, "offset", 0)
+		limit   = GetIntArgument(r, "limit", 10)
+	)
+
+	args := accountListArgs{}
+	util2.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util2.PanicIf(args.Validate())
+
+	filters := make([]qm.QueryMod, 0)
+	if args.Role.IsAAccountRole() {
+		filters = append(filters, models.AccountWhere.Role.EQ(args.Role))
+	}
+	if args.StartAt != 0 {
+		filters = append(filters, models.AccountWhere.CreatedAt.GTE(cast.ToTime(args.StartAt)))
+	}
+	if args.EndAt != 0 {
+		filters = append(filters, models.AccountWhere.CreatedAt.LTE(cast.ToTime(args.EndAt)))
+	}
+
+	ids, err := impl4.DefaultAccountDAO.ListIDs(ctx, offset, limit, filters, nil)
+	util2.PanicIf(err)
+	totalCount, err := impl4.DefaultAccountDAO.Count(ctx, filters)
+	util2.PanicIf(err)
+
+	members := render.NewMemberRender(ids, loginID, render.MemberAdminRenderFields...).RenderSlice(ctx)
+	util2.RenderJSON(w, util2.ListOutput{
+		Paging: util2.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
+		Data:   members,
+	})
 }
