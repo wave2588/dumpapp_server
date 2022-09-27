@@ -74,11 +74,11 @@ func (h *AdminAccountHandler) AddAccount(w http.ResponseWriter, r *http.Request)
 }
 
 type putAccountArgs struct {
-	Email    string            `json:"email"`
-	NewEmail *string           `json:"new_email"`
-	Password *string           `json:"password"`
-	Phone    *string           `json:"phone"`
-	Role     *enum.AccountRole `json:"role"`
+	Email    string           `json:"email"`
+	NewEmail *string          `json:"new_email"`
+	Password *string          `json:"password"`
+	Phone    *string          `json:"phone"`
+	Role     enum.AccountRole `json:"role"`
 }
 
 func (p *putAccountArgs) Validate() error {
@@ -133,8 +133,8 @@ func (h *AdminAccountHandler) PutAccount(w http.ResponseWriter, r *http.Request)
 	if args.Password != nil {
 		account.Password = *args.Password
 	}
-	if args.Role != nil {
-		account.Role = *args.Role
+	if args.Role.IsAAccountRole() {
+		account.Role = args.Role
 	}
 	util2.PanicIf(h.accountDAO.Update(ctx, account))
 

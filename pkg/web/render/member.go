@@ -113,9 +113,9 @@ var DefaultFields = []string{
 }
 
 var MemberAdminRenderFields = []MemberOption{
-	MemberIncludes([]string{
+	MemberIncludes(append(DefaultFields,
 		"Admin",
-	}),
+	)),
 }
 
 var MemberDefaultRenderFields = []MemberOption{
