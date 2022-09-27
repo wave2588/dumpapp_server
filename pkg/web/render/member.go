@@ -183,7 +183,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: "充 500 送 30，充 1000 送 60。",
+				Description: "充 500 送 30，充 1000 送 80。成为代理商可享受充 500 送 50，充 1000 送 120。",
 			},
 		}
 	}

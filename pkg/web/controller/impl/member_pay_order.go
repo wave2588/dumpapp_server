@@ -89,12 +89,12 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	if number >= 500 && number < 1000 {
 		freeNumber = 30
 		if accountRole == enum.AccountRoleAgent {
-			freeNumber = 72
+			freeNumber = 50
 		}
 	} else if number >= 1000 {
-		freeNumber = 60
+		freeNumber = 80
 		if accountRole == enum.AccountRoleAgent {
-			freeNumber = 100
+			freeNumber = 120
 		}
 	}
 	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
