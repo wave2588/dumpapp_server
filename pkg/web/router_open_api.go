@@ -13,6 +13,7 @@ func NewRouterOpenAPI() chi.Router {
 	r.With(middleware.OAuthGuest).Post("/certificate", certificateHandler.PostCertificate)
 	r.With(middleware.OAuthGuest).Get("/certificate", certificateHandler.GetCertificate)
 	r.With(middleware.OAuthGuest).Get("/certificate/list", certificateHandler.GetCertificateList)
+	r.With(middleware.OAuthGuest).Get("/certificate/price", certificateHandler.GetCertificatePrice)
 
 	return r
 }

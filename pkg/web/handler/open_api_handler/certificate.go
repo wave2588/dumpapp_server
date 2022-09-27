@@ -36,7 +36,8 @@ func NewOpenCertificateHandler() *OpenCertificateHandler {
 }
 
 type postCertificateArgs struct {
-	UDID string `json:"udid" validate:"required"`
+	UDID               string  `json:"udid" validate:"required"`
+	CertificatePriceID *string `json:"certificate_price_id"`
 }
 
 func (p *postCertificateArgs) Validate() error {
@@ -74,8 +75,22 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 		}))
 	}
 
+	/// 计算证书价格
+	cerPrice := constant.CertificatePriceL1
+	if args.CertificatePriceID != nil {
+		switch *args.CertificatePriceID {
+		case "1":
+			cerPrice = constant.CertificatePriceL1
+		case "2":
+			cerPrice = constant.CertificatePriceL2
+		case "3":
+			cerPrice = constant.CertificatePriceL3
+		default:
+			util.PanicIf(errors.UnproccessableError("certificate_price_id 未识别"))
+		}
+	}
 	/// 购买证书
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, constant.CertificatePriceL1, "")
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, cerPrice, "")
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
@@ -176,5 +191,11 @@ func (h *OpenCertificateHandler) GetCertificateList(w http.ResponseWriter, r *ht
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(totalCount), offset, limit),
 		Data:   render.NewCertificateRender(cerIDs, loginID, render.CertificateDefaultRenderFields...).RenderSlice(ctx),
+	})
+}
+
+func (h *OpenCertificateHandler) GetCertificatePrice(w http.ResponseWriter, r *http.Request) {
+	util.RenderJSON(w, util.ListOutput{
+		Data: constant.GetCertificatePrices(),
 	})
 }
