@@ -112,7 +112,12 @@ func (h *CertificateHandler) DownloadP12File(w http.ResponseWriter, r *http.Requ
 	if cer == nil {
 		panic(errors.ErrNotFound)
 	}
-	uDec, err := base64.StdEncoding.DecodeString(cer.ModifiedP12FileDate)
+
+	p12Data := cer.ModifiedP12FileDate
+	if p12Data == "" {
+		p12Data = cer.P12FileData
+	}
+	uDec, err := base64.StdEncoding.DecodeString(p12Data)
 	util.PanicIf(err)
 	w.Header().Add("Content-Disposition", `attachment;filename="developer.p12`)
 	w.Header().Add("Access-Control-Expose-Headers", "Content-Disposition")

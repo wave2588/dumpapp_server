@@ -136,7 +136,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		}
 
 		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
-		if cer.P12 == "" {
+		if meta.ModifiedP12FileDate == "" {
 			cer.P12 = meta.P12FileData
 			cer.P12Password = bizExt.OriginalP12Password
 		}
