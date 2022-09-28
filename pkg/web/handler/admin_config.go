@@ -28,6 +28,7 @@ type postConfigArgs struct {
 	AdminBusy      *bool                   `json:"admin_busy"`
 	DailyFreeCount *int64                  `json:"daily_free_count"`
 	CerSource      *enum.CertificateSource `json:"cer_source"`
+	Announcement   *string                 `json:"announcement"`
 }
 
 func (p *postConfigArgs) Validate() error {
@@ -56,6 +57,9 @@ func (h *AdminConfigHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 	if args.CerSource != nil {
 		config.BizExt.CerSource = *args.CerSource
+	}
+	if args.Announcement != nil {
+		config.BizExt.Announcement = *args.Announcement
 	}
 
 	util.PanicIf(h.adminConfigDAO.Update(ctx, config))

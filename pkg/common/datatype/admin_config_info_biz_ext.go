@@ -13,6 +13,8 @@ type AdminConfigInfoBizExt struct {
 	CerSource      enum.CertificateSource `json:"cer_source"`       /// 使用证书平台
 	DailyFreeCount int64                  `json:"daily_free_count"` /// 每日免费砸壳次数
 	AdminBusy      bool                   `json:"admin_busy"`       /// 管理员是否繁忙
+
+	Announcement string `json:"announcement"` /// 公告
 }
 
 func (i AdminConfigInfoBizExt) String() string {
