@@ -2,11 +2,6 @@ package impl
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
-	"io/ioutil"
-	"os"
-
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
@@ -20,6 +15,10 @@ import (
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
 
 type CertificateWebController struct {
@@ -56,7 +55,20 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	memberDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, udid)
 	util.PanicIf(err)
 	if memberDevice == nil {
-		return 0, errors.ErrDeviceNotFound
+		id := util2.MustGenerateID(ctx)
+		err = c.memberDeviceDAO.Insert(ctx, &models.MemberDevice{
+			ID:       id,
+			MemberID: loginID,
+			Udid:     udid,
+			BizExt:   datatype.MemberDeviceBizExt{},
+		})
+		if err != nil {
+			return 0, err
+		}
+		memberDevice, err = c.memberDeviceDAO.Get(ctx, id)
+		if err != nil {
+			return 0, err
+		}
 	}
 	if memberDevice.MemberID != loginID {
 		return 0, errors.ErrCreateCertificateFailV2
