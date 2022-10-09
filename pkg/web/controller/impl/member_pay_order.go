@@ -85,18 +85,26 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	}))
 
 	/// 多买多送，冲 500 送 30, 冲 1000 送 60
+	/*
+		500 - 15
+		1000 - 70
+		2000 - 260
+		5000 - 1290
+		10000 - 3330
+	*/
 	freeNumber := int64(0)
 	if number >= 500 && number < 1000 {
-		freeNumber = 30
-		if accountRole == enum.AccountRoleAgent {
-			freeNumber = 50
-		}
-	} else if number >= 1000 {
-		freeNumber = 80
-		if accountRole == enum.AccountRoleAgent {
-			freeNumber = 120
-		}
+		freeNumber = 15
+	} else if number >= 1000 && number < 2000 {
+		freeNumber = 70
+	} else if number >= 2000 && number < 5000 {
+		freeNumber = 260
+	} else if number >= 5000 && number < 10000 {
+		freeNumber = 1290
+	} else if number >= 10000 {
+		freeNumber = 3330
 	}
+
 	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
 		ObjectID:   orderID,
 		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeOrder,
