@@ -64,11 +64,10 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	if err != nil {
 		return err
 	}
-	account, ok := accountMap[memberID]
+	_, ok := accountMap[memberID]
 	if !ok {
 		return errors2.ErrNotFoundMember
 	}
-	accountRole := account.Role
 
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
