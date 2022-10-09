@@ -31,6 +31,9 @@ function gen_dao() {
 # sqlboiler related environment
 source ./sqlboiler.env
 
+# mysql connection info, don't add to git
+source ./mysql.env
+
 echo "generating models for: $MYSQL_WHITELIST"
 sqlboiler --wipe -d --no-tests --templates "$DRIVER_TEMPLATE_DIR" --output pkg/dao/models mysql
 
