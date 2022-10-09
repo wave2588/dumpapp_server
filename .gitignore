@@ -121,7 +121,9 @@ Session.vim
 # Auto-generated tag files
 tags
 play/
-mysql.env
 .env
 bin/
 main
+
+
+mysql.env
