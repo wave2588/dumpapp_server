@@ -86,18 +86,13 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 
 	/// 这里做个分流, 后台可配置随意切换任何平台
 	var response *controller.CertificateResponse
-	/// 如果是长 id 则默认走 v2
-	if util2.StringCount(udid) == 40 {
+	switch config.BizExt.CerSource {
+	case enum.CertificateSourceV2:
 		response = c.certificateV2Ctl.CreateCer(ctx, udid, "1")
-	} else {
-		switch config.BizExt.CerSource {
-		case enum.CertificateSourceV2:
-			response = c.certificateV2Ctl.CreateCer(ctx, udid, "1")
-		case enum.CertificateSourceV3:
-			response = c.certificateV3Ctl.CreateCer(ctx, udid, "1")
-		default:
-			return 0, errors.UnproccessableError("请联系管理员检查配置信息是否正确")
-		}
+	case enum.CertificateSourceV3:
+		response = c.certificateV3Ctl.CreateCer(ctx, udid, "1")
+	default:
+		return 0, errors.UnproccessableError("请联系管理员检查配置信息是否正确")
 	}
 
 	if response.ErrorMessage != nil {
