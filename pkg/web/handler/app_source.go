@@ -35,6 +35,7 @@ func NewAppSourceHandler() *AppSourceHandler {
 var DefaultAppSourceIDs = []int64{
 	1,
 	1553749259214393344,
+	1573917797795237888,
 }
 
 type postAppSourceArgs struct {
