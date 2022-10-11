@@ -76,7 +76,7 @@ func (h *LingshulianHandler) PostMultipartUploadInfo(w http.ResponseWriter, r *h
 
 	resp, err := h.lingshulianCtl.PostCreateMultipartUploadInfo(ctx, args)
 	if err != nil {
-		h.sendMsg(ctx, "获取上传信息失败", loginID, args)
+		h.sendMsg(ctx, "获取上传信息失败", loginID, args, err.Error())
 	}
 	util.PanicIf(err)
 
@@ -93,7 +93,7 @@ func (h *LingshulianHandler) PostMultipartUploadPartInfo(w http.ResponseWriter, 
 
 	resp, err := h.lingshulianCtl.PostMultipartUploadPartInfo(ctx, args)
 	if err != nil {
-		h.sendMsg(ctx, "获取上传分片信息失败", loginID, args)
+		h.sendMsg(ctx, "获取上传分片信息失败", loginID, args, err.Error())
 	}
 	util.PanicIf(err)
 
@@ -110,7 +110,7 @@ func (h *LingshulianHandler) PostCompleteMultipartUploadInfo(w http.ResponseWrit
 
 	resp, err := h.lingshulianCtl.PostCompleteMultipartUploadInfo(ctx, args)
 	if err != nil {
-		h.sendMsg(ctx, "合并文件失败", loginID, args)
+		h.sendMsg(ctx, "合并文件失败", loginID, args, err.Error())
 	}
 	util.PanicIf(err)
 
@@ -127,20 +127,21 @@ func (h *LingshulianHandler) PostAbortMultipartUploadInfo(w http.ResponseWriter,
 
 	resp, err := h.lingshulianCtl.PostAbortMultipartUploadInfo(ctx, args)
 	if err != nil {
-		h.sendMsg(ctx, "取消上传失败", loginID, args)
+		h.sendMsg(ctx, "取消上传失败", loginID, args, err.Error())
 	}
 	util.PanicIf(err)
 
 	util.RenderJSON(w, resp)
 }
 
-func (h *LingshulianHandler) sendMsg(ctx context.Context, title string, loginID int64, requestBody interface{}) {
+func (h *LingshulianHandler) sendMsg(ctx context.Context, title string, loginID int64, requestBody interface{}, errMsg string) {
 	appVersion, _ := ctx.Value(constant.CtxKeyAppVersion).(string)
 	jsonData, _ := json.Marshal(requestBody)
 	titleString := fmt.Sprintf("<font color=\"warning\">%s</font>\n>", title)
 	loginString := fmt.Sprintf("用户 ID：<font color=\"comment\">%d</font>\n", loginID)
 	jsonString := fmt.Sprintf("request body：<font color=\"comment\">%s</font>\n", string(jsonData))
+	errString := fmt.Sprintf("错误信息：<font color=\"comment\">%s</font>\n", errMsg)
 	appVersionString := fmt.Sprintf("版本：<font color=\"comment\">%s</font>\n", appVersion)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
-	h.alterWebCtl.SendCustomMsg(ctx, "16a2bd1b-a03a-4a46-bbec-f218cbcfe17d", titleString+loginString+jsonString+appVersionString+timeStr)
+	h.alterWebCtl.SendCustomMsg(ctx, "16a2bd1b-a03a-4a46-bbec-f218cbcfe17d", titleString+loginString+jsonString+errString+appVersionString+timeStr)
 }
