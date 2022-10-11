@@ -1,3 +1,3 @@
 package constant
 
-var DispenseRatioByPayCount int64 = 5 * 2
+var DispenseRatioByPayCount int64 = 5
