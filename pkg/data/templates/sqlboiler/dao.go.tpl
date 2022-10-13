@@ -3,7 +3,6 @@
 {{- $pkNames := $colDefs.Names | stringMap (aliasCols $alias) | stringMap .StringFuncs.camelCase | stringMap .StringFuncs.replaceReserved -}}
 {{- $pkArgs := joinSlices " " $pkNames $colDefs.Types | join ", " -}}
 {{- $schemaTable := .Table.Name | .SchemaTable -}}
-{{- $canSoftDelete := .Table.CanSoftDelete }}
 {{- $uniqKeys := .Table.UniqKeys -}}
 
 type {{$alias.UpSingular}}DAO interface {

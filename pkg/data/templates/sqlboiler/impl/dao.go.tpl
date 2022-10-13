@@ -4,7 +4,6 @@
 {{- $pkNames := $colDefs.Names | stringMap (aliasCols $alias) | stringMap .StringFuncs.camelCase | stringMap .StringFuncs.replaceReserved -}}
 {{- $pkArgs := joinSlices " " $pkNames $colDefs.Types | join ", " -}}
 {{- $schemaTable := .Table.Name | .SchemaTable -}}
-{{- $canSoftDelete := .Table.CanSoftDelete }}
 {{- $uniqKeys := .Table.UniqKeys -}}
 
 type {{$alias.UpSingular}}DAO struct {
@@ -178,7 +177,7 @@ func (d *{{$alias.UpSingular}}DAO) GetBy{{$fnName}}(ctx context.Context, {{$ukAr
 
 	sel := "*"
 	query := fmt.Sprintf(
-	"select %s from {{$.Table.Name | $.SchemaTable}} where {{if $.Dialect.UseIndexPlaceholders}}{{whereClause $.LQ $.RQ 1 $uniqKey.Columns}}{{else}}{{whereClause $.LQ $.RQ 0 $uniqKey.Columns}}{{end}}{{if and $.AddSoftDeletes $canSoftDelete}} and {{"deleted_at" | $.Quotes}} is null{{end}}", sel,
+	"select %s from {{$.Table.Name | $.SchemaTable}} where {{if $.Dialect.UseIndexPlaceholders}}{{whereClause $.LQ $.RQ 1 $uniqKey.Columns}}{{else}}{{whereClause $.LQ $.RQ 0 $uniqKey.Columns}}{{end}}{{if and $.AddSoftDeletes}} and {{"deleted_at" | $.Quotes}} is null{{end}}", sel,
 	)
 
 	q := queries.Raw(query, {{$ukColNames | join ", "}})
@@ -244,7 +243,7 @@ func (d *{{$alias.UpSingular}}DAO) BatchGetBy{{$fnName}}(ctx context.Context, {{
 		func (d *{{$alias.UpSingular}}DAO)Get{{$alias.UpSingular}}SliceBy{{$fnName}} (ctx context.Context, {{$ukArgs}}) ([]*models.{{$alias.UpSingular}}, error) {
 		var o []*models.{{$alias.UpSingular}}
 
-		query := "select {{$.Table.Name | $.SchemaTable}}.* from {{$.Table.Name | $.SchemaTable}} where {{if $.Dialect.UseIndexPlaceholders}}{{whereClause $.LQ $.RQ 1 $columns}}{{else}}{{whereClause $.LQ $.RQ 0 $columns}}{{end}}{{if and $.AddSoftDeletes $canSoftDelete}} and {{"deleted_at" | $.Quotes}} is null{{end}}"
+		query := "select {{$.Table.Name | $.SchemaTable}}.* from {{$.Table.Name | $.SchemaTable}} where {{if $.Dialect.UseIndexPlaceholders}}{{whereClause $.LQ $.RQ 1 $columns}}{{else}}{{whereClause $.LQ $.RQ 0 $columns}}{{end}}{{if and $.AddSoftDeletes}} and {{"deleted_at" | $.Quotes}} is null{{end}}"
 
 		q := queries.Raw(query, {{$ukColNames | join ", "}})
 
