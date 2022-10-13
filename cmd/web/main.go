@@ -44,5 +44,6 @@ func origins() []string {
 		"http://www.dumpapp.com",
 		"http://127.0.0.1:8080",
 		"http://localhost:8080",
+		"https://upload.dumpapp.com",
 	}
 }

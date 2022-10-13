@@ -42,7 +42,8 @@ func (h *AuthWebsiteHandler) GetAuth(w http.ResponseWriter, r *http.Request) {
 		resp.Success = false
 		resp.Message = util.StringPtr("未授权的站点")
 	} else {
-		resp.Success = true
+		resp.Success = false
+		resp.Message = util.StringPtr("测试文案哈哈哈哈")
 	}
 
 	util.RenderJSON(w, resp)
