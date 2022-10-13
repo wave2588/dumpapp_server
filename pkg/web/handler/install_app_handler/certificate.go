@@ -25,6 +25,7 @@ import (
 
 type CertificateHandler struct {
 	certificateV2Controller  controller.CertificateController
+	certificateV3Controller  controller.CertificateController
 	alterWebCtl              controller2.AlterWebController
 	certificateWebCtl        controller2.CertificateWebController
 	installAppCertificateDAO dao.InstallAppCertificateDAO
@@ -34,6 +35,7 @@ type CertificateHandler struct {
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
 		certificateV2Controller:  impl.DefaultCertificateV2Controller,
+		certificateV3Controller:  impl.DefaultCertificateV3Controller,
 		alterWebCtl:              impl2.DefaultAlterWebController,
 		certificateWebCtl:        impl2.DefaultCertificateWebController,
 		installAppCertificateDAO: impl3.DefaultInstallAppCertificateDAO,
@@ -78,7 +80,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/// 请求整数接口
-	response := h.certificateV2Controller.CreateCer(ctx, args.UDID, "1")
+	//response := h.certificateV2Controller.CreateCer(ctx, args.UDID, "1")
+	response := h.certificateV3Controller.CreateCer(ctx, args.UDID, "1")
 	if response.ErrorMessage != nil {
 		/// 创建失败推送
 		h.alterWebCtl.SendInstallAppCreateCertificateFailMsg(ctx, args.CDKey, args.UDID, *response.ErrorMessage)

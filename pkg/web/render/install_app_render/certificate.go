@@ -155,6 +155,8 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 					//	return err
 					//}
 					isActiveMap[cer.ID] = true
+				case enum.CertificateSourceV3:
+					isActiveMap[cer.ID] = true
 				}
 				return nil
 			}
