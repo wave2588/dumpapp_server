@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	middleware2 "dumpapp_server/pkg/middleware"
 	"dumpapp_server/pkg/web"
@@ -37,13 +38,17 @@ func main() {
 }
 
 func origins() []string {
-	return []string{
+	res := []string{
 		"https://dumpapp.com",
 		"https://www.dumpapp.com",
 		"http://dumpapp.com",
 		"http://www.dumpapp.com",
 		"http://127.0.0.1:8080",
 		"http://localhost:8080",
-		"https://upload.dumpapp.com",
 	}
+	for _, s := range constant.AuthWebsites {
+		res = append(res, fmt.Sprintf("https://%s", s))
+		res = append(res, fmt.Sprintf("http://%s", s))
+	}
+	return res
 }

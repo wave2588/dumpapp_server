@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/errors"
+	util2 "dumpapp_server/pkg/util"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -38,13 +40,11 @@ func (h *AuthWebsiteHandler) GetAuth(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(args.Validate())
 
 	resp := &getAuthWebsiteResponse{}
-	if args.Domain == "baidu.com" {
-		resp.Success = false
-		resp.Message = util.StringPtr("未授权的站点")
+	if util2.IsContainStrings(constant.AuthWebsites, args.Domain) {
+		resp.Success = true
 	} else {
 		resp.Success = false
-		resp.Message = util.StringPtr("测试文案哈哈哈哈")
+		resp.Message = util.StringPtr("未授权的站点")
 	}
-
 	util.RenderJSON(w, resp)
 }
