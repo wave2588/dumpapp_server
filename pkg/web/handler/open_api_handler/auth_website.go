@@ -41,8 +41,7 @@ func (h *AuthWebsiteHandler) GetAuth(w http.ResponseWriter, r *http.Request) {
 
 	resp := &getAuthWebsiteResponse{}
 	if util2.IsContainStrings(constant.AuthWebsites, args.Domain) {
-		resp.Success = false
-		resp.Message = util.StringPtr("未授权的站点")
+		resp.Success = true
 	} else {
 		resp.Success = false
 		resp.Message = util.StringPtr("未授权的站点")
