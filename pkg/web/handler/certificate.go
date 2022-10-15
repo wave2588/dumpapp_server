@@ -38,6 +38,7 @@ func NewCertificateHandler() *CertificateHandler {
 type postCertificate struct {
 	UDID string `json:"udid" validate:"required"`
 	Type int    `json:"type" validate:"required"`
+	Note string `json:"note"`
 }
 
 func (p *postCertificate) Validate() error {
@@ -72,7 +73,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payType = "private"
 	}
 
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, payCount, payType)
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, payCount, payType)
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)

@@ -212,7 +212,7 @@ func (f *MemberRender) RenderDispenseInfo(ctx context.Context) {
 	for _, member := range f.memberMap {
 		member.DispenseInfo = &DispenseInfo{
 			Count: countMap[member.ID],
-			Rule:  "1D 币兑换 5 分发劵。\n\n（分发劵用于针对签名后的 APP生成下载链接，当前 1G 以下 APP上传分发后安装每次消耗 1 分发劵，1G 以上每次消耗 2 分发劵）",
+			Rule:  fmt.Sprintf("1D 币兑换 %d 分发劵。\n（分发劵用于针对签名后的 APP生成下载链接，当前 1G 以下 APP上传分发后安装每次消耗 1 分发劵，1G 以上每次消耗 2 分发劵）", constant.DispenseRatioByPayCount),
 			Ratio: constant.DispenseRatioByPayCount,
 		}
 	}

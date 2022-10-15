@@ -50,7 +50,7 @@ func NewCertificateWebController() *CertificateWebController {
 	}
 }
 
-func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid string, payCount int64, payType string) (int64, error) {
+func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid, note string, payCount int64, payType string) (int64, error) {
 	util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
 
 	memberDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, udid)
@@ -61,7 +61,9 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 			ID:       id,
 			MemberID: loginID,
 			Udid:     udid,
-			BizExt:   datatype.MemberDeviceBizExt{},
+			BizExt: datatype.MemberDeviceBizExt{
+				Note: note,
+			},
 		})
 		if err != nil {
 			return 0, err

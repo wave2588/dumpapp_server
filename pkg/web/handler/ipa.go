@@ -172,8 +172,6 @@ func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	//body, err := util2.HttpRequest("GET", endpoint, map[string]string{}, map[string]string{}, 0)
 	//util.PanicIf(err)
 	//
-	//fmt.Println(string(body))
-	//
 	//var result []map[string]interface{}
 	//util.PanicIf(json.Unmarshal(body, &result))
 	//
@@ -186,6 +184,7 @@ func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 	//		VersionName: cast.ToString(d["bundleVersion"]),
 	//	})
 	//}
+	//util.RenderJSON(w, data)
 
 	/// plan B
 	endpoint := fmt.Sprintf("https://tools.lancely.tech/api/apple/appVersion/%s/%d", country, ipaID)
@@ -210,7 +209,6 @@ func (h *IpaHandler) GetAllVersion(w http.ResponseWriter, r *http.Request) {
 			VersionName: cast.ToString(version["versionName"]),
 		})
 	}
-
 	util.RenderJSON(w, result)
 }
 
