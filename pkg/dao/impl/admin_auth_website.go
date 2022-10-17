@@ -174,16 +174,16 @@ func (d *AdminAuthWebsiteDAO) Count(ctx context.Context, filters []qm.QueryMod) 
 	return models.AdminAuthWebsites(qs...).Count(ctx, exec)
 }
 
-// GetByMemberIDDomain retrieves a single record by uniq key memberID, domain from db.
-func (d *AdminAuthWebsiteDAO) GetByMemberIDDomain(ctx context.Context, memberID int64, domain string) (*models.AdminAuthWebsite, error) {
+// GetByDomain retrieves a single record by uniq key domain from db.
+func (d *AdminAuthWebsiteDAO) GetByDomain(ctx context.Context, domain string) (*models.AdminAuthWebsite, error) {
 	adminAuthWebsiteObj := &models.AdminAuthWebsite{}
 
 	sel := "*"
 	query := fmt.Sprintf(
-		"select %s from `admin_auth_website` where `member_id`=? AND `domain`=?", sel,
+		"select %s from `admin_auth_website` where `domain`=?", sel,
 	)
 
-	q := queries.Raw(query, memberID, domain)
+	q := queries.Raw(query, domain)
 
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
@@ -196,7 +196,7 @@ func (d *AdminAuthWebsiteDAO) GetByMemberIDDomain(ctx context.Context, memberID 
 	err := q.Bind(ctx, exec, adminAuthWebsiteObj)
 	if err != nil {
 		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=admin_auth_website, query=%s, args=memberID:%v domain :%v", query, memberID, domain)
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=admin_auth_website, query=%s, args=domain :%v", query, domain)
 		}
 		return nil, pkgErr.Wrap(err, "dao: unable to select from admin_auth_website")
 	}
@@ -204,14 +204,8 @@ func (d *AdminAuthWebsiteDAO) GetByMemberIDDomain(ctx context.Context, memberID 
 	return adminAuthWebsiteObj, nil
 }
 
-// GetAdminAuthWebsiteSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
-func (d *AdminAuthWebsiteDAO) GetAdminAuthWebsiteSliceByMemberID(ctx context.Context, memberID int64) ([]*models.AdminAuthWebsite, error) {
-	var o []*models.AdminAuthWebsite
-
-	query := "select `admin_auth_website`.* from `admin_auth_website` where `member_id`=?"
-
-	q := queries.Raw(query, memberID)
-
+// BatchGetByDomain retrieves multiple records by uniq key domain from db.
+func (d *AdminAuthWebsiteDAO) BatchGetByDomain(ctx context.Context, domains []string) (map[string]*models.AdminAuthWebsite, error) {
 	var exec boil.ContextExecutor
 	txn := ctx.Value("txn")
 	if txn == nil {
@@ -219,13 +213,15 @@ func (d *AdminAuthWebsiteDAO) GetAdminAuthWebsiteSliceByMemberID(ctx context.Con
 	} else {
 		exec = txn.(*sql.Tx)
 	}
-
-	err := q.Bind(ctx, exec, &o)
+	datas, err := models.AdminAuthWebsites(models.AdminAuthWebsiteWhere.Domain.IN(domains)).All(ctx, exec)
 	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=admin_auth_website, query=%s, args=memberID :%v", query, memberID)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from admin_auth_website")
+		return nil, pkgErr.WithStack(err)
 	}
-	return o, nil
+
+	result := make(map[string]*models.AdminAuthWebsite)
+	for _, c := range datas {
+		result[c.Domain] = c
+	}
+
+	return result, nil
 }

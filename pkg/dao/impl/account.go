@@ -174,58 +174,6 @@ func (d *AccountDAO) Count(ctx context.Context, filters []qm.QueryMod) (int64, e
 	return models.Accounts(qs...).Count(ctx, exec)
 }
 
-// GetByPhone retrieves a single record by uniq key phone from db.
-func (d *AccountDAO) GetByPhone(ctx context.Context, phone string) (*models.Account, error) {
-	accountObj := &models.Account{}
-
-	sel := "*"
-	query := fmt.Sprintf(
-		"select %s from `account` where `phone`=?", sel,
-	)
-
-	q := queries.Raw(query, phone)
-
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-
-	err := q.Bind(ctx, exec, accountObj)
-	if err != nil {
-		if pkgErr.Cause(err) == sql.ErrNoRows {
-			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=account, query=%s, args=phone :%v", query, phone)
-		}
-		return nil, pkgErr.Wrap(err, "dao: unable to select from account")
-	}
-
-	return accountObj, nil
-}
-
-// BatchGetByPhone retrieves multiple records by uniq key phone from db.
-func (d *AccountDAO) BatchGetByPhone(ctx context.Context, phones []string) (map[string]*models.Account, error) {
-	var exec boil.ContextExecutor
-	txn := ctx.Value("txn")
-	if txn == nil {
-		exec = d.mysqlPool
-	} else {
-		exec = txn.(*sql.Tx)
-	}
-	datas, err := models.Accounts(models.AccountWhere.Phone.IN(phones)).All(ctx, exec)
-	if err != nil {
-		return nil, pkgErr.WithStack(err)
-	}
-
-	result := make(map[string]*models.Account)
-	for _, c := range datas {
-		result[c.Phone] = c
-	}
-
-	return result, nil
-}
-
 // GetByEmail retrieves a single record by uniq key email from db.
 func (d *AccountDAO) GetByEmail(ctx context.Context, email string) (*models.Account, error) {
 	accountObj := &models.Account{}
@@ -273,6 +221,58 @@ func (d *AccountDAO) BatchGetByEmail(ctx context.Context, emails []string) (map[
 	result := make(map[string]*models.Account)
 	for _, c := range datas {
 		result[c.Email] = c
+	}
+
+	return result, nil
+}
+
+// GetByPhone retrieves a single record by uniq key phone from db.
+func (d *AccountDAO) GetByPhone(ctx context.Context, phone string) (*models.Account, error) {
+	accountObj := &models.Account{}
+
+	sel := "*"
+	query := fmt.Sprintf(
+		"select %s from `account` where `phone`=?", sel,
+	)
+
+	q := queries.Raw(query, phone)
+
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+
+	err := q.Bind(ctx, exec, accountObj)
+	if err != nil {
+		if pkgErr.Cause(err) == sql.ErrNoRows {
+			return nil, pkgErr.Wrapf(errors.ErrNotFound, "table=account, query=%s, args=phone :%v", query, phone)
+		}
+		return nil, pkgErr.Wrap(err, "dao: unable to select from account")
+	}
+
+	return accountObj, nil
+}
+
+// BatchGetByPhone retrieves multiple records by uniq key phone from db.
+func (d *AccountDAO) BatchGetByPhone(ctx context.Context, phones []string) (map[string]*models.Account, error) {
+	var exec boil.ContextExecutor
+	txn := ctx.Value("txn")
+	if txn == nil {
+		exec = d.mysqlPool
+	} else {
+		exec = txn.(*sql.Tx)
+	}
+	datas, err := models.Accounts(models.AccountWhere.Phone.IN(phones)).All(ctx, exec)
+	if err != nil {
+		return nil, pkgErr.WithStack(err)
+	}
+
+	result := make(map[string]*models.Account)
+	for _, c := range datas {
+		result[c.Phone] = c
 	}
 
 	return result, nil

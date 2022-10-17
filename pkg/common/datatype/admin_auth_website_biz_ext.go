@@ -8,7 +8,9 @@ import (
 	"dumpapp_server/pkg/common/util"
 )
 
-type AdminAuthWebsiteBizExt struct{}
+type AdminAuthWebsiteBizExt struct {
+	IsOpen bool `json:"is_open"`
+}
 
 func (i AdminAuthWebsiteBizExt) String() string {
 	data, err := json.Marshal(i)

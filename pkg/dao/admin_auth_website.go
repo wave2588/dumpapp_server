@@ -20,9 +20,9 @@ type AdminAuthWebsiteDAO interface {
 	// 后台和脚本使用：倒序列出所有
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
-	// GetByMemberIDDomain retrieves a single record by uniq key memberID, domain from db.
-	GetByMemberIDDomain(ctx context.Context, memberID int64, domain string) (*models.AdminAuthWebsite, error)
-	// GetAdminAuthWebsiteSliceByMemberID retrieves a slice of records by first field of uniq key [memberID] with an executor.
-	GetAdminAuthWebsiteSliceByMemberID(ctx context.Context, memberID int64) ([]*models.AdminAuthWebsite, error)
-	IsExistDomain(ctx context.Context, domain string) (bool, error)
+	// GetByDomain retrieves a single record by uniq key domain from db.
+	GetByDomain(ctx context.Context, domain string) (*models.AdminAuthWebsite, error)
+	GetByDomainSafe(ctx context.Context, domain string) (*models.AdminAuthWebsite, error)
+	// BatchGetByDomain retrieves multiple records by uniq key domain from db.
+	BatchGetByDomain(ctx context.Context, domains []string) (map[string]*models.AdminAuthWebsite, error)
 }

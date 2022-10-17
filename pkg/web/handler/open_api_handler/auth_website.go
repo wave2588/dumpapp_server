@@ -45,15 +45,28 @@ func (h *AuthWebsiteHandler) GetAuth(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	isExist, err := h.adminAuthWebsiteDAO.IsExistDomain(ctx, args.Domain)
+	authWebsite, err := h.adminAuthWebsiteDAO.GetByDomainSafe(ctx, args.Domain)
 	util.PanicIf(err)
 
-	resp := &getAuthWebsiteResponse{}
-	if isExist {
-		resp.Success = true
-	} else {
-		resp.Success = false
-		resp.Message = util.StringPtr("未授权的站点")
+	/// 未收录的站点
+	if authWebsite == nil {
+		util.RenderJSON(w, &getAuthWebsiteResponse{
+			Success: false,
+			Message: util.StringPtr("未授权的站点"),
+		})
+		return
 	}
-	util.RenderJSON(w, resp)
+
+	/// 未打开权限的站点
+	if !authWebsite.BizExt.IsOpen {
+		util.RenderJSON(w, &getAuthWebsiteResponse{
+			Success: false,
+			Message: util.StringPtr("未授权的站点"),
+		})
+		return
+	}
+
+	util.RenderJSON(w, &getAuthWebsiteResponse{
+		Success: true,
+	})
 }

@@ -3,13 +3,15 @@ package impl
 import (
 	"context"
 
+	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/dao/models"
-	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	pkgErr "github.com/pkg/errors"
 )
 
-func (d *AdminAuthWebsiteDAO) IsExistDomain(ctx context.Context, domain string) (bool, error) {
-	qs := []qm.QueryMod{
-		models.AdminAuthWebsiteWhere.Domain.EQ(domain),
+func (d *AdminAuthWebsiteDAO) GetByDomainSafe(ctx context.Context, domain string) (*models.AdminAuthWebsite, error) {
+	res, err := d.GetByDomain(ctx, domain)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		return nil, err
 	}
-	return models.AdminAuthWebsites(qs...).Exists(ctx, d.mysqlPool)
+	return res, nil
 }

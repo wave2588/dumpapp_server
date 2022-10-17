@@ -703,6 +703,7 @@ func (o AdminAuthWebsiteSlice) UpdateAll(ctx context.Context, exec boil.ContextE
 
 var mySQLAdminAuthWebsiteUniqueColumns = []string{
 	"id",
+	"domain",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
