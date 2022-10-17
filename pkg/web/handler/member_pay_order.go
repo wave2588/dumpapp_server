@@ -36,6 +36,9 @@ func (args *getMemberPayOrderArgs) Validate() error {
 	if args.Number <= 0 {
 		return errors.UnproccessableError("number > 0")
 	}
+	if args.Number > 99999 {
+		return errors.UnproccessableError("创建订单失败")
+	}
 	return nil
 }
 
