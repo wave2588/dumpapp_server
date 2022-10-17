@@ -23,6 +23,9 @@ type Certificate struct {
 	ExpireAt  int64 `json:"expire_at"`
 	UpdatedAt int64 `json:"updated_at"`
 
+	/// 备注
+	Note string `json:"note"`
+
 	/// p12 文件密码
 	P12Password     string `json:"p12_password"`
 	P12             string `json:"p12"`
@@ -130,6 +133,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			CreatedAt:       meta.CreatedAt.Unix(),
 			ExpireAt:        meta.CreatedAt.AddDate(1, 0, 0).Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
+			Note:            bizExt.Note,
 			P12Password:     bizExt.NewP12Password,
 			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,

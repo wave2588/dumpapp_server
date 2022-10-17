@@ -61,9 +61,7 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 			ID:       id,
 			MemberID: loginID,
 			Udid:     udid,
-			BizExt: datatype.MemberDeviceBizExt{
-				Note: note,
-			},
+			BizExt:   datatype.MemberDeviceBizExt{},
 		})
 		if err != nil {
 			return 0, err
@@ -124,6 +122,9 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	} else if payCount == constant.CertificatePriceL3 {
 		response.BizExt.Level = 3
 	}
+
+	/// 记录证书备注
+	response.BizExt.Note = note
 
 	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)
