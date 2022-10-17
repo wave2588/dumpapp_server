@@ -78,6 +78,14 @@ func NewRouterAdmin() chi.Router {
 	dispenseHandler := handler.NewAdminDispenseHandler()
 	r.With(middleware.OAuthAdmin).Post("/dispense", dispenseHandler.AddCount)
 	r.With(middleware.OAuthAdmin).Delete("/dispense", dispenseHandler.DeleteCount)
+	// endregion
+
+	// auth_website handler
+	authWebsiteHandler := handler.NewAdminAuthWebsiteHandler()
+	r.With(middleware.OAuthAdmin).Post("/auth/website", authWebsiteHandler.Auth)
+	r.With(middleware.OAuthAdmin).Post("/un_auth/website", authWebsiteHandler.UnAuth)
+	r.With(middleware.OAuthAdmin).Get("/auth/website/list", authWebsiteHandler.List)
+	// endregion
 
 	return r
 }
