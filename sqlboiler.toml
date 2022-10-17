@@ -404,3 +404,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# admin_auth_website
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["admin_auth_website"]
+
+  [types.replace]
+    type = "datatype.AdminAuthWebsiteBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']

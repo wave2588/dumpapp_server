@@ -4,17 +4,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/dao"
+	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
-	util2 "dumpapp_server/pkg/util"
 	"github.com/go-playground/validator/v10"
 )
 
-type AuthWebsiteHandler struct{}
+type AuthWebsiteHandler struct {
+	adminAuthWebsiteDAO dao.AdminAuthWebsiteDAO
+}
 
 func NewAuthWebsiteHandler() *AuthWebsiteHandler {
-	return &AuthWebsiteHandler{}
+	return &AuthWebsiteHandler{
+		adminAuthWebsiteDAO: impl.DefaultAdminAuthWebsiteDAO,
+	}
 }
 
 type getAuthWebsiteArgs struct {
@@ -35,12 +39,17 @@ type getAuthWebsiteResponse struct {
 }
 
 func (h *AuthWebsiteHandler) GetAuth(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	args := getAuthWebsiteArgs{}
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
+	isExist, err := h.adminAuthWebsiteDAO.IsExistDomain(ctx, args.Domain)
+	util.PanicIf(err)
+
 	resp := &getAuthWebsiteResponse{}
-	if util2.IsContainStrings(constant.AuthWebsites, args.Domain) {
+	if isExist {
 		resp.Success = true
 	} else {
 		resp.Success = false
