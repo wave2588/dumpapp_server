@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
@@ -33,7 +34,9 @@ type MemberPayCountRecordRender struct {
 
 	memberPayCountRecordMap map[int64]*MemberPayCountRecord
 
-	memberPayCountRecordDAO dao.MemberPayCountRecordDAO
+	memberPayCountRecordDAO    dao.MemberPayCountRecordDAO
+	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
+	ipaDAO                     dao.IpaDAO
 }
 
 type MemberPayCountRecordOption func(*MemberPayCountRecordRender)
@@ -65,7 +68,9 @@ func NewMemberPayCountRecordRender(ids []int64, loginID int64, opts ...MemberPay
 		ids:     ids,
 		loginID: loginID,
 
-		memberPayCountRecordDAO: impl.DefaultMemberPayCountRecordDAO,
+		memberPayCountRecordDAO:    impl.DefaultMemberPayCountRecordDAO,
+		memberDownloadIpaRecordDAO: impl.DefaultMemberDownloadIpaRecordDAO,
+		ipaDAO:                     impl.DefaultIpaDAO,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -121,6 +126,27 @@ func (f *MemberPayCountRecordRender) fetch(ctx context.Context) {
 }
 
 func (f *MemberPayCountRecordRender) RenderDescription(ctx context.Context) {
+	memberDownloadIpaRecordIDs := make([]int64, 0)
+	for _, record := range f.memberPayCountRecordMap {
+		switch record.meta.Type {
+		case enum.MemberPayCountRecordTypeBuyIpa:
+			if record.meta.BizExt.ObjectType == datatype.MemberPayCountRecordBizExtObjectTypeDownloadIpaRecord {
+				memberDownloadIpaRecordIDs = append(memberDownloadIpaRecordIDs, record.meta.BizExt.ObjectID)
+			}
+		}
+	}
+	memberDownloadIpaRecordMap, err := f.memberDownloadIpaRecordDAO.BatchGet(ctx, memberDownloadIpaRecordIDs)
+	util.PanicIf(err)
+
+	ipaIDs := make([]int64, 0)
+	for _, record := range memberDownloadIpaRecordMap {
+		ipaIDs = append(ipaIDs, record.IpaID.Int64)
+	}
+	ipaIDs = util2.RemoveDuplicates(ipaIDs)
+
+	ipaMap, err := f.ipaDAO.BatchGet(ctx, ipaIDs)
+	util.PanicIf(err)
+
 	for _, record := range f.memberPayCountRecordMap {
 		switch record.meta.Type {
 		case enum.MemberPayCountRecordTypePay:
@@ -140,7 +166,13 @@ func (f *MemberPayCountRecordRender) RenderDescription(ctx context.Context) {
 			record.Description = fmt.Sprintf("邀请用户充值返利赠送 %d 个 D 币", record.meta.Count)
 		case enum.MemberPayCountRecordTypeBuyIpa:
 			record.Type = "deduct"
-			record.Description = fmt.Sprintf("购买 ipa 消费了 %d 个 D 币", record.meta.Count)
+			description := fmt.Sprintf("购买 ipa 消费了 %d 个 D 币", record.meta.Count)
+			if mdr, ok := memberDownloadIpaRecordMap[record.meta.BizExt.ObjectID]; ok {
+				if ipa, ok := ipaMap[mdr.IpaID.Int64]; ok {
+					description = fmt.Sprintf("购买 %s(%s) ipa 消费了 %d 个 D 币", ipa.Name, mdr.Version.String, record.meta.Count)
+				}
+			}
+			record.Description = description
 		case enum.MemberPayCountRecordTypeBuyCertificate:
 			record.Type = "deduct"
 			record.Description = fmt.Sprintf("购买证书消费了 %d 个 D 币", record.meta.Count)
