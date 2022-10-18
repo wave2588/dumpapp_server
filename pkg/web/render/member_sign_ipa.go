@@ -176,20 +176,20 @@ func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
 	util.PanicIf(err)
 
 	for _, ipa := range f.memberSignIpaMap {
+		usedCount := cast.ToInt64(len(res[ipa.ID]))
 		/// 等于 0 相当于没设置, 按照不需要拦截处理
 		dispenseCount := ipa.Meta.BizExt.DispenseCount
 		if dispenseCount == 0 {
 			ipa.Dispense = &Dispense{
 				Count:     0,
-				UsedCount: 0,
+				UsedCount: usedCount,
 				IsValid:   true,
 			}
 			continue
 		}
-		usedCount := cast.ToInt64(len(res[ipa.ID]))
 		ipa.Dispense = &Dispense{
 			Count:     dispenseCount,
-			UsedCount: cast.ToInt64(usedCount),
+			UsedCount: usedCount,
 			IsValid:   usedCount < dispenseCount,
 		}
 	}
