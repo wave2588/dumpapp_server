@@ -258,7 +258,7 @@ func (f *MemberRender) RenderInviteURL(ctx context.Context) {
 
 	for _, member := range f.memberMap {
 		if member.ID == f.loginID {
-			member.InviteURL = util.StringPtr(fmt.Sprintf("https://www.dumpapp.com/register?invite_code=%s", inviteCodeString))
+			member.InviteURL = util.StringPtr(fmt.Sprintf(constant.InviteURL, inviteCodeString))
 		}
 	}
 }
@@ -299,7 +299,7 @@ func (f *MemberRender) RenderDevices(ctx context.Context) {
 
 func (f *MemberRender) RenderShareInfo(ctx context.Context) {
 	for _, member := range f.memberMap {
-		member.ShareInfo = MustRenderShareInfo()
+		member.ShareInfo = MustRenderShareInfo(ctx, member.ID)
 	}
 }
 

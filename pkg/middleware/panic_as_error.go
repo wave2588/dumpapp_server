@@ -1,11 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+
 	"dumpapp_server/pkg/common/sentry"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/web/formatter"
 	pkgErrors "github.com/pkg/errors"
-	"net/http"
 )
 
 func PanicAsError(h http.Handler) http.Handler {

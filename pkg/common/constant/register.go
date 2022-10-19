@@ -6,6 +6,10 @@ import (
 	"dumpapp_server/pkg/util"
 )
 
+const (
+	InviteURL = "https://www.dumpapp.com/register?invite_code=%s"
+)
+
 var SupportedEmailAddress = []string{
 	"qq.com",
 	"vip.qq.com",

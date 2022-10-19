@@ -69,7 +69,18 @@ func getIntArgument(r *http.Request, key string, bitSize int) (int64, error) {
 }
 
 func mustGetLoginID(ctx context.Context) int64 {
-	return middleware.MustGetMemberID(ctx)
+	loginID := middleware.MustGetMemberID(ctx)
+	account, err := impl.DefaultAccountDAO.Get(ctx, loginID)
+	util.PanicIf(err)
+	/// 账户异常
+	if account.Status == 2 {
+		panic(errors.ErrAccountUnusual)
+	}
+	return loginID
+}
+
+func getLoginID(ctx context.Context) (int64, error) {
+	return middleware.GetMemberID(ctx)
 }
 
 func GetAccountByLoginID(ctx context.Context, loginID int64) *models.Account {

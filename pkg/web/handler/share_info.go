@@ -22,5 +22,7 @@ func NewShareInfoHandler() *ShareInfoHandler {
 }
 
 func (h *ShareInfoHandler) Get(w http.ResponseWriter, r *http.Request) {
-	util.RenderJSON(w, render.MustRenderShareInfo())
+	ctx := r.Context()
+	loginID, _ := getLoginID(ctx)
+	util.RenderJSON(w, render.MustRenderShareInfo(ctx, loginID))
 }
