@@ -164,30 +164,20 @@ func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
 }
 
 func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
-	signIpaIDs := make([]int64, 0)
-	for _, ipa := range f.memberSignIpaMap {
-		signIpaIDs = append(signIpaIDs, ipa.ID)
-	}
-
-	res, err := f.dispenseCountRecordDAO.BatchGetByObjectIDsAndRecordType(ctx, signIpaIDs, enum.DispenseCountRecordTypeInstallSignIpa)
+	res, err := f.dispenseCountRecordDAO.BatchGetByObjectIDsAndRecordType(ctx, f.ids, enum.DispenseCountRecordTypeInstallSignIpa)
 	util.PanicIf(err)
 
 	for _, ipa := range f.memberSignIpaMap {
 		usedCount := cast.ToInt64(len(res[ipa.ID]))
-		/// 等于 0 相当于没设置, 按照不需要拦截处理
+		isValid := true /// 默认是有效的
 		dispenseCount := ipa.Meta.BizExt.DispenseCount
-		if dispenseCount == 0 {
-			ipa.Dispense = &Dispense{
-				Count:     0,
-				UsedCount: usedCount,
-				IsValid:   true,
-			}
-			continue
+		if dispenseCount != 0 {
+			isValid = usedCount < dispenseCount
 		}
 		ipa.Dispense = &Dispense{
 			Count:     dispenseCount,
 			UsedCount: usedCount,
-			IsValid:   usedCount < dispenseCount,
+			IsValid:   isValid,
 		}
 	}
 }

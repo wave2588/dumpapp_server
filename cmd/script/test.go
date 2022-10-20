@@ -11,8 +11,7 @@ func main() {
 
 	ctx := context.Background()
 
-	ss, err := impl.DefaultAdminConfigDAO.GetDailyFreeCount(ctx)
+	data, err := impl.DefaultIpaRankingDAO.GetIpaRankingData(ctx)
 	util.PanicIf(err)
-
-	fmt.Println("ss-->: ", ss)
+	fmt.Println("ss-->: ", data)
 }
