@@ -90,7 +90,7 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 		}
 	}
 	/// 购买证书
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, "", cerPrice, "")
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, "", cerPrice, false, "")
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)

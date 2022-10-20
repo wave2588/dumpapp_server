@@ -13,6 +13,7 @@ import (
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/middleware"
+	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
 	impl5 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
@@ -49,6 +50,9 @@ func (p *postCertificate) Validate() error {
 	if p.Type < 1 || p.Type > 3 {
 		return errors.UnproccessableError("type 类型错误")
 	}
+	if !util2.CheckUDIDValid(p.UDID) {
+		return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", p.UDID))
+	}
 	return nil
 }
 
@@ -73,7 +77,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		payType = "private"
 	}
 
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, payCount, payType)
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, payCount, false, payType)
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)

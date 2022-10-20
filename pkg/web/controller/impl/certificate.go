@@ -50,8 +50,11 @@ func NewCertificateWebController() *CertificateWebController {
 	}
 }
 
-func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid, note string, payCount int64, payType string) (int64, error) {
-	util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
+func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid, note string, payCount int64, isReplenish bool, payType string) (int64, error) {
+	/// 如何是售后证书行为则不需要检查账户 D 币是否足够
+	if !isReplenish {
+		util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
+	}
 
 	memberDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, udid)
 	util.PanicIf(err)
@@ -125,6 +128,8 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 
 	/// 记录证书备注
 	response.BizExt.Note = note
+	/// 记录是否为售后证书
+	response.BizExt.IsReplenish = isReplenish
 
 	/// 计算证书 md5
 	p12FileMd5 := util2.StringMd5(p12FileData)
@@ -148,11 +153,14 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		BizExt:                     response.BizExt.String(),
 	}))
 
-	/// 扣除消费的 D 币
-	util.PanicIf(c.memberPayCountCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
-		ObjectID:   cerID,
-		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
-	}))
+	/// 如果是补证书行为则不需要扣币
+	if !isReplenish {
+		/// 扣除消费的 D 币
+		util.PanicIf(c.memberPayCountCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
+			ObjectID:   cerID,
+			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
+		}))
+	}
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)
