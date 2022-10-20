@@ -166,9 +166,6 @@ func (f *MemberSignIpaRender) RenderPlistURL(ctx context.Context) {
 func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
 	signIpaIDs := make([]int64, 0)
 	for _, ipa := range f.memberSignIpaMap {
-		if ipa.Meta.BizExt.DispenseCount == 0 {
-			continue
-		}
 		signIpaIDs = append(signIpaIDs, ipa.ID)
 	}
 
