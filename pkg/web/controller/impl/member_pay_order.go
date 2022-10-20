@@ -119,6 +119,10 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 }
 
 func (c *MemberPayOrderWebController) rebaseRecord(ctx context.Context, order *models.MemberPayOrder) error {
+	if order.Amount < 10 {
+		return nil
+	}
+
 	inviteeID := order.MemberID
 
 	/// 支付成功后要送邀请者
