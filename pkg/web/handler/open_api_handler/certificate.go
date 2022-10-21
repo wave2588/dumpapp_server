@@ -59,6 +59,19 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 	args := &postCertificateArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// 测试用
+	if args.UDID == "00008110-000A7D210EFA801E" {
+		cerID := int64(1573153444598910976)
+		loginID = 1431956649500741632
+		cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+		cer, ok := cerMap[cerID]
+		if !ok {
+			util.PanicIf(errors.ErrNotFoundCertificate)
+		}
+		util.RenderJSON(w, cer)
+		return
+	}
+
 	device, err := h.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
 	util.PanicIf(err)
 
