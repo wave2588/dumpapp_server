@@ -37,7 +37,7 @@ func NewRouter() chi.Router {
 	// member
 	memberHandler := handler.NewMemberHandler()
 	r.With(middleware.OAuthRegister).Get("/member/self", memberHandler.GetSelf)
-	r.With(middleware.OAuthRegister).Get("/member/self/devices", memberHandler.GetSelfDevice)
+	r.With(middleware.OAuthRegister).Get("/member/self/devices", memberHandler.GetSelfDevice) /// 此接口不用了, 统一迁到 devices_v2 接口
 	r.With(middleware.OAuthRegister).Get("/member/self/devices_v2", memberHandler.GetSelfDeviceV2)
 	r.With(middleware.OAuthRegister).Get("/member/self/certificates", memberHandler.GetSelfCertificate)
 	r.With(middleware.OAuthRegister).Get("/member/self/coin/records", memberHandler.GetSelfCoinRecords)

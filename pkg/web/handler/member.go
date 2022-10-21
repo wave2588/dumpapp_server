@@ -147,6 +147,18 @@ func (h *MemberHandler) GetSelfDeviceV2(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
+type getSelfCertificateArgs struct {
+	Keyword string `form:"keyword"`
+}
+
+func (args *getSelfCertificateArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
 func (h *MemberHandler) GetSelfCertificate(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var (
@@ -155,28 +167,25 @@ func (h *MemberHandler) GetSelfCertificate(w http.ResponseWriter, r *http.Reques
 		limit   = GetIntArgument(r, "limit", 10)
 	)
 
-	deviceMap, err := h.memberDeviceDAO.BatchGetByMemberIDs(ctx, []int64{loginID})
-	util.PanicIf(err)
+	args := getSelfCertificateArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
 
-	deviceIDs := make([]int64, 0)
-	for _, devices := range deviceMap {
-		for _, memberDevice := range devices {
-			deviceIDs = append(deviceIDs, memberDevice.ID)
-		}
+	var (
+		certificates []*render.Certificate
+		count        int64
+		err          error
+	)
+	if args.Keyword == "" {
+		certificates, count, err = h.getMemberAllCertificate(ctx, loginID, offset, limit)
+	} else {
+		certificates, count, err = h.getMemberAllCertificateByUDID(ctx, loginID, args.Keyword, offset, limit)
 	}
-
-	filters := []qm.QueryMod{
-		models.CertificateV2Where.DeviceID.IN(deviceIDs),
-	}
-	ids, err := h.certificateDAO.ListIDs(ctx, offset, limit, filters, nil)
-	util.PanicIf(err)
-	count, err := h.certificateDAO.Count(ctx, filters)
 	util.PanicIf(err)
 
-	data := render.NewCertificateRender(ids, loginID, render.CertificateDefaultRenderFields...).RenderSlice(ctx)
 	util.RenderJSON(w, util.ListOutput{
 		Paging: util.GenerateOffsetPaging(ctx, r, int(count), offset, limit),
-		Data:   data,
+		Data:   certificates,
 	})
 }
 
