@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	errors3 "errors"
 	"fmt"
 	"net/http"
 
@@ -208,6 +209,16 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	accountID := util3.MustGenerateID(ctx)
 
+	/// 生成邀请码, 并检查邀请码是否存在
+	inviteCodeString := util3.MustGenerateCode(ctx, 10)
+	inviteCode, err := h.memberInviteCodeDAO.GetByCode(ctx, inviteCodeString)
+	if err != nil && pkgErr.Cause(err) != errors2.ErrNotFound {
+		util.PanicIf(err)
+	}
+	if inviteCode != nil {
+		util.PanicIf(errors3.New(fmt.Sprintf("邀请码已经存在. email: %s  phone: %s  invite_code_string: %s", args.Email, args.Phone, inviteCodeString)))
+	}
+
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
@@ -253,6 +264,12 @@ func (h *AccountHandler) Register(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
 		MemberID: accountID,
 		Code:     util3.MustGenerateUUID(),
+	}))
+
+	/// 写入邀请码
+	util.PanicIf(h.memberInviteCodeDAO.Insert(ctx, &models.MemberInviteCode{
+		MemberID: accountID,
+		Code:     inviteCodeString,
 	}))
 
 	clients.MustCommit(ctx, txn)

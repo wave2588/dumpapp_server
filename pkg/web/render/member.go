@@ -249,7 +249,7 @@ func (f *MemberRender) RenderInviteURL(ctx context.Context) {
 
 	/// 如果没有邀请码则生成邀请码
 	if inviteCode == nil {
-		inviteCodeString = util2.MustGenerateCode(ctx, 6)
+		inviteCodeString = util2.MustGenerateCode(ctx, 10)
 		util.PanicIf(f.memberInviteCodeDAO.Insert(ctx, &models.MemberInviteCode{
 			MemberID: f.loginID,
 			Code:     inviteCodeString,
