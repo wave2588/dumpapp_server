@@ -168,6 +168,10 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if !util2.CheckUDIDValid(memberDevice.Udid) {
+		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", memberDevice.Udid)))
+	}
+
 	/// 查看此账号是否绑定过 udid
 	md, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, memberID, memberDevice.Udid)
 	util.PanicIf(err)
@@ -211,8 +215,8 @@ func (p *postUDIDArgs) Validate() error {
 	if p.UDID == "" {
 		return errors.UnproccessableError("UDID 不能为空")
 	}
-	if util2.StringCount(p.UDID) != 25 && util2.StringCount(p.UDID) != 40 {
-		return errors.UnproccessableError("UDID 格式不正确")
+	if !util2.CheckUDIDValid(p.UDID) {
+		return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", p.UDID))
 	}
 	return nil
 }
@@ -262,6 +266,9 @@ func (p *putUDIDArgs) Validate() error {
 	err := validator.New().Struct(p)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if !util2.CheckUDIDValid(p.UDID) {
+		return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", p.UDID))
 	}
 	return nil
 }
