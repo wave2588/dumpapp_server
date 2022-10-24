@@ -135,7 +135,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type putSignIpaArgs struct {
-	DispenseCount int64 `json:"dispense_count" validate:"required"`
+	DispenseCount int64 `json:"dispense_count"`
 }
 
 func (args *putSignIpaArgs) Validate() error {
