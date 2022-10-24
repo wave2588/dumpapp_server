@@ -135,7 +135,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type putSignIpaArgs struct {
-	DispenseCount int64 `json:"dispense_count"`
+	DispenseCount *int64 `json:"dispense_count" validate:"required"`
 }
 
 func (args *putSignIpaArgs) Validate() error {
@@ -171,7 +171,9 @@ func (h *MemberSignIpaHandler) Put(w http.ResponseWriter, r *http.Request) {
 		util.PanicIf(errors.ErrMemberAccessDenied)
 	}
 
-	signIpa.BizExt.DispenseCount = args.DispenseCount
+	if args.DispenseCount != nil {
+		signIpa.BizExt.DispenseCount = *args.DispenseCount
+	}
 	util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
 
 	data := render.NewMemberSignIpaRender([]int64{id}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
