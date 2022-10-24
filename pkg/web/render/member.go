@@ -3,6 +3,7 @@ package render
 import (
 	"context"
 	"fmt"
+	"github.com/spf13/cast"
 
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
@@ -194,6 +195,9 @@ func (f *MemberRender) fetch(ctx context.Context) {
 
 func (f *MemberRender) RenderPhone(ctx context.Context) {
 	for _, member := range f.memberMap {
+		if cast.ToString(member.meta.ID) == member.meta.Phone { /// 老用户没有设置手机号
+			continue
+		}
 		member.Phone = util.StringPtr(member.meta.Phone)
 	}
 }
