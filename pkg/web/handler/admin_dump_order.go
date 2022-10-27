@@ -130,6 +130,8 @@ func (p *putAdminDumpOrderArgs) Validate() error {
 func (h *AdminDumpOrderHandler) PutDumpOrderList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	loginID := mustGetLoginID(ctx)
+
 	dumpOrderID := cast.ToInt64(util.URLParam(r, "dump_order_id"))
 
 	args := &putAdminDumpOrderArgs{}
@@ -143,7 +145,7 @@ func (h *AdminDumpOrderHandler) PutDumpOrderList(w http.ResponseWriter, r *http.
 		util.RenderJSON(w, DefaultSuccessBody(ctx))
 		return
 	}
-
+	order.OperatorID = loginID
 	order.Status = args.Status
 	util.PanicIf(h.adminDumpOrderDAO.Update(ctx, order))
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
