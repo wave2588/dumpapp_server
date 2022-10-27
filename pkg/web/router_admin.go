@@ -12,8 +12,8 @@ func NewRouterAdmin() chi.Router {
 
 	/// account
 	adminAccountHandler := handler.NewAdminAccountHandler()
-	r.With(middleware.OAuthAdmin).Post("/account", adminAccountHandler.AddAccount)
-	r.With(middleware.OAuthAdmin).Put("/account", adminAccountHandler.PutAccount)
+	r.With(middleware.OAuthAdminV2).Post("/account", adminAccountHandler.AddAccount)
+	r.With(middleware.OAuthAdminV2).Put("/account", adminAccountHandler.PutAccount)
 	r.With(middleware.OAuthAdmin).Get("/account/list", adminAccountHandler.AccountList)
 	// endregion
 
@@ -30,18 +30,18 @@ func NewRouterAdmin() chi.Router {
 
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
-	r.With(middleware.OAuthAdmin).Get("/ipa", adminIpaHandler.List)
-	r.With(middleware.OAuthAdmin).Post("/ipa", adminIpaHandler.Post)
-	r.With(middleware.OAuthAdmin).Get("/ipa/{ipa_id}", adminIpaHandler.Get)
+	r.With(middleware.OAuthAdminV2).Get("/ipa", adminIpaHandler.List)
+	r.With(middleware.OAuthAdminV2).Post("/ipa", adminIpaHandler.Post)
+	r.With(middleware.OAuthAdminV2).Get("/ipa/{ipa_id}", adminIpaHandler.Get)
 	r.With(middleware.OAuthAdmin).Delete("/ipa", adminIpaHandler.DeleteIpa)
 	r.With(middleware.OAuthAdmin).Delete("/batch_ipa", adminIpaHandler.BatchDeleteIpa)
 	// endregion
 
 	/// admin 查看未砸壳列表
 	adminDumpOrderHandler := handler.NewAdminDumpOrderHandler()
-	r.With(middleware.OAuthAdmin).Get("/ipa/dump_order", adminDumpOrderHandler.GetDumpOrderList)
-	r.With(middleware.OAuthAdmin).Put("/ipa/dump_order/{dump_order_id}", adminDumpOrderHandler.PutDumpOrderList)
-	r.With(middleware.OAuthAdmin).Delete("/ipa/dump_order", adminDumpOrderHandler.DeleteDumpOrder)
+	r.With(middleware.OAuthAdminV2).Get("/ipa/dump_order", adminDumpOrderHandler.GetDumpOrderList)
+	r.With(middleware.OAuthAdminV2).Put("/ipa/dump_order/{dump_order_id}", adminDumpOrderHandler.PutDumpOrderList)
+	r.With(middleware.OAuthAdminV2).Delete("/ipa/dump_order", adminDumpOrderHandler.DeleteDumpOrder)
 	// endregion
 
 	/// admin_record
@@ -69,9 +69,9 @@ func NewRouterAdmin() chi.Router {
 
 	// ipa_black handler
 	ipaBlackHandler := handler.NewAdminIpaBlackHandler()
-	r.With(middleware.OAuthAdmin).Post("/ipa_black", ipaBlackHandler.Post)
-	r.With(middleware.OAuthAdmin).Get("/ipa_black/list", ipaBlackHandler.GetList)
-	r.With(middleware.OAuthAdmin).Delete("/ipa_black/{ipa_black_id}", ipaBlackHandler.Delete)
+	r.With(middleware.OAuthAdminV2).Post("/ipa_black", ipaBlackHandler.Post)
+	r.With(middleware.OAuthAdminV2).Get("/ipa_black/list", ipaBlackHandler.GetList)
+	r.With(middleware.OAuthAdminV2).Delete("/ipa_black/{ipa_black_id}", ipaBlackHandler.Delete)
 	// endregion
 
 	// dispense handler
@@ -82,9 +82,9 @@ func NewRouterAdmin() chi.Router {
 
 	// auth_website handler
 	authWebsiteHandler := handler.NewAdminAuthWebsiteHandler()
-	r.With(middleware.OAuthAdmin).Post("/auth/website", authWebsiteHandler.Auth)
-	r.With(middleware.OAuthAdmin).Post("/un_auth/website", authWebsiteHandler.UnAuth)
-	r.With(middleware.OAuthAdmin).Get("/auth/website/list", authWebsiteHandler.List)
+	r.With(middleware.OAuthAdminV2).Post("/auth/website", authWebsiteHandler.Auth)
+	r.With(middleware.OAuthAdminV2).Post("/un_auth/website", authWebsiteHandler.UnAuth)
+	r.With(middleware.OAuthAdminV2).Get("/auth/website/list", authWebsiteHandler.List)
 	// endregion
 
 	// certificate handler

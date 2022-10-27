@@ -114,7 +114,7 @@ func NewRouter() chi.Router {
 
 	// region Cos
 	tencentCosHandler := handler.NewTencentCosHandler()
-	r.With(middleware.OAuthAdmin).Get("/cos", tencentCosHandler.Get) ///todo： 这个应该写到管理后台的 handler 里，暂时先写到这里。
+	r.With(middleware.OAuthAdminV2).Get("/cos", tencentCosHandler.Get) ///todo： 这个应该写到管理后台的 handler 里，暂时先写到这里。
 	r.With(middleware.OAuthRegister).Get("/cos/sign_ipa", tencentCosHandler.GetSignIpa)
 	// endregion
 
