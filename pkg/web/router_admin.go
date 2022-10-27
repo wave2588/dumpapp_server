@@ -20,7 +20,7 @@ func NewRouterAdmin() chi.Router {
 	/// config
 	adminConfigHandler := handler.NewAdminConfigHandler()
 	r.With(middleware.OAuthAdmin).Post("/config", adminConfigHandler.Post)
-	r.With(middleware.OAuthAdmin).Get("/config", adminConfigHandler.Get)
+	r.With(middleware.OAuthAdminV2).Get("/config", adminConfigHandler.Get)
 	// endregion
 
 	/// admin_member
