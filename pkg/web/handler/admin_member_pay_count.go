@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -45,9 +44,6 @@ func (p *addDownloadNumber) Validate() error {
 func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
-	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
-		panic(errors.ErrMemberAccessDenied)
-	}
 
 	args := &addDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -83,9 +79,6 @@ func (p *deleteDownloadNumber) Validate() error {
 func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	loginID := middleware.MustGetMemberID(ctx)
-	if _, ok := constant.OpsAuthMemberIDMap[loginID]; !ok {
-		panic(errors.ErrMemberAccessDenied)
-	}
 
 	args := &deleteDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
