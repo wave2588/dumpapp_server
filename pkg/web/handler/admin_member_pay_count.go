@@ -12,7 +12,6 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
-	"dumpapp_server/pkg/middleware"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -43,7 +42,6 @@ func (p *addDownloadNumber) Validate() error {
 
 func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
 
 	args := &addDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -78,7 +76,6 @@ func (p *deleteDownloadNumber) Validate() error {
 
 func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
 
 	args := &deleteDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))

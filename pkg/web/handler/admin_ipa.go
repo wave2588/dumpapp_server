@@ -262,7 +262,6 @@ func (p *batchDeleteIpaArgs) Validate() error {
 
 func (h *AdminIpaHandler) BatchDeleteIpa(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
 
 	args := &batchDeleteIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -346,7 +345,6 @@ func (p *deleteIpaArgs) Validate() error {
 
 func (h *AdminIpaHandler) DeleteIpa(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
 
 	args := &deleteIpaArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
