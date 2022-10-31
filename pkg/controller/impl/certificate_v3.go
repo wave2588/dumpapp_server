@@ -54,7 +54,7 @@ type cerDataResponse struct {
 func (c *CertificateV3Controller) CreateCer(ctx context.Context, UDID, regionPool string) *controller.CertificateResponse {
 	res := &controller.CertificateResponse{}
 
-	endpoint := "http://dumpapp.52tzs.com/api/adddevice"
+	endpoint := "https://developer.52tzs.com/api/adddevice"
 	requestBodyMap := map[string]interface{}{
 		"token": config.DumpConfig.AppConfig.CerServerTokenV3,
 		"udid":  UDID,
@@ -100,7 +100,7 @@ func (c *CertificateV3Controller) CreateCer(ctx context.Context, UDID, regionPoo
 
 func (c *CertificateV3Controller) getCerByServer(ctx context.Context, id string) *cerResponse {
 	res := &cerResponse{}
-	endpoint := "http://dumpapp.52tzs.com/api/getCertificate"
+	endpoint := "https://developer.52tzs.com/api/getCertificate"
 	requestBodyMap := map[string]interface{}{
 		"token": config.DumpConfig.AppConfig.CerServerTokenV3,
 		"id":    id,
