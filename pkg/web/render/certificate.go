@@ -164,19 +164,17 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 					}
 					isActiveMap[cer.ID] = response
 				case enum.CertificateSourceV2:
-					//response, err := f.certificateV2Ctl.CheckCerIsActive(ctx, cer.ID)
-					//if err != nil {
-					//	return err
-					//}
-					//isActiveMap[cer.ID] = response
-					isActiveMap[cer.ID] = true
+					response, err := f.certificateV2Ctl.CheckCerIsActive(ctx, cer.ID)
+					if err != nil {
+						return err
+					}
+					isActiveMap[cer.ID] = response
 				case enum.CertificateSourceV3:
-					//response, err := f.certificateV3Ctl.CheckCerIsActive(ctx, cer.ID)
-					//if err != nil {
-					//	return err
-					//}
-					//isActiveMap[cer.ID] = response
-					isActiveMap[cer.ID] = true
+					response, err := f.certificateV3Ctl.CheckCerIsActive(ctx, cer.ID)
+					if err != nil {
+						return err
+					}
+					isActiveMap[cer.ID] = response
 				}
 				return nil
 			}
