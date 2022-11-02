@@ -293,3 +293,14 @@ func (c *LingshulianController) PostAbortMultipartUploadInfo(ctx context.Context
 		RequestCharged: output.RequestCharged,
 	}, nil
 }
+
+func (c *LingshulianController) Test() {
+	request, _ := c.Svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: util.StringPtr("dumpipa"),
+		Key:    util.StringPtr("DumpApp1.1.4.ipa"),
+	})
+	url, err := request.Presign(1 * time.Minute)
+	util.PanicIf(err)
+
+	fmt.Println(url)
+}
