@@ -29,7 +29,7 @@ type Member struct {
 	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
 
 	/// 所有价格明细
-	DispenseInfo    *DispenseInfo    `json:"dispense_info" render:"method=RenderDispenseInfo"`       /// 分发卷价格
+	DispenseInfo    *DispenseInfo    `json:"dispense_info" render:"method=RenderDispenseInfo"`       /// 分发券价格
 	IpaInfo         *IpaInfo         `json:"ipa_info" render:"method=RenderIpaInfo"`                 /// ipa 包价格
 	CertificateInfo *CertificateInfo `json:"certificate_info" render:"method=RenderCertificateInfo"` /// 证书价格
 

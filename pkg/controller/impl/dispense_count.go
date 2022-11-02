@@ -62,7 +62,7 @@ func (c *DispenseCountController) Check(ctx context.Context, memberID, count int
 		return err
 	}
 	if len(ids) < int(count) {
-		return errors2.ErrDispenseCountFunc("下载次数不足，请联系签名作者充值分发卷。")
+		return errors2.ErrDispenseCountFunc("下载次数不足，请联系签名作者充值分发券。")
 	}
 	return nil
 }
@@ -81,7 +81,7 @@ func (c *DispenseCountController) DeductCount(ctx context.Context, memberID, cou
 		return err
 	}
 	if len(ids) < int(count) {
-		return errors2.ErrDispenseCountFunc("下载次数不足，请联系签名作者充值分发卷。")
+		return errors2.ErrDispenseCountFunc("下载次数不足，请联系签名作者充值分发券。")
 	}
 
 	dispenseCountMap, err := c.dispenseCountDAO.BatchGet(ctx, ids)
