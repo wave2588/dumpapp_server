@@ -14,3 +14,9 @@ var OpsAuthMemberIDMap = map[int64]string{
 var OpsAuthMemberIDMapV2 = map[int64]string{
 	1569917700480700416: "x-auth-header",
 }
+
+func CheckAllOpsByMemberID(memberID int64) bool {
+	_, isV1Ok := OpsAuthMemberIDMap[memberID]
+	_, isV2Ok := OpsAuthMemberIDMapV2[memberID]
+	return isV1Ok || isV2Ok
+}

@@ -62,6 +62,8 @@ var config = appConfig{
 	LingshulianMemberSignIpaBucket: os.Getenv("LINGSHULIAN_MEMBER_SIGN_IPA_BUCKET"),
 	LingshulianMemberSignIpaHost:   os.Getenv("LINGSHULIAN_MEMBER_SIGN_IPA_HOST"),
 
+	LingshulianDumpIpaBucket: os.Getenv("LINGSHULIAN_DUMP_IPA_BUCKET"),
+
 	ALiPayDumpAppID:             os.Getenv("ALIPAY_DUMP_APP_ID"),
 	ALiPayDumpPublicKey:         os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
 	ALiPayDumpPrivateKey:        os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
@@ -121,6 +123,8 @@ type appConfig struct {
 	LingshulianSecretKey           string
 	LingshulianMemberSignIpaBucket string
 	LingshulianMemberSignIpaHost   string
+
+	LingshulianDumpIpaBucket string
 
 	ALiPayDumpAppID      string
 	ALiPayDumpPublicKey  string

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"dumpapp_server/pkg/common/constant"
@@ -33,6 +34,7 @@ func NewLingshulianHandler() *LingshulianHandler {
 
 type postPutURLArgs struct {
 	Suffix string `json:"suffix" validate:"required"`
+	Bucket string `json:"bucket"`
 }
 
 func (p *postPutURLArgs) Validate() error {
@@ -43,14 +45,25 @@ func (p *postPutURLArgs) Validate() error {
 	if p.Suffix == "" {
 		return errors.UnproccessableError("Suffix 格式错误")
 	}
+	/// 如果 bucket 传空，则默认给 membersignipa bucket
+	if p.Bucket == "" {
+		p.Bucket = config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+	}
 	return nil
 }
 
 func (h *LingshulianHandler) PostUploadInfo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	loginID := mustGetLoginID(ctx)
+
 	args := &postPutURLArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 敏感 bucket 不允许上传
+	if err := h.checkOpsAuth(ctx, args.Bucket, loginID); err != nil {
+		util.PanicIf(err)
+	}
 
 	id := util3.MustGenerateID(ctx)
 	key := fmt.Sprintf("%d.%s", id, args.Suffix)
@@ -74,6 +87,11 @@ func (h *LingshulianHandler) PostMultipartUploadInfo(w http.ResponseWriter, r *h
 	args := &controller.PostCreateMultipartUploadInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// 敏感 bucket 不允许上传
+	if err := h.checkOpsAuth(ctx, args.Bucket, loginID); err != nil {
+		util.PanicIf(err)
+	}
+
 	resp, err := h.lingshulianCtl.PostCreateMultipartUploadInfo(ctx, args)
 	if err != nil {
 		h.sendMsg(ctx, "获取上传信息失败", loginID, args, err.Error())
@@ -90,6 +108,11 @@ func (h *LingshulianHandler) PostMultipartUploadPartInfo(w http.ResponseWriter, 
 
 	args := &controller.PostMultipartUploadPartInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 敏感 bucket 不允许上传
+	if err := h.checkOpsAuth(ctx, args.Bucket, loginID); err != nil {
+		util.PanicIf(err)
+	}
 
 	resp, err := h.lingshulianCtl.PostMultipartUploadPartInfo(ctx, args)
 	if err != nil {
@@ -108,6 +131,11 @@ func (h *LingshulianHandler) PostCompleteMultipartUploadInfo(w http.ResponseWrit
 	args := &controller.PostCompleteMultipartUploadInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	/// 敏感 bucket 不允许上传
+	if err := h.checkOpsAuth(ctx, args.Bucket, loginID); err != nil {
+		util.PanicIf(err)
+	}
+
 	resp, err := h.lingshulianCtl.PostCompleteMultipartUploadInfo(ctx, args)
 	if err != nil {
 		h.sendMsg(ctx, "合并文件失败", loginID, args, err.Error())
@@ -124,6 +152,11 @@ func (h *LingshulianHandler) PostAbortMultipartUploadInfo(w http.ResponseWriter,
 
 	args := &controller.PostAbortMultipartUploadPartInfoRequest{}
 	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 敏感 bucket 不允许上传
+	if err := h.checkOpsAuth(ctx, args.Bucket, loginID); err != nil {
+		util.PanicIf(err)
+	}
 
 	resp, err := h.lingshulianCtl.PostAbortMultipartUploadInfo(ctx, args)
 	if err != nil {
@@ -144,4 +177,14 @@ func (h *LingshulianHandler) sendMsg(ctx context.Context, title string, loginID 
 	appVersionString := fmt.Sprintf("版本：<font color=\"comment\">%s</font>\n", appVersion)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	h.alterWebCtl.SendCustomMsg(ctx, "16a2bd1b-a03a-4a46-bbec-f218cbcfe17d", titleString+loginString+jsonString+errString+appVersionString+timeStr)
+}
+
+func (h *LingshulianHandler) checkOpsAuth(ctx context.Context, bucket string, loginID int64) error {
+	/// dump_ipa bucket 比较敏感, 内部使用, 不允许用户获取到
+	if strings.ToLower(bucket) == strings.ToLower(config.DumpConfig.AppConfig.LingshulianDumpIpaBucket) {
+		if !constant.CheckAllOpsByMemberID(loginID) {
+			return errors.ErrMemberAccessDenied
+		}
+	}
+	return nil
 }

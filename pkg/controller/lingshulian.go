@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/errors"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/go-playground/validator/v10"
@@ -52,6 +53,7 @@ type GetHeaderSignResp struct {
 /// 开始上传
 type PostCreateMultipartUploadInfoRequest struct {
 	Suffix string `json:"suffix" validate:"required"`
+	Bucket string `json:"bucket"`
 }
 
 func (p *PostCreateMultipartUploadInfoRequest) Validate() error {
@@ -61,6 +63,10 @@ func (p *PostCreateMultipartUploadInfoRequest) Validate() error {
 	}
 	if p.Suffix == "" {
 		return errors.UnproccessableError("Suffix 格式错误")
+	}
+	/// 如果 bucket 传空，则默认给 membersignipa bucket
+	if p.Bucket == "" {
+		p.Bucket = config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 	}
 	return nil
 }

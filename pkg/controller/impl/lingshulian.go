@@ -211,10 +211,9 @@ func (c *LingshulianController) List(ctx context.Context, bucket string) (*s3.Li
 func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Context, request *controller.PostCreateMultipartUploadInfoRequest) (*controller.PostCreateMultipartUploadInfoResp, error) {
 	id := util2.MustGenerateID(ctx)
 	key := fmt.Sprintf("%d.%s", id, request.Suffix)
-	bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 	expireTo := time.Now().Add(time.Hour)
 	output, err := c.Svc.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
-		Bucket:  util.StringPtr(bucket),
+		Bucket:  util.StringPtr(request.Bucket),
 		Key:     util.StringPtr(key),
 		Expires: aws.Time(expireTo),
 	})
@@ -227,7 +226,7 @@ func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Contex
 	return &controller.PostCreateMultipartUploadInfoResp{
 		UploadID: *output.UploadId,
 		Key:      key,
-		Bucket:   bucket,
+		Bucket:   request.Bucket,
 		ExpireTo: expireTo.Unix(),
 	}, nil
 }
