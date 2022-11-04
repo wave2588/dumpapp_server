@@ -98,10 +98,8 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		freeNumber = 70
 	} else if number >= 2000 && number < 5000 {
 		freeNumber = 260
-	} else if number >= 5000 && number < 10000 {
+	} else {
 		freeNumber = 1290
-	} else if number >= 10000 {
-		freeNumber = 3330
 	}
 
 	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{
