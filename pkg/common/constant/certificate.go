@@ -1,7 +1,7 @@
 package constant
 
 const (
-	CertificatePriceL1 int64 = 35
+	CertificatePriceL1 int64 = 33
 	CertificatePriceL2 int64 = 78
 	CertificatePriceL3 int64 = 97
 )
