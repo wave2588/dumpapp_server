@@ -19,19 +19,19 @@ func GetCertificatePrices() []*CertificatePriceInfo {
 			ID:          1,
 			Price:       CertificatePriceL1,
 			Title:       "普通版",
-			Description: "理论 1 年，无质保。",
+			Description: "理论 1 年。",
 		},
 		{
 			ID:          2,
 			Price:       CertificatePriceL2,
 			Title:       "稳定版",
-			Description: "理论 1 年，售后半年，掉了无限补。",
+			Description: "理论 1 年，售后半年，掉了补 6 次。",
 		},
 		{
 			ID:          3,
 			Price:       CertificatePriceL3,
 			Title:       "豪华版",
-			Description: "理论 1 年，售后 1 年，掉了无限补。",
+			Description: "理论 1 年，售后 1 年，掉了补 12 次。",
 		},
 	}
 }

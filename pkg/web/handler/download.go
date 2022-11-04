@@ -36,6 +36,7 @@ type DownloadHandler struct {
 
 	memberDownloadNumberCtl controller.MemberPayCountController
 	tencentCtl              controller.TencentController
+	lingshulianCtl          controller.LingshulianController
 }
 
 func NewDownloadHandler() *DownloadHandler {
@@ -48,6 +49,7 @@ func NewDownloadHandler() *DownloadHandler {
 
 		memberDownloadNumberCtl: impl2.DefaultMemberPayCountController,
 		tencentCtl:              impl2.DefaultTencentController,
+		lingshulianCtl:          impl2.DefaultLingshulianController,
 	}
 }
 
@@ -199,6 +201,7 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	// openURL, err := h.lingshulianCtl.GetSignatureURL(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, ipaVersions[0].TokenPath, 30*time.Minute)
 	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersions[0].TokenPath, 30*time.Minute)
 	util.PanicIf(err)
 	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)

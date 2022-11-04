@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
 	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/errors"
@@ -26,6 +27,8 @@ type LingshulianController interface {
 	PostMultipartUploadPartInfo(ctx context.Context, request *PostMultipartUploadPartInfoRequest) (*PostMultipartUploadPartInfoResp, error)
 	PostCompleteMultipartUploadInfo(ctx context.Context, request *PostCompleteMultipartUploadInfoRequest) (*PostCompleteMultipartUploadInfoResp, error)
 	PostAbortMultipartUploadInfo(ctx context.Context, request *PostAbortMultipartUploadPartInfoRequest) (*PostAbortMultipartUploadPartInfoResponse, error)
+
+	GetSignatureURL(ctx context.Context, bucket, key string, expired time.Duration) (string, error)
 }
 
 type GetPutURLResp struct {

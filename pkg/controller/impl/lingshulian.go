@@ -294,13 +294,10 @@ func (c *LingshulianController) PostAbortMultipartUploadInfo(ctx context.Context
 	}, nil
 }
 
-func (c *LingshulianController) Test() {
+func (c *LingshulianController) GetSignatureURL(ctx context.Context, bucket, key string, expired time.Duration) (string, error) {
 	request, _ := c.Svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: util.StringPtr("dumpipa"),
-		Key:    util.StringPtr("DumpApp1.1.4.ipa"),
+		Bucket: util.StringPtr(bucket),
+		Key:    util.StringPtr(key),
 	})
-	url, err := request.Presign(1 * time.Minute)
-	util.PanicIf(err)
-
-	fmt.Println(url)
+	return request.Presign(expired)
 }

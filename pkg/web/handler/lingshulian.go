@@ -180,8 +180,8 @@ func (h *LingshulianHandler) sendMsg(ctx context.Context, title string, loginID 
 }
 
 func (h *LingshulianHandler) checkOpsAuth(ctx context.Context, bucket string, loginID int64) error {
-	/// dump_ipa bucket 比较敏感, 内部使用, 不允许用户获取到
-	if strings.ToLower(bucket) == strings.ToLower(config.DumpConfig.AppConfig.LingshulianDumpIpaBucket) {
+	/// share_ipa bucket 比较敏感, 内部使用, 不允许用户获取到
+	if strings.ToLower(bucket) == strings.ToLower(config.DumpConfig.AppConfig.LingshulianShareIpaBucket) {
 		if !constant.CheckAllOpsByMemberID(loginID) {
 			return errors.ErrMemberAccessDenied
 		}
