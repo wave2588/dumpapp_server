@@ -156,27 +156,23 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 	for _, certificate := range f.certificateMap {
 		batch.Append(func(cer *Certificate) util2.FutureFunc {
 			return func() error {
-				/// if err != nil : 如果查失败了, 则默认显示有效
 				switch cer.Meta.Source {
 				case enum.CertificateSourceV1:
 					response, err := f.certificateV1Ctl.CheckCerIsActive(ctx, cer.ID)
 					if err != nil {
-						isActiveMap[cer.ID] = true
-						return nil
+						return err
 					}
 					isActiveMap[cer.ID] = response
 				case enum.CertificateSourceV2:
 					response, err := f.certificateV2Ctl.CheckCerIsActive(ctx, cer.ID)
 					if err != nil {
-						isActiveMap[cer.ID] = true
-						return nil
+						return err
 					}
 					isActiveMap[cer.ID] = response
 				case enum.CertificateSourceV3:
 					response, err := f.certificateV3Ctl.CheckCerIsActive(ctx, cer.ID)
 					if err != nil {
-						isActiveMap[cer.ID] = true
-						return nil
+						return err
 					}
 					isActiveMap[cer.ID] = response
 				}
@@ -187,7 +183,11 @@ func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
 	batch.Wait()
 
 	for _, certificate := range f.certificateMap {
-		certificate.P12IsActive = isActiveMap[certificate.ID]
+		if res, ok := isActiveMap[certificate.ID]; ok {
+			certificate.P12IsActive = res
+		} else {
+			certificate.P12IsActive = true ///  如果没获取到, 默认展示有效
+		}
 	}
 }
 
