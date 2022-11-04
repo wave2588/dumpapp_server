@@ -266,7 +266,7 @@ func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.GTE(cast.ToTime(startAt)))
 	filter = append(filter, models.SearchRecordV2Where.CreatedAt.LTE(cast.ToTime(endAt)))
 
-	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 20, filter)
+	data, err := h.searchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 50, filter)
 	if err != nil {
 		return nil, err
 	}
