@@ -40,7 +40,9 @@ func HttpRequest(method, endpoint string, header, values map[string]string, time
 }
 
 func HttpRequestV2(method, endpoint string, header map[string]string, body io.Reader) ([]byte, error) {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
 	r, err := http.NewRequest(method, endpoint, body)
 	if err != nil {
 		return nil, err
