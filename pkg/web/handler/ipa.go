@@ -275,6 +275,7 @@ func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64
 	for _, datum := range data {
 		ipaIDs = append(ipaIDs, datum.IpaID)
 	}
+	ipaIDs = util2.RemoveDuplicates(ipaIDs)
 	appleDataMap, err := h.appleCtl.BatchGetAppInfoByAppIDs(ctx, ipaIDs)
 	if err != nil {
 		return nil, err

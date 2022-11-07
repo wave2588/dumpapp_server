@@ -19,7 +19,7 @@ func GetCertificatePrices() []*CertificatePriceInfo {
 			ID:          1,
 			Price:       CertificatePriceL1,
 			Title:       "普通版",
-			Description: "理论 1 年。",
+			Description: "理论 1 年，售后1个月。",
 		},
 		{
 			ID:          2,
