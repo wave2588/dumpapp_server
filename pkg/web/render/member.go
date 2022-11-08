@@ -24,7 +24,8 @@ type Member struct {
 	Email  string `json:"email"`
 	Status string `json:"status"`
 
-	Phone *string `json:"phone,omitempty" render:"method=RenderPhone"`
+	Phone    *string `json:"phone,omitempty" render:"method=RenderPhone"`
+	Password *string `json:"password,omitempty" render:"method=RenderPassword"`
 
 	PayCount *int64 `json:"pay_count,omitempty" render:"method=RenderPayCount"`
 
@@ -114,9 +115,7 @@ var DefaultFields = []string{
 }
 
 var MemberAdminRenderFields = []MemberOption{
-	MemberIncludes(append(DefaultFields,
-		"Admin",
-	)),
+	MemberIncludes(append(DefaultFields, []string{"Admin", "Password", "Phone", "Token"}...)),
 }
 
 var MemberDefaultRenderFields = []MemberOption{
@@ -199,6 +198,12 @@ func (f *MemberRender) RenderPhone(ctx context.Context) {
 			continue
 		}
 		member.Phone = util.StringPtr(member.meta.Phone)
+	}
+}
+
+func (f *MemberRender) RenderPassword(ctx context.Context) {
+	for _, member := range f.memberMap {
+		member.Password = util.StringPtr(member.meta.Password)
 	}
 }
 

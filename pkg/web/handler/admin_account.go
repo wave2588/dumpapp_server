@@ -199,3 +199,35 @@ func (h *AdminAccountHandler) AccountList(w http.ResponseWriter, r *http.Request
 		Data:   members,
 	})
 }
+
+type getAccountArgs struct {
+	Account string `form:"account"`
+}
+
+func (args *getAccountArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *AdminAccountHandler) GetAccount(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx     = r.Context()
+		loginID = mustGetLoginID(ctx)
+	)
+
+	args := getAccountArgs{}
+	util2.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util2.PanicIf(args.Validate())
+
+	account := GetAccountByAccount(ctx, args.Account)
+	if account == nil {
+		util2.PanicIf(errors.ErrNotFoundMember)
+	}
+
+	accountID := account.ID
+	memberMap := render.NewMemberRender([]int64{accountID}, loginID, render.MemberAdminRenderFields...).RenderMap(ctx)
+	util2.RenderJSON(w, memberMap[accountID])
+}
