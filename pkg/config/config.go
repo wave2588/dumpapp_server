@@ -64,7 +64,6 @@ var config = appConfig{
 	LingshulianShareIpaBucket:      os.Getenv("LINGSHULIAN_SHARE_IPA_BUCKET"),
 
 	ALiPayDumpAppID:             os.Getenv("ALIPAY_DUMP_APP_ID"),
-	ALiPayDumpPublicKey:         os.Getenv("ALIPAY_DUMP_PUBLIC_KEY"),
 	ALiPayDumpPrivateKey:        os.Getenv("ALIPAY_DUMP_PRIVATE_KEY"),
 	ALiPayPublicKey:             os.Getenv("ALIPAY_PUBLIC_KEY"),
 	ALiPayNotifyURLV3:           os.Getenv("ALIPAY_NOTIFY_URL_v3"),
@@ -125,7 +124,6 @@ type appConfig struct {
 	LingshulianShareIpaBucket      string
 
 	ALiPayDumpAppID      string
-	ALiPayDumpPublicKey  string
 	ALiPayDumpPrivateKey string
 	ALiPayPublicKey      string
 	ALiPayNotifyURLV3    string

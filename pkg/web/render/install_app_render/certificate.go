@@ -25,6 +25,7 @@ type Certificate struct {
 	P12Password     string `json:"p12_password"`
 	Mobileprovision string `json:"mobileprovision"`
 	UpdatedAt       int64  `json:"updated_at"`
+	Level           int    `json:"level"` /// 0: 未知   1: 普通版   2: 高级版  3: 豪华版
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -126,6 +127,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			Mobileprovision: meta.MobileProvisionFileData,
 			CreatedAt:       meta.CreatedAt.Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
+			Level:           bizExt.Level,
 		}
 		if meta.ModifiedP12FileDate == "" {
 			c.P12 = meta.P12FileData

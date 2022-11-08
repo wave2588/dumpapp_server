@@ -30,6 +30,7 @@ type Certificate struct {
 	P12Password     string `json:"p12_password"`
 	P12             string `json:"p12"`
 	Mobileprovision string `json:"mobileprovision"`
+	Level           int    `json:"level"` /// 0: 未知   1: 普通版   2: 高级版  3: 豪华版
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -137,6 +138,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			P12Password:     bizExt.NewP12Password,
 			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,
+			Level:           bizExt.Level,
 		}
 
 		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
