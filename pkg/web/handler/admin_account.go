@@ -201,7 +201,7 @@ func (h *AdminAccountHandler) AccountList(w http.ResponseWriter, r *http.Request
 }
 
 type getAccountArgs struct {
-	Account string `form:"account"`
+	Account string `form:"account" validate:"required"`
 }
 
 func (args *getAccountArgs) Validate() error {
