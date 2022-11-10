@@ -15,12 +15,14 @@ import (
 )
 
 type MemberPayOrderHandler struct {
-	aliPayCtl controller.ALiPayV3Controller
+	aliPayCtl         controller.ALiPayV3Controller
+	memberPayOrderCtl controller.MemberPayOrderController
 }
 
 func NewMemberPayOrderHandler() *MemberPayOrderHandler {
 	return &MemberPayOrderHandler{
-		aliPayCtl: impl.DefaultALiPayV3Controller,
+		aliPayCtl:         impl.DefaultALiPayV3Controller,
+		memberPayOrderCtl: impl.DefaultMemberPayOrderController,
 	}
 }
 
@@ -85,4 +87,8 @@ func (h *MemberPayOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request)
 		util.PanicIf(errors.ErrMemberPayOrderNotFound)
 	}
 	util.RenderJSON(w, order)
+}
+
+func (h *MemberPayOrderHandler) GetOrderRule(w http.ResponseWriter, r *http.Request) {
+	util.RenderJSON(w, h.memberPayOrderCtl.GetPayCampaignRule())
 }
