@@ -22,7 +22,7 @@ type AdminAuthWebsiteDAO interface {
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	// GetByDomain retrieves a single record by uniq key domain from db.
 	GetByDomain(ctx context.Context, domain string) (*models.AdminAuthWebsite, error)
-	GetByDomainSafe(ctx context.Context, domain string) (*models.AdminAuthWebsite, error)
 	// BatchGetByDomain retrieves multiple records by uniq key domain from db.
 	BatchGetByDomain(ctx context.Context, domains []string) (map[string]*models.AdminAuthWebsite, error)
+	GetByDomainSafe(ctx context.Context, domain string) (*models.AdminAuthWebsite, error)
 }

@@ -183,7 +183,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: "充 500 送 15 ，充 1000 送 70，充 2000 送 260 ，充 5000 送 1290。(如遇充值失败请联系管理员)",
+				Description: "充 500 送 15 ，充 1000 送 70，充 2000 送 260 ，充 5000 送 1290。",
 			},
 		}
 	}

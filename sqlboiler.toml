@@ -53,18 +53,6 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
-# member_download_order table
-[[types]]
-  [types.match]
-    name = "status"
-    type = "string"
-    tables = ["member_download_order"]
-
-  [types.replace]
-    type = "enum.MemberDownloadOrderStatus"
-
-  [types.imports]
-    third_party = ['"dumpapp_server/pkg/common/enum"']
 
 # admin_dump_order table
 [[types]]
