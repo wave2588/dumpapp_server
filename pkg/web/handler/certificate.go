@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -42,7 +41,7 @@ func NewCertificateHandler() *CertificateHandler {
 
 type postCertificate struct {
 	UDID string `json:"udid" validate:"required"`
-	Type int    `json:"type" validate:"required"`
+	Type int    `json:"type" validate:"required"` // 就是 price_id
 	Note string `json:"note"`
 }
 
@@ -67,21 +66,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	payCount := cast.ToInt64(constant.CertificatePriceL1)
 	payType := "private"
-	switch args.Type {
-	case 1: /// 30 售后七天，理论 1 年不掉签
-		payCount = constant.CertificatePriceL1
-		payType = "private"
-	case 2: // 60 售后一年，等 1 - 7 天   public
-		payCount = constant.CertificatePriceL2
-		payType = "private"
-	case 3: /// 90 售后一年，立即出   public
-		payCount = constant.CertificatePriceL3
-		payType = "private"
-	}
-
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, payCount, false, payType)
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, cast.ToInt64(args.Type), false, payType)
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
@@ -90,7 +76,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	prices, err := h.certificatePriceCtl.GetPrices(ctx, 0)
+	loginID := mustGetLoginID(ctx)
+	prices, err := h.certificatePriceCtl.GetPrices(ctx, loginID)
 	util.PanicIf(err)
 	util.RenderJSON(w, util.ListOutput{
 		Data: prices,

@@ -20,16 +20,18 @@ import (
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
+	"github.com/spf13/cast"
 )
 
 type CertificateWebController struct {
-	adminConfigInfoDAO dao.AdminConfigInfoDAO
-	memberDeviceDAO    dao.MemberDeviceDAO
-	certificateDAO     dao.CertificateV2DAO
-	memberPayCountCtl  controller.MemberPayCountController
-	certificateV2Ctl   controller.CertificateController
-	certificateV3Ctl   controller.CertificateController
-	alterWebCtl        controller2.AlterWebController
+	adminConfigInfoDAO  dao.AdminConfigInfoDAO
+	memberDeviceDAO     dao.MemberDeviceDAO
+	certificateDAO      dao.CertificateV2DAO
+	memberPayCountCtl   controller.MemberPayCountController
+	certificateV2Ctl    controller.CertificateController
+	certificateV3Ctl    controller.CertificateController
+	certificatePriceCtl controller.CertificatePriceController
+	alterWebCtl         controller2.AlterWebController
 }
 
 var DefaultCertificateWebController *CertificateWebController
@@ -40,18 +42,23 @@ func init() {
 
 func NewCertificateWebController() *CertificateWebController {
 	return &CertificateWebController{
-		adminConfigInfoDAO: impl.DefaultAdminConfigInfoDAO,
-		memberDeviceDAO:    impl.DefaultMemberDeviceDAO,
-		certificateDAO:     impl.DefaultCertificateV2DAO,
-		memberPayCountCtl:  impl2.DefaultMemberPayCountController,
-		certificateV2Ctl:   impl2.DefaultCertificateV2Controller,
-		certificateV3Ctl:   impl2.DefaultCertificateV3Controller,
-		alterWebCtl:        NewAlterWebController(),
+		adminConfigInfoDAO:  impl.DefaultAdminConfigInfoDAO,
+		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
+		certificateDAO:      impl.DefaultCertificateV2DAO,
+		memberPayCountCtl:   impl2.DefaultMemberPayCountController,
+		certificateV2Ctl:    impl2.DefaultCertificateV2Controller,
+		certificateV3Ctl:    impl2.DefaultCertificateV3Controller,
+		certificatePriceCtl: impl2.DefaultCertificatePriceController,
+		alterWebCtl:         NewAlterWebController(),
 	}
 }
 
-func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid, note string, payCount int64, isReplenish bool, payType string) (int64, error) {
-	/// 如何是售后证书行为则不需要检查账户 D 币是否足够
+func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID int64, udid, note string, priceID int64, isReplenish bool, payType string) (int64, error) {
+	price, err := c.certificatePriceCtl.GetPriceByID(ctx, loginID, priceID)
+	util.PanicIf(err)
+	payCount := price.Price
+
+	/// 如果是售后证书行为则不需要检查账户 D 币是否足够
 	if !isReplenish {
 		util.PanicIf(c.memberPayCountCtl.CheckPayCount(ctx, loginID, payCount))
 	}
@@ -118,13 +125,7 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	// util.PanicIf(err)
 
 	/// 记录证书等级, 方便后期候补
-	if payCount == constant.CertificatePriceL1 {
-		response.BizExt.Level = 1
-	} else if payCount == constant.CertificatePriceL2 {
-		response.BizExt.Level = 2
-	} else if payCount == constant.CertificatePriceL3 {
-		response.BizExt.Level = 3
-	}
+	response.BizExt.Level = cast.ToInt(priceID)
 
 	/// 记录证书备注
 	response.BizExt.Note = note

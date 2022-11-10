@@ -93,21 +93,13 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 	}
 
 	/// 计算证书价格
-	cerPrice := constant.CertificatePriceL1
+	cerPriceID := constant.CertificateIDL1
 	if args.CertificatePriceID != nil {
-		switch *args.CertificatePriceID {
-		case "1":
-			cerPrice = constant.CertificatePriceL1
-		case "2":
-			cerPrice = constant.CertificatePriceL2
-		case "3":
-			cerPrice = constant.CertificatePriceL3
-		default:
-			util.PanicIf(errors.UnproccessableError("certificate_price_id 未识别"))
-		}
+		cerPriceID = cast.ToInt64(*args.CertificatePriceID)
 	}
+
 	/// 购买证书
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, "", cerPrice, false, "")
+	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, "", cerPriceID, false, "")
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)

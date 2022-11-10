@@ -52,7 +52,7 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
 	util.PanicIf(err)
 
-	_, err = h.certificateWebCtl.PayCertificate(ctx, account.ID, args.UDID, "售后证书", constant.CertificatePriceL1, true, "")
+	_, err = h.certificateWebCtl.PayCertificate(ctx, account.ID, args.UDID, "售后证书", constant.CertificateIDL1, true, "")
 	util.PanicIf(err)
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))

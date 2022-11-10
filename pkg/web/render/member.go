@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -20,9 +21,10 @@ import (
 type Member struct {
 	meta *models.Account
 
-	ID     int64  `json:"id,string"`
-	Email  string `json:"email"`
-	Status string `json:"status"`
+	ID     int64            `json:"id,string"`
+	Email  string           `json:"email"`
+	Status string           `json:"status"`
+	Role   enum.AccountRole `json:"role"`
 
 	Phone    *string `json:"phone,omitempty" render:"method=RenderPhone"`
 	Password *string `json:"password,omitempty" render:"method=RenderPassword"`
@@ -182,6 +184,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			ID:        account.ID,
 			Email:     account.Email,
 			Status:    "normal",
+			Role:      account.Role,
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{

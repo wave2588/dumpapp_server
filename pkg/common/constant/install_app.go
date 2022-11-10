@@ -5,33 +5,28 @@ import (
 
 	"dumpapp_server/pkg/common/util"
 	errors2 "dumpapp_server/pkg/errors"
-)
-
-const (
-	InstallAppCDKeyPriceIDL1 = 1
-	InstallAppCDKeyPriceIDL2 = 2
-	InstallAppCDKeyPriceIDL3 = 3
+	"github.com/spf13/cast"
 )
 
 func GetInstallAppCDKeySuffix(cerLevel int) string {
-	switch cerLevel {
-	case InstallAppCDKeyPriceIDL1:
+	switch cast.ToInt64(cerLevel) {
+	case CertificateIDL1:
 		return "L1"
-	case InstallAppCDKeyPriceIDL2:
+	case CertificateIDL2:
 		return "L2"
-	case InstallAppCDKeyPriceIDL3:
+	case CertificateIDL3:
 		return "L3"
 	}
 	return ""
 }
 
 func GetInstallAppCerPrice(cerLevel int64) int64 {
-	switch cerLevel {
-	case InstallAppCDKeyPriceIDL1:
+	switch cast.ToInt64(cerLevel) {
+	case CertificateIDL1:
 		return CertificatePriceL1
-	case InstallAppCDKeyPriceIDL2:
+	case CertificateIDL2:
 		return CertificatePriceL2
-	case InstallAppCDKeyPriceIDL3:
+	case CertificateIDL3:
 		return CertificatePriceL3
 	}
 	/// 如果 cerLevel 不对则直接报错

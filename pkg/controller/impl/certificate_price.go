@@ -8,6 +8,7 @@ import (
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	"github.com/pkg/errors"
 )
 
 type CertificatePriceController struct {
@@ -100,4 +101,17 @@ func (c *CertificatePriceController) GetPrices(ctx context.Context, memberID int
 		return nil, err
 	}
 	return priceMap[memberID], nil
+}
+
+func (c *CertificatePriceController) GetPriceByID(ctx context.Context, memberID, priceID int64) (*controller.CertificatePriceInfo, error) {
+	prices, err := c.GetPrices(ctx, memberID)
+	if err != nil {
+		return nil, err
+	}
+	for _, info := range prices {
+		if info.ID == priceID {
+			return info, nil
+		}
+	}
+	return nil, errors.New("获取价格失败") /// 理论上不会走到这
 }

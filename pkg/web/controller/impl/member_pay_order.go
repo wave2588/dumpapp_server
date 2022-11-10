@@ -64,7 +64,7 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 	if err != nil {
 		return err
 	}
-	_, ok := accountMap[memberID]
+	account, ok := accountMap[memberID]
 	if !ok {
 		return errors2.ErrNotFoundMember
 	}
@@ -100,6 +100,14 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		freeNumber = 260
 	} else if number > 5000 {
 		freeNumber = 1290
+	}
+
+	/// 充值大于等于 500 则自动升级为代理商
+	if number >= 500 {
+		account.Role = enum.AccountRoleAgent
+		if err = c.accountDAO.Update(ctx, account); err != nil {
+			return err
+		}
 	}
 
 	util.PanicIf(c.memberPayCountCtl.AddCount(ctx, order.MemberID, freeNumber, enum.MemberPayCountSourcePayForFree, datatype.MemberPayCountRecordBizExt{

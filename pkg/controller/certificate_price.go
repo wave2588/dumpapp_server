@@ -5,6 +5,7 @@ import "context"
 type CertificatePriceController interface {
 	BatchGetPrices(ctx context.Context, memberIDs []int64) (map[int64][]*CertificatePriceInfo, error)
 	GetPrices(ctx context.Context, memberID int64) ([]*CertificatePriceInfo, error)
+	GetPriceByID(ctx context.Context, memberID, priceID int64) (*CertificatePriceInfo, error)
 }
 
 type CertificatePriceInfo struct {
