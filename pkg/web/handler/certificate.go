@@ -9,6 +9,8 @@ import (
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
@@ -23,14 +25,16 @@ import (
 )
 
 type CertificateHandler struct {
-	certificateWebCtl controller2.CertificateWebController
+	certificateWebCtl   controller2.CertificateWebController
+	certificatePriceCtl controller.CertificatePriceController
 
 	certificateDAO dao.CertificateV2DAO
 }
 
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
-		certificateWebCtl: impl5.DefaultCertificateWebController,
+		certificateWebCtl:   impl5.DefaultCertificateWebController,
+		certificatePriceCtl: impl.DefaultCertificatePriceController,
 
 		certificateDAO: impl2.DefaultCertificateV2DAO,
 	}
@@ -85,8 +89,11 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	prices, err := h.certificatePriceCtl.GetPrices(ctx, 0)
+	util.PanicIf(err)
 	util.RenderJSON(w, util.ListOutput{
-		Data: constant.GetCertificatePrices(),
+		Data: prices,
 	})
 }
 

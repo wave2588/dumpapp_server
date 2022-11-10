@@ -7,11 +7,11 @@ import (
 	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
-	"dumpapp_server/pkg/http"
-	impl2 "dumpapp_server/pkg/http/impl"
 	util2 "dumpapp_server/pkg/util"
 	pkgErr "github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -69,7 +69,7 @@ type IpaInfo struct {
 }
 
 type CertificateInfo struct {
-	Prices []*constant.CertificatePriceInfo `json:"prices"`
+	Prices []*controller.CertificatePriceInfo `json:"prices"`
 }
 
 type MemberRender struct {
@@ -85,7 +85,8 @@ type MemberRender struct {
 	memberDeviceDAO       dao.MemberDeviceDAO
 	memberIDEncryptionDAO dao.MemberIDEncryptionDAO
 	dispenseCountDAO      dao.DispenseCountDAO
-	certificateService    http.CertificateServer
+
+	certificatePriceCtl controller.CertificatePriceController
 }
 
 type MemberOption func(*MemberRender)
@@ -137,7 +138,8 @@ func NewMemberRender(ids []int64, loginID int64, opts ...MemberOption) *MemberRe
 		memberDeviceDAO:       impl.DefaultMemberDeviceDAO,
 		memberIDEncryptionDAO: impl.DefaultMemberIDEncryptionDAO,
 		dispenseCountDAO:      impl.DefaultDispenseCountDAO,
-		certificateService:    impl2.DefaultCertificateServer,
+
+		certificatePriceCtl: impl2.DefaultCertificatePriceController,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -236,9 +238,18 @@ func (f *MemberRender) RenderIpaInfo(ctx context.Context) {
 }
 
 func (f *MemberRender) RenderCertificateInfo(ctx context.Context) {
+	memberIDs := make([]int64, 0)
+	for _, member := range f.memberMap {
+		memberIDs = append(memberIDs, member.ID)
+	}
+	memberIDs = util2.RemoveDuplicates(memberIDs)
+
+	priceMap, err := f.certificatePriceCtl.BatchGetPrices(ctx, memberIDs)
+	util.PanicIf(err)
+
 	for _, member := range f.memberMap {
 		member.CertificateInfo = &CertificateInfo{
-			Prices: constant.GetCertificatePrices(),
+			Prices: priceMap[member.ID],
 		}
 	}
 }

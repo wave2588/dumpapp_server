@@ -3,8 +3,9 @@ package install_app_handler
 import (
 	"net/http"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	"dumpapp_server/pkg/controller/impl"
 	dao2 "dumpapp_server/pkg/dao"
 	impl2 "dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
@@ -15,6 +16,7 @@ type CDKEYHandler struct {
 	installAppCDKEYDAO     dao2.InstallAppCdkeyDAO
 	installAppCDKEYCerDAO  dao2.InstallAppCertificateDAO
 	installAppCKEYOrderDAO dao2.InstallAppCdkeyOrderDAO
+	certificatePriceCtl    controller.CertificatePriceController
 }
 
 func NewCDKEYHandler() *CDKEYHandler {
@@ -22,6 +24,7 @@ func NewCDKEYHandler() *CDKEYHandler {
 		installAppCDKEYDAO:     impl2.DefaultInstallAppCdkeyDAO,
 		installAppCDKEYCerDAO:  impl2.DefaultInstallAppCertificateDAO,
 		installAppCKEYOrderDAO: impl2.DefaultInstallAppCdkeyOrderDAO,
+		certificatePriceCtl:    impl.DefaultCertificatePriceController,
 	}
 }
 
@@ -117,7 +120,10 @@ func (h *CDKEYHandler) GetCDKEYInfoByContactWay(w http.ResponseWriter, r *http.R
 }
 
 func (h *CDKEYHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	prices, err := h.certificatePriceCtl.GetPrices(ctx, 0)
+	util.PanicIf(err)
 	util.RenderJSON(w, util.ListOutput{
-		Data: constant.GetCertificatePrices(),
+		Data: prices,
 	})
 }

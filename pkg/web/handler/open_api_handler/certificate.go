@@ -7,6 +7,8 @@ import (
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/controller"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -22,16 +24,18 @@ import (
 )
 
 type OpenCertificateHandler struct {
-	memberDeviceDAO   dao.MemberDeviceDAO
-	certificateDAO    dao.CertificateV2DAO
-	certificateWebCtl controller2.CertificateWebController
+	memberDeviceDAO     dao.MemberDeviceDAO
+	certificateDAO      dao.CertificateV2DAO
+	certificateWebCtl   controller2.CertificateWebController
+	certificatePriceCtl controller.CertificatePriceController
 }
 
 func NewOpenCertificateHandler() *OpenCertificateHandler {
 	return &OpenCertificateHandler{
-		memberDeviceDAO:   impl.DefaultMemberDeviceDAO,
-		certificateDAO:    impl.DefaultCertificateV2DAO,
-		certificateWebCtl: impl3.DefaultCertificateWebController,
+		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
+		certificateDAO:      impl.DefaultCertificateV2DAO,
+		certificateWebCtl:   impl3.DefaultCertificateWebController,
+		certificatePriceCtl: impl2.DefaultCertificatePriceController,
 	}
 }
 
@@ -208,7 +212,11 @@ func (h *OpenCertificateHandler) GetCertificateList(w http.ResponseWriter, r *ht
 }
 
 func (h *OpenCertificateHandler) GetCertificatePrice(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	loginID := mustGetLoginID(ctx, r)
+	prices, err := h.certificatePriceCtl.GetPrices(ctx, loginID)
+	util.PanicIf(err)
 	util.RenderJSON(w, util.ListOutput{
-		Data: constant.GetCertificatePrices(),
+		Data: prices,
 	})
 }
