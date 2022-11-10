@@ -5,12 +5,13 @@ const (
 	CertificateIDL2       = 2
 	CertificateIDL3       = 3
 
-	CertificatePriceL1      int64 = 35
-	CertificatePriceL2            = 78
-	CertificatePriceL3            = 97
-	CertificatePriceAgentL1       = 35
-	CertificatePriceAgentL2       = 75
-	CertificatePriceAgentL3       = 88
+	CertificatePriceL1 int64 = 35
+	CertificatePriceL2 int64 = 78
+	CertificatePriceL3 int64 = 97
+
+	CertificatePriceAgentL1 int64 = 35
+	CertificatePriceAgentL2 int64 = 70
+	CertificatePriceAgentL3 int64 = 88
 
 	CertificateTitleL1 string = "普通版"
 	CertificateTitleL2        = "稳定版"
