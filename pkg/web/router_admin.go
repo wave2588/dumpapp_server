@@ -52,8 +52,8 @@ func NewRouterAdmin() chi.Router {
 
 	/// admin download number
 	adminMemberPayCountHandler := handler.NewAdminMemberPayCountHandler()
-	r.With(middleware.OAuthAdmin).Post("/member/order", adminMemberPayCountHandler.AddNumber)
-	r.With(middleware.OAuthAdmin).Delete("/member/order", adminMemberPayCountHandler.DeleteNumber)
+	r.With(middleware.OAuthAdminV2).Post("/member/order", adminMemberPayCountHandler.AddNumber)
+	r.With(middleware.OAuthAdminV2).Delete("/member/order", adminMemberPayCountHandler.DeleteNumber)
 	// endregion
 
 	// admin device
