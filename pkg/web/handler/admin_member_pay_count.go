@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
@@ -12,18 +13,22 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/errors"
+	controller2 "dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"github.com/go-playground/validator/v10"
 )
 
 type AdminMemberPayCountHandler struct {
 	accountDAO        dao.AccountDAO
 	memberPayCountCtl controller.MemberPayCountController
+	alertWebCtl       controller2.AlterWebController
 }
 
 func NewAdminMemberPayCountHandler() *AdminMemberPayCountHandler {
 	return &AdminMemberPayCountHandler{
 		accountDAO:        impl.DefaultAccountDAO,
 		memberPayCountCtl: impl2.DefaultMemberPayCountController,
+		alertWebCtl:       impl3.DefaultAlterWebController,
 	}
 }
 
@@ -43,6 +48,8 @@ func (p *addDownloadNumber) Validate() error {
 func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	loginID := mustGetLoginID(ctx)
+
 	args := &addDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
 
@@ -59,6 +66,17 @@ func (h *AdminMemberPayCountHandler) AddNumber(w http.ResponseWriter, r *http.Re
 		ObjectID:   0,
 		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeNone,
 	}))
+
+	// 加个推送
+	adminAccountMap, err := h.accountDAO.BatchGet(ctx, []int64{loginID})
+	util.PanicIf(err)
+	adminAccount := adminAccountMap[loginID]
+	titleString := "<font color=\"warning\">管理员添加 D 币</font>\n>"
+	countString := fmt.Sprintf("count：<font color=\"comment\">%d</font>\n", args.Number)
+	receiveEmailString := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", args.Email)
+	adminEmailString := fmt.Sprintf("管理员邮箱：<font color=\"comment\">%s</font>\n", adminAccount.Email)
+	timeStr := fmt.Sprintf("操作时间：<font color=\"comment\">%s</font>", time.Now().Format("2006-01-02 15:04:05"))
+	h.alertWebCtl.SendCustomMsg(ctx, "32df4de7-524c-4d0c-94cd-c8d7e0709fb4", titleString+countString+receiveEmailString+adminEmailString+timeStr)
 }
 
 type deleteDownloadNumber struct {
@@ -76,6 +94,7 @@ func (p *deleteDownloadNumber) Validate() error {
 
 func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	loginID := mustGetLoginID(ctx)
 
 	args := &deleteDownloadNumber{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -95,4 +114,15 @@ func (h *AdminMemberPayCountHandler) DeleteNumber(w http.ResponseWriter, r *http
 		ObjectID:   0,
 		ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeNone,
 	}))
+
+	// 加个推送
+	adminAccountMap, err := h.accountDAO.BatchGet(ctx, []int64{loginID})
+	util.PanicIf(err)
+	adminAccount := adminAccountMap[loginID]
+	titleString := "<font color=\"warning\">管理员删除 D 币</font>\n>"
+	countString := fmt.Sprintf("count：<font color=\"comment\">%d</font>\n", args.Number)
+	receiveEmailString := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", args.Email)
+	adminEmailString := fmt.Sprintf("管理员邮箱:：<font color=\"comment\">%s</font>\n", adminAccount.Email)
+	timeStr := fmt.Sprintf("操作时间：<font color=\"comment\">%s</font>", time.Now().Format("2006-01-02 15:04:05"))
+	h.alertWebCtl.SendCustomMsg(ctx, "32df4de7-524c-4d0c-94cd-c8d7e0709fb4", titleString+countString+receiveEmailString+adminEmailString+timeStr)
 }
