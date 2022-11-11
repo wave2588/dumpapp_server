@@ -17,7 +17,8 @@ func NewWeComHandler() *WeComHandler {
 }
 
 type postNotificationArgs struct {
-	Content string `json:"content" validate:"required"`
+	Content string  `json:"content" validate:"required"`
+	Token   *string `json:"token"`
 }
 
 func (args *postNotificationArgs) Validate() error {
@@ -34,7 +35,11 @@ func (h *WeComHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postNotificationArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	impl.DefaultAlterWebController.SendCustomMsg(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", args.Content)
+	token := "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5"
+	if args.Token != nil {
+		token = *args.Token
+	}
+	impl.DefaultAlterWebController.SendCustomMsg(ctx, token, args.Content)
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
