@@ -24,7 +24,7 @@ import (
 
 // InstallAppCdkey is an object representing the database table.
 type InstallAppCdkey struct {
-	ID            int64                      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID            int64                      `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	OutID         string                     `boil:"out_id" json:"out_id" toml:"out_id" yaml:"out_id"`
 	Status        enum.InstallAppCDKeyStatus `boil:"status" json:"status" toml:"status" yaml:"status"`
 	CertificateID int64                      `boil:"certificate_id" json:"certificate_id" toml:"certificate_id" yaml:"certificate_id"`

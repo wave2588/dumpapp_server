@@ -24,7 +24,7 @@ import (
 
 // AdminDumpOrder is an object representing the database table.
 type AdminDumpOrder struct {
-	ID         int64                     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID         int64                     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	DemanderID int64                     `boil:"demander_id" json:"demander_id" toml:"demander_id" yaml:"demander_id"`
 	OperatorID int64                     `boil:"operator_id" json:"operator_id" toml:"operator_id" yaml:"operator_id"`
 	IpaID      int64                     `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`

@@ -23,7 +23,7 @@ import (
 
 // MemberAppSource is an object representing the database table.
 type MemberAppSource struct {
-	ID          int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID          int64 `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID    int64 `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	AppSourceID int64 `boil:"app_source_id" json:"app_source_id" toml:"app_source_id" yaml:"app_source_id"`
 	// ????

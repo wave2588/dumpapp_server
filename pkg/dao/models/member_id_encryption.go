@@ -23,7 +23,7 @@ import (
 
 // MemberIDEncryption is an object representing the database table.
 type MemberIDEncryption struct {
-	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID  int64     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Code      string    `boil:"code" json:"code" toml:"code" yaml:"code"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`

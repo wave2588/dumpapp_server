@@ -24,7 +24,7 @@ import (
 
 // DumpappVersion is an object representing the database table.
 type DumpappVersion struct {
-	ID            int64                         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID            int64                         `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Version       string                        `boil:"version" json:"version" toml:"version" yaml:"version"`
 	IsForceUpdate bool                          `boil:"is_force_update" json:"is_force_update" toml:"is_force_update" yaml:"is_force_update"`
 	BizExt        datatype.DumpappVersionBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`

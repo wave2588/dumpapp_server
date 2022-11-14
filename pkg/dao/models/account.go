@@ -24,7 +24,7 @@ import (
 
 // Account is an object representing the database table.
 type Account struct {
-	ID       int64            `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID       int64            `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Email    string           `boil:"email" json:"email" toml:"email" yaml:"email"`
 	Phone    string           `boil:"phone" json:"phone" toml:"phone" yaml:"phone"`
 	Password string           `boil:"password" json:"password" toml:"password" yaml:"password"`

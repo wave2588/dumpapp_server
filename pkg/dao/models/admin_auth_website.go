@@ -24,7 +24,7 @@ import (
 
 // AdminAuthWebsite is an object representing the database table.
 type AdminAuthWebsite struct {
-	ID       int64                           `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID       int64                           `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID int64                           `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Domain   string                          `boil:"domain" json:"domain" toml:"domain" yaml:"domain"`
 	BizExt   datatype.AdminAuthWebsiteBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`

@@ -23,7 +23,7 @@ import (
 
 // MemberInvite is an object representing the database table.
 type MemberInvite struct {
-	ID        int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64 `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	InviterID int64 `boil:"inviter_id" json:"inviter_id" toml:"inviter_id" yaml:"inviter_id"`
 	InviteeID int64 `boil:"invitee_id" json:"invitee_id" toml:"invitee_id" yaml:"invitee_id"`
 	// ????

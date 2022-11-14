@@ -23,7 +23,7 @@ import (
 
 // DailyFreeRecord is an object representing the database table.
 type DailyFreeRecord struct {
-	ID         int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID         int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID   int64     `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	IpaID      int64     `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
 	IpaVersion string    `boil:"ipa_version" json:"ipa_version" toml:"ipa_version" yaml:"ipa_version"`

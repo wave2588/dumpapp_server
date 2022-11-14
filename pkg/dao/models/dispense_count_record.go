@@ -24,7 +24,7 @@ import (
 
 // DispenseCountRecord is an object representing the database table.
 type DispenseCountRecord struct {
-	ID       int64                        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID       int64                        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID int64                        `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Type     enum.DispenseCountRecordType `boil:"type" json:"type" toml:"type" yaml:"type"`
 	ObjectID int64                        `boil:"object_id" json:"object_id" toml:"object_id" yaml:"object_id"`

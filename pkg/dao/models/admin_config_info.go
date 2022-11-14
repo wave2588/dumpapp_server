@@ -24,7 +24,7 @@ import (
 
 // AdminConfigInfo is an object representing the database table.
 type AdminConfigInfo struct {
-	ID        int64                          `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64                          `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	BizExt    datatype.AdminConfigInfoBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	CreatedAt time.Time                      `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt time.Time                      `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`

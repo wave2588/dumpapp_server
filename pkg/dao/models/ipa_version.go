@@ -24,7 +24,7 @@ import (
 
 // IpaVersion is an object representing the database table.
 type IpaVersion struct {
-	ID          int64        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID          int64        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	IpaID       int64        `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
 	Version     string       `boil:"version" json:"version" toml:"version" yaml:"version"`
 	IpaType     enum.IpaType `boil:"ipa_type" json:"ipa_type" toml:"ipa_type" yaml:"ipa_type"`

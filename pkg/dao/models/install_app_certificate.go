@@ -24,7 +24,7 @@ import (
 
 // InstallAppCertificate is an object representing the database table.
 type InstallAppCertificate struct {
-	ID                         int64                  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Udid                       string                 `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
 	P12FileData                string                 `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
 	P12FileDataMD5             string                 `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`

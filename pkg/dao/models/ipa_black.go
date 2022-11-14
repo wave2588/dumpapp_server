@@ -24,7 +24,7 @@ import (
 
 // IpaBlack is an object representing the database table.
 type IpaBlack struct {
-	ID        int64                   `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64                   `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	IpaID     int64                   `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
 	BizExt    datatype.IpaBlackBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	CreatedAt time.Time               `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`

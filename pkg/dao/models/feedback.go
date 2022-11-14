@@ -23,7 +23,7 @@ import (
 
 // Feedback is an object representing the database table.
 type Feedback struct {
-	ID       int64  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID       int64  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID int64  `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Content  string `boil:"content" json:"content" toml:"content" yaml:"content"`
 	// ????

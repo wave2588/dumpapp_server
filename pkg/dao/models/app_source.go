@@ -24,7 +24,7 @@ import (
 
 // AppSource is an object representing the database table.
 type AppSource struct {
-	ID     int64                    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID     int64                    `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	URL    string                   `boil:"url" json:"url" toml:"url" yaml:"url"`
 	BizExt datatype.AppSourceBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	// ????

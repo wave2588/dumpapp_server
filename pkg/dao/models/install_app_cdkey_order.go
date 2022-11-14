@@ -25,7 +25,7 @@ import (
 
 // InstallAppCdkeyOrder is an object representing the database table.
 type InstallAppCdkeyOrder struct {
-	ID        int64                               `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64                               `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Contact   string                              `boil:"contact" json:"contact" toml:"contact" yaml:"contact"`
 	Status    enum.MemberPayOrderStatus           `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Number    int64                               `boil:"number" json:"number" toml:"number" yaml:"number"`

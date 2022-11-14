@@ -25,7 +25,7 @@ import (
 
 // MemberPayOrder is an object representing the database table.
 type MemberPayOrder struct {
-	ID       int64                         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID       int64                         `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	MemberID int64                         `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
 	Status   enum.MemberPayOrderStatus     `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Amount   float64                       `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`

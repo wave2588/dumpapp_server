@@ -23,7 +23,7 @@ import (
 
 // MemberRebateRecord is an object representing the database table.
 type MemberRebateRecord struct {
-	ID               int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID               int64 `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	OrderID          int64 `boil:"order_id" json:"order_id" toml:"order_id" yaml:"order_id"`
 	ReceiverMemberID int64 `boil:"receiver_member_id" json:"receiver_member_id" toml:"receiver_member_id" yaml:"receiver_member_id"`
 	Count            int   `boil:"count" json:"count" toml:"count" yaml:"count"`

@@ -23,7 +23,7 @@ import (
 
 // Ipa is an object representing the database table.
 type Ipa struct {
-	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID        int64     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	Name      string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	BundleID  string    `boil:"bundle_id" json:"bundle_id" toml:"bundle_id" yaml:"bundle_id"`
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`

@@ -24,7 +24,7 @@ import (
 
 // CertificateV2 is an object representing the database table.
 type CertificateV2 struct {
-	ID                         int64                  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
 	DeviceID                   int64                  `boil:"device_id" json:"device_id" toml:"device_id" yaml:"device_id"`
 	P12FileData                string                 `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
 	P12FileDataMD5             string                 `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
