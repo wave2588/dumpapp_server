@@ -467,3 +467,25 @@ func (h *AccountHandler) ResetEmail(w http.ResponseWriter, r *http.Request) {
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
+
+func (h *AccountHandler) ResetToken(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx     = r.Context()
+		loginID = mustGetLoginID(ctx)
+	)
+
+	mtMap, err := h.memberIDEncryptionDAO.BatchGetByMemberID(ctx, []int64{loginID})
+	util.PanicIf(err)
+
+	if mt, ok := mtMap[loginID]; ok {
+		mt.Code = util3.MustGenerateUUID()
+		util.PanicIf(h.memberIDEncryptionDAO.Update(ctx, mt))
+	} else {
+		util.PanicIf(h.memberIDEncryptionDAO.Insert(ctx, &models.MemberIDEncryption{
+			MemberID: loginID,
+			Code:     util3.MustGenerateUUID(),
+		}))
+	}
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
+}
