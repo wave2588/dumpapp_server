@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
@@ -37,6 +39,7 @@ type AdminIpaHandler struct {
 	appleCtl          controller.AppleController
 	emailWebCtl       controller2.EmailWebController
 	tencentCtl        controller.TencentController
+	lingshulianCtl    controller.LingshulianController
 	adminDumpOrderCtl controller.AdminDumpOrderController
 }
 
@@ -50,6 +53,7 @@ func NewAdminIpaHandler() *AdminIpaHandler {
 		appleCtl:          impl2.DefaultAppleController,
 		emailWebCtl:       impl3.DefaultEmailWebController,
 		tencentCtl:        impl2.DefaultTencentController,
+		lingshulianCtl:    impl2.DefaultLingshulianController,
 		adminDumpOrderCtl: impl2.DefaultAdminDumpOrderController,
 	}
 }
@@ -396,9 +400,12 @@ func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaI
 		if err != nil {
 			return err
 		}
-		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
-		if err != nil {
-			return err
+		var ipaVersionBizExt *constant.IpaVersionBizExt
+		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
+		if ipaVersionBizExt.Storage == "lingshulian" {
+			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
+		} else {
+			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil
@@ -414,9 +421,12 @@ func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64, ipaType en
 		if err != nil {
 			return err
 		}
-		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
-		if err != nil {
-			return err
+		var ipaVersionBizExt *constant.IpaVersionBizExt
+		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
+		if ipaVersionBizExt.Storage == "lingshulian" {
+			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
+		} else {
+			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil
@@ -432,9 +442,12 @@ func (h *AdminIpaHandler) deleteIpaVersion(ctx context.Context, ipaID int64, ipa
 		if err != nil {
 			return err
 		}
-		err = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
-		if err != nil {
-			return err
+		var ipaVersionBizExt *constant.IpaVersionBizExt
+		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
+		if ipaVersionBizExt.Storage == "lingshulian" {
+			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
+		} else {
+			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil

@@ -69,6 +69,9 @@ func (p *PostCreateMultipartUploadInfoRequest) Validate() error {
 	if p.Suffix == nil && p.Key == nil {
 		return errors.UnproccessableError("Suffix or Key 不能为空")
 	}
+	if p.Suffix != nil && p.Key != nil {
+		return errors.UnproccessableError("Suffix or Key 不能同时使用")
+	}
 	/// 如果 bucket 传空，则默认给 membersignipa bucket
 	if p.Bucket == "" {
 		p.Bucket = config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
