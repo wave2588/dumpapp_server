@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"dumpapp_server/pkg/common/clients"
@@ -210,12 +211,12 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	var openURL string
 	if bizExt.Storage == "" || bizExt.Storage == "cos" {
 		openURL, err = h.tencentCtl.GetSignatureURL(ctx, version.TokenPath, 30*time.Minute)
+		openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	} else if bizExt.Storage == "lingshulian" {
-		openURL, err = h.lingshulianCtl.GetSignatureURL(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, version.TokenPath, 30*time.Minute)
+		openURL, err = h.lingshulianCtl.GetSignatureURL(ctx, strings.ToUpper(config.DumpConfig.AppConfig.LingshulianShareIpaBucket), version.TokenPath, 30*time.Minute)
 	}
 	util.PanicIf(err)
 
-	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	resJSON := map[string]interface{}{
 		"open_url": openURL,
 	}
