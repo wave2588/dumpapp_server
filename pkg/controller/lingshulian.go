@@ -55,7 +55,9 @@ type GetHeaderSignResp struct {
 
 /// 开始上传
 type PostCreateMultipartUploadInfoRequest struct {
-	Suffix string `json:"suffix" validate:"required"`
+	Suffix *string `json:"suffix"`
+	Key    *string `json:"key"`
+
 	Bucket string `json:"bucket"`
 }
 
@@ -64,8 +66,8 @@ func (p *PostCreateMultipartUploadInfoRequest) Validate() error {
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
-	if p.Suffix == "" {
-		return errors.UnproccessableError("Suffix 格式错误")
+	if p.Suffix == nil && p.Key == nil {
+		return errors.UnproccessableError("Suffix or Key 不能为空")
 	}
 	/// 如果 bucket 传空，则默认给 membersignipa bucket
 	if p.Bucket == "" {

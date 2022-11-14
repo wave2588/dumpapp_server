@@ -210,7 +210,13 @@ func (c *LingshulianController) List(ctx context.Context, bucket string) (*s3.Li
 
 func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Context, request *controller.PostCreateMultipartUploadInfoRequest) (*controller.PostCreateMultipartUploadInfoResp, error) {
 	id := util2.MustGenerateID(ctx)
-	key := fmt.Sprintf("%d.%s", id, request.Suffix)
+	var key string
+	if request.Suffix != nil { /// 如果有后缀, 则使用后缀, 并且自动生成 id
+		key = fmt.Sprintf("%d.%s", id, *request.Suffix)
+	} else if request.Key != nil { /// 如果指定了 key, 则使用指定的 key
+		key = *request.Key
+	}
+
 	expireTo := time.Now().Add(time.Hour)
 	output, err := c.Svc.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
 		Bucket:  util.StringPtr(request.Bucket),
