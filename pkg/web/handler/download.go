@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -201,9 +202,19 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// openURL, err := h.lingshulianCtl.GetSignatureURL(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, ipaVersions[0].TokenPath, 30*time.Minute)
-	openURL, err := h.tencentCtl.GetSignatureURL(ctx, ipaVersions[0].TokenPath, 30*time.Minute)
+	version := ipaVersions[0]
+	var bizExt constant.IpaVersionBizExt
+	err = json.Unmarshal([]byte(version.BizExt), &bizExt)
 	util.PanicIf(err)
+
+	var openURL string
+	if bizExt.Storage == "" || bizExt.Storage == "cos" {
+		openURL, err = h.tencentCtl.GetSignatureURL(ctx, version.TokenPath, 30*time.Minute)
+	} else if bizExt.Storage == "lingshulian" {
+		openURL, err = h.lingshulianCtl.GetSignatureURL(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, version.TokenPath, 30*time.Minute)
+	}
+	util.PanicIf(err)
+
 	openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	resJSON := map[string]interface{}{
 		"open_url": openURL,

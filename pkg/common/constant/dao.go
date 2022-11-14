@@ -28,6 +28,7 @@ type SearchCount struct {
 type IpaVersionBizExt struct {
 	DescribeURL *string `json:"describe_url,omitempty"`
 	Describe    *string `json:"describe,omitempty"`
+	Storage     string  `json:"storage"` /// cos lingshulian
 }
 
 func (d *IpaVersionBizExt) String() string {

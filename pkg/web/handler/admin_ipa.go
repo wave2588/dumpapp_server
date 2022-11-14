@@ -77,6 +77,7 @@ func (h *AdminIpaHandler) List(w http.ResponseWriter, r *http.Request) {
 type createIpaArgs struct {
 	Ipas        []*ipaArgs `json:"ipas" validate:"required"`
 	IsSendEmail bool       `json:"is_send_email"`
+	Storage     string     `json:"storage"`
 }
 
 type ipaArgs struct {
@@ -105,6 +106,15 @@ func (p *createIpaArgs) Validate() error {
 			if !version.IpaType.IsAIpaType() {
 				return errors.UnproccessableError("无效的 ipa_type")
 			}
+		}
+	}
+	if p.Storage == "" {
+		p.Storage = "cos"
+	}
+	/// 校验 storage 是否合法
+	if p.Storage != "" {
+		if p.Storage != "cos" && p.Storage != "lingshulian" {
+			return errors.UnproccessableError("无效的 storage")
 		}
 	}
 	return nil
@@ -161,6 +171,7 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			ipaVersionBizExt := &constant.IpaVersionBizExt{
 				DescribeURL: version.DescribeURL,
 				Describe:    version.Describe,
+				Storage:     args.Storage,
 			}
 			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
 				IpaID:       ipaID,
