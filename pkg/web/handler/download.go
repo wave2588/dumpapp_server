@@ -2,10 +2,8 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"dumpapp_server/pkg/common/clients"
@@ -39,6 +37,7 @@ type DownloadHandler struct {
 	memberDownloadNumberCtl controller.MemberPayCountController
 	tencentCtl              controller.TencentController
 	lingshulianCtl          controller.LingshulianController
+	ipaVersionCtl           controller.IpaVersionController
 }
 
 func NewDownloadHandler() *DownloadHandler {
@@ -52,6 +51,7 @@ func NewDownloadHandler() *DownloadHandler {
 		memberDownloadNumberCtl: impl2.DefaultMemberPayCountController,
 		tencentCtl:              impl2.DefaultTencentController,
 		lingshulianCtl:          impl2.DefaultLingshulianController,
+		ipaVersionCtl:           impl2.DefaultIpaVersionController,
 	}
 }
 
@@ -204,17 +204,8 @@ func (h *DownloadHandler) GetDownloadURL(w http.ResponseWriter, r *http.Request)
 	}
 
 	version := ipaVersions[0]
-	var bizExt constant.IpaVersionBizExt
-	err = json.Unmarshal([]byte(version.BizExt), &bizExt)
-	util.PanicIf(err)
 
-	var openURL string
-	if bizExt.Storage == "" || bizExt.Storage == "cos" {
-		openURL, err = h.tencentCtl.GetSignatureURL(ctx, version.TokenPath, 30*time.Minute)
-		openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
-	} else if bizExt.Storage == "lingshulian" {
-		openURL, err = h.lingshulianCtl.GetSignatureURL(ctx, strings.ToUpper(config.DumpConfig.AppConfig.LingshulianShareIpaBucket), version.TokenPath, 30*time.Minute)
-	}
+	openURL, err := h.ipaVersionCtl.GetDownloadURL(ctx, version.ID, loginID)
 	util.PanicIf(err)
 
 	resJSON := map[string]interface{}{

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -12,7 +11,6 @@ import (
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/config"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
@@ -41,6 +39,7 @@ type AdminIpaHandler struct {
 	tencentCtl        controller.TencentController
 	lingshulianCtl    controller.LingshulianController
 	adminDumpOrderCtl controller.AdminDumpOrderController
+	ipaVersionCtl     controller.IpaVersionController
 }
 
 func NewAdminIpaHandler() *AdminIpaHandler {
@@ -55,6 +54,7 @@ func NewAdminIpaHandler() *AdminIpaHandler {
 		tencentCtl:        impl2.DefaultTencentController,
 		lingshulianCtl:    impl2.DefaultLingshulianController,
 		adminDumpOrderCtl: impl2.DefaultAdminDumpOrderController,
+		ipaVersionCtl:     impl2.DefaultIpaVersionController,
 	}
 }
 
@@ -308,8 +308,7 @@ func (h *AdminIpaHandler) batchDeleteByRetainLatestVersion(ctx context.Context, 
 			if idx == 0 {
 				continue
 			}
-			err := h.ipaVersionDAO.Delete(ctx, version.ID)
-			if err != nil {
+			if err := h.ipaVersionCtl.Delete(ctx, version.ID); err != nil {
 				return err
 			}
 		}
@@ -322,8 +321,7 @@ func (h *AdminIpaHandler) batchDeleteAll(ctx context.Context, ipaIDs []int64, ip
 
 	for _, ipa := range ipaMap {
 		for _, version := range ipa.Versions {
-			err := h.ipaVersionDAO.Delete(ctx, version.ID)
-			if err != nil {
+			if err := h.ipaVersionCtl.Delete(ctx, version.ID); err != nil {
 				return err
 			}
 		}
@@ -396,16 +394,8 @@ func (h *AdminIpaHandler) deleteIpaRetainLatestVersion(ctx context.Context, ipaI
 		if idx == 0 {
 			continue
 		}
-		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
-		if err != nil {
+		if err = h.ipaVersionCtl.Delete(ctx, iv.ID); err != nil {
 			return err
-		}
-		var ipaVersionBizExt *constant.IpaVersionBizExt
-		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
-		if ipaVersionBizExt.Storage == "lingshulian" {
-			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
-		} else {
-			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil
@@ -417,16 +407,8 @@ func (h *AdminIpaHandler) deleteIpa(ctx context.Context, ipaID int64, ipaType en
 		return err
 	}
 	for _, iv := range ivs {
-		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
-		if err != nil {
+		if err = h.ipaVersionCtl.Delete(ctx, iv.ID); err != nil {
 			return err
-		}
-		var ipaVersionBizExt *constant.IpaVersionBizExt
-		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
-		if ipaVersionBizExt.Storage == "lingshulian" {
-			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
-		} else {
-			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil
@@ -438,16 +420,8 @@ func (h *AdminIpaHandler) deleteIpaVersion(ctx context.Context, ipaID int64, ipa
 		return err
 	}
 	for _, iv := range ivs {
-		err = h.ipaVersionDAO.Delete(ctx, iv.ID)
-		if err != nil {
+		if err = h.ipaVersionCtl.Delete(ctx, iv.ID); err != nil {
 			return err
-		}
-		var ipaVersionBizExt *constant.IpaVersionBizExt
-		util.PanicIf(json.Unmarshal([]byte(iv.BizExt), &ipaVersionBizExt))
-		if ipaVersionBizExt.Storage == "lingshulian" {
-			_ = h.lingshulianCtl.Delete(ctx, config.DumpConfig.AppConfig.LingshulianShareIpaBucket, iv.TokenPath)
-		} else {
-			_ = h.tencentCtl.DeleteFile(ctx, iv.TokenPath)
 		}
 	}
 	return nil
