@@ -79,7 +79,8 @@ func (p *getIpaArgs) Validate() error {
 
 func (h *IpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	loginID := middleware.MustGetMemberID(ctx)
+
+	loginID := mustGetLoginID(ctx)
 
 	ipaID := cast.ToInt64(util.URLParam(r, "ipa_id"))
 
