@@ -53,6 +53,17 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["ipa_version"]
+
+  [types.replace]
+    type = "datatype.IpaVersionBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
 
 # admin_dump_order table
 [[types]]

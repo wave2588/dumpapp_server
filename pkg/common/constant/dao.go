@@ -25,18 +25,6 @@ type SearchCount struct {
 	Count int64
 }
 
-type IpaVersionBizExt struct {
-	DescribeURL *string `json:"describe_url,omitempty"`
-	Describe    *string `json:"describe,omitempty"`
-	Storage     string  `json:"storage"` /// cos lingshulian
-}
-
-func (d *IpaVersionBizExt) String() string {
-	data, err := json.Marshal(d)
-	util.PanicIf(err)
-	return string(data)
-}
-
 type IpaSignBizExt struct {
 	IpaVersionID int64        `json:"ipa_version_id"`
 	IpaVersion   string       `json:"ipa_version"`

@@ -2,10 +2,8 @@ package render
 
 import (
 	"context"
-	"encoding/json"
 	"sort"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -205,12 +203,8 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
 			}
-			if v.BizExt != "" {
-				var ipaVersionBizExt *constant.IpaVersionBizExt
-				util.PanicIf(json.Unmarshal([]byte(v.BizExt), &ipaVersionBizExt))
-				version.DescribeURL = ipaVersionBizExt.DescribeURL
-				version.Describe = ipaVersionBizExt.Describe
-			}
+			version.DescribeURL = v.BizExt.DescribeURL
+			version.Describe = v.BizExt.Describe
 			res = append(res, version)
 		}
 		ipa.Versions = res

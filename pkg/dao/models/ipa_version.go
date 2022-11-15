@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,15 +25,15 @@ import (
 
 // IpaVersion is an object representing the database table.
 type IpaVersion struct {
-	ID          int64        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	IpaID       int64        `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
-	Version     string       `boil:"version" json:"version" toml:"version" yaml:"version"`
-	IpaType     enum.IpaType `boil:"ipa_type" json:"ipa_type" toml:"ipa_type" yaml:"ipa_type"`
-	TokenPath   string       `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
-	BizExt      string       `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
-	IsTemporary int64        `boil:"is_temporary" json:"is_temporary" toml:"is_temporary" yaml:"is_temporary"`
-	CreatedAt   time.Time    `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt   time.Time    `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	ID          int64                     `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	IpaID       int64                     `boil:"ipa_id" json:"ipa_id" toml:"ipa_id" yaml:"ipa_id"`
+	Version     string                    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	IpaType     enum.IpaType              `boil:"ipa_type" json:"ipa_type" toml:"ipa_type" yaml:"ipa_type"`
+	TokenPath   string                    `boil:"token_path" json:"token_path" toml:"token_path" yaml:"token_path"`
+	BizExt      datatype.IpaVersionBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	IsTemporary int64                     `boil:"is_temporary" json:"is_temporary" toml:"is_temporary" yaml:"is_temporary"`
+	CreatedAt   time.Time                 `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time                 `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *ipaVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L ipaVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -105,13 +106,34 @@ func (w whereHelperenum_IpaType) GTE(x enum.IpaType) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperdatatype_IpaVersionBizExt struct{ field string }
+
+func (w whereHelperdatatype_IpaVersionBizExt) EQ(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_IpaVersionBizExt) NEQ(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_IpaVersionBizExt) LT(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_IpaVersionBizExt) LTE(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_IpaVersionBizExt) GT(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_IpaVersionBizExt) GTE(x datatype.IpaVersionBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var IpaVersionWhere = struct {
 	ID          whereHelperint64
 	IpaID       whereHelperint64
 	Version     whereHelperstring
 	IpaType     whereHelperenum_IpaType
 	TokenPath   whereHelperstring
-	BizExt      whereHelperstring
+	BizExt      whereHelperdatatype_IpaVersionBizExt
 	IsTemporary whereHelperint64
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
@@ -121,7 +143,7 @@ var IpaVersionWhere = struct {
 	Version:     whereHelperstring{field: "`ipa_version`.`version`"},
 	IpaType:     whereHelperenum_IpaType{field: "`ipa_version`.`ipa_type`"},
 	TokenPath:   whereHelperstring{field: "`ipa_version`.`token_path`"},
-	BizExt:      whereHelperstring{field: "`ipa_version`.`biz_ext`"},
+	BizExt:      whereHelperdatatype_IpaVersionBizExt{field: "`ipa_version`.`biz_ext`"},
 	IsTemporary: whereHelperint64{field: "`ipa_version`.`is_temporary`"},
 	CreatedAt:   whereHelpertime_Time{field: "`ipa_version`.`created_at`"},
 	UpdatedAt:   whereHelpertime_Time{field: "`ipa_version`.`updated_at`"},

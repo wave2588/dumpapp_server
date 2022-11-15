@@ -20,7 +20,7 @@ type LingshulianController interface {
 	GetURL(ctx context.Context, bucket, key string) (string, error)
 	Put(ctx context.Context, bucket, key string, body io.ReadSeeker) error
 	Delete(ctx context.Context, bucket, key string) error
-	List(ctx context.Context, bucket string) (*s3.ListObjectsV2Output, error)
+	List(ctx context.Context, bucket string, limit int64) (*s3.ListObjectsOutput, error)
 
 	/// 分片上传
 	PostCreateMultipartUploadInfo(ctx context.Context, request *PostCreateMultipartUploadInfoRequest) (*PostCreateMultipartUploadInfoResp, error)

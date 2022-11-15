@@ -8,6 +8,7 @@ import (
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
@@ -172,17 +173,16 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 			/// 删除 dump order 记录
 			util.PanicIf(h.adminDumpOrderCtl.Progressed(ctx, loginID, ipaID, version.Version))
 
-			ipaVersionBizExt := &constant.IpaVersionBizExt{
-				DescribeURL: version.DescribeURL,
-				Describe:    version.Describe,
-				Storage:     args.Storage,
-			}
 			util.PanicIf(h.ipaVersionDAO.Insert(ctx, &models.IpaVersion{
-				IpaID:       ipaID,
-				Version:     version.Version,
-				IpaType:     version.IpaType,
-				TokenPath:   version.Token,
-				BizExt:      ipaVersionBizExt.String(),
+				IpaID:     ipaID,
+				Version:   version.Version,
+				IpaType:   version.IpaType,
+				TokenPath: version.Token,
+				BizExt: datatype.IpaVersionBizExt{
+					DescribeURL: version.DescribeURL,
+					Describe:    version.Describe,
+					Storage:     args.Storage,
+				},
 				IsTemporary: cast.ToInt64(version.IsTemporary),
 			}))
 		}
