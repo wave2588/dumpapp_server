@@ -14,7 +14,9 @@ var bucket = config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
 func main() {
 	ctx := context.Background()
 
-	resp, err := impl.DefaultLingshulianController.List(ctx, bucket)
+	var marker *string
+
+	resp, err := impl.DefaultLingshulianController.List(ctx, bucket, marker, 1000)
 	util.PanicIf(err)
 
 	ipaFileTokens := make([]string, 0)

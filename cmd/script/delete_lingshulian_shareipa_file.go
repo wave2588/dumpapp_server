@@ -14,8 +14,11 @@ func main() {
 
 	ctx := context.Background()
 
-	limit := 1000
-	bucket := config.DumpConfig.AppConfig.LingshulianShareIpaBucket
+	var (
+		marker *string
+		limit  = 1000
+		bucket = config.DumpConfig.AppConfig.LingshulianShareIpaBucket
+	)
 
 	ids, err := impl2.DefaultIpaVersionDAO.ListIDs(ctx, 0, limit, nil, []string{})
 	util.PanicIf(err)
@@ -28,7 +31,7 @@ func main() {
 		tokenMap[version.TokenPath] = version
 	}
 
-	res, err := impl.DefaultLingshulianController.List(ctx, bucket, int64(limit))
+	res, err := impl.DefaultLingshulianController.List(ctx, bucket, marker, int64(limit))
 	util.PanicIf(err)
 
 	for _, content := range res.Contents {

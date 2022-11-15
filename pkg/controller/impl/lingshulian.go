@@ -201,10 +201,10 @@ func (c *LingshulianController) Delete(ctx context.Context, bucket, key string) 
 	return err
 }
 
-func (c *LingshulianController) List(ctx context.Context, bucket string, limit int64) (*s3.ListObjectsOutput, error) {
-	fmt.Println(bucket, limit)
+func (c *LingshulianController) List(ctx context.Context, bucket string, marker *string, limit int64) (*s3.ListObjectsOutput, error) {
 	return c.Svc.ListObjects(&s3.ListObjectsInput{
 		Bucket:  util.StringPtr(bucket),
+		Marker:  marker,
 		MaxKeys: util2.Int64Ptr(limit),
 	})
 }
