@@ -59,8 +59,7 @@ func run() {
 		offset += len(ids)
 
 		for _, ipaVersion := range ipaVersionMap {
-			util.PanicIf(impl.DefaultIpaVersionDAO.Delete(ctx, ipaVersion.ID))
-			util.PanicIf(impl2.DefaultTencentController.DeleteFile(ctx, ipaVersion.TokenPath))
+			util.PanicIf(impl2.DefaultIpaVersionController.Delete(ctx, ipaVersion.ID))
 
 			ipa, err := impl.DefaultIpaDAO.Get(ctx, ipaVersion.IpaID)
 			util.PanicIf(err)
