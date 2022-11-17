@@ -196,6 +196,18 @@
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
 
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["certificate_v2"]
+
+  [types.replace]
+    type = "datatype.CertificateBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
+
 
 # intall_app_cdkey_order table
 [[types]]
@@ -235,6 +247,18 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/enum"']
+
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["install_app_certificate"]
+
+  [types.replace]
+    type = "datatype.CertificateBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
 
 # member_device
 [[types]]

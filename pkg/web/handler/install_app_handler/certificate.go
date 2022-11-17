@@ -87,9 +87,6 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		h.alterWebCtl.SendInstallAppCreateCertificateFailMsg(ctx, args.CDKey, args.UDID, *response.ErrorMessage)
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
-	if response.BizExt == nil {
-		util.PanicIf(errors.ErrCreateCertificateFail)
-	}
 
 	p12FileData := response.P12Data
 	mpFileData := response.MobileProvisionData
@@ -121,7 +118,7 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 		MobileProvisionFileData:    mpFileData,
 		MobileProvisionFileDataMD5: mpFileMd5,
 		Source:                     response.Source,
-		BizExt:                     response.BizExt.String(),
+		BizExt:                     response.BizExt,
 	}))
 
 	clients.MustCommit(ctx, txn)

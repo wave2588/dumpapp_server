@@ -2,9 +2,7 @@ package render
 
 import (
 	"context"
-	"encoding/json"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -126,25 +124,24 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		if !ok {
 			continue
 		}
-		var bizExt constant.CertificateBizExt
-		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
+
 		cer := &Certificate{
 			Meta:            meta,
 			ID:              meta.ID,
 			CreatedAt:       meta.CreatedAt.Unix(),
 			ExpireAt:        meta.CreatedAt.AddDate(1, 0, 0).Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
-			Note:            bizExt.Note,
-			P12Password:     bizExt.NewP12Password,
+			Note:            meta.BizExt.Note,
+			P12Password:     meta.BizExt.NewP12Password,
 			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,
-			Level:           bizExt.Level,
+			Level:           meta.BizExt.Level,
 		}
 
 		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
 		if meta.ModifiedP12FileDate == "" {
 			cer.P12 = meta.P12FileData
-			cer.P12Password = bizExt.OriginalP12Password
+			cer.P12Password = meta.BizExt.OriginalP12Password
 		}
 
 		result[meta.ID] = cer

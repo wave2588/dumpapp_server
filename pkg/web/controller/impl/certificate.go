@@ -110,10 +110,6 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, *response.ErrorMessage)
 		util.PanicIf(errors.ErrCreateCertificateFail)
 	}
-	if response.BizExt == nil {
-		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, "response biz_ext is nil")
-		util.PanicIf(errors.ErrCreateCertificateFail)
-	}
 
 	p12FileData := response.P12Data
 	mpFileData := response.MobileProvisionData
@@ -151,7 +147,7 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		MobileProvisionFileData:    mpFileData,
 		MobileProvisionFileDataMD5: mpFileMd5,
 		Source:                     response.Source,
-		BizExt:                     response.BizExt.String(),
+		BizExt:                     response.BizExt,
 	}))
 
 	/// 如果是补证书行为则不需要扣币

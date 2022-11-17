@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	util2 "dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
@@ -96,7 +96,7 @@ func (c *CertificateV2Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		P12Data:             cerData.Data.P12,
 		MobileProvisionData: cerData.Data.Mobileprovision,
 		Source:              enum.CertificateSourceV2,
-		BizExt: &constant.CertificateBizExt{
+		BizExt: datatype.CertificateBizExt{
 			V2DeviceID:          responseData.ID,
 			OriginalP12Password: cerData.Data.Password,
 			NewP12Password:      "1",
@@ -157,13 +157,7 @@ func (c *CertificateV2Controller) CheckCerIsActive(ctx context.Context, certific
 		return false, nil
 	}
 
-	var cerBizExt *constant.CertificateBizExt
-	err = json.Unmarshal([]byte(cer.BizExt), &cerBizExt)
-	if err != nil {
-		return false, err
-	}
-
-	resp := c.getCerByServer(ctx, cerBizExt.V2DeviceID)
+	resp := c.getCerByServer(ctx, cer.BizExt.V2DeviceID)
 	if resp.ErrorMessage != nil {
 		return false, nil
 	}

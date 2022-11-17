@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,15 +25,15 @@ import (
 
 // CertificateV2 is an object representing the database table.
 type CertificateV2 struct {
-	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	DeviceID                   int64                  `boil:"device_id" json:"device_id" toml:"device_id" yaml:"device_id"`
-	P12FileData                string                 `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
-	P12FileDataMD5             string                 `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
-	ModifiedP12FileDate        string                 `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
-	MobileProvisionFileData    string                 `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
-	MobileProvisionFileDataMD5 string                 `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
-	Source                     enum.CertificateSource `boil:"source" json:"source" toml:"source" yaml:"source"`
-	BizExt                     string                 `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	ID                         int64                      `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	DeviceID                   int64                      `boil:"device_id" json:"device_id" toml:"device_id" yaml:"device_id"`
+	P12FileData                string                     `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
+	P12FileDataMD5             string                     `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
+	ModifiedP12FileDate        string                     `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
+	MobileProvisionFileData    string                     `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
+	MobileProvisionFileDataMD5 string                     `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
+	Source                     enum.CertificateSource     `boil:"source" json:"source" toml:"source" yaml:"source"`
+	BizExt                     datatype.CertificateBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	// ????
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	// ????
@@ -117,6 +118,27 @@ func (w whereHelperenum_CertificateSource) GTE(x enum.CertificateSource) qm.Quer
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperdatatype_CertificateBizExt struct{ field string }
+
+func (w whereHelperdatatype_CertificateBizExt) EQ(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperdatatype_CertificateBizExt) NEQ(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperdatatype_CertificateBizExt) LT(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperdatatype_CertificateBizExt) LTE(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperdatatype_CertificateBizExt) GT(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperdatatype_CertificateBizExt) GTE(x datatype.CertificateBizExt) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var CertificateV2Where = struct {
 	ID                         whereHelperint64
 	DeviceID                   whereHelperint64
@@ -126,7 +148,7 @@ var CertificateV2Where = struct {
 	MobileProvisionFileData    whereHelperstring
 	MobileProvisionFileDataMD5 whereHelperstring
 	Source                     whereHelperenum_CertificateSource
-	BizExt                     whereHelperstring
+	BizExt                     whereHelperdatatype_CertificateBizExt
 	CreatedAt                  whereHelpertime_Time
 	UpdatedAt                  whereHelpertime_Time
 }{
@@ -138,7 +160,7 @@ var CertificateV2Where = struct {
 	MobileProvisionFileData:    whereHelperstring{field: "`certificate_v2`.`mobile_provision_file_data`"},
 	MobileProvisionFileDataMD5: whereHelperstring{field: "`certificate_v2`.`mobile_provision_file_data_md5`"},
 	Source:                     whereHelperenum_CertificateSource{field: "`certificate_v2`.`source`"},
-	BizExt:                     whereHelperstring{field: "`certificate_v2`.`biz_ext`"},
+	BizExt:                     whereHelperdatatype_CertificateBizExt{field: "`certificate_v2`.`biz_ext`"},
 	CreatedAt:                  whereHelpertime_Time{field: "`certificate_v2`.`created_at`"},
 	UpdatedAt:                  whereHelpertime_Time{field: "`certificate_v2`.`updated_at`"},
 }

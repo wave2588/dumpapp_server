@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	util2 "dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/config"
@@ -75,7 +75,7 @@ func (c *CertificateV1Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		P12Data:             result.Data.P12FileDate,
 		MobileProvisionData: result.Data.MobileProvisionFileData,
 		Source:              enum.CertificateSourceV1,
-		BizExt: &constant.CertificateBizExt{
+		BizExt: datatype.CertificateBizExt{
 			V1UDIDBatchNo:       result.Data.UdidBatchNo,
 			V1CerAppleID:        result.Data.CerAppleid,
 			OriginalP12Password: "1",

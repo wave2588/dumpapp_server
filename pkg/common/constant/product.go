@@ -36,4 +36,7 @@ var ConvertProductMap = map[string]string{
 	"iPhone14,2": "iPhone 13 Pro",
 	"iPhone14,3": "iPhone 13 Pro Max",
 	"iPhone14,4": "iPhone 13 Mini",
+	"iPhone14,7": "iPhone 14",
+	"iPhone15,2": "iPhone 14 Pro",
+	"iPhone15,3": "iPhone 14 Pro Max",
 }

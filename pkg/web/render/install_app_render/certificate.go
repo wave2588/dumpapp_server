@@ -2,9 +2,7 @@ package install_app_render
 
 import (
 	"context"
-	"encoding/json"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -116,22 +114,21 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		if !ok {
 			continue
 		}
-		var bizExt constant.CertificateBizExt
-		util.PanicIf(json.Unmarshal([]byte(meta.BizExt), &bizExt))
+
 		c := &Certificate{
 			Meta:            meta,
 			ID:              meta.ID,
 			UDID:            meta.Udid,
 			P12:             meta.ModifiedP12FileDate,
-			P12Password:     bizExt.NewP12Password,
+			P12Password:     meta.BizExt.NewP12Password,
 			Mobileprovision: meta.MobileProvisionFileData,
 			CreatedAt:       meta.CreatedAt.Unix(),
 			UpdatedAt:       meta.UpdatedAt.Unix(),
-			Level:           bizExt.Level,
+			Level:           meta.BizExt.Level,
 		}
 		if meta.ModifiedP12FileDate == "" {
 			c.P12 = meta.P12FileData
-			c.P12Password = bizExt.OriginalP12Password
+			c.P12Password = meta.BizExt.OriginalP12Password
 		}
 		result[meta.ID] = c
 	}

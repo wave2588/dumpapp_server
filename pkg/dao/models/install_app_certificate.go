@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"github.com/friendsofgo/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -24,15 +25,15 @@ import (
 
 // InstallAppCertificate is an object representing the database table.
 type InstallAppCertificate struct {
-	ID                         int64                  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	Udid                       string                 `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
-	P12FileData                string                 `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
-	P12FileDataMD5             string                 `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
-	ModifiedP12FileDate        string                 `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
-	MobileProvisionFileData    string                 `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
-	MobileProvisionFileDataMD5 string                 `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
-	Source                     enum.CertificateSource `boil:"source" json:"source" toml:"source" yaml:"source"`
-	BizExt                     string                 `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	ID                         int64                      `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	Udid                       string                     `boil:"udid" json:"udid" toml:"udid" yaml:"udid"`
+	P12FileData                string                     `boil:"p12_file_data" json:"p12_file_data" toml:"p12_file_data" yaml:"p12_file_data"`
+	P12FileDataMD5             string                     `boil:"p12_file_data_md5" json:"p12_file_data_md5" toml:"p12_file_data_md5" yaml:"p12_file_data_md5"`
+	ModifiedP12FileDate        string                     `boil:"modified_p12_file_date" json:"modified_p12_file_date" toml:"modified_p12_file_date" yaml:"modified_p12_file_date"`
+	MobileProvisionFileData    string                     `boil:"mobile_provision_file_data" json:"mobile_provision_file_data" toml:"mobile_provision_file_data" yaml:"mobile_provision_file_data"`
+	MobileProvisionFileDataMD5 string                     `boil:"mobile_provision_file_data_md5" json:"mobile_provision_file_data_md5" toml:"mobile_provision_file_data_md5" yaml:"mobile_provision_file_data_md5"`
+	Source                     enum.CertificateSource     `boil:"source" json:"source" toml:"source" yaml:"source"`
+	BizExt                     datatype.CertificateBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	// ????
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	// ????
@@ -105,7 +106,7 @@ var InstallAppCertificateWhere = struct {
 	MobileProvisionFileData    whereHelperstring
 	MobileProvisionFileDataMD5 whereHelperstring
 	Source                     whereHelperenum_CertificateSource
-	BizExt                     whereHelperstring
+	BizExt                     whereHelperdatatype_CertificateBizExt
 	CreatedAt                  whereHelpertime_Time
 	UpdatedAt                  whereHelpertime_Time
 }{
@@ -117,7 +118,7 @@ var InstallAppCertificateWhere = struct {
 	MobileProvisionFileData:    whereHelperstring{field: "`install_app_certificate`.`mobile_provision_file_data`"},
 	MobileProvisionFileDataMD5: whereHelperstring{field: "`install_app_certificate`.`mobile_provision_file_data_md5`"},
 	Source:                     whereHelperenum_CertificateSource{field: "`install_app_certificate`.`source`"},
-	BizExt:                     whereHelperstring{field: "`install_app_certificate`.`biz_ext`"},
+	BizExt:                     whereHelperdatatype_CertificateBizExt{field: "`install_app_certificate`.`biz_ext`"},
 	CreatedAt:                  whereHelpertime_Time{field: "`install_app_certificate`.`created_at`"},
 	UpdatedAt:                  whereHelpertime_Time{field: "`install_app_certificate`.`updated_at`"},
 }
