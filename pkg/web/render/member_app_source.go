@@ -86,7 +86,7 @@ func (f *MemberAppSourceRender) RenderMap(ctx context.Context) map[int64]*Member
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, MemberAppSource{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, MemberAppSource{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

@@ -85,7 +85,7 @@ func (f *CDKeyOrderRender) RenderMap(ctx context.Context) map[int64]*CDKeyOrder 
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, CDKeyOrder{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, CDKeyOrder{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

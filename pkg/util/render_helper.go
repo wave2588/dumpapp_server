@@ -1,4 +1,4 @@
-package install_app_render
+package util
 
 import (
 	"context"
@@ -23,7 +23,7 @@ func errgrouFuncWrapper(f func() error) func() error {
 	}
 }
 
-func autoRender(ctx context.Context, r interface{}, dst interface{}, includeFields []string) error {
+func AutoRender(ctx context.Context, r interface{}, dst interface{}, includeFields []string) error {
 	if len(includeFields) == 0 {
 		return nil
 	}

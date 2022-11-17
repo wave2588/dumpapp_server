@@ -88,7 +88,7 @@ func (f *AppTimeLockRender) RenderMap(ctx context.Context) map[int64]*AppTimeLoc
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, AppTimeLock{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, AppTimeLock{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

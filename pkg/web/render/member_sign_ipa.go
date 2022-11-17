@@ -115,7 +115,7 @@ func (f *MemberSignIpaRender) RenderMap(ctx context.Context) map[int64]*MemberSi
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, MemberSignIpa{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, MemberSignIpa{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

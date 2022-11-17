@@ -92,7 +92,7 @@ func (f *CDKEYRender) RenderMap(ctx context.Context) map[int64]*CDKEY {
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, CDKEY{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, CDKEY{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

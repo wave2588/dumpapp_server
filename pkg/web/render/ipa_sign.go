@@ -92,7 +92,7 @@ func (f *IpaSignRender) RenderMap(ctx context.Context) map[int64]*IpaSign {
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, IpaSign{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, IpaSign{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

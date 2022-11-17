@@ -89,7 +89,7 @@ func (f *DispenseCountRecordRender) RenderMap(ctx context.Context) map[int64]*Di
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, DispenseCountRecord{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, DispenseCountRecord{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

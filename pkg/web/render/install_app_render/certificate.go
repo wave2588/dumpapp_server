@@ -98,7 +98,7 @@ func (f *CertificateRender) RenderMap(ctx context.Context) map[int64]*Certificat
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, Certificate{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, Certificate{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

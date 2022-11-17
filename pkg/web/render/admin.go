@@ -7,6 +7,7 @@ import (
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
+	util2 "dumpapp_server/pkg/util"
 	"github.com/spf13/cast"
 )
 
@@ -51,7 +52,7 @@ func (f *AdminRender) RenderMap(ctx context.Context) map[int64]*Admin {
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, Admin{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, Admin{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

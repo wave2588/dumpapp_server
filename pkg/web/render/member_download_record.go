@@ -82,7 +82,7 @@ func (f *MemberDownloadRecordRender) RenderMap(ctx context.Context) map[int64]*M
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, MemberDownloadRecord{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, MemberDownloadRecord{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

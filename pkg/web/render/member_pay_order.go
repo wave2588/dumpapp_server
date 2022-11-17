@@ -87,7 +87,7 @@ func (f *MemberPayOrderRender) RenderMap(ctx context.Context) map[int64]*MemberP
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, MemberPayOrder{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, MemberPayOrder{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}

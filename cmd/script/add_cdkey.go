@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao/impl"
@@ -16,7 +16,7 @@ func main() {
 
 	for i := 0; i < 3; i++ {
 		orderID := util2.MustGenerateID(ctx)
-		bizExt := constant.InstallAppCDKEYOrderBizExt{
+		bizExt := datatype.InstallAppCdkeyOrderBizExt{
 			ContactWay: "15711367321",
 			IsTest:     true,
 		}
@@ -25,7 +25,7 @@ func main() {
 			Status: enum.MemberPayOrderStatusPaid,
 			Number: 1,
 			Amount: 10,
-			BizExt: bizExt.String(),
+			BizExt: bizExt,
 		}))
 
 		cdkeyID := util2.MustGenerateID(ctx)

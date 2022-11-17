@@ -148,7 +148,7 @@ func (f *IpaRender) RenderMap(ctx context.Context) map[int64]*Ipa {
 
 	f.fetch(ctx)
 
-	err := autoRender(ctx, f, Ipa{}, f.includeFields)
+	err := util2.AutoRender(ctx, f, Ipa{}, f.includeFields)
 	if err != nil {
 		panic(err)
 	}
