@@ -152,7 +152,7 @@ func (p *getCertificateListArgs) Validate() error {
 	}
 	if p.UDID != nil {
 		if !util2.CheckUDIDValid(*p.UDID) {
-			return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", p.UDID))
+			return errors.UnproccessableError(fmt.Sprintf("无效的 UDID: %s", *p.UDID))
 		}
 	}
 	return nil
