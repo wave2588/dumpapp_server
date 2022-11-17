@@ -34,7 +34,7 @@ func NewAppSourceHandler() *AppSourceHandler {
 
 var DefaultAppSourceIDs = []int64{
 	1,
-	// 1553749259214393344,
+	1553749259214393344,
 	1574353888088166400,
 }
 

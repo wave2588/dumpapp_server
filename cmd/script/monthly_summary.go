@@ -25,6 +25,18 @@ func main() {
 	startAt := time.Date(time.Now().Year(), month, 1, 0, 0, 0, 0, time.Local)
 	//endAt := time.Date(time.Now().Year(), month, 31, 23, 59, 59, 0, time.Local)
 
+	cerCount, err := impl.DefaultCertificateV2DAO.Count(ctx, []qm.QueryMod{
+		models.CertificateV2Where.CreatedAt.GTE(startAt),
+	})
+	util.PanicIf(err)
+
+	iCerCount, err := impl.DefaultInstallAppCertificateDAO.Count(ctx, []qm.QueryMod{
+		models.InstallAppCertificateWhere.CreatedAt.GTE(startAt),
+	})
+	util.PanicIf(err)
+
+	cerAmount := (cerCount + iCerCount) * 25
+
 	resIDs := make([]int64, 0)
 	for hasNext {
 		filter := []qm.QueryMod{
@@ -79,9 +91,13 @@ func main() {
 		installAppAmount += order.Amount
 	}
 
+	total := webAmount + appAmount + installAppAmount
 	fmt.Println(fmt.Sprintf("%d 月新注册用户数-->: %d", month, len(memberIDs)))
 	fmt.Println(fmt.Sprintf("%d 支付成功的订单-->: %d", month, len(resIDs)))
 	fmt.Println(fmt.Sprintf("%d 主站收入-->: %.2f, web: %.2f  app: %.2f", month, webAmount+appAmount, webAmount, appAmount))
 	fmt.Println(fmt.Sprintf("%d app 兑换码收入-->: %.2f", month, installAppAmount))
-	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, webAmount+appAmount+installAppAmount))
+	fmt.Println(fmt.Sprintf("%d 总收入-->: %.2f", month, total))
+	fmt.Println(fmt.Sprintf("%d 支出-->: %d", month, cerAmount))
+	fmt.Println(fmt.Sprintf("%d 利润-->: %.2f%%", month, (total-float64(cerAmount))/total*100))
+	fmt.Println(fmt.Sprintf("%d 账户剩余-->: %.2f", month, total-float64(cerAmount)))
 }

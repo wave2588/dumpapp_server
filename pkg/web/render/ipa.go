@@ -203,8 +203,12 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
 			}
-			version.DescribeURL = v.BizExt.DescribeURL
-			version.Describe = v.BizExt.Describe
+			if v.BizExt.DescribeURL != nil && *v.BizExt.DescribeURL != "" {
+				version.DescribeURL = v.BizExt.DescribeURL
+			}
+			if v.BizExt.Describe != nil && *v.BizExt.Describe != "" {
+				version.Describe = v.BizExt.Describe
+			}
 			res = append(res, version)
 		}
 		ipa.Versions = res

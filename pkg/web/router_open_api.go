@@ -12,7 +12,7 @@ func NewRouterOpenAPI() chi.Router {
 	// ipa handler
 	ipaHandler := open_api_handler.NewOpenIpaHandler()
 	r.With(middleware.OAuthGuest).Get("/ipa", ipaHandler.Get)
-	r.With(middleware.OAuthGuest).Get("/ipa/url", ipaHandler.GetIpaDownloadURL)
+	r.With(middleware.OAuthGuest).Get("/ipa/download_url", ipaHandler.GetIpaDownloadURL)
 	// endregion
 
 	// certificate handler

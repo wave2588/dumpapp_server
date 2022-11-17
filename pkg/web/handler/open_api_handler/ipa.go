@@ -5,11 +5,14 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	"dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/cast"
 )
 
 type OpenIpaHandler struct {
@@ -23,8 +26,7 @@ func NewOpenIpaHandler() *OpenIpaHandler {
 }
 
 type getIpaArgs struct {
-	IpaID      string `form:"ipa_id" validate:"required"`
-	IpaVersion string `form:"ipa_version" validate:"required"`
+	IpaID string `form:"ipa_id" validate:"required"`
 }
 
 func (p *getIpaArgs) Validate() error {
@@ -36,6 +38,22 @@ func (p *getIpaArgs) Validate() error {
 }
 
 func (h *OpenIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
+	var (
+		ctx     = r.Context()
+		loginID = mustGetLoginID(ctx, r)
+	)
+
+	args := getIpaArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	ipaID := cast.ToInt64(args.IpaID)
+	ipaMap := render.NewIpaRender([]int64{ipaID}, loginID, []enum.IpaType{enum.IpaTypeNormal, enum.IpaTypeCrack}, render.IpaDefaultRenderFields...).RenderMap(ctx)
+	ipa, ok := ipaMap[ipaID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundApp)
+	}
+	util.RenderJSON(w, ipa)
 }
 
 type getIpaDownloadURLArgs struct {

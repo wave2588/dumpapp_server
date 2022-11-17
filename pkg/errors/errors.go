@@ -18,7 +18,7 @@ var (
 	ErrPhoneRefusedRegister     = NewDefaultAPIError(401, 10014, "PhoneRefusedRegister", "该手机号不允许注册。")
 	ErrReLogin                  = NewDefaultAPIError(401, 10015, "ReLogin", "身份过期，请重新登录")
 
-	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 app")
+	ErrNotFoundApp        = NewDefaultAPIError(404, 20001, "NotFoundApp", "未找到 ipa")
 	ErrNotFoundIpa        = NewDefaultAPIError(404, 20002, "NotFoundIpa", "未找到 ipa")
 	ErrNotFoundIpaVersion = NewDefaultAPIError(404, 20003, "NotFoundIpaVersion", "未找到对应的 ipa 版本")
 
