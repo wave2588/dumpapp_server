@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	errors3 "errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	jsoniter "github.com/json-iterator/go"
 )
 
 type LingshulianController struct {
@@ -216,6 +218,14 @@ func (c *LingshulianController) PostCreateMultipartUploadInfo(ctx context.Contex
 		key = fmt.Sprintf("%d.%s", id, *request.Suffix)
 	} else if request.Key != nil { /// 如果指定了 key, 则使用指定的 key
 		key = *request.Key
+	}
+
+	if key == "" {
+		data, err := jsoniter.MarshalToString(request)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors3.New(fmt.Sprintf("PostCreateMultipartUploadInfo key is nil. request-->: %s", data))
 	}
 
 	expireTo := time.Now().Add(time.Hour)

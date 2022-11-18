@@ -55,8 +55,8 @@ type GetHeaderSignResp struct {
 
 /// 开始上传
 type PostCreateMultipartUploadInfoRequest struct {
-	Suffix *string `json:"suffix"`
-	Key    *string `json:"key"`
+	Suffix *string `json:"suffix,omitempty"`
+	Key    *string `json:"key,omitempty"`
 
 	Bucket string `json:"bucket"`
 }
