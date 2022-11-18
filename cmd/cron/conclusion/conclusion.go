@@ -121,7 +121,7 @@ func run() {
 	amountStr := fmt.Sprintf("订单收入：<font color=\"comment\">%v</font>\n", amount)
 	cdKeyAmountStr := fmt.Sprintf("App 兑换码收入：<font color=\"comment\">%v</font>\n", cdKeyOrderAmount)
 	totalAmountStr := fmt.Sprintf("总收入：<font color=\"comment\">%v</font>\n利润：<font color=\"comment\">%.2f%%</font>\n", totalAmount, (totalAmount-expendAmount)/totalAmount*100)
-	downloadedStr := fmt.Sprintf("使用次数：<font color=\"comment\">%d</font>\n", downloadedCount)
+	downloadedStr := fmt.Sprintf("下载 ipa 次数：<font color=\"comment\">%d</font>\n", downloadedCount)
 	downloadedMemberStr := fmt.Sprintf("下载人数：<font color=\"comment\">%d</font>\n", len(downloadedMember))
 	uvStr := fmt.Sprintf("uv: <font color=\"comment\">%d</font>\n", uv)
 	pvStr := fmt.Sprintf("pv: <font color=\"comment\">%d</font>\n", pv)

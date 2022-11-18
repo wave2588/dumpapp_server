@@ -26,6 +26,7 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/securecookie v1.1.1
+	github.com/json-iterator/go v1.1.9
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.0

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -13,6 +14,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/util"
+	"dumpapp_server/pkg/web/controller"
+	"dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"
@@ -22,12 +25,14 @@ import (
 type AdminAccountHandler struct {
 	accountDAO            dao2.AccountDAO
 	memberIDEncryptionDAO dao2.MemberIDEncryptionDAO
+	alertWebCtl           controller.AlterWebController
 }
 
 func NewAdminAccountHandler() *AdminAccountHandler {
 	return &AdminAccountHandler{
 		accountDAO:            impl4.DefaultAccountDAO,
 		memberIDEncryptionDAO: impl4.DefaultMemberIDEncryptionDAO,
+		alertWebCtl:           impl.DefaultAlterWebController,
 	}
 }
 
@@ -74,11 +79,12 @@ func (h *AdminAccountHandler) AddAccount(w http.ResponseWriter, r *http.Request)
 }
 
 type putAccountArgs struct {
-	Email    string           `json:"email"`
-	NewEmail *string          `json:"new_email"`
-	Password *string          `json:"password"`
-	Phone    *string          `json:"phone"`
-	Role     enum.AccountRole `json:"role"`
+	Email      string           `json:"email"`
+	NewEmail   *string          `json:"new_email"`
+	Password   *string          `json:"password"`
+	Phone      *string          `json:"phone"`
+	Role       enum.AccountRole `json:"role"`
+	RoleReason *string          `json:"role_reason"`
 }
 
 func (p *putAccountArgs) Validate() error {
@@ -99,7 +105,10 @@ func (p *putAccountArgs) Validate() error {
 }
 
 func (h *AdminAccountHandler) PutAccount(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	var (
+		ctx          = r.Context()
+		loginAccount = mustGetLoginAccount(ctx)
+	)
 
 	args := &putAccountArgs{}
 	util2.PanicIf(util2.JSONArgs(r, args))
@@ -123,6 +132,16 @@ func (h *AdminAccountHandler) PutAccount(w http.ResponseWriter, r *http.Request)
 
 	account, err := h.getAccountByEmail(ctx, args.Email)
 	util2.PanicIf(err)
+
+	/// 加个设置为代理的推送
+	if args.RoleReason != nil && account.Role != args.Role {
+		titleString := "<font color=\"warning\">设置代理商</font>\n>"
+		countString := fmt.Sprintf("Reason：<font color=\"comment\">%s</font>\n", *args.RoleReason)
+		receiveEmailString := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", args.Email)
+		adminEmailString := fmt.Sprintf("管理员邮箱：<font color=\"comment\">%s</font>\n", loginAccount.Email)
+		timeStr := fmt.Sprintf("操作时间：<font color=\"comment\">%s</font>", time.Now().Format("2006-01-02 15:04:05"))
+		h.alertWebCtl.SendCustomMsg(ctx, "32df4de7-524c-4d0c-94cd-c8d7e0709fb4", titleString+countString+receiveEmailString+adminEmailString+timeStr)
+	}
 
 	if args.NewEmail != nil {
 		account.Email = *args.NewEmail

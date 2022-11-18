@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
@@ -10,6 +11,8 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/web/controller"
+	impl2 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render"
 	"github.com/go-playground/validator/v10"
 )
@@ -17,18 +20,21 @@ import (
 type AdminAuthWebsiteHandler struct {
 	accountDAO          dao.AccountDAO
 	adminAuthWebsiteDAO dao.AdminAuthWebsiteDAO
+	alertWebCtl         controller.AlterWebController
 }
 
 func NewAdminAuthWebsiteHandler() *AdminAuthWebsiteHandler {
 	return &AdminAuthWebsiteHandler{
 		accountDAO:          impl.DefaultAccountDAO,
 		adminAuthWebsiteDAO: impl.DefaultAdminAuthWebsiteDAO,
+		alertWebCtl:         impl2.DefaultAlterWebController,
 	}
 }
 
 type authWebsiteArgs struct {
-	Email  string `json:"email" validate:"required"`
-	Domain string `json:"domain" validate:"required"`
+	Email  string  `json:"email" validate:"required"`
+	Domain string  `json:"domain" validate:"required"`
+	Reason *string `json:"reason"`
 }
 
 func (p *authWebsiteArgs) Validate() error {
@@ -40,7 +46,10 @@ func (p *authWebsiteArgs) Validate() error {
 }
 
 func (h *AdminAuthWebsiteHandler) Auth(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	var (
+		ctx          = r.Context()
+		loginAccount = mustGetLoginAccount(ctx)
+	)
 
 	args := &authWebsiteArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -68,6 +77,16 @@ func (h *AdminAuthWebsiteHandler) Auth(w http.ResponseWriter, r *http.Request) {
 			IsOpen: true,
 		},
 	}))
+
+	// 加个授权理由推送
+	if args.Reason != nil {
+		titleString := "<font color=\"warning\">授权独立站</font>\n>"
+		countString := fmt.Sprintf("Reason：<font color=\"comment\">%s</font>\n", *args.Reason)
+		receiveEmailString := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", args.Email)
+		adminEmailString := fmt.Sprintf("管理员邮箱：<font color=\"comment\">%s</font>\n", loginAccount.Email)
+		timeStr := fmt.Sprintf("操作时间：<font color=\"comment\">%s</font>", time.Now().Format("2006-01-02 15:04:05"))
+		h.alertWebCtl.SendCustomMsg(ctx, "32df4de7-524c-4d0c-94cd-c8d7e0709fb4", titleString+countString+receiveEmailString+adminEmailString+timeStr)
+	}
 
 	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
