@@ -91,6 +91,7 @@ func NewRouterAdmin() chi.Router {
 	// certificate handler
 	certificateHandler := handler.NewAdminCertificateHandler()
 	r.With(middleware.OAuthAdmin).Post("/certificate/replenish", certificateHandler.Replenish)
+	r.With(middleware.OAuthAdminV2).Get("/certificate", certificateHandler.GetCertificate)
 	// endregion
 
 	return r
