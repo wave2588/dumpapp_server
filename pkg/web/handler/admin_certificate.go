@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -67,7 +66,7 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 }
 
 type getCertificateArgs struct {
-	UDIDs datatype.StringSlice `form:"udids"`
+	UDID string `form:"udid"`
 }
 
 func (args *getCertificateArgs) Validate() error {
@@ -88,10 +87,11 @@ func (h *AdminCertificateHandler) GetCertificate(w http.ResponseWriter, r *http.
 	util.PanicIf(args.Validate())
 
 	deviceIDs, err := h.memberDeviceDAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
-		models.MemberDeviceWhere.Udid.IN(args.UDIDs),
+		models.MemberDeviceWhere.Udid.EQ(args.UDID),
 	}, []string{})
 	util.PanicIf(err)
 
+	fmt.Println(deviceIDs)
 	cerIDMap, err := h.certificateDAO.ListIDsByDeviceIDs(ctx, deviceIDs)
 	util.PanicIf(err)
 

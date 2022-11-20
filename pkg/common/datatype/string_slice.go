@@ -1,6 +1,7 @@
 package datatype
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -12,11 +13,13 @@ func (slice *StringSlice) Decode(text string) (err error) {
 	if err != nil {
 		return err
 	}
+	fmt.Print(111, cursorStr)
 	value := strings.Split(cursorStr, ",")
 	*slice = value
 	return
 }
 
 func (slice StringSlice) Encode() (string, error) {
+	fmt.Print(111, slice)
 	return strings.Join(slice, ","), nil
 }
