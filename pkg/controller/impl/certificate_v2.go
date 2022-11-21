@@ -14,6 +14,7 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/util"
+	"github.com/pkg/errors"
 )
 
 type CertificateV2Controller struct {
@@ -87,29 +88,28 @@ func (c *CertificateV2Controller) CreateCer(ctx context.Context, UDID, regionPoo
 		return res
 	}
 
-	cerData := c.getCerByServer(ctx, responseData.ID)
-	if cerData.ErrorMessage != nil {
-		res.ErrorMessage = cerData.ErrorMessage
+	cerData, err := c.getCerByServer(ctx, responseData.ID)
+	if err != nil {
+		res.ErrorMessage = util2.StringPtr(err.Error())
 		return res
 	}
+
 	return &controller.CertificateResponse{
-		P12Data:             cerData.Data.P12,
-		MobileProvisionData: cerData.Data.Mobileprovision,
+		P12Data:             cerData.P12,
+		MobileProvisionData: cerData.Mobileprovision,
 		Source:              enum.CertificateSourceV2,
 		BizExt: datatype.CertificateBizExt{
 			V2DeviceID:          responseData.ID,
-			OriginalP12Password: cerData.Data.Password,
+			OriginalP12Password: cerData.Password,
 			NewP12Password:      "1",
 		},
 	}
 }
 
 type getCerResponse struct {
-	Code int                 `json:"code"`
-	Msg  string              `json:"msg"`
-	Data *getCerDataResponse `json:"data"`
-
-	ErrorMessage *string `json:"error_message"`
+	Code int         `json:"code"`
+	Msg  string      `json:"msg"`
+	Data interface{} `json:"data"`
 }
 
 type getCerDataResponse struct {
@@ -119,8 +119,7 @@ type getCerDataResponse struct {
 	AppleDeviceID   string `json:"deviceId"`        /// 苹果平台设备 ID
 }
 
-func (c *CertificateV2Controller) getCerByServer(ctx context.Context, id string) *getCerResponse {
-	res := &getCerResponse{}
+func (c *CertificateV2Controller) getCerByServer(ctx context.Context, id string) (*getCerDataResponse, error) {
 	endpoint := config.DumpConfig.AppConfig.CerGetV2
 	requestBodyMap := map[string]interface{}{
 		"token": config.DumpConfig.AppConfig.CerServerTokenV2,
@@ -132,19 +131,28 @@ func (c *CertificateV2Controller) getCerByServer(ctx context.Context, id string)
 		"Content-Type": "application/json",
 	}, bytes.NewBuffer(requestBody))
 	if err != nil {
-		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server fail.  id: %s", id))
-		return res
+		return nil, errors.New(fmt.Sprintf("v2 get_cer_by_server fail.  id: %s", id))
 	}
+	res := &getCerResponse{}
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server json.Unmarshal fail.  id: %s   json: %s", id, string(body)))
-		return res
+		return nil, errors.New(fmt.Sprintf("v2 get_cer_by_server json.Unmarshal fail.  id: %s   json: %s", id, string(body)))
 	}
-	if res.Code != 1 {
-		res.ErrorMessage = util2.StringPtr(fmt.Sprintf("v2 get_cer_by_server code != 1.  id: %s   json: %s", id, string(body)))
-		return res
+	if res.Code != 1 || res.Data == nil {
+		return nil, errors.New(fmt.Sprintf("v2 get_cer_by_server code != 1.  id: %s   json: %s", id, string(body)))
 	}
-	return res
+
+	dataMarshal, err := json.Marshal(res.Data)
+	if err != nil {
+		return nil, err
+	}
+
+	data := &getCerDataResponse{}
+	if err = json.Unmarshal(dataMarshal, data); err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func (c *CertificateV2Controller) CheckCerIsActive(ctx context.Context, certificateID int64) (bool, error) {
@@ -157,12 +165,12 @@ func (c *CertificateV2Controller) CheckCerIsActive(ctx context.Context, certific
 		return false, nil
 	}
 
-	resp := c.getCerByServer(ctx, cer.BizExt.V2DeviceID)
-	if resp.ErrorMessage != nil {
+	resp, err := c.getCerByServer(ctx, cer.BizExt.V2DeviceID)
+	if err != nil {
 		return false, nil
 	}
 
-	if resp.Code != 1 || resp.Data == nil || resp.Data.P12 == "" {
+	if resp.P12 == "" {
 		return false, nil
 	}
 
