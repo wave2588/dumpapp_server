@@ -168,3 +168,7 @@ func (c *CertificateV2Controller) CheckCerIsActive(ctx context.Context, certific
 
 	return true, nil
 }
+
+func (c *CertificateV2Controller) GetBalance(ctx context.Context) (*controller.CertificateBalance, error) {
+	return &controller.CertificateBalance{}, nil
+}

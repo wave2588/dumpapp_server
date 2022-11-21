@@ -14,6 +14,7 @@ import (
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/util"
+	"github.com/pkg/errors"
 )
 
 type CertificateV3Controller struct {
@@ -145,4 +146,36 @@ func (c *CertificateV3Controller) CheckCerIsActive(ctx context.Context, certific
 	}
 
 	return resp.Data.State, nil
+}
+
+type cerBalanceResponse struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Time int64  `json:"time"`
+	Data struct {
+		Score   int64  `json:"score"`
+		Balance string `json:"balance"`
+	} `json:"data"`
+}
+
+func (c *CertificateV3Controller) GetBalance(ctx context.Context) (*controller.CertificateBalance, error) {
+	res := &cerBalanceResponse{}
+	endpoint := "https://developer.52tzs.com/api/getbalance"
+	requestBodyMap := map[string]interface{}{
+		"token": config.DumpConfig.AppConfig.CerServerTokenV3,
+	}
+	requestBody, _ := json.Marshal(requestBodyMap)
+	body, err := util.HttpRequestV2("POST", endpoint, map[string]string{
+		"Content-Type": "application/json",
+	}, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("v3 get_balance_by_server fail. err: %s", err.Error()))
+	}
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("v3 get_balance_by_server json.Unmarshal fail.  %s", string(body)))
+	}
+	return &controller.CertificateBalance{
+		Count: res.Data.Score,
+	}, nil
 }

@@ -10,6 +10,7 @@ import (
 type CertificateController interface {
 	CreateCer(ctx context.Context, UDID, regionPool string) *CertificateResponse
 	CheckCerIsActive(ctx context.Context, certificateID int64) (bool, error)
+	GetBalance(ctx context.Context) (*CertificateBalance, error)
 }
 
 type CertificateResponse struct {
@@ -20,4 +21,8 @@ type CertificateResponse struct {
 
 	/// 生成错误这里会有错误原因
 	ErrorMessage *string `json:"error_message"`
+}
+
+type CertificateBalance struct {
+	Count int64 `json:"count"`
 }
