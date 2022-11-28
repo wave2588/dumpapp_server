@@ -147,6 +147,7 @@ func (c *ALiPayV3Controller) GetPhonePayURLByNumber(ctx context.Context, loginID
 }
 
 func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) error {
+	fmt.Println("CheckPayStatus--->: ", orderID)
 	p := alipay.TradeQuery{}
 	p.OutTradeNo = fmt.Sprintf("%d", orderID)
 	p.QueryOptions = []string{"TRADE_SETTLE_INFO"}
