@@ -98,7 +98,7 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		freeNumber = 70
 	} else if number >= 2000 && number < 5000 {
 		freeNumber = 260
-	} else if number > 5000 {
+	} else if number >= 5000 {
 		freeNumber = 1290
 	}
 

@@ -34,31 +34,4 @@ func main() {
 	}
 }
 
-var emails = []string{
-	"likkk@163.com",
-	"wangguang3@126.com",
-	"495180175@qq.com",
-	"1511141687@qq.com",
-	"919062031@qq.com",
-	"codemakertyq@163.com",
-	"1330903352@qq.com",
-	"2667371594@qq.com",
-	"2111374699@qq.com",
-	"273880058@qq.com",
-	"1798814463@qq.com",
-	"112013513@@qq.com",
-	"807984999@qq.com",
-	"2511017073@qq.com",
-	"83273738@qq.com",
-	"6269469@gmail.com",
-	"948779023@qq.com",
-	"9456258@qq.com",
-	"3324554289@qq.com",
-	"276880308@qq.com",
-	"745690361@qq.com",
-	"273880058@qq.com",
-	"jinyan19931120@163.com",
-	"83273738@qq.com",
-	"754075907@qq.com",
-	"1511141687@qq.com",
-}
+var emails = []string{}
