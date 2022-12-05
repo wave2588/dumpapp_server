@@ -57,8 +57,13 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 	args := &replenishCertificateArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	account, err := h.accountDAO.GetByEmail(ctx, args.Email)
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
 	util.PanicIf(err)
+
+	account, ok := accountMap[args.Email]
+	if !ok {
+		util.PanicIf(errors.UnproccessableError("邮箱未找到"))
+	}
 
 	devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, account.ID, []string{args.UDID})
 	util.PanicIf(err)
