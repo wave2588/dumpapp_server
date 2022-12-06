@@ -82,15 +82,13 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 	if len(cerIDs) == 0 {
 		util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
 	}
-	cerMap, err := impl.DefaultCertificateV2DAO.BatchGet(ctx, cerIDs)
-	if len(cerMap) == 0 {
-		util.PanicIf(errors.UnproccessableError("未找到有效证书"))
-	}
 
-	var cer *models.CertificateV2
+	cerMap := render.NewCertificateRender(cerIDs, 0, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+
+	var cer *render.Certificate
 	for _, cerID := range cerIDs {
 		cer = cerMap[cerID]
-		if !cer.BizExt.IsReplenish {
+		if !cer.IsReplenish {
 			break
 		}
 	}
@@ -98,27 +96,30 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 		util.PanicIf(errors.UnproccessableError("未找到有效证书"))
 	}
 
+	// 检查证书是否有效
+	if cer.P12IsActive {
+		util.PanicIf(errors.UnproccessableError("证书有效，无法候补。"))
+	}
+
 	// 0 说明是老版本证书, 需要管理员校验
-	if cer.BizExt.Level == 0 {
+	if cer.Level == 0 {
 		util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
 	}
 
 	// 普通证书不能候补
-	if cer.BizExt.Level == 1 {
+	if cer.Level == 1 {
 		util.PanicIf(errors.UnproccessableError("该证书是普通证书，无法后补。"))
 	}
 
 	now := time.Now()
-	if cer.BizExt.Level == 2 {
-		expireAt := cer.CreatedAt.AddDate(0, 0, 180)
-		if expireAt.Unix() <= now.Unix() {
-			util.PanicIf(errors.UnproccessableError("已超过半年有效期，无法候补。"))
+	if cer.Level == 2 {
+		if cer.ReplenishExpireAt <= now.Unix() {
+			util.PanicIf(errors.UnproccessableError("已超过 180 天有效期，无法候补。"))
 		}
 	}
-	if cer.BizExt.Level == 3 {
-		expireAt := cer.CreatedAt.AddDate(1, 0, 0)
-		if expireAt.Unix() <= now.Unix() {
-			util.PanicIf(errors.UnproccessableError("已超过一年有效期，无法候补。"))
+	if cer.Level == 3 {
+		if cer.ReplenishExpireAt <= now.Unix() {
+			util.PanicIf(errors.UnproccessableError("已超过 365 天有效期，无法候补。"))
 		}
 	}
 
