@@ -72,7 +72,6 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("当前账号下没有此 UDID: %s", args.UDID)))
 	}
 
-	// 只处理第一个设备
 	device := devices[0]
 	cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
 		models.CertificateV2Where.DeviceID.EQ(device.ID),
