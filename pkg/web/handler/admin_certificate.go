@@ -74,7 +74,7 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 
 	// 只处理第一个设备
 	device := devices[0]
-	cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 1, []qm.QueryMod{
+	cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
 		models.CertificateV2Where.DeviceID.EQ(device.ID),
 	}, nil)
 	util.PanicIf(err)
@@ -82,12 +82,22 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 	if len(cerIDs) == 0 {
 		util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
 	}
-	cers, err := impl.DefaultCertificateV2DAO.BatchGet(ctx, cerIDs)
-	if len(cers) == 0 {
+	cerMap, err := impl.DefaultCertificateV2DAO.BatchGet(ctx, cerIDs)
+	if len(cerMap) == 0 {
 		util.PanicIf(errors.UnproccessableError("未找到有效证书"))
 	}
 
-	cer := cers[0]
+	var cer *models.CertificateV2
+	for _, cerID := range cerIDs {
+		cer = cerMap[cerID]
+		if !cer.BizExt.IsReplenish {
+			break
+		}
+	}
+	if cer == nil {
+		util.PanicIf(errors.UnproccessableError("未找到有效证书"))
+	}
+
 	// 0 说明是老版本证书, 需要管理员校验
 	if cer.BizExt.Level == 0 {
 		util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
