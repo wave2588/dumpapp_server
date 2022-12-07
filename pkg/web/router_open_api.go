@@ -23,6 +23,11 @@ func NewRouterOpenAPI() chi.Router {
 	r.With(middleware.OAuthGuest).Get("/certificate/price", certificateHandler.GetCertificatePrice)
 	// endregion
 
+	// member handler
+	memberHandler := open_api_handler.NewOpenMemberHandler()
+	r.With(middleware.OAuthGuest).Get("/member", memberHandler.GetMember)
+	// endregion
+
 	// access website
 	authWebsiteHandler := open_api_handler.NewAuthWebsiteHandler()
 	r.With(middleware.OAuthGuest).Get("/auth/website", authWebsiteHandler.GetAuth)
