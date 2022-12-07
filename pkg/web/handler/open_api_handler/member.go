@@ -1,14 +1,14 @@
 package open_api_handler
 
 import (
+	"net/http"
+
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/web/render"
-	"net/http"
 )
 
-type OpenMemberHandler struct {
-}
+type OpenMemberHandler struct{}
 
 func NewOpenMemberHandler() *OpenMemberHandler {
 	return &OpenMemberHandler{}
