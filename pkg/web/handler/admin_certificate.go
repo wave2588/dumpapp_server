@@ -111,14 +111,14 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 	}
 
 	now := time.Now()
-	if cer.Level == 2 {
-		if cer.ReplenishExpireAt <= now.Unix() {
-			util.PanicIf(errors.UnproccessableError("已超过 180 天有效期，无法候补。"))
-		}
-	}
-	if cer.Level == 3 {
-		if cer.ReplenishExpireAt <= now.Unix() {
-			util.PanicIf(errors.UnproccessableError("已超过 365 天有效期，无法候补。"))
+	if cer.ReplenishExpireAt <= now.Unix() {
+		switch cer.Level {
+		case 1:
+			util.PanicIf(errors.UnproccessableError("已超过 7 天候补时间，无法候补。"))
+		case 2:
+			util.PanicIf(errors.UnproccessableError("已超过 180 天候补时间，无法候补。"))
+		case 3:
+			util.PanicIf(errors.UnproccessableError("已超过 365 天候补时间，无法候补。"))
 		}
 	}
 
