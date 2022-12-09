@@ -110,6 +110,49 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 	util.RenderJSON(w, cer)
 }
 
+type postCertificateReplenishArgs struct {
+	CertificateID int64 `json:"certificate_id,string"`
+}
+
+func (p *postCertificateReplenishArgs) Validate() error {
+	err := validator.New().Struct(p)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *OpenCertificateHandler) PostCertificateReplenish(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	loginID := mustGetLoginID(ctx, r)
+
+	args := &postCertificateReplenishArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	/// 测试用
+	if args.CertificateID == 1542516117182877696 {
+		loginID = 1431956649500741632
+		cerMap := render.NewCertificateRender([]int64{args.CertificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+		cer, ok := cerMap[args.CertificateID]
+		if !ok {
+			util.PanicIf(errors.ErrNotFoundCertificate)
+		}
+		util.RenderJSON(w, cer)
+		return
+	}
+
+	cerID, err := h.certificateWebCtl.CertificateReplenish(ctx, loginID, args.CertificateID)
+	util.PanicIf(err)
+
+	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+	cer, ok := cerMap[cerID]
+	if !ok {
+		util.PanicIf(errors.ErrNotFoundCertificate)
+	}
+	util.RenderJSON(w, cer)
+}
+
 type getCertificateArgs struct {
 	CertificateID string `form:"certificate_id" validate:"required"`
 }

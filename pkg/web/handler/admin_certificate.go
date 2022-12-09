@@ -105,11 +105,6 @@ func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Reque
 		util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
 	}
 
-	// 普通证书不能候补
-	if cer.Level == 1 {
-		util.PanicIf(errors.UnproccessableError("该证书是普通证书，无法后补。"))
-	}
-
 	now := time.Now()
 	if cer.ReplenishExpireAt <= now.Unix() {
 		switch cer.Level {

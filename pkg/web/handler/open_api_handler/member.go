@@ -1,9 +1,9 @@
 package open_api_handler
 
 import (
-	"dumpapp_server/pkg/common/enum"
 	"net/http"
 
+	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/errors"
 	"dumpapp_server/pkg/web/render"

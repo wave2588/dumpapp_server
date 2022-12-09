@@ -12,7 +12,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	email := "863612913@qq.com"
+	email := "multiplediaries@qq.com"
 	accountMap, err := impl.DefaultAccountDAO.BatchGetByEmail(ctx, []string{email})
 	util.PanicIf(err)
 
@@ -59,6 +59,15 @@ func main() {
 }
 
 var udids = []string{
-	"645a8fa88ea640e8b8fe9e9b06e29ba46818d1a7",
-	"00008030-000A5DD926FA802E",
+	"00008020-00016DD10A92002E",
+	"00008120-001455443E90C01E",
+	"00008110-001E4D221110401E",
+	"00008110-001A691A11B9801E",
+	"00008101-001245183668001E",
+	"00008110-001278141169801E",
+	"00008110-001A18460EBB801E",
+	"00008101-00060CEC2208001E",
+	"00008120-001824CA0A33401E",
+	"00008101-0014654A3A99001E",
+	"00008101-00114D180151001E",
 }
