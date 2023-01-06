@@ -29,8 +29,8 @@ func MustRenderShareInfo(ctx context.Context, loginID int64) *ShareInfo {
 
 	return &ShareInfo{
 		Content:        fmt.Sprintf("App 多开、分身、去广告、签名推广.....只有你想不到，没有我们做不到，更多好玩 App 功能尽在 DumpApp，快来加入吧！%s", inviteURL),
-		QQGroupURL:     "https://jq.qq.com/?_wv=1027&k=xVqlWqEc",
-		QQGroupNum:     763789550,
+		QQGroupURL:     "https://jq.qq.com/?_wv=1027&k=j2pZDWP9",
+		QQGroupNum:     740273910,
 		TelegramURL:    "https://t.me/+VGGU8RYVqDo1NTg1",
 		WechatURL:      "https://work.weixin.qq.com/u/vc3a10ae3518beb870?v=3.1.23.79300&src=wx",
 		AppTutorialURL: "https://g89s5y6zts.feishu.cn/docx/doxcnUUe4ti2rYSNz535iB9NFsh",
