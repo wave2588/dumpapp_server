@@ -4,6 +4,7 @@ import (
 	"dumpapp_server/cmd/cron/conclusion"
 	"dumpapp_server/cmd/cron/delete_ipa"
 	"dumpapp_server/cmd/cron/delete_plist"
+	"dumpapp_server/cmd/cron/pending_order"
 	"github.com/robfig/cron/v3"
 )
 
@@ -24,6 +25,11 @@ func main() {
 	/// 每晚 0 点推送总结
 	c.AddFunc("00 00 00 * * ?", func() {
 		conclusion.Run()
+	})
+
+	/// 每晚 0 点推送未支付成功的订单
+	c.AddFunc("00 00 00 * * ?", func() {
+		pending_order.Run()
 	})
 
 	//spec := "*/2 * * * * ?" //cron表达式，每秒一次
