@@ -28,6 +28,8 @@ type MemberPayOrderRender struct {
 	ids           []int64
 	loginID       int64
 	includeFields []string
+	features      []string
+	featureSet    *util2.Set
 
 	memberPayOrderMap map[int64]*MemberPayOrder
 
@@ -52,9 +54,28 @@ func MemberPayOrderIncludes(fields []string) MemberPayOrderOption {
 	}
 }
 
+func MemberPayOrderFeatures(features []string) MemberPayOrderOption {
+	return func(render *MemberPayOrderRender) {
+		render.features = features
+		render.featureSet = util2.NewSet()
+		for _, f := range features {
+			render.featureSet.Add(f)
+		}
+	}
+}
+
 var MemberPayOrderDefaultRenderFields = []MemberPayOrderOption{
 	MemberPayOrderIncludes([]string{
 		"Member",
+	}),
+}
+
+var MemberPayOrderAdminRenderFidles = []MemberPayOrderOption{
+	MemberPayOrderIncludes([]string{
+		"Member",
+	}),
+	MemberPayOrderFeatures([]string{
+		"Admin",
 	}),
 }
 
@@ -124,7 +145,11 @@ func (f *MemberPayOrderRender) RenderMember(ctx context.Context) {
 		memberIDs = append(memberIDs, order.meta.MemberID)
 	}
 	memberIDs = util2.RemoveDuplicates(memberIDs)
-	memberMap := NewMemberRender(memberIDs, f.loginID, MemberDefaultRenderFields...).RenderMap(ctx)
+	opts := MemberDefaultRenderFields
+	if f.featureSet.Exists("Admin") {
+		opts = MemberAdminRenderFields
+	}
+	memberMap := NewMemberRender(memberIDs, f.loginID, opts...).RenderMap(ctx)
 	for _, order := range f.memberPayOrderMap {
 		order.Member = memberMap[order.meta.MemberID]
 	}

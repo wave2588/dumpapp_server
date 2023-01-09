@@ -94,6 +94,11 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdminV2).Get("/certificate", certificateHandler.GetCertificate)
 	// endregion
 
+	// order handler
+	orderHandler := handler.NewAdminOrderHandler()
+	r.With(middleware.OAuthAdminV2).Get("/order/list", orderHandler.GetList)
+	// endregion
+
 	return r
 }
 
