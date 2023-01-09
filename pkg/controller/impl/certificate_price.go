@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"fmt"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/enum"
@@ -113,5 +114,5 @@ func (c *CertificatePriceController) GetPriceByID(ctx context.Context, memberID,
 			return info, nil
 		}
 	}
-	return nil, errors.New("获取价格失败") /// 理论上不会走到这
+	return nil, errors.New(fmt.Sprintf("获取价格失败 memberID: %d  priceID: %d", memberID, priceID)) /// 理论上不会走到这
 }
