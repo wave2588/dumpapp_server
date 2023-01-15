@@ -1,8 +1,11 @@
 package install_app_handler
 
 import (
+	"dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/enum"
@@ -19,14 +22,18 @@ import (
 )
 
 type AdminCDKeyHandler struct {
+	accountDAO    dao.AccountDAO
 	cdkeyDAO      dao.InstallAppCdkeyDAO
 	cdkeyOrderDAO dao.InstallAppCdkeyOrderDAO
+	alertWebCtl   controller.AlterWebController
 }
 
 func NewAdminCDKeyHandler() *AdminCDKeyHandler {
 	return &AdminCDKeyHandler{
+		accountDAO:    impl.DefaultAccountDAO,
 		cdkeyDAO:      impl.DefaultInstallAppCdkeyDAO,
 		cdkeyOrderDAO: impl.DefaultInstallAppCdkeyOrderDAO,
+		alertWebCtl:   impl3.DefaultAlterWebController,
 	}
 }
 
@@ -55,7 +62,11 @@ func (p *postCDKeyArgs) Validate() error {
 }
 
 func (h *AdminCDKeyHandler) Post(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	var (
+		ctx     = r.Context()
+		account = mustGetLoginAccount(ctx)
+		loginID = account.ID
+	)
 
 	args := &postCDKeyArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
@@ -86,6 +97,24 @@ func (h *AdminCDKeyHandler) Post(w http.ResponseWriter, r *http.Request) {
 		}))
 		cdkeyIDs = append(cdkeyIDs, cdkeyID)
 	}
+
+	oIDString := ""
+	for _, oID := range outIDs {
+		oIDString += fmt.Sprintf("%s ", oID)
+	}
+
+	// 加个推送
+	adminAccountMap, err := h.accountDAO.BatchGet(ctx, []int64{loginID})
+	util.PanicIf(err)
+	adminAccount := adminAccountMap[loginID]
+	titleString := "<font color=\"warning\">管理员添加兑换码</font>\n>"
+	countString := fmt.Sprintf("count：<font color=\"comment\">%d</font>\n", args.Number)
+	contactEmailString := fmt.Sprintf("联系方式：<font color=\"comment\">%s</font>\n", args.Contact)
+	levelString := fmt.Sprintf("等级：<font color=\"comment\">%d</font>\n", args.CerLevel)
+	outIDString := fmt.Sprintf("兑换码：<font color=\"comment\">%s</font>\n", oIDString)
+	adminEmailString := fmt.Sprintf("管理员邮箱：<font color=\"comment\">%s</font>\n", adminAccount.Email)
+	timeStr := fmt.Sprintf("操作时间：<font color=\"comment\">%s</font>", time.Now().Format("2006-01-02 15:04:05"))
+	h.alertWebCtl.SendCustomMsg(ctx, "32df4de7-524c-4d0c-94cd-c8d7e0709fb4", titleString+countString+contactEmailString+levelString+outIDString+adminEmailString+timeStr)
 
 	util.RenderJSON(w, util.ListOutput{
 		Paging: nil,

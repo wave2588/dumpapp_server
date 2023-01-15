@@ -1,6 +1,12 @@
 package install_app_handler
 
 import (
+	"context"
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/middleware"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -56,4 +62,19 @@ func GetIntArgument(r *http.Request, key string, fallback int) int {
 
 func getIntArgument(r *http.Request, key string, bitSize int) (int64, error) {
 	return strconv.ParseInt(r.URL.Query().Get(key), 10, bitSize)
+}
+
+func mustGetLoginID(ctx context.Context) int64 {
+	account := mustGetLoginAccount(ctx)
+	return account.ID
+}
+
+func mustGetLoginAccount(ctx context.Context) *models.Account {
+	loginID := middleware.MustGetMemberID(ctx)
+	account, err := impl.DefaultAccountDAO.Get(ctx, loginID)
+	util.PanicIf(err)
+	if account.Status == 2 {
+		panic(errors.ErrAccountUnusual)
+	}
+	return account
 }

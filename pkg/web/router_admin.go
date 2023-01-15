@@ -63,9 +63,9 @@ func NewRouterAdmin() chi.Router {
 
 	// admin cdkey handler
 	cdkeyHandler := install_app_handler.NewAdminCDKeyHandler()
-	r.With(middleware.OAuthAdmin).Post("/cdkey", cdkeyHandler.Post)
-	r.With(middleware.OAuthAdmin).Get("/cdkeys", cdkeyHandler.GetList)
-	r.With(middleware.OAuthAdmin).Delete("/cdkey/{cdkey_id}", cdkeyHandler.Delete)
+	r.With(middleware.OAuthAdminV2).Post("/cdkey", cdkeyHandler.Post)
+	r.With(middleware.OAuthAdminV2).Get("/cdkeys", cdkeyHandler.GetList)
+	r.With(middleware.OAuthAdminV2).Delete("/cdkey/{cdkey_id}", cdkeyHandler.Delete)
 	// endregion
 
 	// ipa_black handler
