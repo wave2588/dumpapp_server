@@ -102,8 +102,8 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		freeNumber = 1290
 	}
 
-	/// 充值大于等于 500 则自动升级为代理商
-	if number >= 500 {
+	/// 充值大于等于 1000 则自动升级为代理商
+	if number >= 1000 {
 		account.Role = enum.AccountRoleAgent
 		if err = c.accountDAO.Update(ctx, account); err != nil {
 			return err
