@@ -131,7 +131,7 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 		replenishExpireAt := meta.CreatedAt
 		switch meta.BizExt.Level {
 		case 1:
-			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 7) // 7 天售后
+			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 30) // 30 天售后
 		case 2:
 			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 180) // 180 天售后
 		case 3:

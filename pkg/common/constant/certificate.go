@@ -17,7 +17,7 @@ const (
 	CertificateTitleL2        = "稳定版"
 	CertificateTitleL3        = "豪华版"
 
-	CertificateDescriptionL1 = "理论 1 年，售后 1 星期，掉了补 1 次。"
+	CertificateDescriptionL1 = "理论 1 年，售后 1 个月，掉了补 1 次。"
 	CertificateDescriptionL2 = "理论 1 年，售后 6 个月，掉了补 6 次。"
 	CertificateDescriptionL3 = "理论 1 年，售后 1 年，掉了补 12 次。"
 )
