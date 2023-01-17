@@ -220,7 +220,7 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 		data = map[string]interface{}{
 			"msgtype": "text",
 			"text": map[string]interface{}{
-				"content":        "证书余额不足啦! 快充值啦!!",
+				"content":        fmt.Sprintf("证书余额仅剩 %d 个! 快充值啦!!", balanceCount),
 				"mentioned_list": []string{"@all"},
 			},
 		}
