@@ -193,6 +193,7 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, h.getMemberSignIpaData(ctx, id, args.IncludeFields))
 }
 
+// Deprecated
 func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(errors.UnproccessableError("不需要处理"))
 }
