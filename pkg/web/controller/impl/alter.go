@@ -19,6 +19,7 @@ type AlterWebController struct {
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	memberDeviceDAO            dao.MemberDeviceDAO
 	certificateDAO             dao.CertificateV2DAO
+	certificateV3Ctl           controller3.CertificateController
 }
 
 var DefaultAlterWebController *AlterWebController
@@ -34,6 +35,7 @@ func NewAlterWebController() *AlterWebController {
 		memberDownloadIpaRecordDAO: impl2.DefaultMemberDownloadIpaRecordDAO,
 		memberDeviceDAO:            impl2.DefaultMemberDeviceDAO,
 		certificateDAO:             impl2.DefaultCertificateV2DAO,
+		certificateV3Ctl:           impl.DefaultCertificateV3Controller,
 	}
 }
 
@@ -191,20 +193,39 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 		return
 	}
 
+	balance, _ := c.certificateV3Ctl.GetBalance(ctx)
+	balanceCount := int64(0)
+	if balance != nil {
+		balanceCount = balance.Count
+	}
+
 	cerIDStr := fmt.Sprintf("证书 ID：<font color=\"comment\">%d</font>\n", cer.ID)
 	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
 	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	sourceStr := fmt.Sprintf("Source：<font color=\"comment\">%s</font>\n", cer.Source.String())
+	balanceStr := fmt.Sprintf("余额：<font color=\"comment\">%d</font>\n", balanceCount)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
 			"content": "<font color=\"info\">证书购买成功</font>\n>" +
-				cerIDStr + deviceIDStr + udidStr + sourceStr + emailStr + timeStr,
+				cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + balanceStr + timeStr,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	// 剩余 50 个就开始推
+	if balanceCount <= 50 {
+		data = map[string]interface{}{
+			"msgtype": "text",
+			"text": map[string]interface{}{
+				"content":        "证书余额不足啦! 快充值啦!!",
+				"mentioned_list": []string{"@all"},
+			},
+		}
+		util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+	}
 }
 
 func (c *AlterWebController) SendAccountMsg(ctx context.Context) {

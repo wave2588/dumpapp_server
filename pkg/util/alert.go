@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"dumpapp_server/pkg/common/util"
 )
 
 func SendWeiXinBotV2(ctx context.Context, keyID string, message string, receivers []string) {
@@ -34,7 +32,6 @@ func SendWeiXinBot(ctx context.Context, keyID string, data interface{}, receiver
 
 	client := &http.Client{Timeout: time.Second}
 
-	resp, err := client.Do(req)
-	util.PanicIf(err)
+	resp, _ := client.Do(req)
 	defer resp.Body.Close() // nolint
 }
