@@ -67,7 +67,7 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type expenseArgs struct {
-	ID          string `json:"id" validate:"required"`
+	ID          int64  `json:"id,string" validate:"required"`
 	ExpenseType string `json:"expense_type" validate:"required"`
 }
 
@@ -88,7 +88,7 @@ func (h *DispenseHandler) Expense(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	signIpaMap, err := h.memberSignIpaDAO.BatchGetByExpenseID(ctx, []string{args.ID})
+	signIpaMap, err := h.memberSignIpaDAO.BatchGet(ctx, []int64{args.ID})
 	util.PanicIf(err)
 
 	signIpa, ok := signIpaMap[args.ID]

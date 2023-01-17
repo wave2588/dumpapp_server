@@ -175,7 +175,7 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/self/sign_ipa", memberSignIpaHandler.GetSelfSignIpaList)
 	r.With(middleware.OAuthRegister).Put("/sign_ipa/{id}", memberSignIpaHandler.Put)
 	r.With(middleware.OAuthGuest).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
-	r.With(middleware.OAuthGuest).Get("/sign_ipa/expense_id/{expense_id}", memberSignIpaHandler.GetByExpenseID)
+	r.With(middleware.OAuthGuest).Get("/sign_ipa/expense_id/{expense_id}", memberSignIpaHandler.GetByExpenseID) // 此接口已经不再使用
 	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 
