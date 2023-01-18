@@ -67,7 +67,7 @@ func (h *DispenseHandler) Post(w http.ResponseWriter, r *http.Request) {
 }
 
 type expenseArgs struct {
-	ID          int64  `json:"id,string" validate:"required"`
+	ID          string `json:"id" validate:"required"`
 	ExpenseType string `json:"expense_type" validate:"required"`
 }
 
@@ -88,10 +88,11 @@ func (h *DispenseHandler) Expense(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 
-	signIpaMap, err := h.memberSignIpaDAO.BatchGet(ctx, []int64{args.ID})
+	id := cast.ToInt64(args.ID)
+	signIpaMap, err := h.memberSignIpaDAO.BatchGet(ctx, []int64{id})
 	util.PanicIf(err)
 
-	signIpa, ok := signIpaMap[args.ID]
+	signIpa, ok := signIpaMap[id]
 	if !ok {
 		util.PanicIf(errors.NewDefaultAPIError(404, 404, "NotFound", fmt.Sprintf("记录未找到, id:%s type:%s", cast.ToString(args.ID), args.ExpenseType)))
 	}
