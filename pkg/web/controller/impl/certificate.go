@@ -96,6 +96,23 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		return 0, err
 	}
 
+	/// 事物
+	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
+	defer clients.MustClearMySQLTransaction(ctx, txn)
+	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
+
+	cerID := util2.MustGenerateID(ctx)
+
+	/// 如果是补证书行为则不需要扣币
+	if !isReplenish {
+		/// 扣除消费的 D 币
+		util.PanicIf(c.memberPayCountCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
+			ObjectID:   cerID,
+			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
+		}))
+	}
+
+	// 生成证书
 	/// 这里做个分流, 后台可配置随意切换任何平台
 	var response *controller.CertificateResponse
 	switch config.BizExt.CerSource {
@@ -134,12 +151,6 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	p12FileMd5 := util2.StringMd5(p12FileData)
 	mpFileMd5 := util2.StringMd5(mpFileData)
 
-	/// 事物
-	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
-	defer clients.MustClearMySQLTransaction(ctx, txn)
-	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
-
-	cerID := util2.MustGenerateID(ctx)
 	util.PanicIf(c.certificateDAO.Insert(ctx, &models.CertificateV2{
 		ID:                         cerID,
 		DeviceID:                   memberDevice.ID,
@@ -151,15 +162,6 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 		Source:                     response.Source,
 		BizExt:                     response.BizExt,
 	}))
-
-	/// 如果是补证书行为则不需要扣币
-	if !isReplenish {
-		/// 扣除消费的 D 币
-		util.PanicIf(c.memberPayCountCtl.DeductPayCount(ctx, loginID, payCount, enum.MemberPayCountStatusUsed, enum.MemberPayCountUseCertificate, datatype.MemberPayCountRecordBizExt{
-			ObjectID:   cerID,
-			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
-		}))
-	}
 
 	clients.MustCommit(ctx, txn)
 	ctx = util.ResetCtxKey(ctx, constant.TransactionKeyTxn)

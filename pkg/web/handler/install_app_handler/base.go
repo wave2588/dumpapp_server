@@ -2,16 +2,16 @@ package install_app_handler
 
 import (
 	"context"
-	"dumpapp_server/pkg/common/util"
-	"dumpapp_server/pkg/dao/impl"
-	"dumpapp_server/pkg/dao/models"
-	"dumpapp_server/pkg/errors"
-	"dumpapp_server/pkg/middleware"
 	"encoding/json"
 	"net/http"
 	"net/url"
 	"strconv"
 
+	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/dao/impl"
+	"dumpapp_server/pkg/dao/models"
+	"dumpapp_server/pkg/errors"
+	"dumpapp_server/pkg/middleware"
 	"github.com/go-playground/form"
 )
 

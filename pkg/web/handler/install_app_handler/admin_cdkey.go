@@ -1,8 +1,6 @@
 package install_app_handler
 
 import (
-	"dumpapp_server/pkg/web/controller"
-	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"fmt"
 	"net/http"
 	"time"
@@ -16,6 +14,8 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
+	"dumpapp_server/pkg/web/controller"
+	impl3 "dumpapp_server/pkg/web/controller/impl"
 	"dumpapp_server/pkg/web/render/install_app_render"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/cast"

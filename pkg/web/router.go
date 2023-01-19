@@ -197,7 +197,7 @@ func NewRouter() chi.Router {
 	// endregion
 
 	// Deprecated 废弃的接口，不再用了
-	r.With(middleware.OAuthGuest).Get("/sign_ipa/expense_id/{expense_id}", memberSignIpaHandler.GetByExpenseID) //Deprecated: 此接口已经不再使用
+	r.With(middleware.OAuthGuest).Get("/sign_ipa/expense_id/{expense_id}", memberSignIpaHandler.GetByExpenseID) // Deprecated: 此接口已经不再使用
 	// endregion
 
 	return r
