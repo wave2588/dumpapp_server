@@ -15,7 +15,7 @@ func NewMemberPayOrderController() *MemberPayOrderController {
 }
 
 func (c *MemberPayOrderController) GetPayCampaignDescription() string {
-	return "充 500 送 15 ，充 1000 送 70，充 2000 送 260 ，充 5000 送 1290。"
+	return "充 500 送 15 ，充 1500 送 100，充 3000 送 300 ，充 5000 送 800。"
 }
 
 func (c *MemberPayOrderController) GetPayCampaignRule() *controller.PayCampaign {
