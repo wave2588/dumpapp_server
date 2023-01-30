@@ -92,14 +92,14 @@ func (c *MemberPayOrderWebController) AliPayCallbackOrder(ctx context.Context, o
 		10000 - 3330
 	*/
 	freeNumber := int64(0)
-	if number >= 500 && number < 1000 {
+	if number >= 500 && number < 1500 {
 		freeNumber = 15
-	} else if number >= 1000 && number < 2000 {
-		freeNumber = 70
-	} else if number >= 2000 && number < 5000 {
-		freeNumber = 260
+	} else if number >= 1500 && number < 3000 {
+		freeNumber = 100
+	} else if number >= 3000 && number < 5000 {
+		freeNumber = 300
 	} else if number >= 5000 {
-		freeNumber = 1290
+		freeNumber = 800
 	}
 
 	/// 充值大于等于 1000 则自动升级为代理商
