@@ -109,7 +109,7 @@ func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int
 	}
 
 	// 生成证书
-	if err = c.createCer(ctx, loginID, udid, note, priceID, memberDevice, cerID); err != nil {
+	if err = c.createCer(ctx, loginID, udid, note, priceID, memberDevice, false, cerID); err != nil {
 		return 0, err
 	}
 
@@ -150,7 +150,7 @@ func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int6
 	}
 
 	// 生成证书
-	if err := c.createCer(ctx, loginID, udid, note, priceID, memberDevice, cerID); err != nil {
+	if err := c.createCer(ctx, loginID, udid, note, priceID, memberDevice, true, cerID); err != nil {
 		return 0, err
 	}
 
@@ -160,7 +160,7 @@ func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int6
 	return cerID, nil
 }
 
-func (c *CertificateV2WebController) createCer(ctx context.Context, loginID int64, udid, note string, priceID int64, memberDevice *models.MemberDevice, cerID int64) error {
+func (c *CertificateV2WebController) createCer(ctx context.Context, loginID int64, udid, note string, priceID int64, memberDevice *models.MemberDevice, isReplenish bool, cerID int64) error {
 	resp, alterMsg, err := c.certificateBaseCtl.Create(ctx, udid)
 	if alterMsg != "" {
 		c.alterWebCtl.SendCreateCertificateFailMsg(ctx, loginID, memberDevice.ID, alterMsg)
@@ -175,7 +175,7 @@ func (c *CertificateV2WebController) createCer(ctx context.Context, loginID int6
 	/// 记录证书备注
 	resp.Response.BizExt.Note = note
 	/// 记录是否为售后证书
-	resp.Response.BizExt.IsReplenish = false
+	resp.Response.BizExt.IsReplenish = isReplenish
 
 	/// 计算证书 md5
 	p12FileData := resp.Response.P12Data
