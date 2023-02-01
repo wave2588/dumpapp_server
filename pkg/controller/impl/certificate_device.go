@@ -67,14 +67,7 @@ func (c *CertificateDeviceController) IsReplenish(ctx context.Context, memberID 
 		return false, nil
 	}
 
-	// 检测证书是否有效
-	isActiveMap, _ := c.certificateBaseCtl.CheckCertificateIsActiveByModels(ctx, []*models.CertificateV2{cer})
-	// 如果证书还有效，则不进行候补，进行扣币操作
-	if isActive := isActiveMap[cer.ID]; isActive {
-		return false, nil
-	}
-
-	// 插件证书候补时间
+	// 检测证书候补时间
 	cerReplenishExpireAtMap, err := c.certificateBaseCtl.GetCertificateReplenishExpireAtByModels(ctx, []*models.CertificateV2{cer})
 	if err != nil {
 		return false, err
@@ -84,6 +77,13 @@ func (c *CertificateDeviceController) IsReplenish(ctx context.Context, memberID 
 
 	// 如果证书候补时间大于当前时间，则不能候补
 	if cerReplenishExpireAt.Unix() >= time.Now().Unix() {
+		return false, nil
+	}
+
+	// 检测证书是否有效
+	isActiveMap, _ := c.certificateBaseCtl.CheckCertificateIsActiveByModels(ctx, []*models.CertificateV2{cer})
+	// 如果证书还有效，则不进行候补，进行扣币操作
+	if isActive := isActiveMap[cer.ID]; isActive {
 		return false, nil
 	}
 

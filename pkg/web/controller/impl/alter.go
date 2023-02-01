@@ -228,6 +228,56 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	}
 }
 
+func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Context, loginID, deviceID, cerID int64, isReplenish bool) {
+	account, err := c.accountDAO.Get(ctx, loginID)
+	if err != nil {
+		return
+	}
+	device, err := c.memberDeviceDAO.Get(ctx, deviceID)
+	if err != nil {
+		return
+	}
+	cer, err := c.certificateDAO.Get(ctx, cerID)
+	if err != nil {
+		return
+	}
+
+	balance, _ := c.certificateV3Ctl.GetBalance(ctx)
+	balanceCount := int64(0)
+	if balance != nil {
+		balanceCount = balance.Count
+	}
+
+	cerIDStr := fmt.Sprintf("证书 ID：<font color=\"comment\">%d</font>\n", cer.ID)
+	deviceIDStr := fmt.Sprintf("设备 ID：<font color=\"comment\">%d</font>\n", device.ID)
+	udidStr := fmt.Sprintf("UDID：<font color=\"comment\">%s</font>\n", device.Udid)
+	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
+	sourceStr := fmt.Sprintf("Source：<font color=\"comment\">%s</font>\n", cer.Source.String())
+	isReplenishStr := fmt.Sprintf("是否是售后证书：<font color=\"comment\">%v</font>\n", isReplenish)
+	balanceStr := fmt.Sprintf("余额：<font color=\"comment\">%d</font>\n", balanceCount)
+	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+	data := map[string]interface{}{
+		"msgtype": "markdown",
+		"markdown": map[string]interface{}{
+			"content": "<font color=\"info\">证书购买成功</font>\n>" +
+				cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr + balanceStr + timeStr,
+		},
+	}
+	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+
+	// 剩余 50 个就开始推
+	if balanceCount <= 50 {
+		data = map[string]interface{}{
+			"msgtype": "text",
+			"text": map[string]interface{}{
+				"content":        fmt.Sprintf("证书余额仅剩 %d 个! 快充值啦!!", balanceCount),
+				"mentioned_list": []string{"@all"},
+			},
+		}
+		util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
+	}
+}
+
 func (c *AlterWebController) SendAccountMsg(ctx context.Context) {
 	count, err := c.accountDAO.Count(ctx, nil)
 	if err != nil {

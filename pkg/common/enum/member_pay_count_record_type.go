@@ -18,10 +18,11 @@ const (
 	MemberPayCountRecordTypeInvitedPresented                                     /// 增加: 邀请赠送
 	MemberPayCountRecordTypeRebate                                               /// 增加: 被邀请的人充值后返还给邀请人
 
-	MemberPayCountRecordTypeBuyIpa         /// 减少: 购买 ipa
-	MemberPayCountRecordTypeBuyCertificate /// 减少: 购买证书
-	MemberPayCountRecordTypeAdminDelete    /// 减少: 管理员删除
-	MemberPayCountRecordTypeDispense       /// 减少: 兑换了下载次数
+	MemberPayCountRecordTypeBuyIpa               /// 减少: 购买 ipa
+	MemberPayCountRecordTypeBuyCertificate       /// 减少: 购买证书
+	MemberPayCountRecordTypeAdminDelete          /// 减少: 管理员删除
+	MemberPayCountRecordTypeDispense             /// 减少: 兑换了下载次数
+	MemberPayCountRecordTypeReplenishCertificate /// 减少: 候补证书
 )
 
 func ConvertMemberPayCountSourceToRecordType(source MemberPayCountSource) MemberPayCountRecordType {

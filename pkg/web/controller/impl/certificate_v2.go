@@ -20,14 +20,15 @@ import (
 )
 
 type CertificateV2WebController struct {
-	memberDeviceDAO      dao.MemberDeviceDAO
-	certificateDAO       dao.CertificateV2DAO
-	certificateDeviceDAO dao.CertificateDeviceDAO
-	memberPayCountCtl    controller.MemberPayCountController
-	certificatePriceCtl  controller.CertificatePriceController
-	certificateBaseCtl   controller.CertificateBaseController
-	certificateDeviceCtl controller.CertificateDeviceController
-	alterWebCtl          controller2.AlterWebController
+	memberDeviceDAO         dao.MemberDeviceDAO
+	certificateDAO          dao.CertificateV2DAO
+	certificateDeviceDAO    dao.CertificateDeviceDAO
+	memberPayCountRecordDAO dao.MemberPayCountRecordDAO
+	memberPayCountCtl       controller.MemberPayCountController
+	certificatePriceCtl     controller.CertificatePriceController
+	certificateBaseCtl      controller.CertificateBaseController
+	certificateDeviceCtl    controller.CertificateDeviceController
+	alterWebCtl             controller2.AlterWebController
 }
 
 var DefaultCertificateV2WebController *CertificateV2WebController
@@ -38,14 +39,15 @@ func init() {
 
 func NewCertificateV2WebController() *CertificateV2WebController {
 	return &CertificateV2WebController{
-		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
-		certificateDAO:       impl.DefaultCertificateV2DAO,
-		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
-		memberPayCountCtl:    impl2.DefaultMemberPayCountController,
-		certificatePriceCtl:  impl2.DefaultCertificatePriceController,
-		certificateBaseCtl:   impl2.DefaultCertificateBaseController,
-		certificateDeviceCtl: impl2.DefaultCertificateDeviceController,
-		alterWebCtl:          NewAlterWebController(),
+		memberDeviceDAO:         impl.DefaultMemberDeviceDAO,
+		certificateDAO:          impl.DefaultCertificateV2DAO,
+		certificateDeviceDAO:    impl.DefaultCertificateDeviceDAO,
+		memberPayCountRecordDAO: impl.DefaultMemberPayCountRecordDAO,
+		memberPayCountCtl:       impl2.DefaultMemberPayCountController,
+		certificatePriceCtl:     impl2.DefaultCertificatePriceController,
+		certificateBaseCtl:      impl2.DefaultCertificateBaseController,
+		certificateDeviceCtl:    impl2.DefaultCertificateDeviceController,
+		alterWebCtl:             NewAlterWebController(),
 	}
 }
 
@@ -62,12 +64,21 @@ func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, 
 		return 0, errors.ErrCreateCertificateFailV2
 	}
 
+	var cerID int64
 	// 候补
 	if isReplenish {
-		return c.replenish(ctx, loginID, UDID, note, priceID, memberDevice)
+		cerID, err = c.replenish(ctx, loginID, UDID, note, priceID, memberDevice)
+	} else {
+		cerID, err = c.realCreate(ctx, loginID, UDID, note, priceID, memberDevice)
+	}
+	if err != nil {
+		return 0, err
 	}
 
-	return c.realCreate(ctx, loginID, UDID, note, priceID, memberDevice)
+	/// 发送消费成功通知
+	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, isReplenish)
+
+	return cerID, nil
 }
 
 func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int64, udid, note string, priceID int64, memberDevice *models.MemberDevice) (int64, error) {
@@ -124,6 +135,19 @@ func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int6
 	ctx = context.WithValue(ctx, constant.TransactionKeyTxn, txn)
 
 	cerID := util2.MustGenerateID(ctx)
+
+	// 生成记录
+	if err := c.memberPayCountRecordDAO.Insert(ctx, &models.MemberPayCountRecord{
+		MemberID: loginID,
+		Type:     enum.MemberPayCountRecordTypeReplenishCertificate,
+		Count:    0,
+		BizExt: datatype.MemberPayCountRecordBizExt{
+			ObjectID:   cerID,
+			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
+		},
+	}); err != nil {
+		return 0, nil
+	}
 
 	// 生成证书
 	if err := c.createCer(ctx, loginID, udid, note, priceID, memberDevice, cerID); err != nil {

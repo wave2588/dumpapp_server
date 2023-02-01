@@ -176,6 +176,9 @@ func (f *MemberPayCountRecordRender) RenderDescription(ctx context.Context) {
 		case enum.MemberPayCountRecordTypeBuyCertificate:
 			record.Type = "deduct"
 			record.Description = fmt.Sprintf("购买证书消费了 %d 个 D 币", record.meta.Count)
+		case enum.MemberPayCountRecordTypeReplenishCertificate:
+			record.Type = "deduct"
+			record.Description = fmt.Sprintf("候补证书消费了 %d 个 D 币", record.meta.Count)
 		case enum.MemberPayCountRecordTypeAdminDelete:
 			record.Type = "deduct"
 			record.Description = fmt.Sprintf("系统删除了 %d 个 D 币", record.meta.Count)
