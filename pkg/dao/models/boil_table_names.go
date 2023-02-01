@@ -10,6 +10,7 @@ var TableNames = struct {
 	AdminDumpOrder          string
 	AppSource               string
 	AppTimeLock             string
+	CertificateDevice       string
 	CertificateV2           string
 	DailyFreeRecord         string
 	DispenseCount           string
@@ -43,6 +44,7 @@ var TableNames = struct {
 	AdminDumpOrder:          "admin_dump_order",
 	AppSource:               "app_source",
 	AppTimeLock:             "app_time_lock",
+	CertificateDevice:       "certificate_device",
 	CertificateV2:           "certificate_v2",
 	DailyFreeRecord:         "daily_free_record",
 	DispenseCount:           "dispense_count",

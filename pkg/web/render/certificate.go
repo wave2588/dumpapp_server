@@ -3,7 +3,6 @@ package render
 import (
 	"context"
 
-	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl3 "dumpapp_server/pkg/controller/impl"
@@ -46,10 +45,8 @@ type CertificateRender struct {
 
 	certificateMap map[int64]*Certificate
 
-	certificateDAO   dao.CertificateV2DAO
-	certificateV1Ctl controller.CertificateController
-	certificateV2Ctl controller.CertificateController
-	certificateV3Ctl controller.CertificateController
+	certificateDAO     dao.CertificateV2DAO
+	certificateBaseCtl controller.CertificateBaseController
 }
 
 type CertificateOption func(*CertificateRender)
@@ -82,10 +79,8 @@ func NewCertificateRender(ids []int64, loginID int64, opts ...CertificateOption)
 		ids:     ids,
 		loginID: loginID,
 
-		certificateDAO:   impl.DefaultCertificateV2DAO,
-		certificateV1Ctl: impl3.DefaultCertificateV1Controller,
-		certificateV2Ctl: impl3.DefaultCertificateV2Controller,
-		certificateV3Ctl: impl3.DefaultCertificateV3Controller,
+		certificateDAO:     impl.DefaultCertificateV2DAO,
+		certificateBaseCtl: impl3.DefaultCertificateBaseController,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -165,42 +160,19 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 }
 
 func (f *CertificateRender) RenderP12IsActive(ctx context.Context) {
-	isActiveMap := make(map[int64]bool)
-	batch := util2.NewBatch(ctx)
+	cerMetas := make([]*models.CertificateV2, 0)
 	for _, certificate := range f.certificateMap {
-		batch.Append(func(cer *Certificate) util2.FutureFunc {
-			return func() error {
-				switch cer.Meta.Source {
-				case enum.CertificateSourceV1:
-					response, err := f.certificateV1Ctl.CheckCerIsActive(ctx, cer.ID)
-					if err != nil {
-						return err
-					}
-					isActiveMap[cer.ID] = response
-				case enum.CertificateSourceV2:
-					response, err := f.certificateV2Ctl.CheckCerIsActive(ctx, cer.ID)
-					if err != nil {
-						return err
-					}
-					isActiveMap[cer.ID] = response
-				case enum.CertificateSourceV3:
-					response, err := f.certificateV3Ctl.CheckCerIsActive(ctx, cer.ID)
-					if err != nil {
-						return err
-					}
-					isActiveMap[cer.ID] = response
-				}
-				return nil
-			}
-		}(certificate))
+		cerMetas = append(cerMetas, certificate.Meta)
 	}
-	batch.Wait()
+
+	isActiveMap, err := f.certificateBaseCtl.CheckCertificateIsActiveByModels(ctx, cerMetas)
+	util.PanicIf(err)
 
 	for _, certificate := range f.certificateMap {
-		if res, ok := isActiveMap[certificate.ID]; ok {
-			certificate.P12IsActive = res
+		if isActive, ok := isActiveMap[certificate.ID]; ok {
+			certificate.P12IsActive = isActive
 		} else {
-			certificate.P12IsActive = true ///  如果没获取到, 默认展示有效
+			certificate.P12IsActive = true // todo:  如果没获取到, 默认展示有效
 		}
 	}
 }

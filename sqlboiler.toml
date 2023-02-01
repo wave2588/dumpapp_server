@@ -440,3 +440,16 @@
 
   [types.imports]
     third_party = ['"dumpapp_server/pkg/common/datatype"']
+
+# admin_auth_website
+[[types]]
+  [types.match]
+    name = "biz_ext"
+    type = "string"
+    tables = ["certificate_device"]
+
+  [types.replace]
+    type = "datatype.CertificateDeviceBizExt"
+
+  [types.imports]
+    third_party = ['"dumpapp_server/pkg/common/datatype"']
