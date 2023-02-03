@@ -52,6 +52,9 @@ func NewCertificateV2WebController() *CertificateV2WebController {
 }
 
 func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, UDID, note string, priceID int64) (int64, error) {
+	/// 发送用户开始购买证书日志
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, UDID)
+
 	// 判断是候补还是正常购买
 	isReplenish, err := c.certificateDeviceCtl.IsReplenish(ctx, loginID, UDID)
 	if err != nil {
