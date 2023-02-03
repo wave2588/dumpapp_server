@@ -2,6 +2,7 @@ package render
 
 import (
 	"context"
+	"time"
 
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -10,6 +11,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 )
 
 type Certificate struct {
@@ -29,7 +31,7 @@ type Certificate struct {
 	Mobileprovision string `json:"mobileprovision"`
 	Level           int    `json:"level"` /// 0: 未知   1: 普通版   2: 高级版  3: 豪华版
 
-	IsReplenish bool `json:"is_replenish" render:"method=RenderIsReplenish"` // 是否是候补证书
+	IsReplenish *bool `json:"is_replenish,omitempty" render:"method=RenderIsReplenish"` // 是否是候补证书
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -71,6 +73,7 @@ var CertificateDefaultRenderFields = []CertificateOption{
 	CertificateIncludes([]string{
 		"P12IsActive",
 		"Device",
+		"IsReplenish",
 	}),
 }
 
@@ -135,7 +138,6 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			P12:             meta.ModifiedP12FileDate,
 			Mobileprovision: meta.MobileProvisionFileData,
 			Level:           meta.BizExt.Level,
-			IsReplenish:     meta.BizExt.IsReplenish,
 		}
 
 		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
@@ -184,8 +186,12 @@ func (f *CertificateRender) RenderIsReplenish(ctx context.Context) {
 	cdMap, err := f.certificateDeviceDAO.BatchGetByCertificateID(ctx, f.ids)
 	util.PanicIf(err)
 
+	endAt := time.Date(2023, 2, 3, 15, 0, 0, 0, time.Now().Location())
 	for _, certificate := range f.certificateMap {
+		if certificate.CreatedAt < endAt.Unix() {
+			continue
+		}
 		_, ok := cdMap[certificate.ID]
-		certificate.IsReplenish = !ok // 如果存在说明不是候补证书
+		certificate.IsReplenish = common.BoolPtr(!ok) // 如果存在说明不是候补证书
 	}
 }
