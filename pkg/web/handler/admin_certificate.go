@@ -3,9 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 
-	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
@@ -52,75 +50,77 @@ func (p *replenishCertificateArgs) Validate() error {
 }
 
 func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	util.PanicIf(errors.UnproccessableError("该接口已下线"))
 
-	args := &replenishCertificateArgs{}
-	util.PanicIf(util.JSONArgs(r, args))
-
-	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
-	util.PanicIf(err)
-
-	account, ok := accountMap[args.Email]
-	if !ok {
-		util.PanicIf(errors.UnproccessableError("邮箱未找到"))
-	}
-
-	devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, account.ID, []string{args.UDID})
-	util.PanicIf(err)
-
-	if len(devices) == 0 {
-		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("当前账号下没有此 UDID: %s", args.UDID)))
-	}
-
-	device := devices[0]
-	cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
-		models.CertificateV2Where.DeviceID.EQ(device.ID),
-	}, nil)
-	util.PanicIf(err)
-
-	if len(cerIDs) == 0 {
-		util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
-	}
-
-	cerMap := render.NewCertificateRender(cerIDs, 0, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-
-	var cer *render.Certificate
-	for _, cerID := range cerIDs {
-		cer = cerMap[cerID]
-		if !cer.IsReplenish {
-			break
-		}
-	}
-	if cer == nil {
-		util.PanicIf(errors.UnproccessableError("未找到有效证书"))
-	}
-
-	// 检查证书是否有效
-	if cer.P12IsActive {
-		util.PanicIf(errors.UnproccessableError("证书有效，无法候补。"))
-	}
-
-	// 0 说明是老版本证书, 需要管理员校验
-	if cer.Level == 0 {
-		util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
-	}
-
-	now := time.Now()
-	if cer.ReplenishExpireAt <= now.Unix() {
-		switch cer.Level {
-		case 1:
-			util.PanicIf(errors.UnproccessableError("已超过 7 天候补时间，无法候补。"))
-		case 2:
-			util.PanicIf(errors.UnproccessableError("已超过 180 天候补时间，无法候补。"))
-		case 3:
-			util.PanicIf(errors.UnproccessableError("已超过 365 天候补时间，无法候补。"))
-		}
-	}
-
-	_, err = h.certificateWebCtl.PayCertificate(ctx, account.ID, args.UDID, "售后证书", constant.CertificateIDL1, true, "")
-	util.PanicIf(err)
-
-	util.RenderJSON(w, DefaultSuccessBody(ctx))
+	//ctx := r.Context()
+	//
+	//args := &replenishCertificateArgs{}
+	//util.PanicIf(util.JSONArgs(r, args))
+	//
+	//accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
+	//util.PanicIf(err)
+	//
+	//account, ok := accountMap[args.Email]
+	//if !ok {
+	//	util.PanicIf(errors.UnproccessableError("邮箱未找到"))
+	//}
+	//
+	//devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, account.ID, []string{args.UDID})
+	//util.PanicIf(err)
+	//
+	//if len(devices) == 0 {
+	//	util.PanicIf(errors.UnproccessableError(fmt.Sprintf("当前账号下没有此 UDID: %s", args.UDID)))
+	//}
+	//
+	//device := devices[0]
+	//cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
+	//	models.CertificateV2Where.DeviceID.EQ(device.ID),
+	//}, nil)
+	//util.PanicIf(err)
+	//
+	//if len(cerIDs) == 0 {
+	//	util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
+	//}
+	//
+	//cerMap := render.NewCertificateRender(cerIDs, 0, render.CertificateDefaultRenderFields...).RenderMap(ctx)
+	//
+	//var cer *render.Certificate
+	//for _, cerID := range cerIDs {
+	//	cer = cerMap[cerID]
+	//	if !cer.IsReplenish {
+	//		break
+	//	}
+	//}
+	//if cer == nil {
+	//	util.PanicIf(errors.UnproccessableError("未找到有效证书"))
+	//}
+	//
+	//// 检查证书是否有效
+	//if cer.P12IsActive {
+	//	util.PanicIf(errors.UnproccessableError("证书有效，无法候补。"))
+	//}
+	//
+	//// 0 说明是老版本证书, 需要管理员校验
+	//if cer.Level == 0 {
+	//	util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
+	//}
+	//
+	//now := time.Now()
+	//if cer.ReplenishExpireAt <= now.Unix() {
+	//	switch cer.Level {
+	//	case 1:
+	//		util.PanicIf(errors.UnproccessableError("已超过 7 天候补时间，无法候补。"))
+	//	case 2:
+	//		util.PanicIf(errors.UnproccessableError("已超过 180 天候补时间，无法候补。"))
+	//	case 3:
+	//		util.PanicIf(errors.UnproccessableError("已超过 365 天候补时间，无法候补。"))
+	//	}
+	//}
+	//
+	//_, err = h.certificateWebCtl.PayCertificate(ctx, account.ID, args.UDID, "售后证书", constant.CertificateIDL1, true, "")
+	//util.PanicIf(err)
+	//
+	//util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
 
 type getCertificateArgs struct {

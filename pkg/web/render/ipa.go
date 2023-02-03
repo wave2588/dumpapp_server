@@ -37,6 +37,8 @@ type Version struct {
 	IpaType     enum.IpaType `json:"ipa_type"`
 	DescribeURL *string      `json:"describe_url,omitempty"`
 	Describe    *string      `json:"describe,omitempty"`
+	Size        int64        `json:"size"`
+	Country     string       `json:"country"`
 	CreatedAt   int64        `json:"created_at"`
 	UpdatedAt   int64        `json:"updated_at"`
 }
@@ -200,6 +202,8 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 				ID:        v.ID,
 				Version:   v.Version,
 				IpaType:   v.IpaType,
+				Size:      v.BizExt.Size,
+				Country:   v.BizExt.Country,
 				CreatedAt: v.CreatedAt.Unix(),
 				UpdatedAt: v.UpdatedAt.Unix(),
 			}

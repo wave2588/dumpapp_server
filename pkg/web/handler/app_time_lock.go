@@ -168,6 +168,22 @@ func (h *AppTimeLockHandler) Get(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, resp)
 }
 
+type getTimeLockListArgs struct {
+	StartAt int64 `form:"start_at"`
+	EndAt   int64 `form:"end_at"`
+}
+
+func (args *getTimeLockListArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if args.StartAt >= args.EndAt {
+		return errors.UnproccessableError("开始时间不能大于或等于结束时间")
+	}
+	return nil
+}
+
 func (h *AppTimeLockHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	var (
 		ctx     = r.Context()
@@ -176,10 +192,21 @@ func (h *AppTimeLockHandler) GetList(w http.ResponseWriter, r *http.Request) {
 		limit   = GetIntArgument(r, "limit", 10)
 	)
 
+	args := getTimeLockListArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
 	filter := []qm.QueryMod{
 		models.AppTimeLockWhere.MemberID.EQ(loginID),
 		models.AppTimeLockWhere.IsDelete.EQ(false),
 	}
+	if args.StartAt != 0 {
+		filter = append(filter, models.AppTimeLockWhere.StartAt.GTE(time.Unix(args.StartAt, 0)))
+	}
+	if args.EndAt != 0 {
+		filter = append(filter, models.AppTimeLockWhere.StartAt.LTE(time.Unix(args.EndAt, 0)))
+	}
+
 	ids, err := h.appTimeLockDAO.ListIDs(ctx, offset, limit, filter, nil)
 	util.PanicIf(err)
 

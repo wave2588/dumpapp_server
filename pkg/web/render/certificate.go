@@ -29,8 +29,7 @@ type Certificate struct {
 	Mobileprovision string `json:"mobileprovision"`
 	Level           int    `json:"level"` /// 0: 未知   1: 普通版   2: 高级版  3: 豪华版
 
-	IsReplenish       bool  `json:"is_replenish"`        // 是否是候补证书
-	ReplenishExpireAt int64 `json:"replenish_expire_at"` // 候补的截止时间
+	IsReplenish bool `json:"is_replenish" render:"method=RenderIsReplenish"` // 是否是候补证书
 
 	/// p12 文件是否有效
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
@@ -45,8 +44,9 @@ type CertificateRender struct {
 
 	certificateMap map[int64]*Certificate
 
-	certificateDAO     dao.CertificateV2DAO
-	certificateBaseCtl controller.CertificateBaseController
+	certificateDAO       dao.CertificateV2DAO
+	certificateDeviceDAO dao.CertificateDeviceDAO
+	certificateBaseCtl   controller.CertificateBaseController
 }
 
 type CertificateOption func(*CertificateRender)
@@ -79,8 +79,9 @@ func NewCertificateRender(ids []int64, loginID int64, opts ...CertificateOption)
 		ids:     ids,
 		loginID: loginID,
 
-		certificateDAO:     impl.DefaultCertificateV2DAO,
-		certificateBaseCtl: impl3.DefaultCertificateBaseController,
+		certificateDAO:       impl.DefaultCertificateV2DAO,
+		certificateDeviceDAO: impl.DefaultCertificateDeviceDAO,
+		certificateBaseCtl:   impl3.DefaultCertificateBaseController,
 	}
 	for _, opt := range opts {
 		opt(f)
@@ -123,29 +124,18 @@ func (f *CertificateRender) fetch(ctx context.Context) {
 			continue
 		}
 
-		replenishExpireAt := meta.CreatedAt
-		switch meta.BizExt.Level {
-		case 1:
-			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 7) // 7 天售后
-		case 2:
-			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 180) // 180 天售后
-		case 3:
-			replenishExpireAt = replenishExpireAt.AddDate(0, 0, 365) // 365 天售后
-		}
-
 		cer := &Certificate{
-			Meta:              meta,
-			ID:                meta.ID,
-			CreatedAt:         meta.CreatedAt.Unix(),
-			ExpireAt:          meta.CreatedAt.AddDate(1, 0, 0).Unix(),
-			UpdatedAt:         meta.UpdatedAt.Unix(),
-			Note:              meta.BizExt.Note,
-			P12Password:       meta.BizExt.NewP12Password,
-			P12:               meta.ModifiedP12FileDate,
-			Mobileprovision:   meta.MobileProvisionFileData,
-			Level:             meta.BizExt.Level,
-			IsReplenish:       meta.BizExt.IsReplenish,
-			ReplenishExpireAt: replenishExpireAt.Unix(),
+			Meta:            meta,
+			ID:              meta.ID,
+			CreatedAt:       meta.CreatedAt.Unix(),
+			ExpireAt:        meta.CreatedAt.AddDate(1, 0, 0).Unix(),
+			UpdatedAt:       meta.UpdatedAt.Unix(),
+			Note:            meta.BizExt.Note,
+			P12Password:     meta.BizExt.NewP12Password,
+			P12:             meta.ModifiedP12FileDate,
+			Mobileprovision: meta.MobileProvisionFileData,
+			Level:           meta.BizExt.Level,
+			IsReplenish:     meta.BizExt.IsReplenish,
 		}
 
 		/// fixme: 做个兜底策略, 防止 read |0: file already closed 错误再次出现
@@ -187,5 +177,15 @@ func (f *CertificateRender) RenderDevice(ctx context.Context) {
 	deviceMap := NewDeviceRender(deviceIDs, f.loginID).RenderMap(ctx)
 	for _, certificate := range f.certificateMap {
 		certificate.Device = deviceMap[certificate.Meta.DeviceID]
+	}
+}
+
+func (f *CertificateRender) RenderIsReplenish(ctx context.Context) {
+	cdMap, err := f.certificateDeviceDAO.BatchGetByCertificateID(ctx, f.ids)
+	util.PanicIf(err)
+
+	for _, certificate := range f.certificateMap {
+		_, ok := cdMap[certificate.ID]
+		certificate.IsReplenish = !ok // 如果存在说明不是候补证书
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"dumpapp_server/pkg/common/constant"
-	"dumpapp_server/pkg/common/datatype"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
 	impl2 "dumpapp_server/pkg/controller/impl"
@@ -24,18 +23,20 @@ import (
 )
 
 type OpenCertificateHandler struct {
-	memberDeviceDAO     dao.MemberDeviceDAO
-	certificateDAO      dao.CertificateV2DAO
-	certificateWebCtl   controller2.CertificateWebController
-	certificatePriceCtl controller.CertificatePriceController
+	memberDeviceDAO      dao.MemberDeviceDAO
+	certificateDAO       dao.CertificateV2DAO
+	certificateWebCtl    controller2.CertificateWebController
+	certificatePriceCtl  controller.CertificatePriceController
+	certificateCreateCtl controller2.CertificateCreateWebController
 }
 
 func NewOpenCertificateHandler() *OpenCertificateHandler {
 	return &OpenCertificateHandler{
-		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
-		certificateDAO:      impl.DefaultCertificateV2DAO,
-		certificateWebCtl:   impl3.DefaultCertificateWebController,
-		certificatePriceCtl: impl2.DefaultCertificatePriceController,
+		memberDeviceDAO:      impl.DefaultMemberDeviceDAO,
+		certificateDAO:       impl.DefaultCertificateV2DAO,
+		certificateWebCtl:    impl3.DefaultCertificateWebController,
+		certificatePriceCtl:  impl2.DefaultCertificatePriceController,
+		certificateCreateCtl: impl3.DefaultCertificateCreateWebController,
 	}
 }
 
@@ -76,30 +77,17 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 		return
 	}
 
-	device, err := h.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, loginID, args.UDID)
-	util.PanicIf(err)
-
-	/// 判断是否绑定了设备，如果没有绑定则进行绑定
-	deviceID := util2.MustGenerateID(ctx)
-	if device != nil {
-		deviceID = device.ID
-	} else {
-		util.PanicIf(h.memberDeviceDAO.Insert(ctx, &models.MemberDevice{
-			ID:       deviceID,
-			MemberID: loginID,
-			Udid:     args.UDID,
-			BizExt:   datatype.MemberDeviceBizExt{},
-		}))
-	}
-
 	/// 计算证书价格
 	cerPriceID := constant.CertificateIDL1
 	if args.CertificatePriceID != nil {
 		cerPriceID = cast.ToInt64(*args.CertificatePriceID)
 	}
+	if cerPriceID == 0 {
+		cerPriceID = constant.CertificateIDL1
+	}
 
-	/// 购买证书
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, "", cerPriceID, false, "")
+	payType := "private"
+	cerID, err := h.certificateCreateCtl.Create(ctx, loginID, args.UDID, "", cerPriceID, false, payType)
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
@@ -108,49 +96,10 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 		util.PanicIf(errors.ErrNotFoundCertificate)
 	}
 	util.RenderJSON(w, cer)
-}
-
-type postCertificateReplenishArgs struct {
-	CertificateID int64 `json:"certificate_id,string"`
-}
-
-func (p *postCertificateReplenishArgs) Validate() error {
-	err := validator.New().Struct(p)
-	if err != nil {
-		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
-	}
-	return nil
 }
 
 func (h *OpenCertificateHandler) PostCertificateReplenish(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	loginID := mustGetLoginID(ctx, r)
-
-	args := &postCertificateReplenishArgs{}
-	util.PanicIf(util.JSONArgs(r, args))
-
-	/// 测试用
-	if args.CertificateID == 1542516117182877696 {
-		loginID = 1431956649500741632
-		cerMap := render.NewCertificateRender([]int64{args.CertificateID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-		cer, ok := cerMap[args.CertificateID]
-		if !ok {
-			util.PanicIf(errors.ErrNotFoundCertificate)
-		}
-		util.RenderJSON(w, cer)
-		return
-	}
-
-	cerID, err := h.certificateWebCtl.CertificateReplenish(ctx, loginID, args.CertificateID)
-	util.PanicIf(err)
-
-	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-	cer, ok := cerMap[cerID]
-	if !ok {
-		util.PanicIf(errors.ErrNotFoundCertificate)
-	}
-	util.RenderJSON(w, cer)
+	util.PanicIf(errors.UnproccessableError("该接口已下线"))
 }
 
 type getCertificateArgs struct {

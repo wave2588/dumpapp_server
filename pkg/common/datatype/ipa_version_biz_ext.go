@@ -11,7 +11,9 @@ import (
 type IpaVersionBizExt struct {
 	DescribeURL *string `json:"describe_url,omitempty"`
 	Describe    *string `json:"describe,omitempty"`
-	Storage     string  `json:"storage"` /// cos lingshulian
+	Storage     string  `json:"storage"` // cos lingshulian
+	Size        int64   `json:"size"`    // ipa 大小
+	Country     string  `json:"country"` // 国家
 }
 
 func (i IpaVersionBizExt) String() string {

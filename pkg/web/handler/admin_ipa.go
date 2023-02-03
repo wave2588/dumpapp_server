@@ -99,6 +99,8 @@ type Version struct {
 	IsTemporary bool         `json:"is_temporary" validate:"required"`
 	DescribeURL *string      `json:"describe_url"`
 	Describe    *string      `json:"describe"`
+	Size        int64        `json:"size"`
+	Country     string       `json:"country"`
 }
 
 func (p *createIpaArgs) Validate() error {
@@ -182,6 +184,8 @@ func (h *AdminIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 					DescribeURL: version.DescribeURL,
 					Describe:    version.Describe,
 					Storage:     args.Storage,
+					Size:        version.Size,
+					Country:     version.Country,
 				},
 				IsTemporary: cast.ToInt64(version.IsTemporary),
 			}))

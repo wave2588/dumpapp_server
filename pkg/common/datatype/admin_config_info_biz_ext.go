@@ -15,6 +15,8 @@ type AdminConfigInfoBizExt struct {
 	AdminBusy      bool                   `json:"admin_busy"`       /// 管理员是否繁忙
 
 	Announcement string `json:"announcement"` /// 公告
+
+	OpenReplenish bool `json:"open_replenish"`
 }
 
 func (i AdminConfigInfoBizExt) String() string {

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"dumpapp_server/pkg/common/constant"
 	errors2 "dumpapp_server/pkg/common/errors"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/controller"
@@ -25,18 +24,20 @@ import (
 )
 
 type CertificateHandler struct {
-	certificateWebCtl   controller2.CertificateWebController
-	certificateV2WebCtl controller2.CertificateV2WebController
-	certificatePriceCtl controller.CertificatePriceController
+	certificateCreateCtl controller2.CertificateCreateWebController
+	certificateWebCtl    controller2.CertificateWebController
+	certificateV2WebCtl  controller2.CertificateV2WebController
+	certificatePriceCtl  controller.CertificatePriceController
 
 	certificateDAO dao.CertificateV2DAO
 }
 
 func NewCertificateHandler() *CertificateHandler {
 	return &CertificateHandler{
-		certificateWebCtl:   impl5.DefaultCertificateWebController,
-		certificateV2WebCtl: impl5.DefaultCertificateV2WebController,
-		certificatePriceCtl: impl.DefaultCertificatePriceController,
+		certificateCreateCtl: impl5.DefaultCertificateCreateWebController,
+		certificateWebCtl:    impl5.DefaultCertificateWebController,
+		certificateV2WebCtl:  impl5.DefaultCertificateV2WebController,
+		certificatePriceCtl:  impl.DefaultCertificatePriceController,
 
 		certificateDAO: impl2.DefaultCertificateV2DAO,
 	}
@@ -69,17 +70,8 @@ func (h *CertificateHandler) Post(w http.ResponseWriter, r *http.Request) {
 	args := &postCertificate{}
 	util.PanicIf(util.JSONArgs(r, args))
 
-	// 管理员先用
-	if constant.CheckAllOpsByMemberID(loginID) {
-		cerID, err := h.certificateV2WebCtl.Create(ctx, loginID, args.UDID, args.Note, cast.ToInt64(args.Type))
-		util.PanicIf(err)
-		cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-		util.RenderJSON(w, cerMap[cerID])
-		return
-	}
-
 	payType := "private"
-	cerID, err := h.certificateWebCtl.PayCertificate(ctx, loginID, args.UDID, args.Note, cast.ToInt64(args.Type), false, payType)
+	cerID, err := h.certificateCreateCtl.Create(ctx, loginID, args.UDID, args.Note, cast.ToInt64(args.Type), false, payType)
 	util.PanicIf(err)
 
 	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 
 	"dumpapp_server/pkg/common/clients"
 	"dumpapp_server/pkg/common/constant"
@@ -21,7 +20,6 @@ import (
 	"dumpapp_server/pkg/errors"
 	util2 "dumpapp_server/pkg/util"
 	controller2 "dumpapp_server/pkg/web/controller"
-	"dumpapp_server/pkg/web/render"
 	"github.com/spf13/cast"
 )
 
@@ -220,44 +218,4 @@ func (c *CertificateWebController) mobileconfigPath() (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%s/templates/mobileconfig", path), nil
-}
-
-func (c *CertificateWebController) CertificateReplenish(ctx context.Context, loginID, cerID int64) (int64, error) {
-	cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-	cer, ok := cerMap[cerID]
-	if !ok {
-		return 0, errors.ErrNotFoundCertificate
-	}
-
-	if cer.Device.Meta.MemberID != loginID {
-		return 0, errors.UnproccessableError("该证书不在当前账号下，无法候补。")
-	}
-
-	if cer.IsReplenish {
-		return 0, errors.UnproccessableError("该证书已是候补证书，无法候补。")
-	}
-
-	// 检查证书是否有效
-	if cer.P12IsActive {
-		return 0, errors.UnproccessableError("证书有效，无法候补。")
-	}
-
-	// 0 说明是老版本证书, 需要管理员校验
-	if cer.Level == 0 {
-		return 0, errors.UnproccessableError("当前证书无法候补，请联系管理员。")
-	}
-
-	now := time.Now()
-	if cer.ReplenishExpireAt <= now.Unix() {
-		switch cer.Level {
-		case 1:
-			util.PanicIf(errors.UnproccessableError("已超过 7 天候补时间，无法候补。"))
-		case 2:
-			util.PanicIf(errors.UnproccessableError("已超过 180 天候补时间，无法候补。"))
-		case 3:
-			util.PanicIf(errors.UnproccessableError("已超过 365 天候补时间，无法候补。"))
-		}
-	}
-
-	return c.PayCertificate(ctx, loginID, cer.Device.Meta.Udid, "售后证书", constant.CertificateIDL1, true, "")
 }
