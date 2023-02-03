@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/web/controller"
@@ -30,7 +29,7 @@ func NewCertificateCreateWebController() *CertificateCreateWebController {
 
 func (c *CertificateCreateWebController) Create(ctx context.Context, loginID int64, udid, note string, priceID int64, isReplenish bool, payType string) (int64, error) {
 	config, err := c.adminConfigInfoDAO.GetConfig(ctx)
-	if err == nil {
+	if err != nil {
 		return c.certificateV1WebCtl.PayCertificate(ctx, loginID, udid, note, priceID, isReplenish, payType)
 	}
 	if !config.BizExt.OpenReplenish {

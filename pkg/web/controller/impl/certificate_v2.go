@@ -205,10 +205,10 @@ func (c *CertificateV2WebController) getMemberDevice(ctx context.Context, loginI
 	if err != nil {
 		return nil, err
 	}
-
 	if memberDevice != nil {
 		return memberDevice, nil
 	}
+
 	id := util2.MustGenerateID(ctx)
 	err = c.memberDeviceDAO.Insert(ctx, &models.MemberDevice{
 		ID:       id,
