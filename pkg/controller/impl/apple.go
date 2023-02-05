@@ -27,7 +27,7 @@ type appResult struct {
 	Results     []interface{} `json:"results"`
 }
 
-func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []int64) (map[int64]interface{}, error) {
+func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []int64) (map[int64]map[string]interface{}, error) {
 	res := make([]interface{}, len(appIDs))
 	batch := util.NewBatch(ctx)
 	for idx, appID := range appIDs {
@@ -46,17 +46,20 @@ func (c *AppleController) BatchGetAppInfoByAppIDs(ctx context.Context, appIDs []
 		}(idx, appID))
 	}
 	rpcErrs := batch.Get()
-	result := make(map[int64]interface{})
+	result := make(map[int64]map[string]interface{})
 	for idx, appID := range appIDs {
 		if rpcErrs[idx] != nil {
 			err := rpcErrs[idx]
 			return nil, err
 		}
-		data := res[idx]
+		data, ok := res[idx].(map[string]interface{})
+		if !ok {
+			continue
+		}
 		if data == nil {
 			continue
 		}
-		result[appID] = res[idx]
+		result[appID] = data
 	}
 	return result, nil
 }

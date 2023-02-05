@@ -203,10 +203,10 @@ func (h *AppTimeLockHandler) GetList(w http.ResponseWriter, r *http.Request) {
 		models.AppTimeLockWhere.IsDelete.EQ(false),
 	}
 	if args.StartAt != 0 {
-		filter = append(filter, models.AppTimeLockWhere.StartAt.GTE(time.Unix(args.StartAt, 0)))
+		filter = append(filter, models.AppTimeLockWhere.EndAt.GTE(time.Unix(args.StartAt, 0)))
 	}
 	if args.EndAt != 0 {
-		filter = append(filter, models.AppTimeLockWhere.StartAt.LTE(time.Unix(args.EndAt, 0)))
+		filter = append(filter, models.AppTimeLockWhere.EndAt.LTE(time.Unix(args.EndAt, 0)))
 	}
 
 	ids, err := h.appTimeLockDAO.ListIDs(ctx, offset, limit, filter, nil)

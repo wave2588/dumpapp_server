@@ -282,12 +282,23 @@ func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64
 		return nil, err
 	}
 
+	versionMap, err := h.ipaVersionDAO.BatchGetIpaVersions(ctx, ipaIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	result := make([]interface{}, 0)
 	for _, ipaID := range ipaIDs {
 		appleData, ok := appleDataMap[ipaID]
 		if !ok {
 			continue
 		}
+
+		appleData["dump_country"] = ""
+		if versions := versionMap[ipaID]; len(versions) != 0 {
+			appleData["dump_country"] = versions[0].BizExt.Country
+		}
+
 		result = append(result, appleData)
 	}
 	return result, nil

@@ -28,7 +28,7 @@ func NewIpaRankingDAO() *IpaRankingDAO {
 }
 
 func (d *IpaRankingDAO) generateIpaRankingKey() string {
-	return "dump:ipa:ranking:v0"
+	return "dump:ipa:ranking:v1"
 }
 
 func (d *IpaRankingDAO) SetIpaRankingData(ctx context.Context, data *dao.IpaRanking) error {
