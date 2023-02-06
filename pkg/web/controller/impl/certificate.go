@@ -86,7 +86,7 @@ func (c *CertificateWebController) PayCertificate(ctx context.Context, loginID i
 	}
 
 	/// 发送用户开始购买证书日志
-	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid, false)
 
 	/// 请求整数接口
 	config, err := c.adminConfigInfoDAO.GetConfig(ctx)

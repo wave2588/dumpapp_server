@@ -52,7 +52,6 @@ func NewCertificateV2WebController() *CertificateV2WebController {
 }
 
 func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, UDID, note string, priceID int64) (int64, error) {
-
 	// 判断是候补还是正常购买
 	isReplenish, err := c.certificateDeviceCtl.IsReplenish(ctx, loginID, UDID)
 	if err != nil {
@@ -95,7 +94,7 @@ func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int
 	}
 
 	/// 发送用户开始购买证书日志
-	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid, false)
 
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
@@ -134,7 +133,7 @@ func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int
 
 func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int64, udid, note string, priceID int64, memberDevice *models.MemberDevice) (int64, error) {
 	/// 发送用户开始购买证书日志
-	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid, true)
 
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
@@ -153,7 +152,7 @@ func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int6
 			ObjectType: datatype.MemberPayCountRecordBizExtObjectTypeCertificate,
 		},
 	}); err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	// 生成证书
@@ -190,7 +189,7 @@ func (c *CertificateV2WebController) createCer(ctx context.Context, loginID int6
 	p12FileMd5 := util2.StringMd5(p12FileData)
 	mpFileMd5 := util2.StringMd5(mpFileData)
 
-	if err = c.certificateDAO.Insert(ctx, &models.CertificateV2{
+	return c.certificateDAO.Insert(ctx, &models.CertificateV2{
 		ID:                         cerID,
 		DeviceID:                   memberDevice.ID,
 		P12FileData:                p12FileData,
@@ -200,10 +199,7 @@ func (c *CertificateV2WebController) createCer(ctx context.Context, loginID int6
 		MobileProvisionFileDataMD5: mpFileMd5,
 		Source:                     resp.Response.Source,
 		BizExt:                     resp.Response.BizExt,
-	}); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
 func (c *CertificateV2WebController) getMemberDevice(ctx context.Context, loginID int64, UDID string) (*models.MemberDevice, error) {

@@ -161,7 +161,11 @@ func (c *AlterWebController) SendCreateCertificateFailMsg(ctx context.Context, l
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})
 }
 
-func (c *AlterWebController) SendBeganCreateCertificateMsg(ctx context.Context, loginID int64, udid string) {
+func (c *AlterWebController) SendBeganCreateCertificateMsg(ctx context.Context, loginID int64, udid string, isReplenish bool) {
+	title := "<font color=\"comment\">用户开始购买证书</font>\n>"
+	if isReplenish {
+		title = "<font color=\"comment\">用户开始候补证书</font>\n>"
+	}
 	account, err := c.accountDAO.Get(ctx, loginID)
 	if err != nil {
 		return
@@ -172,7 +176,7 @@ func (c *AlterWebController) SendBeganCreateCertificateMsg(ctx context.Context, 
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
-			"content": "<font color=\"comment\">用户开始购买证书</font>\n>" +
+			"content": title +
 				udidStr + emailStr + timeStr,
 		},
 	}
