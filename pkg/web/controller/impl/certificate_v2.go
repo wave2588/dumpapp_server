@@ -52,8 +52,6 @@ func NewCertificateV2WebController() *CertificateV2WebController {
 }
 
 func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, UDID, note string, priceID int64) (int64, error) {
-	/// 发送用户开始购买证书日志
-	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, UDID)
 
 	// 判断是候补还是正常购买
 	isReplenish, err := c.certificateDeviceCtl.IsReplenish(ctx, loginID, UDID)
@@ -96,6 +94,9 @@ func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int
 		return 0, err
 	}
 
+	/// 发送用户开始购买证书日志
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)
@@ -132,6 +133,9 @@ func (c *CertificateV2WebController) realCreate(ctx context.Context, loginID int
 }
 
 func (c *CertificateV2WebController) replenish(ctx context.Context, loginID int64, udid, note string, priceID int64, memberDevice *models.MemberDevice) (int64, error) {
+	/// 发送用户开始购买证书日志
+	c.alterWebCtl.SendBeganCreateCertificateMsg(ctx, loginID, udid)
+
 	/// 事物
 	txn := clients.GetMySQLTransaction(ctx, clients.MySQLConnectionsPool, true)
 	defer clients.MustClearMySQLTransaction(ctx, txn)

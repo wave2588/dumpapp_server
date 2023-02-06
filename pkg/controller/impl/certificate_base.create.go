@@ -34,7 +34,7 @@ func (c *CertificateBaseController) Create(ctx context.Context, UDID string) (ce
 	}
 
 	// 创建失败
-	if response.ErrorMessage != nil {
+	if response.ErrorMessage != nil && *response.ErrorMessage != "" {
 		return nil, *response.ErrorMessage, errors.ErrCreateCertificateFail
 	}
 
@@ -48,7 +48,7 @@ func (c *CertificateBaseController) Create(ctx context.Context, UDID string) (ce
 	return &controller.CerCreateResponse{
 		Response:            response,
 		ModifiedP12FileData: modifiedP12FileData,
-	}, "", nil
+	}, alterMsg, nil
 }
 
 func (c *CertificateBaseController) GetModifiedCertificateData(ctx context.Context, p12Data, originalPassword, newPassword string) (string, error) {

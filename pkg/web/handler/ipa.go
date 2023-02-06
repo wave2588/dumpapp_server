@@ -295,8 +295,10 @@ func (h *IpaHandler) getIpaRankingData(ctx context.Context, startAt, endAt int64
 		}
 
 		appleData["dump_country"] = ""
+		appleData["dump_size"] = 0
 		if versions := versionMap[ipaID]; len(versions) != 0 {
 			appleData["dump_country"] = versions[0].BizExt.Country
+			appleData["dump_size"] = versions[0].BizExt.Size
 		}
 
 		result = append(result, appleData)
