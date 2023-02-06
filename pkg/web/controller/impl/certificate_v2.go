@@ -66,7 +66,7 @@ func (c *CertificateV2WebController) AdminCreate(ctx context.Context, memberID i
 	}
 
 	// 发送消费成功通知
-	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, memberID, mDevice.ID, cerID, true, false)
+	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, memberID, mDevice.ID, cerID, true, true)
 
 	return cerID, nil
 }
@@ -96,7 +96,7 @@ func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, 
 	}
 
 	/// 发送消费成功通知
-	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, false, true)
+	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, false, false)
 
 	return cerID, nil
 }
