@@ -75,8 +75,8 @@ func (c *CertificateDeviceController) IsReplenish(ctx context.Context, memberID 
 
 	cerReplenishExpireAt := cerReplenishExpireAtMap[cer.ID]
 
-	// 如果证书候补时间大于当前时间，则不能候补
-	if cerReplenishExpireAt.Unix() >= time.Now().Unix() {
+	// 候补时间到 02-20，当前时间 03-01，则不能候补了。
+	if cerReplenishExpireAt.Unix() < time.Now().Unix() {
 		return false, nil
 	}
 

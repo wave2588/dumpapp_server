@@ -51,6 +51,26 @@ func NewCertificateV2WebController() *CertificateV2WebController {
 	}
 }
 
+func (c *CertificateV2WebController) AdminCreate(ctx context.Context, memberID int64, UDID string) (int64, error) {
+	mDevice, err := c.memberDeviceDAO.GetByMemberIDUdidSafe(ctx, memberID, UDID)
+	if err != nil {
+		return 0, err
+	}
+	if mDevice == nil {
+		return 0, errors.ErrDeviceNotFound
+	}
+
+	cerID, err := c.replenish(ctx, memberID, UDID, "", constant.CertificateIDL1, mDevice)
+	if err != nil {
+		return 0, err
+	}
+
+	// 发送消费成功通知
+	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, memberID, mDevice.ID, cerID, true, false)
+
+	return cerID, nil
+}
+
 func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, UDID, note string, priceID int64) (int64, error) {
 	// 判断是候补还是正常购买
 	isReplenish, err := c.certificateDeviceCtl.IsReplenish(ctx, loginID, UDID)
@@ -76,7 +96,7 @@ func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, 
 	}
 
 	/// 发送消费成功通知
-	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, isReplenish)
+	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, false, true)
 
 	return cerID, nil
 }

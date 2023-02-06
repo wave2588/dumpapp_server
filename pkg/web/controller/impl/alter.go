@@ -232,7 +232,11 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsg(ctx context.Context
 	}
 }
 
-func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Context, loginID, deviceID, cerID int64, isReplenish bool) {
+func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Context, loginID, deviceID, cerID int64, isReplenish, isAdmin bool) {
+	title := "<font color=\"info\">证书购买成功</font>\n>"
+	if isAdmin {
+		title = "<font color=\"info\">管理员添加证书成功</font>\n>"
+	}
 	account, err := c.accountDAO.Get(ctx, loginID)
 	if err != nil {
 		return
@@ -263,7 +267,7 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Conte
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
-			"content": "<font color=\"info\">证书购买成功</font>\n>" +
+			"content": title +
 				cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr + balanceStr + timeStr,
 		},
 	}

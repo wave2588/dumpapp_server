@@ -16,7 +16,7 @@ type AlterWebController interface {
 	/// 证书创建成功
 	SendBeganCreateCertificateMsg(ctx context.Context, loginID int64, udid string, isReplenish bool)
 	SendCreateCertificateSuccessMsg(ctx context.Context, loginID, deviceID, cerID int64) // 废弃了
-	SendCreateCertificateSuccessMsgV2(ctx context.Context, loginID, deviceID, cerID int64, isReplenish bool)
+	SendCreateCertificateSuccessMsgV2(ctx context.Context, loginID, deviceID, cerID int64, isReplenish, isAdmin bool)
 
 	///  注册用户监控
 	SendAccountMsg(ctx context.Context)

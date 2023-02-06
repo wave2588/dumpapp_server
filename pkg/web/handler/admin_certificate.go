@@ -3,8 +3,11 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/util"
+	controller2 "dumpapp_server/pkg/controller"
+	impl3 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
@@ -18,18 +21,22 @@ import (
 )
 
 type AdminCertificateHandler struct {
-	accountDAO        dao.AccountDAO
-	memberDeviceDAO   dao.MemberDeviceDAO
-	certificateDAO    dao.CertificateV2DAO
-	certificateWebCtl controller.CertificateWebController
+	accountDAO          dao.AccountDAO
+	memberDeviceDAO     dao.MemberDeviceDAO
+	certificateDAO      dao.CertificateV2DAO
+	certificateWebCtl   controller.CertificateWebController
+	certificateV2WebCtl controller.CertificateV2WebController
+	certificateBaseCtl  controller2.CertificateBaseController
 }
 
 func NewAdminCertificateHandler() *AdminCertificateHandler {
 	return &AdminCertificateHandler{
-		accountDAO:        impl.DefaultAccountDAO,
-		memberDeviceDAO:   impl.DefaultMemberDeviceDAO,
-		certificateDAO:    impl.DefaultCertificateV2DAO,
-		certificateWebCtl: impl2.DefaultCertificateWebController,
+		accountDAO:          impl.DefaultAccountDAO,
+		memberDeviceDAO:     impl.DefaultMemberDeviceDAO,
+		certificateDAO:      impl.DefaultCertificateV2DAO,
+		certificateWebCtl:   impl2.DefaultCertificateWebController,
+		certificateV2WebCtl: impl2.DefaultCertificateV2WebController,
+		certificateBaseCtl:  impl3.DefaultCertificateBaseController,
 	}
 }
 
@@ -50,77 +57,53 @@ func (p *replenishCertificateArgs) Validate() error {
 }
 
 func (h *AdminCertificateHandler) Replenish(w http.ResponseWriter, r *http.Request) {
-	util.PanicIf(errors.UnproccessableError("该接口已下线"))
+	ctx := r.Context()
 
-	//ctx := r.Context()
-	//
-	//args := &replenishCertificateArgs{}
-	//util.PanicIf(util.JSONArgs(r, args))
-	//
-	//accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
-	//util.PanicIf(err)
-	//
-	//account, ok := accountMap[args.Email]
-	//if !ok {
-	//	util.PanicIf(errors.UnproccessableError("邮箱未找到"))
-	//}
-	//
-	//devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, account.ID, []string{args.UDID})
-	//util.PanicIf(err)
-	//
-	//if len(devices) == 0 {
-	//	util.PanicIf(errors.UnproccessableError(fmt.Sprintf("当前账号下没有此 UDID: %s", args.UDID)))
-	//}
-	//
-	//device := devices[0]
-	//cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
-	//	models.CertificateV2Where.DeviceID.EQ(device.ID),
-	//}, nil)
-	//util.PanicIf(err)
-	//
-	//if len(cerIDs) == 0 {
-	//	util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
-	//}
-	//
-	//cerMap := render.NewCertificateRender(cerIDs, 0, render.CertificateDefaultRenderFields...).RenderMap(ctx)
-	//
-	//var cer *render.Certificate
-	//for _, cerID := range cerIDs {
-	//	cer = cerMap[cerID]
-	//	if !cer.IsReplenish {
-	//		break
-	//	}
-	//}
-	//if cer == nil {
-	//	util.PanicIf(errors.UnproccessableError("未找到有效证书"))
-	//}
-	//
-	//// 检查证书是否有效
-	//if cer.P12IsActive {
-	//	util.PanicIf(errors.UnproccessableError("证书有效，无法候补。"))
-	//}
-	//
-	//// 0 说明是老版本证书, 需要管理员校验
-	//if cer.Level == 0 {
-	//	util.PanicIf(errors.UnproccessableError("当前证书无法候补，请联系管理员。"))
-	//}
-	//
-	//now := time.Now()
-	//if cer.ReplenishExpireAt <= now.Unix() {
-	//	switch cer.Level {
-	//	case 1:
-	//		util.PanicIf(errors.UnproccessableError("已超过 7 天候补时间，无法候补。"))
-	//	case 2:
-	//		util.PanicIf(errors.UnproccessableError("已超过 180 天候补时间，无法候补。"))
-	//	case 3:
-	//		util.PanicIf(errors.UnproccessableError("已超过 365 天候补时间，无法候补。"))
-	//	}
-	//}
-	//
-	//_, err = h.certificateWebCtl.PayCertificate(ctx, account.ID, args.UDID, "售后证书", constant.CertificateIDL1, true, "")
-	//util.PanicIf(err)
-	//
-	//util.RenderJSON(w, DefaultSuccessBody(ctx))
+	args := &replenishCertificateArgs{}
+	util.PanicIf(util.JSONArgs(r, args))
+
+	accountMap, err := h.accountDAO.BatchGetByEmail(ctx, []string{args.Email})
+	util.PanicIf(err)
+
+	account, ok := accountMap[args.Email]
+	if !ok {
+		util.PanicIf(errors.UnproccessableError("邮箱未找到"))
+	}
+
+	devices, err := h.memberDeviceDAO.GetByMemberIDAndUDIDs(ctx, account.ID, []string{args.UDID})
+	util.PanicIf(err)
+
+	if len(devices) == 0 {
+		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("当前账号下没有此 UDID: %s", args.UDID)))
+	}
+
+	device := devices[0]
+	cerIDs, err := impl.DefaultCertificateV2DAO.ListIDs(ctx, 0, 100, []qm.QueryMod{
+		models.CertificateV2Where.DeviceID.EQ(device.ID),
+	}, nil)
+	util.PanicIf(err)
+
+	if len(cerIDs) == 0 {
+		util.PanicIf(errors.UnproccessableError("该账号下的 UDID 没有购买过证书 UDID"))
+	}
+	cerID := cerIDs[0]
+
+	cerMap, err := h.certificateBaseCtl.GetCertificateReplenishExpireAt(ctx, []int64{cerID})
+	util.PanicIf(err)
+
+	cerExpireAt, ok := cerMap[cerID]
+	if !ok {
+		util.PanicIf(errors.UnproccessableError("未获取到证书的过期时间"))
+	}
+
+	if cerExpireAt.Unix() < time.Now().Unix() {
+		util.PanicIf(errors.UnproccessableError("已不在候补时间内"))
+	}
+
+	_, err = h.certificateV2WebCtl.AdminCreate(ctx, account.ID, args.UDID)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, DefaultSuccessBody(ctx))
 }
 
 type getCertificateArgs struct {
