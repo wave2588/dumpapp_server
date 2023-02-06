@@ -179,7 +179,7 @@ func (args *getTimeLockListArgs) Validate() error {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
 	}
 	if args.StartAt != 0 && args.EndAt != 0 {
-		if args.StartAt >= args.EndAt {
+		if args.StartAt > args.EndAt {
 			return errors.UnproccessableError("开始时间不能大于或等于结束时间")
 		}
 	}
