@@ -83,8 +83,9 @@ func (h *CertificateHandler) GetPrice(w http.ResponseWriter, r *http.Request) {
 	loginID := mustGetLoginID(ctx)
 	prices, err := h.certificatePriceCtl.GetPrices(ctx, loginID)
 	util.PanicIf(err)
-	util.RenderJSON(w, util.ListOutput{
-		Data: prices,
+	util.RenderJSON(w, map[string]interface{}{
+		"data":  prices,
+		"title": "网站所有证书已开启推送权限，证书掉签后非代理用户7天(代理用户30天)内使用掉签 UDID 进行购买证书不会消耗 D 币。",
 	})
 }
 
