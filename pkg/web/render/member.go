@@ -57,7 +57,8 @@ type Member struct {
 }
 
 type PayCampaign struct {
-	Description string `json:"description"`
+	Description  string `json:"description"`
+	BuyCerNotice string `json:"buy_cer_notice"`
 }
 
 type DispenseInfo struct {
@@ -190,7 +191,8 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			CreatedAt: account.CreatedAt.Unix(),
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
-				Description: f.memberPayOrderCtl.GetPayCampaignDescription(),
+				Description:  f.memberPayOrderCtl.GetPayCampaignDescription(),
+				BuyCerNotice: "网站所有证书已开启推送权限，证书掉签后非代理用户 7 天(代理用户 30 天)内使用掉签 UDID 进行购买证书不会消耗 D 币。",
 			},
 		}
 	}
