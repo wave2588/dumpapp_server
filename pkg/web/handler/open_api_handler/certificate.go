@@ -65,9 +65,9 @@ func (h *OpenCertificateHandler) PostCertificate(w http.ResponseWriter, r *http.
 	util.PanicIf(util.JSONArgs(r, args))
 
 	/// 测试用
-	if args.UDID == "00008101-001959310E92001E" {
-		cerID := int64(1540030430865002496)
-		loginID = 1431956649500741632
+	if args.UDID == "00008103-001140922E80801E" {
+		cerID := int64(1592666967771189248)
+		loginID = 1546741149819998208
 		cerMap := render.NewCertificateRender([]int64{cerID}, loginID, render.CertificateDefaultRenderFields...).RenderMap(ctx)
 		cer, ok := cerMap[cerID]
 		if !ok {
