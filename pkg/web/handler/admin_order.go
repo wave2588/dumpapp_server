@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/enum"
 	"dumpapp_server/pkg/common/util"
@@ -27,8 +28,9 @@ func NewAdminOrderHandler() *AdminOrderHandler {
 
 type getListArgs struct {
 	Status  enum.MemberPayOrderStatus `form:"status"`
-	StartAt int64                     `from:"start_at"`
-	EndAt   int64                     `from:"end_at"`
+	StartAt int64                     `form:"start_at"`
+	EndAt   int64                     `form:"end_at"`
+	Account string                    `form:"account"`
 }
 
 func (args *getListArgs) Validate() error {
@@ -51,16 +53,26 @@ func (h *AdminOrderHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	filter := make([]qm.QueryMod, 0)
+	filters := make([]qm.QueryMod, 0)
 
 	if args.Status.IsAMemberPayOrderStatus() {
-		filter = append(filter, models.MemberPayOrderWhere.Status.EQ(args.Status))
+		filters = append(filters, models.MemberPayOrderWhere.Status.EQ(args.Status))
+	}
+	if args.Account != "" {
+		account := GetAccountByAccount(ctx, args.Account)
+		filters = append(filters, models.MemberPayOrderWhere.MemberID.EQ(account.ID))
+	}
+	if args.StartAt != 0 {
+		filters = append(filters, models.MemberPayOrderWhere.UpdatedAt.GTE(time.Unix(args.StartAt, 0)))
+	}
+	if args.EndAt != 0 {
+		filters = append(filters, models.MemberPayOrderWhere.UpdatedAt.LTE(time.Unix(args.EndAt, 0)))
 	}
 
-	ids, err := h.orderDAO.ListIDs(ctx, offset, limit, filter, nil)
+	ids, err := h.orderDAO.ListIDs(ctx, offset, limit, filters, nil)
 	util.PanicIf(err)
 
-	count, err := h.orderDAO.Count(ctx, filter)
+	count, err := h.orderDAO.Count(ctx, filters)
 	util.PanicIf(err)
 
 	data := render.NewMemberPayOrderRender(ids, loginID, render.MemberPayOrderAdminRenderFidles...).RenderSlice(ctx)

@@ -20,7 +20,4 @@ type AlterWebController interface {
 
 	///  注册用户监控
 	SendAccountMsg(ctx context.Context)
-
-	/// 绑定设备流程 log
-	SendDeviceLog(ctx context.Context, title string, memberID int64, values map[string]string)
 }

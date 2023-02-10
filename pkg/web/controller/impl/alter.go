@@ -303,25 +303,6 @@ func (c *AlterWebController) SendAccountMsg(ctx context.Context) {
 	util.SendWeiXinBot(ctx, "2ff8e2b8-1098-4418-8bde-97c0f5e15ab5", data, []string{})
 }
 
-func (c *AlterWebController) SendDeviceLog(ctx context.Context, title string, memberID int64, values map[string]string) {
-	account, err := c.accountDAO.Get(ctx, memberID)
-	if err != nil {
-		return
-	}
-	message := fmt.Sprintf("邮箱：<font color=\"comment\">%s</font>\n member_id: <font color=\"comment\">%d</font>\n", account.Email, memberID)
-	for key, value := range values {
-		msg := fmt.Sprintf("%s：<font color=\"comment\">%s</font>\n", key, value)
-		message += msg
-	}
-	data := map[string]interface{}{
-		"msgtype": "markdown",
-		"markdown": map[string]interface{}{
-			"content": fmt.Sprintf("<font color=\"warning\">%s</font>\n>", title) + message,
-		},
-	}
-	util.SendWeiXinBot(ctx, "c8e8a862-4d4a-44ea-8250-de9297b5e8bc", data, []string{})
-}
-
 func (c *AlterWebController) SendInstallAppCreateCertificateFailMsg(ctx context.Context, cdkey, udid string, errorMessage string) {
 	errorStr := fmt.Sprintf("错误信息：<font color=\"comment\">%s</font>\n", errorMessage)
 	deviceStr := fmt.Sprintf("udid：<font color=\"comment\">%s</font>\n", udid)

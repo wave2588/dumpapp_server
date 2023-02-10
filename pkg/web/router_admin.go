@@ -24,11 +24,6 @@ func NewRouterAdmin() chi.Router {
 	r.With(middleware.OAuthAdminV2).Get("/config", adminConfigHandler.Get)
 	// endregion
 
-	/// admin_member
-	adminMemberHandler := handler.NewAdminMemberHandler()
-	r.With(middleware.OAuthAdmin).Get("/member", adminMemberHandler.ListMember)
-	// endregion
-
 	/// admin_v2
 	adminIpaHandler := handler.NewAdminIpaHandler()
 	r.With(middleware.OAuthAdminV2).Get("/ipa", adminIpaHandler.List)

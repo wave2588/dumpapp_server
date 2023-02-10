@@ -52,11 +52,6 @@ func (h *DeviceHandler) GetMobileConfigQRCode(w http.ResponseWriter, r *http.Req
 
 	url := fmt.Sprintf("%s/device/config/file?code=%s", constant.HOST, code)
 
-	impl3.NewAlterWebController().SendDeviceLog(ctx, "1. 用户获取绑定设备二维码", loginID, map[string]string{
-		"code": code,
-		"url":  url,
-	})
-
 	q, err := qrcode.New(url, qrcode.Medium)
 	if err != nil {
 		return
@@ -176,20 +171,9 @@ func (h *DeviceHandler) Bind(w http.ResponseWriter, r *http.Request) {
 	md, err := h.memberDeivceDAO.GetByMemberIDUdidSafe(ctx, memberID, memberDevice.Udid)
 	util.PanicIf(err)
 
-	impl3.NewAlterWebController().SendDeviceLog(ctx, "3. 用户绑定设备成功", memberID, map[string]string{
-		"code": code,
-		"udid": memberDevice.Udid,
-	})
-
 	if md != nil {
 		account, err := h.accountDAO.Get(ctx, md.MemberID)
 		util.PanicIf(err)
-		impl3.NewAlterWebController().SendDeviceLog(ctx, "错误啦!!!，发现此 udid 已经绑定过了。！！！", memberID, map[string]string{
-			"code":            code,
-			"udid":            memberDevice.Udid,
-			"exist_email":     account.Email,
-			"exist_member_id": cast.ToString(md.MemberID),
-		})
 		w.Header().Set("Location", fmt.Sprintf("https://dumpapp.com/view_udid?udid=%s&product=%s&version=%s&exist_email=%s", memberDevice.Udid, memberDevice.Product, memberDevice.Version, account.Email))
 		w.WriteHeader(301)
 		return
