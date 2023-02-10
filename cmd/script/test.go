@@ -42,4 +42,8 @@ func main() {
 
 	util.PanicIf(impl.DefaultIpaRankingDAO.RemoveIpaRankingData(ctx))
 
+	redisData, err := impl.DefaultIpaRankingDAO.GetIpaRankingData(ctx)
+	util.PanicIf(err)
+	fmt.Println(redisData)
+
 }
