@@ -23,15 +23,15 @@ func (d *SearchRecordV2DAO) BatchGetByIpaIDs(ctx context.Context, filters []qm.Q
 }
 
 func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, limit int, filter []qm.QueryMod) ([]*constant.SearchCount, error) {
-	qm := []qm.QueryMod{
-		qm.Select("ipa_id, name, count(id) as count"),
+	qs := []qm.QueryMod{
+		qm.Select("ipa_id, count(id) as count"),
 		qm.GroupBy("ipa_id"),
 		qm.OrderBy("count desc"),
 		qm.Offset(offset),
 		qm.Limit(limit),
 	}
-	qm = append(qm, filter...)
-	query := models.SearchRecordV2S(qm...)
+	qs = append(qs, filter...)
+	query := models.SearchRecordV2S(qs...)
 	res, err := query.QueryContext(ctx, d.mysqlPool)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (d *SearchRecordV2DAO) GetOrderBySearchCount(ctx context.Context, offset, l
 	result := make([]*constant.SearchCount, 0)
 	for res.Next() {
 		r := &constant.SearchCount{}
-		err = res.Scan(&r.IpaID, &r.Name, &r.Count)
+		err = res.Scan(&r.IpaID, &r.Count)
 		if err != nil {
 			return nil, err
 		}
