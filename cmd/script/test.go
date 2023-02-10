@@ -4,6 +4,7 @@ import (
 	"context"
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao/impl"
+	"fmt"
 )
 
 func main() {
@@ -31,6 +32,7 @@ func main() {
 	//
 	//fmt.Println(resp)
 
-	util.PanicIf(impl.DefaultIpaRankingDAO.RemoveIpaRankingData(ctx))
-
+	ac, err := impl.DefaultAccountDAO.GetByEmail(ctx, "15711367321@163.com")
+	util.PanicIf(err)
+	fmt.Println(ac)
 }
