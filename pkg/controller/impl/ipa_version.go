@@ -65,12 +65,13 @@ func (c *IpaVersionController) GetDownloadURL(ctx context.Context, ID, loginID i
 		return "", nil
 	}
 
+	expired := 3 * time.Hour
 	var openURL string
 	if ipaVersion.BizExt.Storage == "" || ipaVersion.BizExt.Storage == "cos" {
-		openURL, err = c.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath, 30*time.Minute)
+		openURL, err = c.tencentCtl.GetSignatureURL(ctx, ipaVersion.TokenPath, expired)
 		openURL = fmt.Sprintf("%s&member_id=%d", openURL, loginID)
 	} else if ipaVersion.BizExt.Storage == "lingshulian" {
-		openURL, err = c.lingshulianCtl.GetSignatureURL(ctx, strings.ToUpper(config.DumpConfig.AppConfig.LingshulianShareIpaBucket), ipaVersion.TokenPath, 30*time.Minute)
+		openURL, err = c.lingshulianCtl.GetSignatureURL(ctx, strings.ToUpper(config.DumpConfig.AppConfig.LingshulianShareIpaBucket), ipaVersion.TokenPath, expired)
 	}
 	return openURL, err
 }
