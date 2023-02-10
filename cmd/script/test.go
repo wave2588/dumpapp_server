@@ -35,4 +35,8 @@ func main() {
 	ac, err := impl.DefaultAccountDAO.GetByEmail(ctx, "15711367321@163.com")
 	util.PanicIf(err)
 	fmt.Println(ac)
+
+	res, err := impl.DefaultAdminConfigDAO.GetAdminBusy(ctx)
+	util.PanicIf(err)
+	fmt.Println(res)
 }
