@@ -5,6 +5,7 @@ import (
 	"dumpapp_server/pkg/common/util"
 	"dumpapp_server/pkg/dao/impl"
 	"fmt"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
 func main() {
@@ -46,4 +47,7 @@ func main() {
 	util.PanicIf(err)
 	fmt.Println(redisData)
 
+	data, err := impl.DefaultSearchRecordV2DAO.GetOrderBySearchCount(ctx, 0, 50, []qm.QueryMod{})
+	util.PanicIf(err)
+	fmt.Println(len(data))
 }
