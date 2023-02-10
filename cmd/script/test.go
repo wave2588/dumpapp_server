@@ -39,4 +39,7 @@ func main() {
 	res, err := impl.DefaultAdminConfigDAO.GetAdminBusy(ctx)
 	util.PanicIf(err)
 	fmt.Println(res)
+
+	util.PanicIf(impl.DefaultIpaRankingDAO.RemoveIpaRankingData(ctx))
+
 }
