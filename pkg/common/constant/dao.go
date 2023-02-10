@@ -21,7 +21,6 @@ type AdminDumpOrderBizExt struct {
 
 type SearchCount struct {
 	IpaID int64
-	Name  string
 	Count int64
 }
 

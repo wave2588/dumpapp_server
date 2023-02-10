@@ -71,7 +71,7 @@ func (h *AdminSearchRecordHandler) GetMemberSearchRecord(w http.ResponseWriter, 
 	for _, datum := range data {
 		result = append(result, &record{
 			IpaID: datum.IpaID,
-			Name:  datum.Name,
+			//Name:  datum.Name,
 			Count: datum.Count,
 		})
 	}
