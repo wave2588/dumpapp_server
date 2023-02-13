@@ -24,3 +24,27 @@ func (d *DispenseCountRecordDAO) BatchGetByObjectIDsAndRecordType(ctx context.Co
 	}
 	return result, nil
 }
+
+func (d *DispenseCountRecordDAO) BatchGetCountByObjectIDs(ctx context.Context, objectIDs []int64) (map[int64]int64, error) {
+	qs := []qm.QueryMod{
+		qm.Select(models.DispenseCountRecordColumns.ObjectID, "count(*) as count"),
+		qm.From("dispense_count_record"),
+		models.DispenseCountRecordWhere.ObjectID.IN(objectIDs),
+		qm.GroupBy(models.DispenseCountRecordColumns.ObjectID),
+	}
+
+	var data []struct {
+		ObjectID int64 `boil:"object_id"`
+		Count    int64 `boil:"count"`
+	}
+	err := models.NewQuery(qs...).Bind(ctx, d.mysqlPool, &data)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[int64]int64)
+	for _, datum := range data {
+		result[datum.ObjectID] = datum.Count
+	}
+	return result, nil
+}

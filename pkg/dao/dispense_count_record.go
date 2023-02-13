@@ -22,4 +22,5 @@ type DispenseCountRecordDAO interface {
 	ListIDs(ctx context.Context, offset, limit int, filters []qm.QueryMod, orderBys []string) ([]int64, error)
 	Count(ctx context.Context, filters []qm.QueryMod) (int64, error)
 	BatchGetByObjectIDsAndRecordType(ctx context.Context, objectIDs []int64, recordType enum.DispenseCountRecordType) (map[int64][]*models.DispenseCountRecord, error)
+	BatchGetCountByObjectIDs(ctx context.Context, objectIDs []int64) (map[int64]int64, error)
 }
