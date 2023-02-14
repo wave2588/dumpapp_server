@@ -33,7 +33,7 @@ func main() {
 		pending_order.Run()
 	})
 
-	c.AddFunc("0 */1 * * *", func() {
+	c.AddFunc("@hourly", func() {
 		statistics_dispense.Run()
 	})
 
