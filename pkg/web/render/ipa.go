@@ -220,16 +220,16 @@ func (f *IpaRender) RenderVersions(ctx context.Context) {
 }
 
 func (f *IpaRender) RenderCounter(ctx context.Context) {
-	for _, ipa := range f.IpaMap {
-		count, updatedAt, err := f.memberDownloadIpaRecordDAO.GetIpaDownloadCount(ctx, ipa.ID)
-		util.PanicIf(err)
-		if count != 0 {
-			ipa.Counter = &Counter{
-				DownloadCount:    count,
-				LastDownloadTime: updatedAt,
-			}
-		}
-	}
+	//for _, ipa := range f.IpaMap {
+	//	count, updatedAt, err := f.memberDownloadIpaRecordDAO.GetIpaDownloadCount(ctx, ipa.ID)
+	//	util.PanicIf(err)
+	//	if count != 0 {
+	//		ipa.Counter = &Counter{
+	//			DownloadCount:    count,
+	//			LastDownloadTime: updatedAt,
+	//		}
+	//	}
+	//}
 }
 
 func (f *IpaRender) RenderBlack(ctx context.Context) {
