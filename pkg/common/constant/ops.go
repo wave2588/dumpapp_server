@@ -1,18 +1,18 @@
 package constant
 
 var OpsAuthNameMap = map[string]int64{
-	"x-auth-header": 1390315185599680512,
+	"x-auth-headerv2": 1580838004182749184,
 }
 
 var OpsAuthMemberIDMap = map[int64]string{
-	1390315185599680512: "x-auth-header",
-	1431956649500741632: "x-auth-header",
-	1399256949626769408: "x-auth-header",
+	1580838004182749184: "x-auth-headerv2",
+	1431956649500741632: "x-auth-headerv2",
+	1399256949626769408: "x-auth-headerv2",
 }
 
-/// 招聘的代理
+// / 招聘的代理
 var OpsAuthMemberIDMapV2 = map[int64]string{
-	1569917700480700416: "x-auth-header",
+	1569917700480700416: "x-auth-headerv2",
 }
 
 func CheckAllOpsByMemberID(memberID int64) bool {
