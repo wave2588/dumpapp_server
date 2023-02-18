@@ -16,7 +16,7 @@ func SetTicketCookie(w http.ResponseWriter, r *http.Request, ticket string) {
 	})
 }
 
-/// 招聘的代理走这个 ops
+// / 招聘的代理走这个 ops
 func OAuthAdminV2(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -39,11 +39,11 @@ func OAuthAdminV2(next http.Handler) http.Handler {
 		_, isAdmin := constant.OpsAuthMemberIDMap[ticket.MemberID]
 		_, isAdminV2 := constant.OpsAuthMemberIDMapV2[ticket.MemberID]
 		/// 说明是超级管理员  说明是招聘的管理员
-		if (isAdmin && !isAdminV2) || (!isAdmin && isAdminV2) {
-			ctx = context.WithValue(ctx, constant.MemberIDKey, ticket.MemberID)
-		} else {
+		if !isAdmin && !isAdminV2 {
 			panic(errors.ErrMemberAccessDenied)
 		}
+
+		ctx = context.WithValue(ctx, constant.MemberIDKey, ticket.MemberID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
