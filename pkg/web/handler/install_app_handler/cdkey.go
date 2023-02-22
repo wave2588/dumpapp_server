@@ -93,6 +93,10 @@ func (h *CDKEYHandler) GetCDKEYInfoByContactWay(w http.ResponseWriter, r *http.R
 
 	contact := util.URLParam(r, "contact")
 
+	if contact == "" {
+		util.PanicIf(errors.UnproccessableError("请输入关键词查询"))
+	}
+
 	orderMap, err := h.installAppCKEYOrderDAO.BatchGetByContact(ctx, []string{contact})
 	util.PanicIf(err)
 

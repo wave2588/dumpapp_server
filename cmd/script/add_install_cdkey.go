@@ -9,19 +9,28 @@ import (
 	"dumpapp_server/pkg/dao/models"
 	errors2 "dumpapp_server/pkg/errors"
 	util3 "dumpapp_server/pkg/util"
+	"encoding/csv"
 	"fmt"
 	"github.com/spf13/cast"
 	"github.com/volatiletech/strmangle"
+	"os"
 )
 
 func main() {
+
+	csvFile, err := os.OpenFile("l2.csv", os.O_CREATE|os.O_RDWR, 0644)
+	util.PanicIf(err)
+	defer csvFile.Close()
+
+	writer := csv.NewWriter(csvFile)
+	util.PanicIf(writer.Write([]string{"OutID"}))
 
 	ctx := context.Background()
 
 	orderID := util3.MustGenerateID(ctx)
 
-	count := 1
-	price := 68
+	count := 50
+	price := 0
 	level := 2
 	outIDs, err := getOutIDs(ctx, count, level)
 	util.PanicIf(err)
@@ -37,7 +46,7 @@ func main() {
 	}))
 
 	for _, oID := range outIDs {
-		fmt.Println(oID)
+		util.PanicIf(writer.Write([]string{oID}))
 		id := util3.MustGenerateID(ctx)
 		util.PanicIf(impl.DefaultInstallAppCdkeyDAO.Insert(ctx, &models.InstallAppCdkey{
 			ID:      id,
@@ -46,6 +55,8 @@ func main() {
 			OrderID: orderID,
 		}))
 	}
+
+	writer.Flush()
 }
 
 func getOutIDs(ctx context.Context, number, level int) ([]string, error) {
