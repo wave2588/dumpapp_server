@@ -28,6 +28,7 @@ type CertificateV2WebController struct {
 	certificatePriceCtl     controller.CertificatePriceController
 	certificateBaseCtl      controller.CertificateBaseController
 	certificateDeviceCtl    controller.CertificateDeviceController
+	cdKeyCtl                controller.CdKeyController
 	alterWebCtl             controller2.AlterWebController
 }
 
@@ -47,6 +48,7 @@ func NewCertificateV2WebController() *CertificateV2WebController {
 		certificatePriceCtl:     impl2.DefaultCertificatePriceController,
 		certificateBaseCtl:      impl2.DefaultCertificateBaseController,
 		certificateDeviceCtl:    impl2.DefaultCertificateDeviceController,
+		cdKeyCtl:                impl2.DefaultCdKeyController,
 		alterWebCtl:             NewAlterWebController(),
 	}
 }
@@ -94,6 +96,9 @@ func (c *CertificateV2WebController) Create(ctx context.Context, loginID int64, 
 	if err != nil {
 		return 0, err
 	}
+
+	// 生成兑换码失败则先忽略
+	_ = c.cdKeyCtl.AddCdKeyByMemberBuyCertificate(ctx, cerID)
 
 	/// 发送消费成功通知
 	c.alterWebCtl.SendCreateCertificateSuccessMsgV2(ctx, loginID, memberDevice.ID, cerID, false, false)

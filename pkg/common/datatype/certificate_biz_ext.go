@@ -25,6 +25,8 @@ type CertificateBizExt struct {
 	IsReplenish         bool   `json:"is_replenish"`          /// 是否是补充证书
 	Level               int    `json:"level"`                 /// 1: 普通版   2: 高级版  3: 豪华版
 	Note                string `json:"note"`                  /// 证书备注
+
+	CdKeyOutID string `json:"cd_key_out_id"`
 }
 
 func (i CertificateBizExt) String() string {
