@@ -11,6 +11,7 @@ import (
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
+	"dumpapp_server/pkg/web/render/install_app_render"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 )
 
@@ -37,6 +38,8 @@ type Certificate struct {
 	P12IsActive bool `json:"p12_is_active" render:"method=RenderP12IsActive"`
 	/// 证书对应绑定的设备
 	Device *Device `json:"device" render:"method=RenderDevice"`
+
+	CdKey *install_app_render.CDKEY `json:"cd_key,omitempty" render:"method=RenderCdKey"`
 }
 
 type CertificateRender struct {
@@ -193,5 +196,21 @@ func (f *CertificateRender) RenderIsReplenish(ctx context.Context) {
 		}
 		_, ok := cdMap[certificate.ID]
 		certificate.IsReplenish = common.BoolPtr(!ok) // 如果存在说明不是候补证书
+	}
+}
+
+func (f *CertificateRender) RenderCdKey(ctx context.Context) {
+	cdKeyIDs := make([]int64, 0)
+	for _, certificate := range f.certificateMap {
+		cdKeyID := certificate.Meta.BizExt.CdKeyID
+		if cdKeyID == 0 {
+			continue
+		}
+		cdKeyIDs = append(cdKeyIDs, cdKeyID)
+	}
+
+	cdKeyMap := install_app_render.NewCDKEYRender(cdKeyIDs, f.loginID, install_app_render.CDKeyDefaultRenderFields...).RenderMap(ctx)
+	for _, certificate := range f.certificateMap {
+		certificate.CdKey = cdKeyMap[certificate.Meta.BizExt.CdKeyID]
 	}
 }

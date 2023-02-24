@@ -26,7 +26,7 @@ type CertificateBizExt struct {
 	Level               int    `json:"level"`                 /// 1: 普通版   2: 高级版  3: 豪华版
 	Note                string `json:"note"`                  /// 证书备注
 
-	CdKeyOutID string `json:"cd_key_out_id"`
+	CdKeyID int64 `json:"cd_key_id"` // 兑换码 id
 }
 
 func (i CertificateBizExt) String() string {

@@ -62,9 +62,8 @@ func (c *CdKeyController) AddCdKeyByMemberBuyCertificate(ctx context.Context, ce
 	if len(outIDs) == 0 {
 		return nil
 	}
-	outID := outIDs[0]
-	cer.BizExt.CdKeyOutID = outID
 
+	// 写入证书
 	installAppCerID := util2.MustGenerateID(ctx)
 	if err = c.installAppCertificateDAO.Insert(ctx, &models.InstallAppCertificate{
 		ID:                         installAppCerID,
@@ -80,15 +79,19 @@ func (c *CdKeyController) AddCdKeyByMemberBuyCertificate(ctx context.Context, ce
 		return err
 	}
 
+	// 写入兑换码
+	cdKeyID := util2.MustGenerateID(ctx)
 	if err = c.installAppCdKeyDAO.Insert(ctx, &models.InstallAppCdkey{
-		ID:            util2.MustGenerateID(ctx),
-		OutID:         outID,
+		ID:            cdKeyID,
+		OutID:         outIDs[0],
 		Status:        enum.InstallAppCDKeyStatusUsed,
 		CertificateID: installAppCerID,
 		OrderID:       0, // 0 就代表是自动生成的
 	}); err != nil {
 		return err
 	}
+
+	cer.BizExt.CdKeyID = cdKeyID
 
 	return c.certificateDAO.Update(ctx, cer)
 }

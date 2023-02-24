@@ -23,7 +23,7 @@ type CDKEY struct {
 
 	Certificate *Certificate `json:"certificate,omitempty" render:"method=RenderCertificate"`
 
-	Order *CDKeyOrder `json:"order" render:"method=RenderOrder"`
+	Order *CDKeyOrder `json:"order,omitempty" render:"method=RenderOrder"`
 }
 
 type CDKEYRender struct {
