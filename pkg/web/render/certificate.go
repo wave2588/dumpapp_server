@@ -77,6 +77,7 @@ var CertificateDefaultRenderFields = []CertificateOption{
 		"P12IsActive",
 		"Device",
 		"IsReplenish",
+		"CdKey",
 	}),
 }
 
