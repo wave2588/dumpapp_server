@@ -3,6 +3,8 @@ package statistics_dispense
 import (
 	"context"
 	"dumpapp_server/pkg/common/util"
+	"dumpapp_server/pkg/config"
+	impl2 "dumpapp_server/pkg/controller/impl"
 	"dumpapp_server/pkg/dao/impl"
 	"dumpapp_server/pkg/dao/models"
 	util2 "dumpapp_server/pkg/util"
@@ -91,8 +93,11 @@ func run() {
 		if !ok {
 			continue
 		}
-		nameStr += fmt.Sprintf("<font color=\"info\">用户邮箱-分发ID-名称-分发次数：</font>%s\n%d\n%s\n%d \n>", account.Email, memberSignIpa.ID, memberSignIpa.BizExt.IpaName, count.Count)
-		nameStr += "-----------------------\n"
+
+		bucket := config.DumpConfig.AppConfig.LingshulianMemberSignIpaBucket
+		url, _ := impl2.DefaultLingshulianController.GetURL(ctx, bucket, memberSignIpa.IpaFileToken)
+		nameStr += fmt.Sprintf("用户邮箱: %s\nID: %d\n名称: %s\n分发次数: %d\n ipa 下载链接: [%s](%s)\n", account.Email, memberSignIpa.ID, memberSignIpa.BizExt.IpaName, count.Count, url, url)
+		nameStr += "<font color=\"info\">-----------------------</font>\n"
 	}
 
 	if nameStr == "" {
