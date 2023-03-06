@@ -40,6 +40,8 @@ func origins() []string {
 	res := []string{
 		"https://dumpapp.com",
 		"https://www.dumpapp.com",
+		"https://api.dumpapp.com",
+		"https://www.api.dumpapp.com",
 		"http://dumpapp.com",
 		"http://www.dumpapp.com",
 		"http://127.0.0.1:8080",
