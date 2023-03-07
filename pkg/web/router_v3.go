@@ -15,6 +15,8 @@ func NewRouterV3() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/order/{order_id}", memberPayOrder.GetOrder)
 	r.With(middleware.OAuthRegister).Get("/member/order/rule", memberPayOrder.GetOrderRule)
 
+	r.With().Get("/member/order/test", memberPayOrder.GetPayOrderURLTest)
+
 	// ipa
 	downloadHandler := handler.NewDownloadHandler()
 	r.With(middleware.OAuthRegister).Get("/ipa/{ipa_id}/download_url", downloadHandler.GetDownloadURL)

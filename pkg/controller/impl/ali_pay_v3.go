@@ -166,3 +166,24 @@ func (c *ALiPayV3Controller) CheckPayStatus(ctx context.Context, orderID int64) 
 
 	return nil
 }
+
+func (c *ALiPayV3Controller) Test(ctx context.Context, amount int64) (int64, string, error) {
+	id := util2.MustGenerateID(ctx)
+
+	p := alipay.TradePagePay{}
+	p.NotifyURL = "https://dumpapp.com/check_health"
+	p.ReturnURL = "https://www.dumpapp.com"
+	p.Subject = "Dumpapp"
+	p.OutTradeNo = fmt.Sprintf("%d", id)
+	p.TotalAmount = fmt.Sprintf("%d", amount)
+	p.ProductCode = "FAST_INSTANT_TRADE_PAY"
+	//p.ExtendParams = map[string]interface{}{
+	//	"duration": duration.String(),
+	//}
+	p.TimeoutExpress = "15m"
+	url, err := c.client.TradePagePay(p)
+	if err != nil {
+		return 0, "", err
+	}
+	return id, url.String(), nil
+}

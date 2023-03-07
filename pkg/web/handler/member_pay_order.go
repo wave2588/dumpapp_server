@@ -92,3 +92,35 @@ func (h *MemberPayOrderHandler) GetOrder(w http.ResponseWriter, r *http.Request)
 func (h *MemberPayOrderHandler) GetOrderRule(w http.ResponseWriter, r *http.Request) {
 	util.RenderJSON(w, h.memberPayOrderCtl.GetPayCampaignRule())
 }
+
+type getPayOrderURLTestArgs struct {
+	Amount int64 `form:"amount" validate:"required"`
+}
+
+func (args *getPayOrderURLTestArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if args.Amount == 0 {
+		args.Amount = 1
+	}
+	return nil
+}
+
+func (h *MemberPayOrderHandler) GetPayOrderURLTest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := getPayOrderURLTestArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	orderID, payURL, err := h.aliPayCtl.Test(ctx, args.Amount)
+	util.PanicIf(err)
+
+	res := map[string]interface{}{
+		"order_id": cast.ToString(orderID),
+		"open_url": payURL,
+	}
+	util.RenderJSON(w, res)
+}
