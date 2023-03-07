@@ -15,6 +15,7 @@ func NewRouterV3() chi.Router {
 	r.With(middleware.OAuthRegister).Get("/member/order/{order_id}", memberPayOrder.GetOrder)
 	r.With(middleware.OAuthRegister).Get("/member/order/rule", memberPayOrder.GetOrderRule)
 
+	// 测试接口
 	r.With().Get("/member/order/test", memberPayOrder.GetPayOrderURLTest)
 
 	// ipa
