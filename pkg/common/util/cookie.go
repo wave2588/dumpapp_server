@@ -48,7 +48,7 @@ func ClearCookie(w http.ResponseWriter, name string) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		Secure:   false,
-		SameSite: http.SameSiteStrictMode,
+		SameSite: http.SameSiteNoneMode,
 		HttpOnly: true,
 	}
 	http.SetCookie(w, cookie)
