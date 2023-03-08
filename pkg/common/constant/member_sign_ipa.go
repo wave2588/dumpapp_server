@@ -21,7 +21,7 @@ const MemberSignIpaPlistConfig = `<?xml version="1.0" encoding="UTF-8"?>
 					<key>needs-shine</key>
 					<true/>
 					<key>url</key>
-					<string>https://dumpapp.com/plist/logo.png</string>
+					<string>https://app.hxios.cn/plist/logo.png</string>
 				</dict>
 				<dict>
 					<key>kind</key>
@@ -29,7 +29,7 @@ const MemberSignIpaPlistConfig = `<?xml version="1.0" encoding="UTF-8"?>
 					<key>needs-shine</key>
 					<true/>
 					<key>url</key>
-					<string>https://dumpapp.com/plist/logo.png</string>
+					<string>https://app.hxios.cn/plist/logo.png</string>
 				</dict>
 			</array>
 			<key>metadata</key>

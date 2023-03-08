@@ -32,6 +32,7 @@ type result struct {
 	DownloadURL   string `json:"download_url"`    /// 下载地址
 	Title         string `json:"title"`
 	Describe      string `json:"describe"`
+	UpdateIpaURL  string `json:"update_ipa_url"` //dumpapp 新版本下载地址
 }
 
 func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Request) {
@@ -60,6 +61,7 @@ func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Reque
 		DownloadURL:   lastDumpappVersion.BizExt.DownloadURL,
 		Title:         lastDumpappVersion.BizExt.Title,
 		Describe:      lastDumpappVersion.BizExt.Describe,
+		UpdateIpaURL:  lastDumpappVersion.BizExt.UpdateIpaURL,
 	}
 
 	if constrain.Check(v) {
