@@ -73,6 +73,14 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 	plistToken := fmt.Sprintf("%d.plist", util2.MustGenerateID(ctx))
 	util.PanicIf(h.fileCtl.PutFileToLocal(ctx, h.fileCtl.GetPlistFolderPath(ctx), plistToken, []byte(fmt.Sprintf(constant.MemberSignIpaPlistConfig, ipaURL, args.IpaBundleID, args.IpaName))))
 
+	// 如果是 dumpapp 客户端更新，则只返回 plist_url
+	if args.IsDumpapp && args.IpaName == "DumpApp" && args.IpaBundleID == "com.dumpapp.ipa" {
+		util.RenderJSON(w, map[string]string{
+			"plist_url": h.fileCtl.GetPlistFileURL(ctx, plistToken),
+		})
+		return
+	}
+
 	signIpaID := util2.MustGenerateID(ctx)
 	bizExt := datatype.MemberSignIpaBizExt{
 		IpaName:         args.IpaName,
@@ -94,12 +102,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		BizExt:            bizExt,
 	}))
 
-	options := render.MemberSignIpaDefaultRenderFields
-	// 如果是 dumpapp 客户端更新则直接返回 plist_url
-	if args.IsDumpapp && args.IpaName == "Dumpapp" && args.IpaBundleID == "com.dumpapp.ipa" {
-		options = render.MemberSignDumpappIpaDefaultRenderFields
-	}
-	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, options...).RenderMap(ctx)
+	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, data[signIpaID])
 }
 
