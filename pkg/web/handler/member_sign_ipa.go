@@ -46,6 +46,7 @@ type postSignIpaArgs struct {
 	IpaSize         int64  `json:"ipa_size" validate:"required"`
 	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
 	DispenseCount   *int64 `json:"dispense_count"`
+	IsDumpapp       bool   `json:"is_dumpapp"`
 }
 
 func (args *postSignIpaArgs) Validate() error {
@@ -93,7 +94,12 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		BizExt:            bizExt,
 	}))
 
-	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
+	options := render.MemberSignIpaDefaultRenderFields
+	// 如果是 dumpapp 客户端更新则直接返回 plist_url
+	if args.IsDumpapp && args.IpaName == "Dumpapp" && args.IpaBundleID == "com.dumpapp.ipa" {
+		options = render.MemberSignDumpappIpaDefaultRenderFields
+	}
+	data := render.NewMemberSignIpaRender([]int64{signIpaID}, loginID, options...).RenderMap(ctx)
 	util.RenderJSON(w, data[signIpaID])
 }
 

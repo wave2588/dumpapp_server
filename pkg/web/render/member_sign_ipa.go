@@ -83,6 +83,10 @@ var MemberSignIpaDefaultRenderFields = []MemberSignIpaOption{
 	MemberSignIpaIncludes(DefaultMemberSignIpaFields),
 }
 
+var MemberSignDumpappIpaDefaultRenderFields = []MemberSignIpaOption{
+	MemberSignIpaIncludes(append(DefaultMemberSignIpaFields, "PlistURL")),
+}
+
 func NewMemberSignIpaRender(ids []int64, loginID int64, opts ...MemberSignIpaOption) *MemberSignIpaRender {
 	f := &MemberSignIpaRender{
 		ids:     ids,
