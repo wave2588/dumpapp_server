@@ -49,6 +49,7 @@ type postSignIpaArgs struct {
 	DispenseCount   *int64 `json:"dispense_count"`
 	IsDumpapp       bool   `json:"is_dumpapp"`
 	Note            string `json:"note"`
+	AppTimeLockID   int64  `json:"app_time_lock_id,string"`
 }
 
 func (args *postSignIpaArgs) Validate() error {
@@ -93,6 +94,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		IpaVersion:      args.IpaVersion,
 		IpaSize:         args.IpaSize,
 		CertificateName: args.CertificateName,
+		AppTimeLockID:   args.AppTimeLockID,
 	}
 	if args.DispenseCount != nil {
 		bizExt.DispenseCount = *args.DispenseCount

@@ -28,8 +28,9 @@ type MemberSignIpa struct {
 	IsDelete        bool   `json:"is_delete"`
 	Note            string `json:"note"`
 
-	DownloadURL string  `json:"download_url" render:"method=RenderDownloadURL"`
-	PlistURL    *string `json:"plist_url,omitempty" render:"method=RenderPlistURL"`
+	AppTimeLock *AppTimeLock `json:"app_time_lock,omitempty" render:"method=RenderAppTimeLock"`
+	DownloadURL string       `json:"download_url" render:"method=RenderDownloadURL"`
+	PlistURL    *string      `json:"plist_url,omitempty" render:"method=RenderPlistURL"`
 
 	/// 分发相关的控制
 	Dispense *Dispense `json:"dispense" render:"method=RenderDispense"`
@@ -78,6 +79,7 @@ func MemberSignIpaIncludes(fields []string) MemberSignIpaOption {
 var DefaultMemberSignIpaFields = []string{
 	"DownloadURL",
 	"Dispense",
+	"AppTimeLock",
 }
 
 var MemberSignIpaDefaultRenderFields = []MemberSignIpaOption{
@@ -186,5 +188,20 @@ func (f *MemberSignIpaRender) RenderDispense(ctx context.Context) {
 			UsedCount: usedCount,
 			IsValid:   isValid,
 		}
+	}
+}
+
+func (f *MemberSignIpaRender) RenderAppTimeLock(ctx context.Context) {
+	timeLockIDs := make([]int64, 0)
+	for _, ipa := range f.memberSignIpaMap {
+		if ipa.Meta.BizExt.AppTimeLockID == 0 {
+			continue
+		}
+		timeLockIDs = append(timeLockIDs, ipa.Meta.BizExt.AppTimeLockID)
+	}
+
+	timeLockMap := NewAppTimeLockRender(timeLockIDs, f.loginID, AppTimeLockDefaultRenderFields...).RenderMap(ctx)
+	for _, ipa := range f.memberSignIpaMap {
+		ipa.AppTimeLock = timeLockMap[ipa.Meta.BizExt.AppTimeLockID]
 	}
 }
