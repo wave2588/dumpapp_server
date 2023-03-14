@@ -32,7 +32,7 @@ type result struct {
 	DownloadURL   string `json:"download_url"`    /// 下载地址
 	Title         string `json:"title"`
 	Describe      string `json:"describe"`
-	UpdateIpaURL  string `json:"update_ipa_url"` //dumpapp 新版本下载地址
+	UpdateIpaURL  string `json:"update_ipa_url"` // dumpapp 新版本下载地址
 }
 
 func (h *AppVersionHandler) CheckAppVersion(w http.ResponseWriter, r *http.Request) {

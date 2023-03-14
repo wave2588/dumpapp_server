@@ -22,6 +22,7 @@ type AppTimeLock struct {
 	EndAt       int64  `json:"end_at"`
 	CreatedAt   int64  `json:"created_at"`
 	UpdatedAt   int64  `json:"updated_at"`
+	Note        string `json:"note"`
 
 	/// 是否过期
 	IsValid bool `json:"is_valid"` /// true 有效 false 无效
@@ -115,6 +116,7 @@ func (f *AppTimeLockRender) fetch(ctx context.Context) {
 			Description: meta.BizExt.Description,
 			StartAt:     meta.StartAt.Unix(),
 			EndAt:       meta.EndAt.Unix(),
+			Note:        meta.Note,
 			CreatedAt:   meta.CreatedAt.Unix(),
 			UpdatedAt:   meta.UpdatedAt.Unix(),
 			IsValid:     meta.StartAt.Unix() < now && now < meta.EndAt.Unix(),

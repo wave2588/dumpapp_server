@@ -31,7 +31,9 @@ type AppTimeLock struct {
 	// 开始时间
 	StartAt time.Time `boil:"start_at" json:"start_at" toml:"start_at" yaml:"start_at"`
 	// 结束时间
-	EndAt  time.Time                  `boil:"end_at" json:"end_at" toml:"end_at" yaml:"end_at"`
+	EndAt time.Time `boil:"end_at" json:"end_at" toml:"end_at" yaml:"end_at"`
+	// 备注
+	Note   string                     `boil:"note" json:"note" toml:"note" yaml:"note"`
 	BizExt datatype.AppTimeLockBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	// ????
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
@@ -49,6 +51,7 @@ var AppTimeLockColumns = struct {
 	IsStop    string
 	StartAt   string
 	EndAt     string
+	Note      string
 	BizExt    string
 	CreatedAt string
 	UpdatedAt string
@@ -59,6 +62,7 @@ var AppTimeLockColumns = struct {
 	IsStop:    "is_stop",
 	StartAt:   "start_at",
 	EndAt:     "end_at",
+	Note:      "note",
 	BizExt:    "biz_ext",
 	CreatedAt: "created_at",
 	UpdatedAt: "updated_at",
@@ -71,6 +75,7 @@ var AppTimeLockTableColumns = struct {
 	IsStop    string
 	StartAt   string
 	EndAt     string
+	Note      string
 	BizExt    string
 	CreatedAt string
 	UpdatedAt string
@@ -81,6 +86,7 @@ var AppTimeLockTableColumns = struct {
 	IsStop:    "app_time_lock.is_stop",
 	StartAt:   "app_time_lock.start_at",
 	EndAt:     "app_time_lock.end_at",
+	Note:      "app_time_lock.note",
 	BizExt:    "app_time_lock.biz_ext",
 	CreatedAt: "app_time_lock.created_at",
 	UpdatedAt: "app_time_lock.updated_at",
@@ -125,6 +131,7 @@ var AppTimeLockWhere = struct {
 	IsStop    whereHelperbool
 	StartAt   whereHelpertime_Time
 	EndAt     whereHelpertime_Time
+	Note      whereHelperstring
 	BizExt    whereHelperdatatype_AppTimeLockBizExt
 	CreatedAt whereHelpertime_Time
 	UpdatedAt whereHelpertime_Time
@@ -135,6 +142,7 @@ var AppTimeLockWhere = struct {
 	IsStop:    whereHelperbool{field: "`app_time_lock`.`is_stop`"},
 	StartAt:   whereHelpertime_Time{field: "`app_time_lock`.`start_at`"},
 	EndAt:     whereHelpertime_Time{field: "`app_time_lock`.`end_at`"},
+	Note:      whereHelperstring{field: "`app_time_lock`.`note`"},
 	BizExt:    whereHelperdatatype_AppTimeLockBizExt{field: "`app_time_lock`.`biz_ext`"},
 	CreatedAt: whereHelpertime_Time{field: "`app_time_lock`.`created_at`"},
 	UpdatedAt: whereHelpertime_Time{field: "`app_time_lock`.`updated_at`"},
@@ -157,8 +165,8 @@ func (*appTimeLockR) NewStruct() *appTimeLockR {
 type appTimeLockL struct{}
 
 var (
-	appTimeLockAllColumns            = []string{"id", "member_id", "is_delete", "is_stop", "start_at", "end_at", "biz_ext", "created_at", "updated_at"}
-	appTimeLockColumnsWithoutDefault = []string{"member_id", "biz_ext"}
+	appTimeLockAllColumns            = []string{"id", "member_id", "is_delete", "is_stop", "start_at", "end_at", "note", "biz_ext", "created_at", "updated_at"}
+	appTimeLockColumnsWithoutDefault = []string{"member_id", "note", "biz_ext"}
 	appTimeLockColumnsWithDefault    = []string{"id", "is_delete", "is_stop", "start_at", "end_at", "created_at", "updated_at"}
 	appTimeLockPrimaryKeyColumns     = []string{"id"}
 	appTimeLockGeneratedColumns      = []string{}

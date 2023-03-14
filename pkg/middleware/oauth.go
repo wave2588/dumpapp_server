@@ -65,7 +65,6 @@ func OAuthAdmin(next http.Handler) http.Handler {
 
 func OAuthRegister(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-
 		registerTicket := util.GetCookie(r, "session")["ticket"]
 		if registerTicket == "" {
 			panic(errors.ErrNotAuthorized)

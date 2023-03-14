@@ -32,6 +32,7 @@ type postAppTimeLockArgs struct {
 	StartAt     int64  `json:"start_at" validate:"required"`
 	EndAt       int64  `json:"end_at" validate:"required"`
 	Description string `json:"description" validate:"required"`
+	Note        string `json:"note"`
 }
 
 func (p *postAppTimeLockArgs) Validate() error {
@@ -41,6 +42,9 @@ func (p *postAppTimeLockArgs) Validate() error {
 	}
 	if p.StartAt >= p.EndAt {
 		return errors.UnproccessableError("开始时间不能大于或等于结束时间")
+	}
+	if util2.StringCount(p.Note) > 50 {
+		return errors.UnproccessableError("备注字数请小于 50 字")
 	}
 	return nil
 }
@@ -71,6 +75,7 @@ func (h *AppTimeLockHandler) Post(w http.ResponseWriter, r *http.Request) {
 		IsStop:   false,
 		StartAt:  time.Unix(args.StartAt, 0),
 		EndAt:    time.Unix(args.EndAt, 0),
+		Note:     args.Note,
 		BizExt: datatype.AppTimeLockBizExt{
 			Description: args.Description,
 		},
@@ -85,6 +90,7 @@ type putAppTimeLockArgs struct {
 	EndAt       int64  `json:"end_at" validate:"required"`
 	Description string `json:"description" validate:"required"`
 	IsStop      bool   `json:"is_stop"` /// 犹豫不能传 0 和 false，所以 1 表示为停止，2 标识为不停止
+	Note        string `json:"note"`
 }
 
 func (p *putAppTimeLockArgs) Validate() error {
@@ -94,6 +100,9 @@ func (p *putAppTimeLockArgs) Validate() error {
 	}
 	if p.StartAt >= p.EndAt {
 		return errors.UnproccessableError("开始时间不能大于或等于结束时间")
+	}
+	if util2.StringCount(p.Note) > 50 {
+		return errors.UnproccessableError("备注字数请小于 50 字")
 	}
 	return nil
 }
@@ -123,6 +132,7 @@ func (h *AppTimeLockHandler) Put(w http.ResponseWriter, r *http.Request) {
 	timeLock.EndAt = time.Unix(args.EndAt, 0)
 	timeLock.BizExt.Description = args.Description
 	timeLock.IsStop = args.IsStop
+	timeLock.Note = args.Note
 	util.PanicIf(h.appTimeLockDAO.Update(ctx, timeLock))
 
 	respMap := render.NewAppTimeLockRender([]int64{timeLockID}, loginID, render.AppTimeLockDefaultRenderFields...).RenderMap(ctx)
@@ -169,8 +179,9 @@ func (h *AppTimeLockHandler) Get(w http.ResponseWriter, r *http.Request) {
 }
 
 type getTimeLockListArgs struct {
-	StartAt int64 `form:"start_at"`
-	EndAt   int64 `form:"end_at"`
+	StartAt int64  `form:"start_at"`
+	EndAt   int64  `form:"end_at"`
+	Keyword string `form:"keyword"`
 }
 
 func (args *getTimeLockListArgs) Validate() error {
@@ -207,6 +218,9 @@ func (h *AppTimeLockHandler) GetList(w http.ResponseWriter, r *http.Request) {
 	}
 	if args.EndAt != 0 {
 		filter = append(filter, models.AppTimeLockWhere.EndAt.LTE(time.Unix(args.EndAt, 0)))
+	}
+	if args.Keyword != "" {
+		filter = append(filter, qm.Where("note like ?", fmt.Sprintf(`%s%%`, args.Keyword)))
 	}
 
 	ids, err := h.appTimeLockDAO.ListIDs(ctx, offset, limit, filter, nil)

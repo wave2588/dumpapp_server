@@ -29,7 +29,7 @@ func (c *FileController) GetPlistFolderPath(ctx context.Context) string {
 }
 
 func (c *FileController) GetPlistFileURL(ctx context.Context, key string) string {
-	//return fmt.Sprintf("https://dumpapp.com/plist/%s", key)
+	// return fmt.Sprintf("https://dumpapp.com/plist/%s", key)
 	return fmt.Sprintf("https://app.hxios.cn/plist/%s", key)
 }
 

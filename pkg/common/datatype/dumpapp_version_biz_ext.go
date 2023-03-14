@@ -12,7 +12,7 @@ type DumpappVersionBizExt struct {
 	DownloadURL  string `json:"download_url"`
 	Title        string `json:"title"`
 	Describe     string `json:"describe"`
-	UpdateIpaURL string `json:"update_ipa_url"` //dumpapp 新版本下载地址
+	UpdateIpaURL string `json:"update_ipa_url"` // dumpapp 新版本下载地址
 }
 
 func (i DumpappVersionBizExt) String() string {
