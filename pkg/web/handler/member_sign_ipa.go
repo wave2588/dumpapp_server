@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"dumpapp_server/pkg/common/constant"
 	"dumpapp_server/pkg/common/datatype"
@@ -47,12 +48,16 @@ type postSignIpaArgs struct {
 	CertificateName string `json:"certificate_name" validate:"required"` /// 证书名称
 	DispenseCount   *int64 `json:"dispense_count"`
 	IsDumpapp       bool   `json:"is_dumpapp"`
+	Note            string `json:"note"`
 }
 
 func (args *postSignIpaArgs) Validate() error {
 	err := validator.New().Struct(args)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if util2.StringCount(args.Note) > 50 {
+		return errors.UnproccessableError("备注字数请小于 50 字")
 	}
 	return nil
 }
@@ -99,6 +104,7 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 		IsDelete:          false,
 		IpaFileToken:      args.IpaFileToken,
 		IpaPlistFileToken: plistToken,
+		Note:              args.Note,
 		BizExt:            bizExt,
 	}))
 
@@ -108,12 +114,16 @@ func (h *MemberSignIpaHandler) Post(w http.ResponseWriter, r *http.Request) {
 
 type putSignIpaArgs struct {
 	DispenseCount *int64 `json:"dispense_count" validate:"required"`
+	Note          string `json:"note"`
 }
 
 func (args *putSignIpaArgs) Validate() error {
 	err := validator.New().Struct(args)
 	if err != nil {
 		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	if util2.StringCount(args.Note) > 50 {
+		return errors.UnproccessableError("备注字数请小于 50 字")
 	}
 	return nil
 }
@@ -146,10 +156,25 @@ func (h *MemberSignIpaHandler) Put(w http.ResponseWriter, r *http.Request) {
 	if args.DispenseCount != nil {
 		signIpa.BizExt.DispenseCount = *args.DispenseCount
 	}
+	signIpa.Note = args.Note
 	util.PanicIf(h.memberSignDAO.Update(ctx, signIpa))
 
 	data := render.NewMemberSignIpaRender([]int64{id}, loginID, render.MemberSignIpaDefaultRenderFields...).RenderMap(ctx)
 	util.RenderJSON(w, data[id])
+}
+
+type getMemberSignIpaListArgs struct {
+	StartAt int64  `form:"start_at"`
+	EndAt   int64  `form:"end_at"`
+	Keyword string `form:"keyword"`
+}
+
+func (args *getMemberSignIpaListArgs) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
 }
 
 func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http.Request) {
@@ -161,10 +186,24 @@ func (h *MemberSignIpaHandler) GetSelfSignIpaList(w http.ResponseWriter, r *http
 		limit   = GetIntArgument(r, "limit", 10)
 	)
 
+	args := getMemberSignIpaListArgs{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
 	filter := []qm.QueryMod{
 		models.MemberSignIpaWhere.MemberID.EQ(loginID),
 		models.MemberSignIpaWhere.IsDelete.EQ(false),
 	}
+	if args.StartAt != 0 {
+		filter = append(filter, models.MemberSignIpaWhere.CreatedAt.GTE(time.Unix(args.StartAt, 0)))
+	}
+	if args.EndAt != 0 {
+		filter = append(filter, models.MemberSignIpaWhere.CreatedAt.LTE(time.Unix(args.EndAt, 0)))
+	}
+	if args.Keyword != "" {
+		filter = append(filter, qm.Where("note like ?", fmt.Sprintf(`%s%%`, args.Keyword)))
+	}
+
 	ids, err := h.memberSignDAO.ListIDs(ctx, offset, limit, filter, []string{"updated_at desc"})
 	util.PanicIf(err)
 

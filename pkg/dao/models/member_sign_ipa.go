@@ -24,13 +24,15 @@ import (
 
 // MemberSignIpa is an object representing the database table.
 type MemberSignIpa struct {
-	ID                int64                        `boil:"id" json:"id,string" toml:"id" yaml:"id"`
-	ExpenseID         string                       `boil:"expense_id" json:"expense_id" toml:"expense_id" yaml:"expense_id"`
-	MemberID          int64                        `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
-	IsDelete          bool                         `boil:"is_delete" json:"is_delete" toml:"is_delete" yaml:"is_delete"`
-	IpaFileToken      string                       `boil:"ipa_file_token" json:"ipa_file_token" toml:"ipa_file_token" yaml:"ipa_file_token"`
-	IpaPlistFileToken string                       `boil:"ipa_plist_file_token" json:"ipa_plist_file_token" toml:"ipa_plist_file_token" yaml:"ipa_plist_file_token"`
-	BizExt            datatype.MemberSignIpaBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
+	ID                int64  `boil:"id" json:"id,string" toml:"id" yaml:"id"`
+	ExpenseID         string `boil:"expense_id" json:"expense_id" toml:"expense_id" yaml:"expense_id"`
+	MemberID          int64  `boil:"member_id" json:"member_id" toml:"member_id" yaml:"member_id"`
+	IsDelete          bool   `boil:"is_delete" json:"is_delete" toml:"is_delete" yaml:"is_delete"`
+	IpaFileToken      string `boil:"ipa_file_token" json:"ipa_file_token" toml:"ipa_file_token" yaml:"ipa_file_token"`
+	IpaPlistFileToken string `boil:"ipa_plist_file_token" json:"ipa_plist_file_token" toml:"ipa_plist_file_token" yaml:"ipa_plist_file_token"`
+	// 备注
+	Note   string                       `boil:"note" json:"note" toml:"note" yaml:"note"`
+	BizExt datatype.MemberSignIpaBizExt `boil:"biz_ext" json:"biz_ext" toml:"biz_ext" yaml:"biz_ext"`
 	// ????
 	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	// ????
@@ -47,6 +49,7 @@ var MemberSignIpaColumns = struct {
 	IsDelete          string
 	IpaFileToken      string
 	IpaPlistFileToken string
+	Note              string
 	BizExt            string
 	CreatedAt         string
 	UpdatedAt         string
@@ -57,6 +60,7 @@ var MemberSignIpaColumns = struct {
 	IsDelete:          "is_delete",
 	IpaFileToken:      "ipa_file_token",
 	IpaPlistFileToken: "ipa_plist_file_token",
+	Note:              "note",
 	BizExt:            "biz_ext",
 	CreatedAt:         "created_at",
 	UpdatedAt:         "updated_at",
@@ -69,6 +73,7 @@ var MemberSignIpaTableColumns = struct {
 	IsDelete          string
 	IpaFileToken      string
 	IpaPlistFileToken string
+	Note              string
 	BizExt            string
 	CreatedAt         string
 	UpdatedAt         string
@@ -79,6 +84,7 @@ var MemberSignIpaTableColumns = struct {
 	IsDelete:          "member_sign_ipa.is_delete",
 	IpaFileToken:      "member_sign_ipa.ipa_file_token",
 	IpaPlistFileToken: "member_sign_ipa.ipa_plist_file_token",
+	Note:              "member_sign_ipa.note",
 	BizExt:            "member_sign_ipa.biz_ext",
 	CreatedAt:         "member_sign_ipa.created_at",
 	UpdatedAt:         "member_sign_ipa.updated_at",
@@ -114,6 +120,7 @@ var MemberSignIpaWhere = struct {
 	IsDelete          whereHelperbool
 	IpaFileToken      whereHelperstring
 	IpaPlistFileToken whereHelperstring
+	Note              whereHelperstring
 	BizExt            whereHelperdatatype_MemberSignIpaBizExt
 	CreatedAt         whereHelpertime_Time
 	UpdatedAt         whereHelpertime_Time
@@ -124,6 +131,7 @@ var MemberSignIpaWhere = struct {
 	IsDelete:          whereHelperbool{field: "`member_sign_ipa`.`is_delete`"},
 	IpaFileToken:      whereHelperstring{field: "`member_sign_ipa`.`ipa_file_token`"},
 	IpaPlistFileToken: whereHelperstring{field: "`member_sign_ipa`.`ipa_plist_file_token`"},
+	Note:              whereHelperstring{field: "`member_sign_ipa`.`note`"},
 	BizExt:            whereHelperdatatype_MemberSignIpaBizExt{field: "`member_sign_ipa`.`biz_ext`"},
 	CreatedAt:         whereHelpertime_Time{field: "`member_sign_ipa`.`created_at`"},
 	UpdatedAt:         whereHelpertime_Time{field: "`member_sign_ipa`.`updated_at`"},
@@ -146,8 +154,8 @@ func (*memberSignIpaR) NewStruct() *memberSignIpaR {
 type memberSignIpaL struct{}
 
 var (
-	memberSignIpaAllColumns            = []string{"id", "expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext", "created_at", "updated_at"}
-	memberSignIpaColumnsWithoutDefault = []string{"expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "biz_ext"}
+	memberSignIpaAllColumns            = []string{"id", "expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "note", "biz_ext", "created_at", "updated_at"}
+	memberSignIpaColumnsWithoutDefault = []string{"expense_id", "member_id", "is_delete", "ipa_file_token", "ipa_plist_file_token", "note", "biz_ext"}
 	memberSignIpaColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
 	memberSignIpaPrimaryKeyColumns     = []string{"id"}
 	memberSignIpaGeneratedColumns      = []string{}
