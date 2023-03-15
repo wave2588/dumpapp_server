@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -26,32 +25,43 @@ var (
 
 func init() {
 	formDecoder = form.NewDecoder()
+
 	formDecoder.RegisterCustomTypeFunc(func(strings []string) (i interface{}, err error) {
-		sv := SortValues{}
+		sv := Int64StringSlice{}
 		err = sv.Decode(strings[0])
 		return sv, err
-	}, SortValues{})
+	}, Int64StringSlice{})
+
 	formEncoder = form.NewEncoder()
 }
 
-type SortValues []interface{}
+type Int64StringSlice []int64
 
-func (sv *SortValues) Decode(text string) (err error) {
-	cursorStr, err := url.QueryUnescape(text)
+func (sv *Int64StringSlice) Decode(text string) (err error) {
+	data := []byte(text)
+	var values []string
+	err = json.Unmarshal(data, &values)
 	if err != nil {
-		return err
-	}
-	var value []interface{}
-	if cursorStr != "" {
-		if err := json.Unmarshal([]byte(cursorStr), &value); err != nil {
+		// Fall back to array of integers:
+		var values []int64
+		if err := json.Unmarshal(data, &values); err != nil {
 			return err
 		}
+		*sv = values
+		return nil
 	}
-	*sv = value
-	return
+	*sv = make([]int64, len(values))
+	for i, value := range values {
+		value, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return err
+		}
+		(*sv)[i] = value
+	}
+	return nil
 }
 
-func (sv SortValues) Encode() (string, error) {
+func (sv Int64StringSlice) Encode() (string, error) {
 	v, err := json.Marshal(sv)
 	return string(v), err
 }

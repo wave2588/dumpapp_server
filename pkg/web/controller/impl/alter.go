@@ -19,6 +19,7 @@ type AlterWebController struct {
 	memberDownloadIpaRecordDAO dao.MemberDownloadIpaRecordDAO
 	memberDeviceDAO            dao.MemberDeviceDAO
 	certificateDAO             dao.CertificateV2DAO
+	certificateDeviceDAO       dao.CertificateDeviceDAO
 	certificateV3Ctl           controller3.CertificateController
 }
 
@@ -35,6 +36,7 @@ func NewAlterWebController() *AlterWebController {
 		memberDownloadIpaRecordDAO: impl2.DefaultMemberDownloadIpaRecordDAO,
 		memberDeviceDAO:            impl2.DefaultMemberDeviceDAO,
 		certificateDAO:             impl2.DefaultCertificateV2DAO,
+		certificateDeviceDAO:       impl2.DefaultCertificateDeviceDAO,
 		certificateV3Ctl:           impl.DefaultCertificateV3Controller,
 	}
 }
@@ -264,11 +266,29 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Conte
 	isReplenishStr := fmt.Sprintf("售后证书：<font color=\"comment\">%v</font>\n", isReplenish)
 	balanceStr := fmt.Sprintf("余额：<font color=\"comment\">%d</font>\n", balanceCount)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
+
+	content := title +
+		cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr
+
+	// 如果是售后证书，则把上一本证书的信息也打印出来
+	if isReplenish {
+		certificateDevice, err := c.certificateDeviceDAO.GetLastByDeviceID(ctx, deviceID)
+		if err != nil {
+			return
+		}
+		replenishCer, err := c.certificateDAO.Get(ctx, certificateDevice.CertificateID)
+		if err != nil {
+			return
+		}
+		content = content + fmt.Sprintf("上一本证书版本：<font color=\"comment\">%d</font>\n", replenishCer.BizExt.Level)
+		content = content + fmt.Sprintf("上一本证书购买时间：<font color=\"comment\">%s</font>\n", certificateDevice.CreatedAt.Format("2006-01-02 15:04:05"))
+	}
+	content = content + balanceStr + timeStr
+
 	data := map[string]interface{}{
 		"msgtype": "markdown",
 		"markdown": map[string]interface{}{
-			"content": title +
-				cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr + balanceStr + timeStr,
+			"content": content,
 		},
 	}
 	util.SendWeiXinBot(ctx, config.DumpConfig.AppConfig.TencentGroupKey, data, []string{})

@@ -179,7 +179,8 @@ func NewRouter() chi.Router {
 	r.With(middleware.OAuthRegister).Post("/sign_ipa", memberSignIpaHandler.Post)
 	r.With(middleware.OAuthRegister).Get("/member/self/sign_ipa", memberSignIpaHandler.GetSelfSignIpaList)
 	r.With(middleware.OAuthRegister).Put("/sign_ipa/{id}", memberSignIpaHandler.Put)
-	r.With(middleware.OAuthGuest).Get("/sign_ipa/{id}", memberSignIpaHandler.Get)
+	r.With(middleware.OAuthGuest).Get("/sign_ipa/{id}", memberSignIpaHandler.Get) // 获取单个分发详情
+	r.With(middleware.OAuthGuest).Get("/sign_ipa", memberSignIpaHandler.GetV2)    // 批量获取分发详情
 	r.With(middleware.OAuthRegister).Delete("/sign_ipa/{id}", memberSignIpaHandler.Delete)
 	// endregion
 

@@ -240,7 +240,50 @@ func (h *MemberSignIpaHandler) Get(w http.ResponseWriter, r *http.Request) {
 	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
 	util.PanicIf(args.Validate())
 
-	util.RenderJSON(w, h.getMemberSignIpaData(ctx, id, args.IncludeFields))
+	data, err := h.getMemberSignIpaData(ctx, id, args.IncludeFields)
+	util.PanicIf(err)
+
+	util.RenderJSON(w, data)
+}
+
+type getMemberSignIpaV2Args struct {
+	IncludeFields datatype.IncludeFields `form:"include"`
+	IDs           Int64StringSlice       `form:"ids"`
+}
+
+func (args *getMemberSignIpaV2Args) Validate() error {
+	err := validator.New().Struct(args)
+	if err != nil {
+		return errors.UnproccessableError(fmt.Sprintf("参数校验失败: %s", err.Error()))
+	}
+	return nil
+}
+
+func (h *MemberSignIpaHandler) GetV2(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	args := getMemberSignIpaV2Args{}
+	util.PanicIf(formDecoder.Decode(&args, r.URL.Query()))
+	util.PanicIf(args.Validate())
+
+	fmt.Println(args.IDs)
+
+	result := make([]*render.MemberSignIpa, 0)
+	for _, id := range args.IDs {
+		data, err := h.getMemberSignIpaData(ctx, id, args.IncludeFields)
+		if err != nil {
+			continue
+		}
+		result = append(result, data)
+	}
+
+	fields := render.DefaultMemberSignIpaFields
+	fields = append(fields, convertIncludes(args.IncludeFields)...)
+
+	util.RenderJSON(w, util.ListOutput{
+		Paging: nil,
+		Data:   result,
+	})
 }
 
 // Deprecated
@@ -248,7 +291,7 @@ func (h *MemberSignIpaHandler) GetByExpenseID(w http.ResponseWriter, r *http.Req
 	util.PanicIf(errors.UnproccessableError("不需要处理"))
 }
 
-func (h *MemberSignIpaHandler) getMemberSignIpaData(ctx context.Context, memberSignIpaID int64, includeFields datatype.IncludeFields) *render.MemberSignIpa {
+func (h *MemberSignIpaHandler) getMemberSignIpaData(ctx context.Context, memberSignIpaID int64, includeFields datatype.IncludeFields) (*render.MemberSignIpa, error) {
 	fields := render.DefaultMemberSignIpaFields
 	fields = append(fields, convertIncludes(includeFields)...)
 	dataMap := render.NewMemberSignIpaRender(
@@ -260,20 +303,25 @@ func (h *MemberSignIpaHandler) getMemberSignIpaData(ctx context.Context, memberS
 
 	data, ok := dataMap[memberSignIpaID]
 	if !ok || data.IsDelete {
-		util.PanicIf(errors.ErrNotFound)
+		return nil, errors.ErrNotFound
 	}
 
 	/// 检查签名用户是否有足够的下载次数
 	if len(includeFields) != 0 {
 		dCount := h.dispenseCountCtl.CalculateMemberSignIpaDispenseCount(ctx, data.Meta.BizExt.IpaSize)
-		util.PanicIf(h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, dCount))
+		err := h.dispenseCountCtl.Check(ctx, data.Meta.MemberID, dCount)
+		if err != nil {
+			return nil, err
+		}
 
 		/// 如果分发次数已经 > 用户设置分发次数, 则不允许再分发
 		if !data.Dispense.IsValid {
-			util.PanicIf(errors.UnproccessableError("分发次数已达到上限"))
+			if err = errors.UnproccessableError("分发次数已达到上限"); err != nil {
+				return nil, err
+			}
 		}
 	}
-	return data
+	return data, nil
 }
 
 func convertIncludes(includeFields datatype.IncludeFields) []string {

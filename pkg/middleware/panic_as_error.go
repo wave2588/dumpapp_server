@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"dumpapp_server/pkg/common/sentry"
@@ -24,6 +25,7 @@ func PanicAsError(h http.Handler) http.Handler {
 					formatter.RenderError(w, realErr)
 					return
 				default:
+					fmt.Println(err)
 					sentry.RavenCaptureError(err)
 					formatter.RenderError(w, errors.NewDefaultAPIError(http.StatusInternalServerError, 50000, "InternalServerError", "服务器错误"))
 					return
