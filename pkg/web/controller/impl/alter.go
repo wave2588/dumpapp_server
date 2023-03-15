@@ -264,11 +264,12 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Conte
 	emailStr := fmt.Sprintf("用户邮箱：<font color=\"comment\">%s</font>\n", account.Email)
 	sourceStr := fmt.Sprintf("Source：<font color=\"comment\">%s</font>\n", cer.Source.String())
 	isReplenishStr := fmt.Sprintf("售后证书：<font color=\"comment\">%v</font>\n", isReplenish)
+	isAdminStr := fmt.Sprintf("是否是管理员添加：<font color=\"comment\">%v</font>\n", isAdmin)
 	balanceStr := fmt.Sprintf("余额：<font color=\"comment\">%d</font>\n", balanceCount)
 	timeStr := fmt.Sprintf("发送时间：<font color=\"comment\">%s</font>\n", time.Now().Format("2006-01-02 15:04:05"))
 
 	content := title +
-		cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr
+		cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr + isAdminStr
 
 	// 如果是售后证书，则把上一本证书的信息也打印出来
 	if isReplenish && !isAdmin {
