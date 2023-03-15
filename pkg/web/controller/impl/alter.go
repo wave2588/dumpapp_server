@@ -271,7 +271,7 @@ func (c *AlterWebController) SendCreateCertificateSuccessMsgV2(ctx context.Conte
 		cerIDStr + emailStr + deviceIDStr + udidStr + sourceStr + isReplenishStr
 
 	// 如果是售后证书，则把上一本证书的信息也打印出来
-	if isReplenish {
+	if isReplenish && !isAdmin {
 		certificateDevice, err := c.certificateDeviceDAO.GetLastByDeviceID(ctx, deviceID)
 		if err != nil {
 			return
