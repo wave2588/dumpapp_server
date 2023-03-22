@@ -25,7 +25,7 @@ func NewRouter() chi.Router {
 	/// region account
 	accountHandler := handler.NewAccountHandler()
 	r.With(middleware.OAuthGuest).Post("/email/captcha", accountHandler.SendEmailCaptcha)
-	r.With(middleware.OAuthGuest).Post("/phone/captcha", accountHandler.SendPhoneCaptcha)
+	r.With(middleware.OAuthGuest).Post("/phone/captcha_v2", accountHandler.SendPhoneCaptcha)
 	r.With(middleware.OAuthGuest).Post("/register", accountHandler.Register)
 	r.With(middleware.OAuthGuest).Post("/login", accountHandler.Login)
 	r.With(middleware.OAuthGuest).Post("/logout", accountHandler.Logout)
