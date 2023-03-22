@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"encoding/base64"
 	errors3 "errors"
 	"fmt"
 	"net/http"
@@ -124,20 +125,32 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 	args := &sendPhoneCaptchaQueryArgs{}
 	util.PanicIf(util.JSONArgs(r, args))
 
+	res, err := base64.StdEncoding.DecodeString(args.Phone)
+	if err != nil {
+		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("发送验证码失败，请联系管理员解决。")))
+	}
+
+	origData, err := util3.RsaDecrypt(res)
+	if err != nil {
+		util.PanicIf(errors.UnproccessableError(fmt.Sprintf("发送验证码失败，请联系管理员解决。")))
+	}
+
+	phone := string(origData)
+
 	/// 检测手机号
-	if !constant.CheckPhoneValid(args.Phone) {
+	if !constant.CheckPhoneValid(phone) {
 		panic(errors.ErrPhoneRefusedRegister)
 	}
 
-	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{args.Phone})
+	accountMap, err := h.accountDAO.BatchGetByPhones(ctx, []string{phone})
 	util.PanicIf(err)
-	account := accountMap[args.Phone]
+	account := accountMap[phone]
 	if account != nil {
 		panic(errors.ErrAccountRegisteredByPhone)
 		return
 	}
 
-	captcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, args.Phone)
+	captcha, err := h.captchaDAO.GetPhoneCaptcha(ctx, phone)
 	util.PanicIf(err)
 
 	if captcha != "" {
@@ -146,8 +159,8 @@ func (h *AccountHandler) SendPhoneCaptcha(w http.ResponseWriter, r *http.Request
 
 	/// 发送验证码
 	newCaptcha := util3.MustGenerateCaptcha(ctx)
-	util.PanicIf(h.captchaDAO.SetPhoneCaptcha(ctx, args.Phone, newCaptcha))
-	util.PanicIf(h.tencentCtl.SendPhoneRegisterCaptcha(ctx, newCaptcha, args.Phone))
+	util.PanicIf(h.captchaDAO.SetPhoneCaptcha(ctx, phone, newCaptcha))
+	util.PanicIf(h.tencentCtl.SendPhoneRegisterCaptcha(ctx, newCaptcha, phone))
 
 	util.RenderJSON(w, "ok")
 }
