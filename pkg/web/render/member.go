@@ -192,7 +192,7 @@ func (f *MemberRender) fetch(ctx context.Context) {
 			UpdatedAt: account.UpdatedAt.Unix(),
 			PayCampaign: &PayCampaign{
 				Description:  f.memberPayOrderCtl.GetPayCampaignDescription(),
-				BuyCerNotice: "网站所有证书已开启推送权限，证书掉签后非代理用户 7 天(代理用户 30 天)内使用掉签 UDID 进行购买证书不会消耗 D 币。",
+				BuyCerNotice: "网站所有证书已开启推送权限，证书掉签后非代理用户7天(代理用户30天)内使用掉签UDID进行购买证书不会消耗D币（证书目前可能不支持M1电脑，正在优化解决中）",
 			},
 		}
 	}
